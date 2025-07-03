@@ -1,37 +1,4998 @@
 <!DOCTYPE html>
-
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>NGINX on Railway</title>
-    <meta name="description" content="Choo Choo!" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Expense Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        /* shadcn/ui Design System */
+        :root {
+            /* Colors */
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 221.2 83.2% 53.3%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96%;
+            --secondary-foreground: 222.2 84% 4.9%;
+            --muted: 210 40% 96%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96%;
+            --accent-foreground: 222.2 84% 4.9%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 221.2 83.2% 53.3%;
+            --radius: 0.5rem;
+            
+            /* Success & Warning */
+            --success: 142.1 76.2% 36.3%;
+            --success-foreground: 210 40% 98%;
+            --warning: 47.9 95.8% 53.1%;
+            --warning-foreground: 26 83.3% 14.1%;
+        }
+        
+        /* Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: 222.2 84% 4.9%;
+                --foreground: 210 40% 98%;
+                --card: 222.2 84% 4.9%;
+                --card-foreground: 210 40% 98%;
+                --primary: 217.2 91.2% 59.8%;
+                --primary-foreground: 222.2 84% 4.9%;
+                --secondary: 217.2 32.6% 17.5%;
+                --secondary-foreground: 210 40% 98%;
+                --muted: 217.2 32.6% 17.5%;
+                --muted-foreground: 215 20.2% 65.1%;
+                --accent: 217.2 32.6% 17.5%;
+                --accent-foreground: 210 40% 98%;
+                --destructive: 0 62.8% 30.6%;
+                --destructive-foreground: 210 40% 98%;
+                --border: 217.2 32.6% 17.5%;
+                --input: 217.2 32.6% 17.5%;
+                --ring: 224.3 76.3% 94.1%;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            border-color: hsl(var(--border));
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            height: 100vh;
+            overflow: hidden;
+            font-feature-settings: "rlig" 1, "calt" 1;
+        }
+        
+        /* Button Components */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 150ms ease;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+        
+        .btn:disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        
+        .btn:focus-visible {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+        }
+        
+        .btn-primary {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+        
+        .btn-primary:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+        
+        .btn-secondary {
+            background-color: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+        
+        .btn-secondary:hover {
+            background-color: hsl(var(--secondary) / 0.8);
+        }
+        
+        .btn-outline {
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+        }
+        
+        .btn-outline:hover {
+            background-color: hsl(var(--accent));
+            color: hsl(var(--accent-foreground));
+        }
+        
+        .btn-ghost {
+            background-color: transparent;
+            color: hsl(var(--foreground));
+        }
+        
+        .btn-ghost:hover {
+            background-color: hsl(var(--accent));
+            color: hsl(var(--accent-foreground));
+        }
+        
+        .btn-destructive {
+            background-color: hsl(var(--destructive));
+            color: hsl(var(--destructive-foreground));
+        }
+        
+        .btn-destructive:hover {
+            background-color: hsl(var(--destructive) / 0.9);
+        }
+        
+        /* Button Sizes */
+        .btn-sm {
+            height: 2rem;
+            padding: 0 0.75rem;
+            font-size: 0.8rem;
+        }
+        
+        .btn-md {
+            height: 2.5rem;
+            padding: 0 1rem;
+        }
+        
+        .btn-lg {
+            height: 2.75rem;
+            padding: 0 2rem;
+        }
+        
+        .btn-icon {
+            height: 2.5rem;
+            width: 2.5rem;
+            padding: 0;
+        }
+        
+        /* Card Components */
+        .card {
+            background-color: hsl(var(--card));
+            color: hsl(var(--card-foreground));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+        }
+        
+        .card-header {
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1;
+            margin: 0;
+            color: hsl(var(--foreground));
+        }
+        
+        .card-description {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+            margin-top: 0.375rem;
+        }
+        
+        .card-content {
+            padding: 0;
+        }
+        
+        /* Form Components */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: hsl(var(--foreground));
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-input {
+            display: flex;
+            height: 2.5rem;
+            width: 100%;
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            transition: all 150ms ease;
+            color: hsl(var(--foreground));
+        }
+        
+        .form-input:focus {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+            border-color: hsl(var(--ring));
+        }
+        
+        .form-input:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .form-input::placeholder {
+            color: hsl(var(--muted-foreground));
+        }
+        
+        /* Custom Select Component */
+        .select-container {
+            position: relative;
+        }
+        
+        .select-trigger {
+            display: flex;
+            height: 2.5rem;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            color: hsl(var(--foreground));
+            cursor: pointer;
+            transition: all 150ms ease;
+            user-select: none;
+        }
+        
+        .select-trigger:hover {
+            background-color: hsl(var(--accent));
+        }
+        
+        .select-trigger:focus {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+            border-color: hsl(var(--ring));
+        }
+        
+        .select-trigger[aria-expanded="true"] {
+            background-color: hsl(var(--accent));
+            border-color: hsl(var(--ring));
+        }
+        
+        .select-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: hsl(var(--popover));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            margin-top: 0.25rem;
+            max-height: 200px;
+            overflow-y: auto;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 150ms ease;
+            pointer-events: none;
+        }
+        
+        .select-content.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        
+        .select-item {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+            color: hsl(var(--foreground));
+        }
+        
+        .select-item:hover {
+            background-color: hsl(var(--accent));
+        }
+        
+        .select-item.selected {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+        
+        .select-item:first-child {
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+        
+        .select-item:last-child {
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+        
+        /* Date Input Styling */
+        .date-input {
+            display: flex;
+            height: 2.5rem;
+            width: 100%;
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            transition: all 150ms ease;
+            color: hsl(var(--foreground));
+            cursor: pointer;
+        }
+        
+        .date-input:focus {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+            border-color: hsl(var(--ring));
+        }
+        
+        /* Hide native date picker styling */
+        .date-input::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
+        
+        .date-input::-webkit-inner-spin-button,
+        .date-input::-webkit-clear-button {
+            display: none;
+        }
+        
+        /* Custom Date Picker Styles */
+        .date-picker-container {
+            position: relative;
+        }
 
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+        .date-picker-trigger {
+            display: flex;
+            height: 2.5rem;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            color: hsl(var(--foreground));
+            cursor: pointer;
+            transition: all 150ms ease;
+            user-select: none;
+        }
 
-    <link rel="stylesheet" href="/styles.css?v=1.0" />
-  </head>
+        .date-picker-trigger:hover {
+            background-color: hsl(var(--accent));
+        }
 
-  <body>
-    <main>
-      <img
-        src="https://railway.app/brand/logo-light.svg"
-        alt="Railway logo"
-        class="logo"
-      />
+        .date-picker-trigger:focus {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+            border-color: hsl(var(--ring));
+        }
 
-      <h1>NGINX on Railway</h1>
+        .date-picker-trigger[aria-expanded="true"] {
+            background-color: hsl(var(--accent));
+            border-color: hsl(var(--ring));
+        }
 
-      <p>
-        Choo Choo! This is an example of an NGINX static site running on
-        Railway.
-        <a
-          href="https://github.com/railwayapp/starters/tree/master/examples/nginx"
-          >View source</a
-        >.
-      </p>
-    </main>
+        .date-picker-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: hsl(var(--popover));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            margin-top: 0.25rem;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 150ms ease;
+            pointer-events: none;
+            padding: 1rem;
+            min-width: 280px;
+        }
 
-    <script src="/script.js"></script>
-  </body>
+        .date-picker-content.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .date-picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .date-picker-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .date-picker-nav-btn {
+            background-color: transparent;
+            border: none;
+            width: 2rem;
+            height: 2rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            color: hsl(var(--foreground));
+            transition: all 150ms ease;
+        }
+
+        .date-picker-nav-btn:hover {
+            background-color: hsl(var(--accent));
+        }
+
+        .date-picker-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .date-picker-month-year {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: hsl(var(--foreground));
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .date-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.125rem;
+        }
+
+        .date-picker-day-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 2rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .date-picker-day {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 2rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border-radius: var(--radius);
+            transition: all 150ms ease;
+            color: hsl(var(--foreground));
+            background-color: transparent;
+            border: none;
+        }
+
+        .date-picker-day:hover {
+            background-color: hsl(var(--accent));
+        }
+
+        .date-picker-day.today {
+            background-color: hsl(var(--accent));
+            font-weight: 600;
+        }
+
+        .date-picker-day.selected {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .date-picker-day.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .date-picker-day.disabled:hover {
+            background-color: transparent;
+        }
+
+        .date-picker-day.other-month {
+            opacity: 0.5;
+        }
+
+        .date-picker-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        .date-picker-today-btn {
+            background-color: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .date-picker-today-btn:hover {
+            background-color: hsl(var(--secondary) / 0.8);
+        }
+
+        .date-picker-clear-btn {
+            background-color: transparent;
+            color: hsl(var(--muted-foreground));
+            border: none;
+            padding: 0.375rem 0.75rem;
+            border-radius: var(--radius);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+
+        .date-picker-clear-btn:hover {
+            background-color: hsl(var(--accent));
+            color: hsl(var(--foreground));
+        }
+        
+        /* Period dropdown custom styling */
+        .period-dropdown {
+            display: none; /* Hide native select */
+        }
+        
+        .period-select-container {
+            position: relative;
+            min-width: 120px;
+        }
+        
+        .period-select-trigger {
+            display: flex;
+            height: 2rem;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: var(--radius);
+            border: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: hsl(var(--foreground));
+            cursor: pointer;
+            transition: all 150ms ease;
+            user-select: none;
+            gap: 0.5rem;
+        }
+        
+        .period-select-trigger:hover {
+            background-color: hsl(var(--accent));
+        }
+        
+        .period-select-trigger:focus {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+            border-color: hsl(var(--ring));
+        }
+        
+        .period-select-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: hsl(var(--popover));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            margin-top: 0.25rem;
+            max-height: 200px;
+            overflow-y: auto;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 150ms ease;
+            pointer-events: none;
+        }
+        
+        .period-select-content.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        
+        .period-select-item {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+            color: hsl(var(--foreground));
+        }
+        
+        .period-select-item:hover {
+            background-color: hsl(var(--accent));
+        }
+        
+        .period-select-item.selected {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+        
+        /* Utility Classes */
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        
+        .text-foreground { color: hsl(var(--foreground)); }
+        .text-muted-foreground { color: hsl(var(--muted-foreground)); }
+        .text-primary { color: hsl(var(--primary)); }
+        .text-success { color: hsl(var(--success)); }
+        .text-destructive { color: hsl(var(--destructive)); }
+        
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+        
+        .p-2 { padding: 0.5rem; }
+        .p-4 { padding: 1rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mr-2 { margin-right: 0.5rem; }
+        
+        .rounded { border-radius: var(--radius); }
+        .rounded-lg { border-radius: var(--radius); }
+        .rounded-full { border-radius: 9999px; }
+        
+        /* Icon Styles */
+        .w-4 { width: 1rem; }
+        .h-4 { height: 1rem; }
+        .w-5 { width: 1.25rem; }
+        .h-5 { height: 1.25rem; }
+        .w-6 { width: 1.5rem; }
+        .h-6 { height: 1.5rem; }
+        
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: hsl(var(--background));
+        }
+        
+        .app-header {
+            background-color: hsl(var(--card));
+            border-bottom: 1px solid hsl(var(--border));
+            padding: 1rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+        
+        .app-header h1 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            margin-bottom: 0.25rem;
+        }
+        
+        .date-display {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+        
+        .content-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background-color: hsl(var(--background));
+        }
+        
+        .screens-wrapper {
+            display: flex;
+            height: 100%;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        }
+        
+        .screen {
+            width: 100vw;
+            flex-shrink: 0;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: hsl(var(--background));
+        }
+        
+        /* Remove old daily-budget styles - now using card classes */
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            margin-top: 1.5rem;
+            padding: 0 1.5rem;
+        }
+        
+        .action-btn {
+            flex: 1;
+            max-width: 200px;
+        }
+        
+        .expense-btn {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+        
+        .expense-btn:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+        
+        .balance-btn {
+            background-color: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+        
+        .balance-btn:hover {
+            background-color: hsl(var(--secondary) / 0.8);
+        }
+        
+        /* Remove old action-label styles - using shadcn button styling */
+        
+        @media (max-width: 480px) {
+            .action-buttons {
+                padding: 0 10px;
+                gap: 10px;
+            }
+            
+            .action-btn {
+                padding: 14px 16px;
+                max-width: none;
+            }
+            
+            .action-label {
+                font-size: 0.85rem;
+            }
+        }
+        
+        .expense-input {
+            margin-bottom: 25px;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: flex-end;
+        }
+        
+        .input-group {
+            flex: 1;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            font-size: 0.9rem;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            font-size: 1rem;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+            border-color: hsl(var(--ring));
+        }
+        
+        .add-btn {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            padding: 14px 20px;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .add-btn:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+        
+        .add-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .expenses-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            margin-bottom: 8px;
+        }
+        
+        .expense-details {
+            flex: 1;
+        }
+        
+        .expense-description {
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            margin-bottom: 2px;
+        }
+        
+        .expense-category {
+            font-size: 0.8rem;
+            color: hsl(var(--muted-foreground));
+            text-transform: capitalize;
+        }
+        
+        .expense-amount {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: hsl(var(--destructive));
+        }
+        
+        .delete-btn {
+            background-color: hsl(var(--destructive));
+            color: hsl(var(--destructive-foreground));
+            border: none;
+            padding: 6px 10px;
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 150ms ease;
+        }
+        
+        .delete-btn:hover {
+            background-color: hsl(var(--destructive) / 0.9);
+        }
+        
+        .chart-container {
+            /* Use .card class instead of custom styling */
+            height: 350px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card {
+            /* Use .card class instead of custom styling */
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: hsl(var(--muted-foreground));
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+        }
+        
+        .stat-subtitle {
+            font-size: 0.75rem;
+            color: hsl(var(--muted-foreground));
+            margin-top: 4px;
+            font-weight: 400;
+        }
+        
+        .stat-subtitle.positive {
+            color: hsl(var(--success));
+        }
+        
+        .stat-subtitle.negative {
+            color: hsl(var(--destructive));
+        }
+        
+        .stat-subtitle.warning {
+            color: hsl(var(--warning));
+        }
+        
+        .stat-value.positive {
+            color: hsl(var(--success));
+        }
+        
+        .stat-value.negative {
+            color: hsl(var(--destructive));
+        }
+        
+        .stat-value.warning {
+            color: hsl(var(--warning));
+        }
+        
+        .bottom-nav {
+            background-color: hsl(var(--card));
+            border-top: 1px solid hsl(var(--border));
+            padding: 0.5rem 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+            border-radius: var(--radius);
+            min-width: 80px;
+            user-select: none;
+            color: hsl(var(--muted-foreground));
+        }
+        
+        .nav-item.active {
+            background-color: hsl(var(--accent));
+            color: hsl(var(--accent-foreground));
+        }
+        
+        .nav-item:hover:not(.active) {
+            background-color: hsl(var(--accent) / 0.5);
+        }
+        
+        .nav-item .icon {
+            font-size: 1.3rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .nav-item .label {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .screen::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .screen {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-good { background-color: hsl(var(--success)); }
+        .status-warning { background-color: hsl(var(--warning)); }
+        .status-danger { background-color: hsl(var(--destructive)); }
+        
+        .weekly-summary {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+        
+        .weekly-summary h3 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .weekly-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        
+        .weekly-stat {
+            text-align: center;
+        }
+        
+        .weekly-stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .weekly-stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        /* period-selector uses .card class for styling */
+
+        .period-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .period-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+
+        .period-switch {
+            display: flex;
+            background-color: hsl(var(--muted));
+            border-radius: var(--radius);
+            padding: 2px;
+        }
+
+        .period-switch button {
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            border-radius: calc(var(--radius) - 2px);
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .period-switch button.active {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+
+        .month-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .month-nav-btn {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .month-nav-btn:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+
+        .month-nav-btn:disabled {
+            background-color: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+            cursor: not-allowed;
+        }
+
+        .selected-month {
+            font-size: 1rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .chart-period-selector {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 4px;
+            background-color: hsl(var(--muted));
+            border-radius: var(--radius);
+        }
+
+        .chart-period-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: calc(var(--radius) - 2px);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: hsl(var(--muted-foreground));
+            min-width: 60px;
+        }
+
+        .chart-period-btn.active {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+
+        .chart-period-btn:hover:not(.active) {
+            background-color: hsl(var(--accent));
+            color: hsl(var(--accent-foreground));
+        }
+        
+        /* chart-container-wrapper uses .card class for styling */
+        
+        /* Enhanced Wealthsimple-style chart header */
+        .chart-container-wrapper {
+            margin-top: 20px;
+            padding-top: 10px;
+        }
+        
+        .chart-header {
+            margin-bottom: 24px;
+            padding: 0 6px;
+        }
+        
+        .chart-main-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+            margin-bottom: 4px;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+        
+        .chart-subtitle {
+            font-size: 1rem;
+            color: hsl(var(--muted-foreground));
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .chart-growth {
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 4px 0;
+        }
+        
+        .chart-growth.positive {
+            color: #10B981; /* Green for positive growth */
+        }
+        
+        .chart-growth.negative {
+            color: #EF4444; /* Red for negative growth */
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+            transition: opacity 0.2s ease;
+        }
+        
+        .chart-container.loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+        }
+        
+        .chart-container.loading::before {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(16, 185, 129, 0.2);
+            border-radius: 50%;
+            border-top-color: #10B981;
+            animation: spin 0.8s linear infinite;
+            z-index: 6;
+            top: 50%;
+            left: 50%;
+            margin-top: -15px;
+            margin-left: -15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Bottom Period Selector for Chart (Wealthsimple Style) */
+        .chart-period-selector-bottom {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin-top: 24px;
+            background-color: hsl(var(--muted));
+            border-radius: calc(var(--radius) * 2.5);
+            padding: 4px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Enhanced Wealthsimple-style period selector buttons */
+        .chart-period-btn-wealthsimple {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: calc(var(--radius) * 2);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: hsl(var(--muted-foreground));
+            min-width: 50px;
+            letter-spacing: 0.02em;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .chart-period-btn-wealthsimple.active {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            font-weight: 600;
+        }
+        
+        .chart-period-btn-wealthsimple:hover:not(.active) {
+            color: hsl(var(--foreground));
+        }
+        
+        .chart-period-btn-wealthsimple:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+        
+        /* Animate period button transitions */
+        .chart-period-selector-bottom {
+            position: relative;
+        }
+        
+        @media (prefers-reduced-motion: no-preference) {
+            .chart-period-btn-wealthsimple.active {
+                animation: scaleIn 0.2s ease forwards;
+            }
+            
+            @keyframes scaleIn {
+                0% { transform: scale(0.95); }
+                100% { transform: scale(1); }
+            }
+        }
+        
+        /* Sticky Period Selector for Tracking Screen */
+        .period-selector-sticky {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: #ffffffa1; /* Semi-transparent white */
+            border-bottom: 1px solid hsl(var(--border));
+            padding: 0.5rem 1rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border-radius: 0;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+        
+        .period-selector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .period-date-dropdowns {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            background: hsl(var(--muted));
+            border-radius: var(--radius);
+            padding: 2px;
+            gap: 2px;
+        }
+        
+        /* Compact Toggle */
+        .period-mode-toggle-compact {
+            display: flex;
+            background: hsl(var(--muted));
+            border-radius: var(--radius);
+            padding: 2px;
+            gap: 2px;
+        }
+        
+        .period-mode-btn-compact {
+            padding: 0.375rem 0.75rem;
+            border: none;
+            background: transparent;
+            border-radius: calc(var(--radius) - 2px);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+        
+        .period-mode-btn-compact.active {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+        
+        .period-mode-btn-compact:hover:not(.active) {
+            background-color: hsl(var(--accent));
+        }
+        
+        /* Enhanced Wealthsimple-style chart overlay */
+        .chart-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+            /* Add subtle border and shadow for Wealthsimple look */
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        
+        #spendingChart {
+            touch-action: none; /* Prevent default touch behaviors */
+            cursor: crosshair;
+            padding: 10px 0;
+        }
+        
+        /* Make chart more responsive to touch on mobile devices */
+        @media (hover: none) and (pointer: coarse) {
+            #spendingChart {
+                cursor: default;
+                padding: 15px 0; /* More padding on mobile for better touch area */
+            }
+        }
+        
+        .chart-crosshair {
+            position: absolute;
+            width: 1px;
+            height: 100%;
+            background: rgba(16, 185, 129, 0.6); /* Match green savings color */
+            opacity: 0;
+            transition: opacity 0.15s ease, left 0.05s linear;
+            pointer-events: none;
+        }
+        
+        /* Make crosshair more visible on mobile */
+        @media (hover: none) and (pointer: coarse) {
+            .chart-crosshair {
+                width: 2px;
+                background: rgba(16, 185, 129, 0.7);
+            }
+        }
+        
+        .chart-tooltip {
+            position: absolute;
+            background-color: white;
+            color: hsl(var(--foreground));
+            border-radius: calc(var(--radius) * 1.2);
+            padding: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(230, 230, 230, 0.8);
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.15s ease;
+            pointer-events: none;
+            min-width: 220px;
+            z-index: 20;
+            transform: translateY(5px);
+            backdrop-filter: blur(8px);
+        }
+        
+        .chart-overlay.visible .chart-tooltip {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .tooltip-date {
+            font-size: 0.95rem;
+            color: #111827;
+            margin-bottom: 12px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(230, 230, 230, 0.5);
+            padding-bottom: 10px;
+        }
+        
+        .tooltip-values {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .tooltip-value {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tooltip-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .tooltip-dot.savings {
+            background: #10B981; /* Match the green line color */
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+        
+        .tooltip-dot.spending {
+            background: #6B7280; /* Match the gray line color */
+            box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.2);
+        }
+        
+        .tooltip-label {
+            font-size: 0.85rem;
+            color: #666;
+            flex: 1;
+        }
+        
+        .tooltip-value:first-child .tooltip-amount {
+            color: #10B981; /* Green for savings */
+            font-weight: 600;
+        }
+        
+        .tooltip-value:last-child .tooltip-amount {
+            color: #6B7280; /* Gray for spending */
+            font-weight: 600;
+        }
+        
+        .tooltip-amount {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        /* Savings/Account tracking styles */
+        .savings-accounts-section {
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .manage-accounts-btn {
+            background-color: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 150ms ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .manage-accounts-btn:hover {
+            background-color: hsl(var(--secondary) / 0.8);
+        }
+        
+        /* Remove old account-tabs styles */
+        
+        /* Mobile responsive for section header */
+        @media (max-width: 480px) {
+            .section-header h3 {
+                font-size: 1.1rem;
+            }
+            
+            .manage-accounts-btn {
+                padding: 10px 14px;
+                font-size: 0.85rem;
+                min-height: 44px; /* Better touch target */
+            }
+        }
+        
+        .account-balance-input {
+            margin-bottom: 15px;
+        }
+        
+        .account-balance-input h4 {
+            margin-bottom: 15px;
+            color: hsl(var(--foreground));
+            font-size: 1.1rem;
+        }
+        
+        .balance-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        .balance-input-row .input-group {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .balance-input-row select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            font-size: 1rem;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            transition: all 0.3s ease;
+        }
+        
+        .balance-input-row select:focus {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+            border-color: hsl(var(--ring));
+        }
+        
+        .balance-add-btn {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            padding: 14px 20px;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+        
+        .balance-add-btn:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+        
+        /* Mobile responsiveness for balance input */
+        @media (max-width: 480px) {
+            .balance-input-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            
+            .balance-input-row .input-group {
+                min-width: 100%;
+            }
+            
+            .balance-add-btn {
+                width: 100%;
+                margin-top: 5px;
+            }
+        }
+        
+        .balance-add-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .account-balance-display {
+            background-color: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            padding: 15px;
+            border-radius: var(--radius);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .current-balance {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: hsl(var(--success));
+            margin-bottom: 5px;
+        }
+        
+        /* Mobile responsiveness for balance display */
+        @media (max-width: 480px) {
+            .account-balance-display {
+                padding: 12px;
+            }
+            
+            .current-balance {
+                font-size: 1.3rem;
+            }
+        }
+        
+        .balance-change {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .balance-change.positive {
+            color: #27ae60;
+        }
+        
+        .balance-change.negative {
+            color: #e74c3c;
+        }
+        
+        .balance-change.neutral {
+            color: #666;
+        }
+        
+        .balance-history {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        
+        .balance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background-color: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            margin-bottom: 6px;
+        }
+        
+        .balance-details {
+            flex: 1;
+        }
+        
+        .balance-date {
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            margin-bottom: 2px;
+        }
+        
+        .balance-account {
+            font-size: 0.8rem;
+            color: hsl(var(--muted-foreground));
+        }
+        
+        .balance-amount {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: hsl(var(--success));
+        }
+        
+        .delete-balance-btn {
+            background-color: hsl(var(--destructive));
+            color: hsl(var(--destructive-foreground));
+            border: none;
+            padding: 6px 10px;
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 150ms ease;
+        }
+        
+        .delete-balance-btn:hover {
+            background-color: hsl(var(--destructive) / 0.9);
+        }
+        
+        /* Account Management Slide-out */
+        .account-management-slide-out {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+        
+        .account-management-slide-out.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .account-management-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: hsl(var(--background));
+            border-radius: 20px 20px 0 0;
+            padding: 20px 20px 40px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .account-management-slide-out.active .account-management-content {
+            transform: translateY(0);
+        }
+        
+        .account-management-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+        
+        .account-management-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+        
+        .account-management-close {
+            background-color: hsl(var(--muted));
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: hsl(var(--foreground));
+            transition: all 150ms ease;
+        }
+        
+        .account-management-close:hover {
+            background-color: hsl(var(--muted) / 0.8);
+        }
+        
+        .account-management-list {
+            margin-bottom: 30px;
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+        
+        .account-management-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background-color: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            margin-bottom: 8px;
+        }
+        
+        .account-management-name {
+            font-weight: 500;
+            color: hsl(var(--foreground));
+            font-size: 1rem;
+        }
+        
+        .account-management-delete-btn {
+            background-color: hsl(var(--destructive));
+            color: hsl(var(--destructive-foreground));
+            border: none;
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+            font-weight: 500;
+        }
+        
+        .account-management-delete-btn:hover {
+            background-color: hsl(var(--destructive) / 0.9);
+        }
+        
+        .account-management-add-form {
+            padding-top: 20px;
+            border-top: 1px solid hsl(var(--border));
+        }
+        
+        .account-management-add-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            margin-bottom: 15px;
+        }
+        
+        .account-management-input-group {
+            margin-bottom: 15px;
+        }
+        
+        .account-management-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            font-size: 1rem;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            transition: all 150ms ease;
+        }
+        
+        .account-management-input:focus {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+            border-color: hsl(var(--ring));
+        }
+        
+        .account-management-add-btn {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            padding: 14px 20px;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 150ms ease;
+        }
+        
+        .account-management-add-btn:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+        
+        /* Handle bar for account management slide-out */
+        .account-management-handle {
+            width: 40px;
+            height: 4px;
+            background-color: hsl(var(--muted-foreground));
+            border-radius: 2px;
+            margin: 0 auto 15px;
+        }
+        
+        /* Legacy modal styles - hidden but kept for backwards compatibility */
+        .account-management-modal {
+            display: none !important;
+        }
+        
+        .modal-content {
+            display: none !important;
+        }
+        
+        .modal-header {
+            display: none !important;
+        }
+        
+        .modal-title {
+            display: none !important;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .account-list {
+            margin-bottom: 20px;
+        }
+        
+        .account-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: hsl(var(--muted));
+            border-radius: var(--radius);
+            margin-bottom: 8px;
+        }
+        
+        .account-name {
+            font-weight: 500;
+            color: hsl(var(--foreground));
+        }
+        
+        .delete-account-btn {
+            background-color: hsl(var(--destructive));
+            color: hsl(var(--destructive-foreground));
+            border: none;
+            padding: 4px 8px;
+            border-radius: var(--radius);
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+        
+        .delete-account-btn:hover {
+            background-color: hsl(var(--destructive) / 0.9);
+        }
+        
+        .add-account-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .add-account-form input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+        }
+        
+        .add-account-form input:focus {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+            border-color: hsl(var(--ring));
+        }
+        
+        .add-account-form button {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+        
+        .add-account-form button:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+        
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: hsl(var(--card));
+            color: hsl(var(--card-foreground));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 24px;
+            margin: 20px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .account-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.03);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .account-name {
+            font-weight: 500;
+            color: hsl(var(--foreground));
+        }
+        
+        .delete-account-btn {
+            background-color: hsl(var(--destructive));
+            color: hsl(var(--destructive-foreground));
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 150ms ease;
+        }
+        
+        .delete-account-btn:hover {
+            background-color: hsl(var(--destructive) / 0.9);
+        }
+        
+        .add-account-form {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid hsl(var(--border));
+        }
+        
+        .add-account-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+        
+        .add-account-btn:hover {
+            background: #219a52;
+        }
+        
+        /* Slide-out overlays */
+        .slide-out-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+        
+        .slide-out-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .slide-out-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px 20px 40px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .slide-out-overlay.active .slide-out-content {
+            transform: translateY(0);
+        }
+        
+        .slide-out-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .slide-out-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .slide-out-close {
+            background-color: hsl(var(--muted));
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: hsl(var(--foreground));
+            transition: all 150ms ease;
+        }
+        
+        .slide-out-close:hover {
+            background-color: hsl(var(--muted) / 0.8);
+        }
+        
+        .slide-out-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* Handle bar for slide-out */
+        .slide-out-handle {
+            width: 40px;
+            height: 4px;
+            background-color: hsl(var(--muted-foreground));
+            border-radius: 2px;
+            margin: 0 auto 15px;
+        }
+
+        /* Custom Datepicker Styles */
+        .custom-datepicker {
+            position: relative;
+            width: 100%;
+        }
+
+        .datepicker-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            background-color: hsl(var(--background));
+            cursor: pointer;
+            transition: all 150ms ease;
+            font-size: 0.875rem;
+        }
+
+        .datepicker-trigger:hover {
+            border-color: hsl(var(--ring));
+        }
+
+        .datepicker-trigger:focus {
+            outline: none;
+            border-color: hsl(var(--ring));
+            box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+        }
+        
+        .datepicker-trigger:focus-visible {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+        }
+
+        .datepicker-value {
+            color: hsl(var(--foreground));
+            flex: 1;
+        }
+
+        .datepicker-trigger .w-4 {
+            width: 16px;
+            height: 16px;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .datepicker-popup {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background-color: hsl(var(--popover));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 16px;
+            margin-top: 4px;
+            display: none;
+            min-width: 280px;
+        }
+
+        .datepicker-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .datepicker-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-radius: var(--radius);
+            transition: all 150ms ease;
+        }
+
+        .datepicker-nav:hover {
+            background-color: hsl(var(--muted));
+        }
+
+        .datepicker-nav .w-4 {
+            width: 16px;
+            height: 16px;
+            color: hsl(var(--foreground));
+        }
+
+        .datepicker-month-year {
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            font-size: 0.875rem;
+        }
+
+        .datepicker-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-bottom: 16px;
+        }
+
+        .datepicker-day-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .datepicker-day {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 150ms ease;
+            font-size: 0.875rem;
+            color: hsl(var(--foreground));
+        }
+
+        .datepicker-day:hover {
+            background-color: hsl(var(--muted));
+        }
+
+        .datepicker-day.empty {
+            cursor: default;
+        }
+
+        .datepicker-day.empty:hover {
+            background-color: transparent;
+        }
+
+        .datepicker-day.today {
+            background-color: hsl(var(--muted));
+            font-weight: 500;
+        }
+
+        .datepicker-day.selected {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .datepicker-day.selected:hover {
+            background-color: hsl(var(--primary));
+        }
+
+        .datepicker-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .datepicker-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 150ms ease;
+            border: 1px solid transparent;
+            flex: 1;
+        }
+
+        .datepicker-btn-secondary {
+            background-color: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+            border-color: hsl(var(--border));
+        }
+
+        .datepicker-btn-secondary:hover {
+            background-color: hsl(var(--secondary) / 0.8);
+        }
+
+        .datepicker-btn-primary {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .datepicker-btn-primary:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 480px) {
+            .datepicker-popup {
+                min-width: calc(100vw - 40px);
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <h1>Daily Expense Tracker</h1>
+            <div class="date-display" id="currentDate"></div>
+        </div>
+        
+        <div class="content-container">
+            <div class="screens-wrapper" id="screensWrapper">
+                <!-- Screen 1: Tracking -->
+                <div class="screen">
+                    <!-- Sticky Period Selector -->
+                    <div class="period-selector-sticky" id="periodSelectorSticky">
+                        <!-- Period Selector Header with Toggle on Left, Dropdowns on Right -->
+                        <div class="period-selector-header">
+                            <!-- Today/Month Toggle (Left Side) -->
+                            <div class="period-mode-toggle-compact">
+                                <button onclick="setPeriodMode('today')" class="btn btn-ghost btn-sm period-mode-btn-compact active" id="todayBtnCompact" title="Today View">
+                                    <i data-lucide="sun" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="setPeriodMode('month')" class="btn btn-ghost btn-sm period-mode-btn-compact" id="monthBtnCompact" title="Month View">
+                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Date Dropdowns (Right Side) -->
+                            <div class="period-date-dropdowns" id="periodDropdowns" style="display: none;">
+                                <!-- Month Selector -->
+                                <div class="period-select-container">
+                                    <div class="period-select-trigger" onclick="togglePeriodSelect('month')" id="monthSelectTrigger">
+                                        <span id="monthSelectValue">July</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                    </div>
+                                    <div class="period-select-content" id="monthSelectContent">
+                                        <div class="period-select-item" data-value="0">January</div>
+                                        <div class="period-select-item" data-value="1">February</div>
+                                        <div class="period-select-item" data-value="2">March</div>
+                                        <div class="period-select-item" data-value="3">April</div>
+                                        <div class="period-select-item" data-value="4">May</div>
+                                        <div class="period-select-item" data-value="5">June</div>
+                                        <div class="period-select-item selected" data-value="6">July</div>
+                                        <div class="period-select-item" data-value="7">August</div>
+                                        <div class="period-select-item" data-value="8">September</div>
+                                        <div class="period-select-item" data-value="9">October</div>
+                                        <div class="period-select-item" data-value="10">November</div>
+                                        <div class="period-select-item" data-value="11">December</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Year Selector -->
+                                <div class="period-select-container">
+                                    <div class="period-select-trigger" onclick="togglePeriodSelect('year')" id="yearSelectTrigger">
+                                        <span id="yearSelectValue">2025</span>
+                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                    </div>
+                                    <div class="period-select-content" id="yearSelectContent">
+                                        <div class="period-select-item" data-value="2023">2023</div>
+                                        <div class="period-select-item" data-value="2024">2024</div>
+                                        <div class="period-select-item selected" data-value="2025">2025</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hidden native selects for compatibility -->
+                                <select id="monthDropdown" class="period-dropdown" style="display: none;">
+                                    <option value="0">January</option>
+                                    <option value="1">February</option>
+                                    <option value="2">March</option>
+                                    <option value="3">April</option>
+                                    <option value="4">May</option>
+                                    <option value="5">June</option>
+                                    <option value="6">July</option>
+                                    <option value="7">August</option>
+                                    <option value="8">September</option>
+                                    <option value="9">October</option>
+                                    <option value="10">November</option>
+                                    <option value="11">December</option>
+                                </select>
+                                <select id="yearDropdown" class="period-dropdown" style="display: none;">
+                                    <!-- Years populated by JavaScript -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Budget Display -->
+                    <div class="card" id="budgetDisplay">
+                        <div class="card-header">
+                            <h3 class="card-title" id="budgetPeriodLabel">Daily Budget</h3>
+                            <p class="card-description" id="budgetDescription">for all variable expenses</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="text-3xl font-bold text-primary mb-4" id="budgetAmount">$41.30</div>
+                            
+                            <div class="flex items-center justify-between p-4 rounded-lg" style="background-color: hsl(var(--muted));">
+                                <div>
+                                    <div class="text-sm text-muted-foreground" id="remainingLabel">Remaining Today</div>
+                                    <div class="text-xl font-semibold" id="remainingBudget">$41.30</div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="status-indicator status-good" id="budgetStatus"></span>
+                                    <span class="text-sm font-medium" id="budgetStatusText">On Track</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons" id="actionButtons">
+                        <button class="btn btn-lg action-btn expense-btn" onclick="showExpenseSlideOut()">
+                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
+                            <span class="action-label">Add Expense</span>
+                        </button>
+                        <button class="btn btn-lg action-btn balance-btn" id="balanceActionBtn" onclick="showBalanceSlideOut()" style="display: none;">
+                            <i data-lucide="piggy-bank" class="w-4 h-4 mr-2"></i>
+                            <span class="action-label">Add Balance</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Add Expense -->
+                    <div class="card expense-input" id="expenseInput" style="display: none;">
+                        <h3 class="card-title mb-4" id="expenseInputTitle">Add Expense</h3>
+                        
+                        <!-- Date picker for month mode -->
+                        <div class="input-group" id="datePickerGroup" style="display: none;">
+                            <label for="expenseDate">Date</label>
+                            <input type="date" id="expenseDate" class="form-input">
+                        </div>
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label for="expenseAmount">Amount ($)</label>
+                                <input type="number" id="expenseAmount" placeholder="0.00" step="0.01">
+                            </div>
+                            <div class="input-group">
+                                <label for="expenseCategory">Category</label>
+                                <select id="expenseCategory">
+                                    <option value="groceries">Groceries</option>
+                                    <option value="transportation">Transportation</option>
+                                    <option value="dining">Dining Out</option>
+                                    <option value="entertainment">Entertainment</option>
+                                    <option value="personal">Personal Care</option>
+                                    <option value="clothing">Clothing</option>
+                                    <option value="health">Health/Fitness</option>
+                                    <option value="subscriptions">Subscriptions</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="expenseDescription">Description (optional)</label>
+                            <input type="text" id="expenseDescription" placeholder="What did you buy?">
+                        </div>
+                        
+                        <button class="add-btn" onclick="addExpense()">Add Expense</button>
+                    </div>
+                    
+                    <!-- Period Expenses -->
+                    <div class="card">
+                        <h3 class="card-title mb-4" id="expensesListTitle">Today's Expenses</h3>
+                        <div class="expenses-list" id="expensesList">
+                            <div style="text-align: center; color: #7f8c8d; padding: 20px;">
+                                No expenses recorded today
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Savings Accounts Section -->
+                    <div class="card savings-accounts-section" id="savingsSection" style="display: none;">
+                        <div class="section-header">
+                            <h3 class="text-lg font-semibold">Account Balances</h3>
+                            <button class="btn btn-outline btn-sm" onclick="showAccountManagementModal()">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                Manage Accounts
+                            </button>
+                        </div>
+                        
+                        <!-- Total Balance Display -->
+                        <div class="account-balance-display">
+                            <div class="current-balance" id="totalAccountBalance">$0.00</div>
+                            <div class="balance-change" id="totalBalanceChange">Total across all accounts this month</div>
+                        </div>
+                        
+                        <!-- Balance History -->
+                        <div class="balance-history" id="balanceHistory">
+                            <div style="text-align: center; color: #7f8c8d; padding: 20px;">
+                                No balance records this month
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Screen 2: Reports -->
+                <div class="screen">
+                    <!-- Weekly Summary -->
+                    <div class="card weekly-summary">
+                        <h3>This Week's Financial Health</h3>
+                        <div class="weekly-stats">
+                            <div class="weekly-stat">
+                                <div class="weekly-stat-value" id="weeklySpent">$0</div>
+                                <div class="weekly-stat-label">Spent</div>
+                            </div>
+                            <div class="weekly-stat">
+                                <div class="weekly-stat-value" id="weeklyRemaining">$286</div>
+                                <div class="weekly-stat-label">Remaining</div>
+                            </div>
+                            <div class="weekly-stat">
+                                <div class="weekly-stat-value" id="projectedMonthlySavings">$0</div>
+                                <div class="weekly-stat-label">Projected Savings</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Monthly Stats -->
+                    <div class="stats-grid">
+                        <div class="card stat-card">
+                            <div class="stat-label" id="monthSpentLabel">July Spent</div>
+                            <div class="stat-value" id="monthlySpent">$0</div>
+                            <div class="stat-subtitle" id="monthSpentSubtitle">of $1,239 budget</div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-label">Daily Burn Rate</div>
+                            <div class="stat-value" id="dailyBurnRate">$0</div>
+                            <div class="stat-subtitle" id="burnRateStatus">vs $41.30 target</div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-label">Days Left in Budget</div>
+                            <div class="stat-value" id="daysRemaining">--</div>
+                            <div class="stat-subtitle" id="daysRemainingSubtitle">at current pace</div>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-label">Savings Rate</div>
+                            <div class="stat-value positive" id="savingsRate">--%</div>
+                            <div class="stat-subtitle" id="savingsRateSubtitle">of income saved</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Wealthsimple-Style Chart -->
+                    <div class="chart-container-wrapper">
+                        <!-- Chart Header with Main Value -->
+                        <div class="chart-header">
+                            <div class="chart-main-value" id="chartMainValue">$0.00</div>
+                            <div class="chart-subtitle" id="chartSubtitle">Total Savings</div>
+                            <div class="chart-growth" id="chartGrowth">+$0.00 (+0%) all time</div>
+                        </div>
+                        
+                        <!-- Chart with Overlay -->
+                        <div class="card chart-container">
+                            <canvas id="spendingChart"></canvas>
+                            <div class="chart-overlay" id="chartOverlay">
+                                <div class="chart-crosshair" id="chartCrosshair"></div>
+                                <div class="chart-tooltip" id="chartTooltip">
+                                    <div class="tooltip-date" id="tooltipDate"></div>
+                                    <div class="tooltip-values">
+                                        <div class="tooltip-value">
+                                            <span class="tooltip-dot savings"></span>
+                                            <span class="tooltip-label">Total Savings</span>
+                                            <span class="tooltip-amount" id="tooltipSavings">$0.00</span>
+                                        </div>
+                                        <div class="tooltip-value">
+                                            <span class="tooltip-dot spending"></span>
+                                            <span class="tooltip-label">Cumulative Spending</span>
+                                            <span class="tooltip-amount" id="tooltipSpending">$0.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chart Period Selector at Bottom -->
+                        <div class="chart-period-selector-bottom">
+                            <button class="chart-period-btn-wealthsimple" onclick="setChartPeriod('1M')" id="period1M">1M</button>
+                            <button class="chart-period-btn-wealthsimple" onclick="setChartPeriod('3M')" id="period3M">3M</button>
+                            <button class="chart-period-btn-wealthsimple" onclick="setChartPeriod('6M')" id="period6M">6M</button>
+                            <button class="chart-period-btn-wealthsimple active" onclick="setChartPeriod('YTD')" id="periodYTD">YTD</button>
+                            <button class="chart-period-btn-wealthsimple" onclick="setChartPeriod('1Y')" id="period1Y">1Y</button>
+                            <button class="chart-period-btn-wealthsimple" onclick="setChartPeriod('ALL')" id="periodALL">ALL</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="goToScreen(0)">
+                <div class="icon">
+                    <i data-lucide="wallet" class="w-6 h-6"></i>
+                </div>
+                <div class="label">Track</div>
+            </div>
+            <div class="nav-item" onclick="goToScreen(1)">
+                <div class="icon">
+                    <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+                </div>
+                <div class="label">Reports</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Expense Slide-out -->
+    <div class="slide-out-overlay" id="expenseSlideOut">
+        <div class="slide-out-content">
+            <div class="slide-out-handle"></div>
+            <div class="slide-out-header">
+                <h3 class="slide-out-title">Add Expense</h3>
+                <button class="slide-out-close" onclick="hideExpenseSlideOut()">×</button>
+            </div>
+            
+            <div class="slide-out-form">
+                <!-- Date picker for month mode -->
+                <div class="form-group" id="slideOutDatePickerGroup" style="display: none;">
+                    <label class="form-label" for="slideOutExpenseDate">Date</label>
+                    <div class="custom-datepicker" id="expenseCustomDatepicker">
+                        <div class="datepicker-trigger" onclick="toggleDatepicker('expenseCustomDatepicker')" 
+                             role="button" tabindex="0" aria-label="Select date" aria-expanded="false">
+                            <span class="datepicker-value" id="expenseCustomDatepickerValue">Select date</span>
+                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                        </div>
+                        <div class="datepicker-popup" id="expenseCustomDatepickerPopup">
+                            <div class="datepicker-header">
+                                <button type="button" class="datepicker-nav" onclick="navigateMonth('expenseCustomDatepicker', -1)">
+                                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                </button>
+                                <div class="datepicker-month-year" id="expenseCustomDatepickerMonthYear">
+                                    December 2024
+                                </div>
+                                <button type="button" class="datepicker-nav" onclick="navigateMonth('expenseCustomDatepicker', 1)">
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <div class="datepicker-grid" id="expenseCustomDatepickerGrid">
+                                <!-- Calendar grid will be populated by JavaScript -->
+                            </div>
+                            <div class="datepicker-footer">
+                                <button type="button" class="datepicker-btn datepicker-btn-secondary" onclick="clearDate('expenseCustomDatepicker')">
+                                    Clear
+                                </button>
+                                <button type="button" class="datepicker-btn datepicker-btn-primary" onclick="selectToday('expenseCustomDatepicker')">
+                                    Today
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="slideOutExpenseDate" name="slideOutExpenseDate">
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <div class="form-group">
+                        <label class="form-label" for="slideOutExpenseAmount">Amount ($)</label>
+                        <input type="number" class="form-input" id="slideOutExpenseAmount" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="slideOutExpenseCategory">Category</label>
+                        <div class="select-container">
+                            <div class="select-trigger" onclick="toggleSlideOutSelect('expenseCategory')" id="expenseCategoryTrigger">
+                                <span id="expenseCategoryValue">Groceries</span>
+                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                            </div>
+                            <div class="select-content" id="expenseCategoryContent">
+                                <div class="select-item selected" data-value="groceries">Groceries</div>
+                                <div class="select-item" data-value="transportation">Transportation</div>
+                                <div class="select-item" data-value="dining">Dining Out</div>
+                                <div class="select-item" data-value="entertainment">Entertainment</div>
+                                <div class="select-item" data-value="personal">Personal Care</div>
+                                <div class="select-item" data-value="clothing">Clothing</div>
+                                <div class="select-item" data-value="health">Health/Fitness</div>
+                                <div class="select-item" data-value="subscriptions">Subscriptions</div>
+                                <div class="select-item" data-value="other">Other</div>
+                            </div>
+                        </div>
+                        <!-- Hidden native select for compatibility -->
+                        <select id="slideOutExpenseCategory" style="display: none;">
+                            <option value="groceries">Groceries</option>
+                            <option value="transportation">Transportation</option>
+                            <option value="dining">Dining Out</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="personal">Personal Care</option>
+                            <option value="clothing">Clothing</option>
+                            <option value="health">Health/Fitness</option>
+                            <option value="subscriptions">Subscriptions</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="slideOutExpenseDescription">Description (optional)</label>
+                    <input type="text" class="form-input" id="slideOutExpenseDescription" placeholder="What did you buy?">
+                </div>
+                
+                <button type="button" class="add-btn" onclick="addExpenseFromSlideOut()">Add Expense</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Balance Slide-out -->
+    <div class="slide-out-overlay" id="balanceSlideOut">
+        <div class="slide-out-content">
+            <div class="slide-out-handle"></div>
+            <div class="slide-out-header">
+                <h3 class="slide-out-title">Record Balance</h3>
+                <button class="slide-out-close" onclick="hideBalanceSlideOut()">×</button>
+            </div>
+            
+            <div class="slide-out-form">
+                <div class="form-group">
+                    <label class="form-label" for="slideOutBalanceDate">Date</label>
+                    <div class="custom-datepicker" id="balanceCustomDatepicker">
+                        <div class="datepicker-trigger" onclick="toggleDatepicker('balanceCustomDatepicker')"
+                             role="button" tabindex="0" aria-label="Select date" aria-expanded="false">
+                            <span class="datepicker-value" id="balanceCustomDatepickerValue">Select date</span>
+                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                        </div>
+                        <div class="datepicker-popup" id="balanceCustomDatepickerPopup">
+                            <div class="datepicker-header">
+                                <button type="button" class="datepicker-nav" onclick="navigateMonth('balanceCustomDatepicker', -1)">
+                                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                </button>
+                                <div class="datepicker-month-year" id="balanceCustomDatepickerMonthYear">
+                                    December 2024
+                                </div>
+                                <button type="button" class="datepicker-nav" onclick="navigateMonth('balanceCustomDatepicker', 1)">
+                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <div class="datepicker-grid" id="balanceCustomDatepickerGrid">
+                                <!-- Calendar grid will be populated by JavaScript -->
+                            </div>
+                            <div class="datepicker-footer">
+                                <button type="button" class="datepicker-btn datepicker-btn-secondary" onclick="clearDate('balanceCustomDatepicker')">
+                                    Clear
+                                </button>
+                                <button type="button" class="datepicker-btn datepicker-btn-primary" onclick="selectToday('balanceCustomDatepicker')">
+                                    Today
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="slideOutBalanceDate" name="slideOutBalanceDate">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="slideOutBalanceAccount">Account</label>
+                    <div class="select-container">
+                        <div class="select-trigger" onclick="toggleSlideOutSelect('balanceAccount')" id="balanceAccountTrigger">
+                            <span id="balanceAccountValue">Checking</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                        <div class="select-content" id="balanceAccountContent">
+                            <!-- Options will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <!-- Hidden native select for compatibility -->
+                    <select id="slideOutBalanceAccount" style="display: none;">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="slideOutBalanceAmount">Balance ($)</label>
+                    <input type="number" class="form-input" id="slideOutBalanceAmount" placeholder="0.00" step="0.01">
+                </div>
+                
+                <button type="button" class="balance-add-btn" onclick="addBalanceFromSlideOut()">Add Balance</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Account Management Slide-out -->
+    <div class="account-management-slide-out" id="accountManagementSlideOut">
+        <div class="account-management-content">
+            <div class="account-management-handle"></div>
+            <div class="account-management-header">
+                <h3 class="account-management-title">Manage Accounts</h3>
+                <button class="account-management-close" onclick="hideAccountManagementSlideOut()">×</button>
+            </div>
+            
+            <div class="account-management-list" id="accountManagementList">
+                <!-- Account list will be populated by JavaScript -->
+            </div>
+            
+            <div class="account-management-add-form">
+                <h4 class="account-management-add-title">Add New Account</h4>
+                <div class="account-management-input-group">
+                    <input type="text" class="account-management-input" id="newAccountNameSlideOut" placeholder="e.g., Emergency Fund">
+                </div>
+                <button class="account-management-add-btn" onclick="addNewAccountFromSlideOut()">Add Account</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Legacy Account Management Modal (hidden for backwards compatibility) -->
+    <div class="modal-overlay" id="accountManagementModal" style="display: none !important;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Manage Accounts</h3>
+                <button class="modal-close" onclick="hideAccountManagementModal()">×</button>
+            </div>
+            
+            <div class="account-list" id="accountList">
+                <!-- Account list will be populated by JavaScript -->
+            </div>
+            
+            <div class="add-account-form">
+                <h4 class="text-lg font-semibold mb-4">Add New Account</h4>
+                <div class="input-group">
+                    <label for="newAccountName">Account Name</label>
+                    <input type="text" id="newAccountName" placeholder="e.g., Emergency Fund" style="width: 100%; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem;">
+                </div>
+                <button class="add-account-btn" onclick="addNewAccount()">Add Account</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase configuration (add your actual config)
+        const firebaseConfig = {
+            // Replace with your Firebase config
+            apiKey: "your-api-key",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "your-app-id"
+        };
+
+        // Initialize Firebase (uncomment when you have real config)
+        // firebase.initializeApp(firebaseConfig);
+        // const db = firebase.firestore();
+
+        // Period tracking variables
+        let currentPeriodMode = 'today'; // 'today' or 'month'
+        let selectedMonthDate = new Date();
+        let currentChartPeriod = 'ALL'; // '1M', '3M', '6M', 'YTD', '1Y', 'ALL'
+        
+        let currentScreen = 0;
+        let spendingChart;
+        
+        // Storage keys
+        const EXPENSES_KEY = 'dailyExpenses';
+        const MONTHLY_DATA_KEY = 'monthlyData';
+        const SAVINGS_ACCOUNTS_KEY = 'savingsAccounts';
+        const ACCOUNT_BALANCES_KEY = 'accountBalances';
+        
+        // Budget constants
+        const DAILY_BUDGET = 41.30;
+        const WEEKLY_BUDGET = 286;
+        const MONTHLY_BUDGET = 1239;
+        const MONTHLY_SAVINGS_TARGET = 4333;
+        
+        // Savings tracking variables
+        savingsAccounts = [];
+        
+        // Default accounts
+        const defaultAccounts = [
+            { id: 'checking', name: 'Checking', type: 'checking' },
+            { id: 'savings', name: 'Savings', type: 'savings' },
+            { id: 'investment', name: 'Investment', type: 'investment' }
+        ];
+        
+        function goToScreen(screenIndex) {
+            currentScreen = screenIndex;
+            const wrapper = document.getElementById('screensWrapper');
+            wrapper.style.transform = `translateX(-${screenIndex * 100}vw)`;
+            
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach((item, index) => {
+                item.classList.toggle('active', index === screenIndex);
+            });
+            
+            if (screenIndex === 1) {
+                updateReports();
+                setTimeout(updateChart, 300);
+            }
+        }
+        
+        
+        function getCurrentDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        function loadAccountBalances() {
+            const balances = localStorage.getItem('accountBalances');
+            return balances ? JSON.parse(balances) : {};
+        }
+        
+        function saveAccountBalances(balances) {
+            localStorage.setItem('accountBalances', JSON.stringify(balances));
+        }
+        
+        function updatePeriodView() {
+            updateBudgetDisplay();
+            updateExpensesList();
+            if (currentPeriodMode === 'month') {
+                updateTotalSavingsDisplay();
+            }
+        }
+        
+        function updateBudgetDisplay() {
+            const expenses = loadExpenses();
+            let totalSpent = 0;
+            let periodLabel = '';
+            let description = '';
+            
+            if (currentPeriodMode === 'today') {
+                const today = getCurrentDate();
+                const todayExpenses = expenses[today] || [];
+                totalSpent = todayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+                periodLabel = 'Daily Budget';
+                description = 'for all variable expenses';
+                
+                const remainingLabel = document.getElementById('remainingLabel');
+                if (remainingLabel) {
+                    remainingLabel.textContent = 'Remaining Today';
+                }
+            } else {
+                // Month mode
+                const monthKey = getCurrentPeriodKey();
+                Object.keys(expenses).forEach(date => {
+                    if (date.startsWith(monthKey)) {
+                        const dayExpenses = expenses[date] || [];
+                        totalSpent += dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+                    }
+                });
+                
+                const monthName = selectedMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                periodLabel = `${monthName} Budget`;
+                description = 'monthly spending budget';
+                
+                const remainingLabel = document.getElementById('remainingLabel');
+                if (remainingLabel) {
+                    remainingLabel.textContent = 'Remaining This Month';
+                }
+            }
+            
+            const budget = currentPeriodMode === 'today' ? DAILY_BUDGET : MONTHLY_BUDGET;
+            const remaining = budget - totalSpent;
+            
+            // Update display elements if they exist
+            const budgetPeriodLabel = document.getElementById('budgetPeriodLabel');
+            const budgetDescription = document.getElementById('budgetDescription');
+            const budgetAmount = document.getElementById('budgetAmount');
+            const remainingBudget = document.getElementById('remainingBudget');
+            
+            if (budgetPeriodLabel) budgetPeriodLabel.textContent = periodLabel;
+            if (budgetDescription) budgetDescription.textContent = description;
+            if (budgetAmount) budgetAmount.textContent = `$${budget.toFixed(2)}`;
+            if (remainingBudget) remainingBudget.textContent = `$${remaining.toFixed(2)}`;
+            
+            // Update status
+            const statusIndicator = document.getElementById('budgetStatus');
+            const statusText = document.getElementById('budgetStatusText');
+            
+            if (statusIndicator && statusText) {
+                if (remaining > budget * 0.5) {
+                    statusIndicator.className = 'status-indicator status-good';
+                    statusText.textContent = 'On Track';
+                } else if (remaining > 0) {
+                    statusIndicator.className = 'status-indicator status-warning';
+                    statusText.textContent = 'Watch Spending';
+                } else {
+                    statusIndicator.className = 'status-indicator status-danger';
+                    statusText.textContent = 'Over Budget';
+                }
+            }
+        }
+        
+        function updateExpensesList() {
+            const expenses = loadExpenses();
+            const listContainer = document.getElementById('expensesList');
+            const titleElement = document.getElementById('expensesListTitle');
+            
+            if (!listContainer) return;
+            
+            let periodExpenses = [];
+            
+            if (currentPeriodMode === 'today') {
+                const today = getCurrentDate();
+                periodExpenses = expenses[today] || [];
+                // Add the date to each expense for consistent handling
+                periodExpenses = periodExpenses.map(expense => ({
+                    ...expense,
+                    date: today
+                }));
+                if (titleElement) titleElement.textContent = "Today's Expenses";
+            } else {
+                const monthKey = getCurrentPeriodKey();
+                Object.keys(expenses).forEach(date => {
+                    if (date.startsWith(monthKey)) {
+                        const dayExpenses = expenses[date] || [];
+                        dayExpenses.forEach(expense => {
+                            periodExpenses.push({
+                                ...expense,
+                                date: date
+                            });
+                        });
+                    }
+                });
+                
+                // Sort by date (newest first), then by timestamp
+                periodExpenses.sort((a, b) => {
+                    const dateCompare = new Date(b.date) - new Date(a.date);
+                    if (dateCompare !== 0) return dateCompare;
+                    return b.timestamp - a.timestamp;
+                });
+                
+                const monthName = selectedMonthDate.toLocaleDateString('en-US', { month: 'long' });
+                if (titleElement) titleElement.textContent = `${monthName} Expenses`;
+            }
+            
+            if (periodExpenses.length === 0) {
+                const noExpensesText = currentPeriodMode === 'today' ? 'No expenses recorded today' : 'No expenses recorded this month';
+                listContainer.innerHTML = `<div style="text-align: center; color: #7f8c8d; padding: 20px;">${noExpensesText}</div>`;
+            } else {
+                listContainer.innerHTML = periodExpenses.map((expense, index) => {
+                    let displayDate = '';
+                    if (currentPeriodMode === 'month') {
+                        // Parse date manually to avoid timezone issues
+                        const dateParts = expense.date.split('-').map(Number);
+                        const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                        displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' • ';
+                    }
+                    
+                    return `
+                        <div class="expense-item">
+                            <div class="expense-details">
+                                <div class="expense-description">${expense.description || expense.category}</div>
+                                <div class="expense-category">${displayDate}${expense.category}</div>
+                            </div>
+                            <div class="expense-amount">$${expense.amount.toFixed(2)}</div>
+                            <button class="delete-btn" onclick="deleteExpense('${expense.date}', ${expense.timestamp})">✕</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+        
+        function deleteExpense(date, timestamp) {
+            const expenses = loadExpenses();
+            
+            // Handle the case where date might be undefined for today mode
+            const targetDate = date || getCurrentDate();
+            
+            if (expenses[targetDate]) {
+                // Filter out the expense with the matching timestamp
+                const originalLength = expenses[targetDate].length;
+                expenses[targetDate] = expenses[targetDate].filter(expense => expense.timestamp !== timestamp);
+                
+                // Check if the expense was actually removed
+                if (expenses[targetDate].length === originalLength) {
+                    console.error('Expense not found with timestamp:', timestamp);
+                    alert('Could not find expense to delete. Please refresh and try again.');
+                    return;
+                }
+                
+                // Remove the date entry if no expenses left for that date
+                if (expenses[targetDate].length === 0) {
+                    delete expenses[targetDate];
+                }
+                
+                // Save the updated expenses
+                saveExpenses(expenses);
+                
+                // Update the display
+                updatePeriodView();
+                
+                console.log('Expense deleted successfully');
+            } else {
+                console.error('No expenses found for date:', targetDate);
+                alert('Could not find expenses for this date. Please refresh and try again.');
+            }
+        }
+        
+        function updateReports() {
+            // Update weekly and monthly stats
+            const expenses = loadExpenses();
+            const today = new Date();
+            const dayOfMonth = today.getDate();
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            const remainingDaysInMonth = daysInMonth - dayOfMonth;
+            
+            // Calculate weekly spending
+            let weeklySpent = 0;
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const dateKey = `${year}-${month}-${day}`;
+                const dayExpenses = expenses[dateKey] || [];
+                weeklySpent += dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+            }
+            
+            // Calculate monthly spending
+            let monthlySpent = 0;
+            const currentMonth = getCurrentMonth();
+            Object.keys(expenses).forEach(date => {
+                if (date.startsWith(currentMonth)) {
+                    const dayExpenses = expenses[date] || [];
+                    monthlySpent += dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+                }
+            });
+            
+            // Calculate daily burn rate (average spent per day)
+            const dailyBurnRate = monthlySpent / dayOfMonth;
+            
+            // Calculate projected spending for the rest of the month
+            const projectedAdditionalSpending = dailyBurnRate * remainingDaysInMonth;
+            const projectedTotalSpending = monthlySpent + projectedAdditionalSpending;
+            
+            // Calculate projected monthly savings
+            const projectedMonthlySavings = Math.max(0, MONTHLY_BUDGET - projectedTotalSpending);
+            
+            // Calculate days left in budget (at current burn rate)
+            const remainingBudget = MONTHLY_BUDGET - monthlySpent;
+            const daysLeftInBudget = dailyBurnRate > 0 ? Math.floor(remainingBudget / dailyBurnRate) : remainingDaysInMonth;
+            
+            // Calculate savings rate (assuming budget = income - required savings)
+            // This is an approximation - in reality, we'd need income data
+            const assumedIncome = MONTHLY_BUDGET + MONTHLY_SAVINGS_TARGET;
+            const projectedSavings = assumedIncome - projectedTotalSpending;
+            const savingsRate = (projectedSavings / assumedIncome) * 100;
+            
+            // Update weekly metrics
+            const weeklySpentEl = document.getElementById('weeklySpent');
+            const weeklyRemainingEl = document.getElementById('weeklyRemaining');
+            const projectedMonthlySavingsEl = document.getElementById('projectedMonthlySavings');
+            
+            if (weeklySpentEl) weeklySpentEl.textContent = `$${weeklySpent.toFixed(0)}`;
+            if (weeklyRemainingEl) weeklyRemainingEl.textContent = `$${Math.max(0, WEEKLY_BUDGET - weeklySpent).toFixed(0)}`;
+            if (projectedMonthlySavingsEl) projectedMonthlySavingsEl.textContent = `$${projectedMonthlySavings.toFixed(0)}`;
+            
+            // Update monthly stats
+            const monthlySpentEl = document.getElementById('monthlySpent');
+            const monthSpentSubtitleEl = document.getElementById('monthSpentSubtitle');
+            const dailyBurnRateEl = document.getElementById('dailyBurnRate');
+            const burnRateStatusEl = document.getElementById('burnRateStatus');
+            const daysRemainingEl = document.getElementById('daysRemaining');
+            const daysRemainingSubtitleEl = document.getElementById('daysRemainingSubtitle');
+            const savingsRateEl = document.getElementById('savingsRate');
+            const savingsRateSubtitleEl = document.getElementById('savingsRateSubtitle');
+            
+            // Update month spent with percentage indicator
+            if (monthlySpentEl) monthlySpentEl.textContent = `$${monthlySpent.toFixed(0)}`;
+            if (monthSpentSubtitleEl) {
+                const percentUsed = (monthlySpent / MONTHLY_BUDGET) * 100;
+                monthSpentSubtitleEl.textContent = `${percentUsed.toFixed(0)}% of $${MONTHLY_BUDGET} budget`;
+            }
+            
+            // Update daily burn rate with status
+            if (dailyBurnRateEl) dailyBurnRateEl.textContent = `$${dailyBurnRate.toFixed(0)}`;
+            if (burnRateStatusEl) {
+                const dailyTarget = MONTHLY_BUDGET / daysInMonth;
+                const difference = dailyTarget - dailyBurnRate;
+                let burnRateStatus = '';
+                
+                if (difference > 0) {
+                    burnRateStatus = `$${difference.toFixed(0)} under target`;
+                    burnRateStatusEl.className = 'stat-subtitle positive';
+                } else if (difference < 0) {
+                    burnRateStatus = `$${Math.abs(difference).toFixed(0)} over target`;
+                    burnRateStatusEl.className = 'stat-subtitle negative';
+                } else {
+                    burnRateStatus = 'right on target';
+                    burnRateStatusEl.className = 'stat-subtitle';
+                }
+                
+                burnRateStatusEl.textContent = burnRateStatus;
+            }
+            
+            // Update days left in budget
+            if (daysRemainingEl) {
+                if (daysLeftInBudget >= remainingDaysInMonth) {
+                    daysRemainingEl.textContent = remainingDaysInMonth;
+                    daysRemainingEl.className = 'stat-value positive';
+                } else if (daysLeftInBudget <= 0) {
+                    daysRemainingEl.textContent = '0';
+                    daysRemainingEl.className = 'stat-value negative';
+                } else {
+                    daysRemainingEl.textContent = daysLeftInBudget;
+                    if (daysLeftInBudget < 7) {
+                        daysRemainingEl.className = 'stat-value warning';
+                    } else {
+                        daysRemainingEl.className = 'stat-value';
+                    }
+                }
+            }
+            
+            if (daysRemainingSubtitleEl) {
+                const daysMessage = daysLeftInBudget >= remainingDaysInMonth ? 
+                    'on track' : `${remainingDaysInMonth - daysLeftInBudget} days short`;
+                daysRemainingSubtitleEl.textContent = daysMessage;
+            }
+            
+            // Update savings rate
+            if (savingsRateEl) {
+                savingsRateEl.textContent = `${Math.max(0, savingsRate).toFixed(0)}%`;
+                
+                // Styling based on savings goal
+                const targetSavingsRate = (MONTHLY_SAVINGS_TARGET / assumedIncome) * 100;
+                if (savingsRate >= targetSavingsRate) {
+                    savingsRateEl.className = 'stat-value positive';
+                } else if (savingsRate >= targetSavingsRate * 0.7) {
+                    savingsRateEl.className = 'stat-value warning';
+                } else {
+                    savingsRateEl.className = 'stat-value negative';
+                }
+            }
+            
+            if (savingsRateSubtitleEl) {
+                savingsRateSubtitleEl.textContent = `vs ${(MONTHLY_SAVINGS_TARGET / assumedIncome * 100).toFixed(0)}% target`;
+            }
+            
+            // Update month name in labels
+            updateMonthLabel();
+        }
+        
+        function updateMonthLabel() {
+            const monthName = new Date().toLocaleDateString('en-US', { month: 'long' });
+            const monthSpentLabelEl = document.getElementById('monthSpentLabel');
+            
+            if (monthSpentLabelEl) {
+                monthSpentLabelEl.textContent = `${monthName} Spent`;
+            }
+        }
+        
+        function setChartPeriod(period) {
+            // If it's the same period, don't do anything
+            if (currentChartPeriod === period) return;
+            
+            // Store the previous period for animation
+            const previousPeriod = currentChartPeriod;
+            currentChartPeriod = period;
+            
+            // Update button states with smooth transition
+            document.querySelectorAll('.chart-period-btn-wealthsimple').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const periodBtn = document.getElementById('period' + period);
+            if (periodBtn) {
+                // Small delay for visual feedback
+                setTimeout(() => {
+                    periodBtn.classList.add('active');
+                }, 10);
+            }
+            
+            // Add loading indicator if needed for longer data sets
+            const chartContainer = document.querySelector('.chart-container');
+            if (period === 'ALL') {
+                chartContainer.classList.add('loading');
+            }
+            
+            // Slight delay for animation
+            setTimeout(() => {
+                updateChart();
+                chartContainer.classList.remove('loading');
+            }, 100);
+        }
+        
+        function updateChart() {
+            // Get expenses and balances
+            const expenses = loadExpenses();
+            const balances = loadAccountBalances();
+            
+            // Get chart canvas
+            const ctx = document.getElementById('spendingChart').getContext('2d');
+            
+            // Calculate date range based on selected period
+            const endDate = new Date();
+            let startDate;
+            
+            switch (currentChartPeriod) {
+                case '1M':
+                    startDate = new Date();
+                    startDate.setMonth(startDate.getMonth() - 1);
+                    break;
+                case '3M':
+                    startDate = new Date();
+                    startDate.setMonth(startDate.getMonth() - 3);
+                    break;
+                case '6M':
+                    startDate = new Date();
+                    startDate.setMonth(startDate.getMonth() - 6);
+                    break;
+                case 'YTD':
+                    startDate = new Date(endDate.getFullYear(), 0, 1); // Jan 1st of current year
+                    break;
+                case '1Y':
+                    startDate = new Date();
+                    startDate.setFullYear(startDate.getFullYear() - 1);
+                    break;
+                case 'ALL':
+                default:
+                    // For 'ALL', go back 2 years or to the first record, whichever is earlier
+                    startDate = new Date();
+                    startDate.setFullYear(startDate.getFullYear() - 2);
+                    break;
+            }
+            
+            // Generate dates between start and end date
+            const dates = [];
+            const currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+                dates.push(new Date(currentDate));
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            // Format dates for labels and lookup
+            const labels = dates.map(date => {
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+            
+            const dateKeys = dates.map(date => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            });
+            
+            // Calculate cumulative spending
+            const spendingData = [];
+            let cumulativeSpending = 0;
+            
+            dateKeys.forEach(dateKey => {
+                const dayExpenses = expenses[dateKey] || [];
+                const dayTotal = dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+                cumulativeSpending += dayTotal;
+                spendingData.push(cumulativeSpending);
+            });
+            
+            // Calculate account balances over time
+            const savingsData = new Array(dates.length).fill(null);
+            
+            // Get all balance records and sort by date
+            const balanceRecords = [];
+            Object.keys(balances).forEach(accountId => {
+                const accountBalances = balances[accountId] || {};
+                Object.keys(accountBalances).forEach(date => {
+                    if (date >= dateKeys[0] && date <= dateKeys[dateKeys.length - 1]) {
+                        balanceRecords.push({
+                            date: date,
+                            amount: accountBalances[date]
+                        });
+                    }
+                });
+            });
+            
+            // Sort balance records by date
+            balanceRecords.sort((a, b) => a.date.localeCompare(b.date));
+            
+            // Calculate total balance for each date
+            let lastKnownBalance = 0;
+            balanceRecords.forEach(record => {
+                const dateIndex = dateKeys.indexOf(record.date);
+                if (dateIndex !== -1) {
+                    lastKnownBalance = record.amount;
+                    savingsData[dateIndex] = lastKnownBalance;
+                }
+            });
+            
+            // Fill in missing balance data using last known balance
+            for (let i = 0; i < savingsData.length; i++) {
+                if (savingsData[i] === null) {
+                    if (i > 0 && savingsData[i-1] !== null) {
+                        savingsData[i] = savingsData[i-1];
+                    } else {
+                        savingsData[i] = 0; // Default if no previous balance
+                    }
+                }
+            }
+            
+            // Calculate total savings and growth
+            const initialSavings = savingsData[0] || 0;
+            const finalSavings = savingsData[savingsData.length - 1] || 0;
+            const savingsGrowth = finalSavings - initialSavings;
+            const savingsGrowthPercent = initialSavings > 0 ? (savingsGrowth / initialSavings) * 100 : 0;
+            
+            // Update chart header
+            const chartMainValue = document.getElementById('chartMainValue');
+            const chartSubtitle = document.getElementById('chartSubtitle');
+            const chartGrowth = document.getElementById('chartGrowth');
+            
+            if (chartMainValue) chartMainValue.textContent = `$${finalSavings.toFixed(2)}`;
+            if (chartSubtitle) chartSubtitle.textContent = 'Total Savings';
+            if (chartGrowth) {
+                const growthPrefix = savingsGrowth >= 0 ? '+' : '';
+                chartGrowth.textContent = `${growthPrefix}$${savingsGrowth.toFixed(2)} (${growthPrefix}${savingsGrowthPercent.toFixed(1)}%) ${currentChartPeriod === 'ALL' ? 'all time' : currentChartPeriod}`;
+                chartGrowth.className = 'chart-growth ' + (savingsGrowth >= 0 ? 'positive' : 'negative');
+            }
+            
+            // Destroy previous chart instance if it exists
+            if (spendingChart) {
+                spendingChart.destroy();
+            }
+            
+            // Create enhanced gradient for savings (Wealthsimple style)
+            const savingsGradient = ctx.createLinearGradient(0, 0, 0, 400);
+            savingsGradient.addColorStop(0, 'rgba(16, 185, 129, 0.25)'); // Green with transparency
+            savingsGradient.addColorStop(0.6, 'rgba(16, 185, 129, 0.05)');
+            savingsGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+            
+            // Create enhanced gradient for spending
+            const spendingGradient = ctx.createLinearGradient(0, 0, 0, 400);
+            spendingGradient.addColorStop(0, 'rgba(234, 67, 53, 0.15)');
+            spendingGradient.addColorStop(0.6, 'rgba(234, 67, 53, 0.05)');
+            spendingGradient.addColorStop(1, 'rgba(234, 67, 53, 0)');
+            
+            // Create the chart
+            spendingChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total Savings',
+                            data: savingsData,
+                            borderColor: 'rgb(16, 185, 129)', // Green color for savings
+                            backgroundColor: savingsGradient,
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            pointHoverBackgroundColor: 'rgb(16, 185, 129)',
+                            pointHoverBorderColor: '#fff',
+                            pointHoverBorderWidth: 2,
+                            borderWidth: 2.5,
+                            z: 10 // Higher z-index to ensure it's on top
+                        },
+                        {
+                            label: 'Cumulative Spending',
+                            data: spendingData,
+                            borderColor: 'rgb(107, 114, 128)', // Gray color for spending
+                            backgroundColor: spendingGradient,
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 0,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: 'rgb(107, 114, 128)',
+                            pointHoverBorderColor: '#fff',
+                            pointHoverBorderWidth: 2,
+                            borderWidth: 2,
+                            z: 5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animations: {
+                        tension: {
+                            duration: 1000,
+                            easing: 'easeOutQuad',
+                            from: 0.8,
+                            to: 0.4,
+                            loop: false
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false,
+                            external: function(context) {
+                                // Enhanced custom tooltip implementation (Wealthsimple style)
+                                const tooltipEl = document.getElementById('chartTooltip');
+                                const tooltipDate = document.getElementById('tooltipDate');
+                                const tooltipSavings = document.getElementById('tooltipSavings');
+                                const tooltipSpending = document.getElementById('tooltipSpending');
+                                const chartOverlay = document.getElementById('chartOverlay');
+                                const chartCrosshair = document.getElementById('chartCrosshair');
+                                
+                                // Hide tooltip if no point is active
+                                if (context.tooltip.opacity === 0) {
+                                    chartOverlay.style.opacity = '0';
+                                    chartCrosshair.style.opacity = '0';
+                                    return;
+                                }
+                                
+                                // Set tooltip content
+                                if (tooltipDate && context.tooltip.dataPoints && context.tooltip.dataPoints.length) {
+                                    const dataPoint = context.tooltip.dataPoints[0];
+                                    
+                                    // Format date more elegantly
+                                    const formattedDate = dataPoint.label;
+                                    tooltipDate.textContent = formattedDate;
+                                    
+                                    // Get savings and spending values at this point
+                                    const index = dataPoint.dataIndex;
+                                    if (tooltipSavings) {
+                                        tooltipSavings.textContent = `$${savingsData[index].toFixed(2)}`;
+                                    }
+                                    if (tooltipSpending) {
+                                        tooltipSpending.textContent = `$${spendingData[index].toFixed(2)}`;
+                                    }
+                                    
+                                    // Position tooltip and crosshair with smooth animation
+                                    chartOverlay.style.opacity = '1';
+                                    if (chartCrosshair) {
+                                        const x = context.tooltip.caretX;
+                                        chartCrosshair.style.left = x + 'px';
+                                        chartCrosshair.style.opacity = '1';
+                                    }
+                                    
+                                    // Smart positioning for tooltip to avoid edge clipping
+                                    const tooltipPos = context.tooltip.caretX;
+                                    const chartWidth = context.chart.width;
+                                    
+                                    tooltipEl.style.opacity = '1';
+                                    if (tooltipPos < chartWidth / 2) {
+                                        tooltipEl.style.left = (tooltipPos + 15) + 'px';
+                                        tooltipEl.style.right = 'auto';
+                                    } else {
+                                        tooltipEl.style.right = (chartWidth - tooltipPos + 15) + 'px';
+                                        tooltipEl.style.left = 'auto';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                // Show fewer labels on small screens
+                                maxTicksLimit: window.innerWidth < 768 ? 4 : 8,
+                                font: {
+                                    family: 'Inter, system-ui, sans-serif',
+                                    size: 11
+                                },
+                                color: 'hsl(var(--muted-foreground))',
+                                padding: 8
+                            },
+                            border: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'hsl(var(--border) / 0.15)',
+                                drawBorder: false,
+                                tickLength: 8,
+                                lineWidth: 1
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    // Format currency nicely
+                                    if (value >= 1000) {
+                                        return '$' + (value/1000) + 'k';
+                                    }
+                                    return '$' + value;
+                                },
+                                font: {
+                                    family: 'Inter, system-ui, sans-serif',
+                                    size: 11
+                                },
+                                color: 'hsl(var(--muted-foreground))',
+                                padding: 8,
+                                maxTicksLimit: 6
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    hover: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    elements: {
+                        point: {
+                            hitRadius: 30 // Larger hit area for better mobile interaction
+                        },
+                        line: {
+                            tension: 0.4 // Smoother curves
+                        }
+                    }
+                }
+            });
+            
+            // Enhanced chart interactions for tooltip overlay
+            ctx.canvas.addEventListener('mousemove', function(e) {
+                const rect = ctx.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const chartOverlay = document.getElementById('chartOverlay');
+                const chartCrosshair = document.getElementById('chartCrosshair');
+                const chartTooltip = document.getElementById('chartTooltip');
+                
+                if (chartCrosshair && x >= 0 && x <= rect.width) {
+                    chartCrosshair.style.left = x + 'px';
+                    chartCrosshair.style.opacity = '1';
+                    
+                    // Show tooltip when hovering over chart
+                    if (chartOverlay) {
+                        chartOverlay.style.opacity = '1';
+                    }
+                }
+            });
+            
+            // Handle touch events for mobile devices
+            ctx.canvas.addEventListener('touchmove', function(e) {
+                e.preventDefault(); // Prevent scrolling
+                const rect = ctx.canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                const x = touch.clientX - rect.left;
+                const chartCrosshair = document.getElementById('chartCrosshair');
+                
+                if (chartCrosshair && x >= 0 && x <= rect.width) {
+                    chartCrosshair.style.left = x + 'px';
+                    chartCrosshair.style.opacity = '1';
+                    
+                    // Show tooltip when touching chart
+                    const chartOverlay = document.getElementById('chartOverlay');
+                    if (chartOverlay) {
+                        chartOverlay.style.opacity = '1';
+                    }
+                }
+            });
+            
+            ctx.canvas.addEventListener('mouseleave', function() {
+                const chartOverlay = document.getElementById('chartOverlay');
+                const chartCrosshair = document.getElementById('chartCrosshair');
+                if (chartOverlay) {
+                    chartOverlay.style.opacity = '0';
+                }
+                if (chartCrosshair) {
+                    chartCrosshair.style.opacity = '0';
+                }
+            });
+            
+            // Hide overlay when touch ends
+            ctx.canvas.addEventListener('touchend', function() {
+                const chartOverlay = document.getElementById('chartOverlay');
+                const chartCrosshair = document.getElementById('chartCrosshair');
+                if (chartOverlay) {
+                    chartOverlay.style.opacity = '0';
+                }
+                if (chartCrosshair) {
+                    chartCrosshair.style.opacity = '0';
+                }
+            });
+        }
+        
+        // Global variables
+        currentPeriodMode = 'today'; // or 'month'
+        savingsAccounts = [
+            { id: 'checking', name: 'Checking' },
+            { id: 'savings', name: 'Savings' },
+            { id: 'emergency', name: 'Emergency Fund' }
+        ];
+        
+        function getCurrentPeriodKey() {
+            if (currentPeriodMode === 'today') {
+                return getCurrentDate();
+            } else {
+                return `${selectedMonthDate.getFullYear()}-${String(selectedMonthDate.getMonth() + 1).padStart(2, '0')}`;
+            }
+        }
+        
+        function getCurrentMonth() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+        
+        function isCurrentMonth() {
+            const now = new Date();
+            return selectedMonthDate.getMonth() === now.getMonth() && 
+                   selectedMonthDate.getFullYear() === now.getFullYear();
+        }
+        
+        function loadExpenses() {
+            const stored = localStorage.getItem(EXPENSES_KEY);
+            return stored ? JSON.parse(stored) : {};
+        }
+        
+        function saveExpenses(expenses) {
+            localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
+        }
+        
+        // Savings account functions
+        function loadSavingsAccounts() {
+            const stored = localStorage.getItem(SAVINGS_ACCOUNTS_KEY);
+            return stored ? JSON.parse(stored) : defaultAccounts;
+        }
+        
+        function saveSavingsAccounts(accounts) {
+            localStorage.setItem(SAVINGS_ACCOUNTS_KEY, JSON.stringify(accounts));
+        }
+        
+        function loadAccountBalances() {
+            const stored = localStorage.getItem(ACCOUNT_BALANCES_KEY);
+            return stored ? JSON.parse(stored) : {};
+        }
+        
+        function saveAccountBalances(balances) {
+            localStorage.setItem(ACCOUNT_BALANCES_KEY, JSON.stringify(balances));
+        }
+        
+        function initializeSavingsAccounts() {
+            savingsAccounts = loadSavingsAccounts();
+            updateAccountSelector();
+        }
+        
+        function initializeMonthPicker() {
+            initializeDateDropdowns();
+        }
+        
+        function initializeDateDropdowns() {
+            const yearDropdown = document.getElementById('yearDropdown');
+            if (!yearDropdown) return;
+            
+            yearDropdown.innerHTML = '';
+            
+            // Generate years (2 years back to current year)
+            const currentYear = new Date().getFullYear();
+            for (let year = currentYear - 2; year <= currentYear; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === selectedMonthDate.getFullYear()) {
+                    option.selected = true;
+                }
+                yearDropdown.appendChild(option);
+            }
+            
+            // Set month dropdown
+            const monthDropdown = document.getElementById('monthDropdown');
+            if (monthDropdown) {
+                monthDropdown.value = selectedMonthDate.getMonth();
+            }
+            
+            // Add event listeners
+            yearDropdown.addEventListener('change', (e) => {
+                selectedMonthDate.setFullYear(parseInt(e.target.value));
+                updatePeriodView();
+            });
+            
+            monthDropdown.addEventListener('change', (e) => {
+                selectedMonthDate.setMonth(parseInt(e.target.value));
+                updatePeriodView();
+            });
+        }
+        
+        function selectMonth(date) {
+            selectedMonthDate = new Date(date);
+            
+            // Update dropdowns
+            const monthDropdown = document.getElementById('monthDropdown');
+            const yearDropdown = document.getElementById('yearDropdown');
+            if (monthDropdown) monthDropdown.value = date.getMonth();
+            if (yearDropdown) yearDropdown.value = date.getFullYear();
+            
+            setDefaultDatePicker();
+            setDefaultBalanceDate();
+            updatePeriodView();
+        }
+        
+        function scrollToSelectedMonth() {
+            // Not needed for compressed design
+        }
+        
+        function updateAccountSelector() {
+            const balanceAccountSelect = document.getElementById('balanceAccount');
+            
+            if (balanceAccountSelect) {
+                balanceAccountSelect.innerHTML = '';
+                
+                // Add account options for balance input
+                savingsAccounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account.id;
+                    option.textContent = account.name;
+                    balanceAccountSelect.appendChild(option);
+                });
+            }
+            
+            // Also update slide-out dropdown
+            updateSlideOutAccountDropdown();
+            
+            updateTotalSavingsDisplay();
+        }
+        
+        function updateSlideOutAccountDropdown() {
+            const balanceAccountContent = document.getElementById('balanceAccountContent');
+            const slideOutBalanceAccount = document.getElementById('slideOutBalanceAccount');
+            
+            if (balanceAccountContent && slideOutBalanceAccount) {
+                // Clear existing options
+                balanceAccountContent.innerHTML = '';
+                slideOutBalanceAccount.innerHTML = '';
+                
+                // Add account options
+                savingsAccounts.forEach((account, index) => {
+                    // Add to custom dropdown
+                    const item = document.createElement('div');
+                    item.className = 'select-item';
+                    if (index === 0) item.classList.add('selected');
+                    item.setAttribute('data-value', account.id);
+                    item.textContent = account.name;
+                    
+                    // Add click handler
+                    item.addEventListener('click', function() {
+                        selectSlideOutOption('balanceAccount', account.id, account.name);
+                    });
+                    
+                    balanceAccountContent.appendChild(item);
+                    
+                    // Add to hidden select
+                    const option = document.createElement('option');
+                    option.value = account.id;
+                    option.textContent = account.name;
+                    if (index === 0) option.selected = true;
+                    slideOutBalanceAccount.appendChild(option);
+                });
+                
+                // Update displayed value
+                const balanceAccountValue = document.getElementById('balanceAccountValue');
+                if (balanceAccountValue && savingsAccounts.length > 0) {
+                    balanceAccountValue.textContent = savingsAccounts[0].name;
+                }
+            }
+        }
+
+        
+        function updateTotalSavingsDisplay() {
+            const balances = loadAccountBalances();
+            const monthKey = getCurrentPeriodKey();
+            let totalBalance = 0;
+            let accountsWithBalances = 0;
+            
+            // Calculate total balance across all accounts for current month
+            Object.keys(balances).forEach(accountId => {
+                const accountBalances = balances[accountId] || {};
+                const monthBalances = Object.keys(accountBalances)
+                    .filter(date => date.startsWith(monthKey))
+                    .sort()
+                    .reverse();
+                
+                if (monthBalances.length > 0) {
+                    totalBalance += accountBalances[monthBalances[0]];
+                    accountsWithBalances++;
+                }
+            });
+            
+            // Update total balance display
+            const totalBalanceElement = document.getElementById('totalAccountBalance');
+            if (totalBalanceElement) {
+                totalBalanceElement.textContent = `$${totalBalance.toFixed(2)}`;
+            }
+            
+            const changeElement = document.getElementById('totalBalanceChange');
+            if (changeElement) {
+                changeElement.textContent = `Total across ${accountsWithBalances} account${accountsWithBalances !== 1 ? 's' : ''} this month`;
+            }
+            
+            // Update balance history
+            updateBalanceHistory();
+        }
+        
+        function updateBalanceHistory() {
+            const balances = loadAccountBalances();
+            const monthKey = getCurrentPeriodKey();
+            const monthBalances = [];
+            
+            // Get all balances for the selected month (not just current account)
+            Object.keys(balances).forEach(accountId => {
+                const accountBalances = balances[accountId] || {};
+                Object.keys(accountBalances).forEach(date => {
+                    if (date.startsWith(monthKey)) {
+                        monthBalances.push({
+                            date: date,
+                            accountId: accountId,
+                            accountName: savingsAccounts.find(acc => acc.id === accountId)?.name || accountId,
+                            balance: accountBalances[date]
+                        });
+                    }
+                });
+            });
+            
+            // Sort by date (newest first), then by account name for same dates
+            monthBalances.sort((a, b) => {
+                // Parse dates manually to avoid timezone issues
+                const dateA = a.date.split('-').map(Number);
+                const dateB = b.date.split('-').map(Number);
+                const dateObjA = new Date(dateA[0], dateA[1] - 1, dateA[2]);
+                const dateObjB = new Date(dateB[0], dateB[1] - 1, dateB[2]);
+                
+                const dateCompare = dateObjB - dateObjA;
+                if (dateCompare !== 0) return dateCompare;
+                return a.accountName.localeCompare(b.accountName);
+            });
+            
+            const historyContainer = document.getElementById('balanceHistory');
+            if (!historyContainer) return;
+            
+            if (monthBalances.length === 0) {
+                historyContainer.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 20px;">No balance records this month</div>';
+            } else {
+                historyContainer.innerHTML = monthBalances.map(item => {
+                    // Parse date manually to avoid timezone issues
+                    const dateParts = item.date.split('-').map(Number);
+                    const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                    const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    
+                    return `
+                        <div class="balance-item">
+                            <div class="balance-details">
+                                <div class="balance-date">${formattedDate}</div>
+                                <div class="balance-account">${item.accountName}</div>
+                            </div>
+                            <div class="balance-amount">$${item.balance.toFixed(2)}</div>
+                            <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+        
+        function addBalance() {
+            const amount = parseFloat(document.getElementById('balanceAmount').value);
+            const targetDate = document.getElementById('balanceDate').value;
+            const selectedAccount = document.getElementById('balanceAccount').value;
+            
+            if (!amount || amount < 0) {
+                alert('Please enter a valid balance amount');
+                return;
+            }
+            
+            if (!targetDate) {
+                alert('Please select a date');
+                return;
+            }
+            
+            if (!selectedAccount) {
+                alert('Please select an account');
+                return;
+            }
+            
+            const balances = loadAccountBalances();
+            
+            if (!balances[selectedAccount]) {
+                balances[selectedAccount] = {};
+            }
+            
+            balances[selectedAccount][targetDate] = amount;
+            saveAccountBalances(balances);
+            
+            // Clear form
+            document.getElementById('balanceAmount').value = '';
+            
+            updateTotalSavingsDisplay();
+            
+            // Update chart if on reports screen
+            if (currentScreen === 1) {
+                updateChart();
+            }
+        }
+        
+        function deleteBalance(accountId, date) {
+            const balances = loadAccountBalances();
+            
+            if (balances[accountId] && balances[accountId][date]) {
+                delete balances[accountId][date];
+                saveAccountBalances(balances);
+                updateTotalSavingsDisplay();
+                
+                // Update chart if on reports screen
+                if (currentScreen === 1) {
+                    updateChart();
+                }
+            }
+        }
+        
+        function showAccountManagementModal() {
+            showAccountManagementSlideOut();
+        }
+        
+        function showAccountManagementSlideOut() {
+            document.getElementById('accountManagementSlideOut').classList.add('active');
+            updateAccountManagementList();
+        }
+        
+        function hideAccountManagementSlideOut() {
+            document.getElementById('accountManagementSlideOut').classList.remove('active');
+        }
+        
+        function hideAccountManagementModal() {
+            hideAccountManagementSlideOut();
+        }
+        
+        function updateAccountList() {
+            updateAccountManagementList();
+        }
+        
+        function updateAccountManagementList() {
+            const listContainer = document.getElementById('accountManagementList');
+            if (!listContainer) return;
+            
+            listContainer.innerHTML = savingsAccounts.map(account => `
+                <div class="account-management-list-item">
+                    <span class="account-management-name">${account.name}</span>
+                    ${savingsAccounts.length > 1 ? `<button class="account-management-delete-btn" onclick="deleteAccountFromSlideOut('${account.id}')">Delete</button>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function addNewAccount() {
+            addNewAccountFromSlideOut();
+        }
+        
+        function addNewAccountFromSlideOut() {
+            const name = document.getElementById('newAccountNameSlideOut').value.trim();
+            
+            if (!name) {
+                alert('Please enter an account name');
+                return;
+            }
+            
+            const id = name.toLowerCase().replace(/\s+/g, '-');
+            
+            if (savingsAccounts.find(acc => acc.id === id)) {
+                alert('Account with this name already exists');
+                return;
+            }
+            
+            savingsAccounts.push({
+                id: id,
+                name: name,
+                type: 'custom'
+            });
+            
+            saveSavingsAccounts(savingsAccounts);
+            document.getElementById('newAccountNameSlideOut').value = '';
+            updateAccountManagementList();
+            updateAccountSelector();
+        }
+        
+        function deleteAccount(accountId) {
+            deleteAccountFromSlideOut(accountId);
+        }
+        
+        function deleteAccountFromSlideOut(accountId) {
+            if (savingsAccounts.length <= 1) {
+                alert('You must have at least one account');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to delete this account? All balance history will be lost.')) {
+                // Remove from accounts
+                savingsAccounts = savingsAccounts.filter(acc => acc.id !== accountId);
+                saveSavingsAccounts(savingsAccounts);
+                
+                // Remove all balances for this account
+                const balances = loadAccountBalances();
+                delete balances[accountId];
+                saveAccountBalances(balances);
+                
+                updateAccountManagementList();
+                updateAccountSelector();
+            }
+        }
+        
+        function setDefaultBalanceDate() {
+            const dateInput = document.getElementById('balanceDate');
+            if (dateInput) {
+                const today = new Date();
+                if (isCurrentMonth()) {
+                    const year = today.getFullYear();
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const day = String(today.getDate()).padStart(2, '0');
+                    dateInput.value = `${year}-${month}-${day}`;
+                } else {
+                    const firstDay = new Date(selectedMonthDate.getFullYear(), selectedMonthDate.getMonth(), 1);
+                    const year = firstDay.getFullYear();
+                    const month = String(firstDay.getMonth() + 1).padStart(2, '0');
+                    const day = String(firstDay.getDate()).padStart(2, '0');
+                    dateInput.value = `${year}-${month}-${day}`;
+                }
+            }
+        }
+        
+        function setDefaultDatePicker() {
+            // For custom datepickers, set default date when in month mode
+            if (currentPeriodMode === 'month') {
+                const datepickerId = 'expenseCustomDatepicker';
+                const state = datepickerStates[datepickerId];
+                
+                if (state) {
+                    if (isCurrentMonth()) {
+                        selectToday(datepickerId);
+                    } else {
+                        // Set to first day of selected month
+                        const firstDay = new Date(selectedMonthDate.getFullYear(), selectedMonthDate.getMonth(), 1);
+                        state.selectedDate = firstDay;
+                        state.currentMonth = firstDay.getMonth();
+                        state.currentYear = firstDay.getFullYear();
+                        updateDatepickerValue(datepickerId);
+                    }
+                }
+            }
+        }
+        
+        // Period management functions
+        function setPeriodMode(mode) {
+            currentPeriodMode = mode;
+            
+            // Update compact button states
+            const todayBtn = document.getElementById('todayBtnCompact');
+            const monthBtn = document.getElementById('monthBtnCompact');
+            if (todayBtn) todayBtn.classList.toggle('active', mode === 'today');
+            if (monthBtn) monthBtn.classList.toggle('active', mode === 'month');
+            
+            // Show/hide dropdowns
+            const periodDropdowns = document.getElementById('periodDropdowns');
+            if (periodDropdowns) {
+                periodDropdowns.style.display = mode === 'month' ? 'flex' : 'none';
+            }
+            
+            // Show/hide date picker in slide-out
+            const slideOutDateGroup = document.getElementById('slideOutDatePickerGroup');
+            if (slideOutDateGroup) {
+                slideOutDateGroup.style.display = mode === 'month' ? 'block' : 'none';
+            }
+            
+            // Show/hide savings section - only in month mode
+            const savingsSection = document.getElementById('savingsSection');
+            if (savingsSection) {
+                savingsSection.style.display = mode === 'month' ? 'block' : 'none';
+            }
+            
+            // Toggle action buttons visibility
+            const balanceActionBtn = document.getElementById('balanceActionBtn');
+            if (balanceActionBtn) {
+                balanceActionBtn.style.display = mode === 'month' ? 'inline-flex' : 'none';
+            }
+            
+            if (mode === 'month') {
+                // Initialize month/year dropdowns to current values
+                updatePeriodDropdownValues();
+                setupPeriodDropdownEventListeners();
+                setDefaultDatePicker();
+                setDefaultBalanceDate();
+            }
+            
+            updatePeriodView();
+        }
+        
+        function updatePeriodDropdownValues() {
+            // Update month dropdown
+            const monthSelectValue = document.getElementById('monthSelectValue');
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            if (monthSelectValue) {
+                monthSelectValue.textContent = monthNames[selectedMonthDate.getMonth()];
+            }
+            
+            // Update selected state in month dropdown
+            document.querySelectorAll('#monthSelectContent .period-select-item').forEach(item => {
+                item.classList.remove('selected');
+                if (parseInt(item.getAttribute('data-value')) === selectedMonthDate.getMonth()) {
+                    item.classList.add('selected');
+                }
+            });
+            
+            // Update year dropdown
+            const yearSelectValue = document.getElementById('yearSelectValue');
+            if (yearSelectValue) {
+                yearSelectValue.textContent = selectedMonthDate.getFullYear().toString();
+            }
+            
+            // Update selected state in year dropdown
+            document.querySelectorAll('#yearSelectContent .period-select-item').forEach(item => {
+                item.classList.remove('selected');
+                if (parseInt(item.getAttribute('data-value')) === selectedMonthDate.getFullYear()) {
+                    item.classList.add('selected');
+                }
+            });
+        }
+        
+        // Slide-out functions
+        function showExpenseSlideOut() {
+            const overlay = document.getElementById('expenseSlideOut');
+            overlay.classList.add('active');
+            
+            // Update date picker visibility in slide-out
+            const slideOutDateGroup = document.getElementById('slideOutDatePickerGroup');
+            if (slideOutDateGroup) {
+                slideOutDateGroup.style.display = currentPeriodMode === 'month' ? 'block' : 'none';
+            }
+            
+            // Initialize and set default date for custom datepicker if in month mode
+            if (currentPeriodMode === 'month') {
+                // Initialize the datepicker if not already done
+                if (!datepickerStates['expenseCustomDatepicker']) {
+                        // Set to first day of selected month
+                        const firstDay = new Date(selectedMonthDate.getFullYear(), selectedMonthDate.getMonth(), 1);
+                        state.selectedDate = firstDay;
+                        state.currentMonth = firstDay.getMonth();
+                        state.currentYear = firstDay.getFullYear();
+                        updateDatepickerValue(datepickerId);
+                    }
+                }
+            }
+        
+        function hideExpenseSlideOut() {
+            const overlay = document.getElementById('expenseSlideOut');
+            overlay.classList.remove('active');
+        }
+        
+        function showBalanceSlideOut() {
+            const overlay = document.getElementById('balanceSlideOut');
+            overlay.classList.add('active');
+            
+            // Initialize the datepicker if not already done
+            if (!datepickerStates['balanceCustomDatepicker']) {
+                initializeDatepicker('balanceCustomDatepicker');
+            }
+            
+            // Set default date to today
+            const datepickerId = 'balanceCustomDatepicker';
+            const state = datepickerStates[datepickerId];
+            
+            if (state && !state.selectedDate) {
+                selectToday(datepickerId);
+            }
+        }
+        
+        function hideBalanceSlideOut() {
+            const overlay = document.getElementById('balanceSlideOut');
+            overlay.classList.remove('active');
+        }
+        
+        // Custom Datepicker Functions
+        let datepickerStates = {};
+        
+        function initializeDatepicker(datepickerId) {
+            if (!datepickerStates[datepickerId]) {
+                datepickerStates[datepickerId] = {
+                    currentMonth: new Date().getMonth(),
+                    currentYear: new Date().getFullYear(),
+                    selectedDate: null,
+                    isOpen: false
+                };
+            }
+            
+            // Set default to today
+            selectToday(datepickerId);
+            renderCalendar(datepickerId);
+        }
+        
+        function toggleDatepicker(datepickerId) {
+            const popup = document.getElementById(datepickerId + 'Popup');
+            const trigger = document.querySelector(`#${datepickerId} .datepicker-trigger`);
+            const state = datepickerStates[datepickerId];
+            
+            if (!state) {
+                initializeDatepicker(datepickerId);
+                return;
+            }
+            
+            // Close all other datepickers
+            Object.keys(datepickerStates).forEach(id => {
+                if (id !== datepickerId) {
+                    const otherPopup = document.getElementById(id + 'Popup');
+                    const otherTrigger = document.querySelector(`#${id} .datepicker-trigger`);
+                    if (otherPopup) {
+                        otherPopup.style.display = 'none';
+                        datepickerStates[id].isOpen = false;
+                    }
+                    if (otherTrigger) {
+                        otherTrigger.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+            
+            if (state.isOpen) {
+                popup.style.display = 'none';
+                state.isOpen = false;
+                if (trigger) {
+                    trigger.setAttribute('aria-expanded', 'false');
+                }
+            } else {
+                renderCalendar(datepickerId);
+                popup.style.display = 'block';
+                state.isOpen = true;
+                if (trigger) {
+                    trigger.setAttribute('aria-expanded', 'true');
+                }
+            }
+        }
+        
+        function renderCalendar(datepickerId) {
+            const state = datepickerStates[datepickerId];
+            if (!state) return;
+            
+            const monthYearElement = document.getElementById(datepickerId + 'MonthYear');
+            const gridElement = document.getElementById(datepickerId + 'Grid');
+            
+            // Update month/year display
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            monthYearElement.textContent = `${monthNames[state.currentMonth]} ${state.currentYear}`;
+            
+            // Clear existing grid
+            gridElement.innerHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+            dayHeaders.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'datepicker-day-header';
+                dayHeader.textContent = day;
+                gridElement.appendChild(dayHeader);
+            });
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(state.currentYear, state.currentMonth, 1);
+            const lastDay = new Date(state.currentYear, state.currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startingDayOfWeek = firstDay.getDay();
+            
+            // Add empty cells for days before first day of month
+            for (let i = 0; i < startingDayOfWeek; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'datepicker-day datepicker-day-empty';
+                gridElement.appendChild(emptyCell);
+            }
+            
+            // Add days of month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'datepicker-day';
+                dayElement.textContent = day;
+                
+                // Check if this day is selected
+                if (state.selectedDate && 
+                    state.selectedDate.getDate() === day && 
+                    state.selectedDate.getMonth() === state.currentMonth && 
+                    state.selectedDate.getFullYear() === state.currentYear) {
+                    dayElement.classList.add('datepicker-day-selected');
+                }
+                
+                // Check if this day is today
+                const today = new Date();
+                if (today.getDate() === day && 
+                    today.getMonth() === state.currentMonth && 
+                    today.getFullYear() === state.currentYear) {
+                    dayElement.classList.add('datepicker-day-today');
+                }
+                
+                dayElement.addEventListener('click', () => selectDate(datepickerId, day));
+                gridElement.appendChild(dayElement);
+            }
+        }
+        
+        function selectDate(datepickerId, day) {
+            const state = datepickerStates[datepickerId];
+            if (!state) return;
+            
+            state.selectedDate = new Date(state.currentYear, state.currentMonth, day);
+            updateDatepickerValue(datepickerId);
+            closeDatepicker(datepickerId);
+        }
+        
+        function updateDatepickerValue(datepickerId) {
+            const state = datepickerStates[datepickerId];
+            if (!state || !state.selectedDate) return;
+            
+            const valueElement = document.getElementById(datepickerId + 'Value');
+            
+            // More robust hidden input identification
+            let hiddenInput;
+            if (datepickerId.includes('expense')) {
+                hiddenInput = document.getElementById('slideOutExpenseDate');
+            } else if (datepickerId.includes('balance')) {
+                hiddenInput = document.getElementById('slideOutBalanceDate');
+            }
+            
+            // Create a new date to avoid timezone issues
+            const selectedDate = new Date(state.selectedDate);
+            
+            // Format date as readable string for display (using local timezone)
+            const displayDate = selectedDate.toLocaleDateString('en-US', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+            
+            // Format date as YYYY-MM-DD for form submission (avoid timezone offset)
+            const year = selectedDate.getFullYear();
+            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const day = String(selectedDate.getDate()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`;
+            
+            if (valueElement) {
+                valueElement.textContent = displayDate;
+            }
+            if (hiddenInput) {
+                hiddenInput.value = formattedDate;
+            }
+        }
+        
+        function closeDatepicker(datepickerId) {
+            const popup = document.getElementById(datepickerId + 'Popup');
+            const trigger = document.querySelector(`#${datepickerId} .datepicker-trigger`);
+            const state = datepickerStates[datepickerId];
+            
+            if (popup) {
+                popup.style.display = 'none';
+            }
+            if (state) {
+                state.isOpen = false;
+            }
+            if (trigger) {
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+        }
+        
+        function navigateMonth(datepickerId, direction) {
+            const state = datepickerStates[datepickerId];
+            if (!state) return;
+            
+            state.currentMonth += direction;
+            
+            if (state.currentMonth < 0) {
+                state.currentMonth = 11;
+                state.currentYear--;
+            } else if (state.currentMonth > 11) {
+                state.currentMonth = 0;
+                state.currentYear++;
+            }
+            
+            renderCalendar(datepickerId);
+        }
+        
+        function selectToday(datepickerId) {
+            const state = datepickerStates[datepickerId];
+            if (!state) {
+                initializeDatepicker(datepickerId);
+                return;
+            }
+            
+            const today = new Date();
+            state.selectedDate = today;
+            state.currentMonth = today.getMonth();
+            state.currentYear = today.getFullYear();
+            
+            updateDatepickerValue(datepickerId);
+            if (state.isOpen) {
+                renderCalendar(datepickerId);
+            }
+        }
+        
+        function clearDate(datepickerId) {
+            const state = datepickerStates[datepickerId];
+            if (!state) return;
+            
+            state.selectedDate = null;
+            
+            const valueElement = document.getElementById(datepickerId + 'Value');
+            
+            // More robust hidden input identification
+            let hiddenInput;
+            if (datepickerId.includes('expense')) {
+                hiddenInput = document.getElementById('slideOutExpenseDate');
+            } else if (datepickerId.includes('balance')) {
+                hiddenInput = document.getElementById('slideOutBalanceDate');
+            }
+            
+            if (valueElement) {
+                valueElement.textContent = 'Select date';
+            }
+            if (hiddenInput) {
+                hiddenInput.value = '';
+            }
+            
+            closeDatepicker(datepickerId);
+        }
+        
+        // Close datepickers when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.custom-datepicker')) {
+                Object.keys(datepickerStates).forEach(datepickerId => {
+                    closeDatepicker(datepickerId);
+                });
+            }
+        });
+        
+        // Add keyboard support for datepickers
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                // Close all open datepickers
+                Object.keys(datepickerStates).forEach(datepickerId => {
+                    closeDatepicker(datepickerId);
+                });
+            }
+        });
+        
+        // Initialize datepickers when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Migrate old expense data if it exists
+            const oldExpenses = localStorage.getItem('expenses');
+            const newExpenses = localStorage.getItem('dailyExpenses');
+            if (oldExpenses && !newExpenses) {
+                localStorage.setItem('dailyExpenses', oldExpenses);
+                console.log('Migrated expense data from old storage key');
+            }
+            
+            // Initialize datepickers
+            initializeDatepicker('expenseCustomDatepicker');
+            initializeDatepicker('balanceCustomDatepicker');
+            
+            // Initialize savings accounts
+            initializeSavingsAccounts();
+            
+            // Initialize dropdown event listeners
+            setupDropdownEventListeners();
+            setupPeriodDropdownEventListeners();
+            
+            // Initialize period mode
+            setPeriodMode('today');
+            
+            // Force initialize Lucide icons with multiple attempts
+            function initializeLucideIcons() {
+                if (typeof lucide !== 'undefined') {
+                    try {
+                        lucide.createIcons();
+                        console.log('Lucide icons initialized successfully');
+                    } catch (error) {
+                        console.error('Error initializing Lucide icons:', error);
+                    }
+                } else {
+                    console.warn('Lucide not loaded yet, retrying...');
+                }
+            }
+            
+            // Try immediately
+            initializeLucideIcons();
+            
+            // Try again after short delays
+            setTimeout(initializeLucideIcons, 100);
+            setTimeout(initializeLucideIcons, 500);
+            setTimeout(initializeLucideIcons, 1000);
+            
+            // Update current date display
+            updateCurrentDateDisplay();
+            
+            // Initial update of displays
+            updatePeriodView();
+            
+            // Initialize the chart with empty data
+            if (document.getElementById('spendingChart')) {
+                // Set default period
+                currentChartPeriod = 'YTD';
+                document.querySelectorAll('.chart-period-btn-wealthsimple').forEach(btn => {
+                    btn.classList.toggle('active', btn.id === 'periodYTD');
+                });
+            }
+        });
+        
+        function setupDropdownEventListeners() {
+            // Setup expense category dropdown
+            const expenseCategoryItems = document.querySelectorAll('#expenseCategoryContent .select-item');
+            expenseCategoryItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    const text = this.textContent;
+                    selectSlideOutOption('expenseCategory', value, text);
+                });
+            });
+            
+            // Balance account dropdown will be set up when accounts are loaded
+        }
+        
+        function setupPeriodDropdownEventListeners() {
+            // Setup month selector
+            const monthSelectItems = document.querySelectorAll('#monthSelectContent .period-select-item');
+            monthSelectItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const monthIndex = parseInt(this.getAttribute('data-value'));
+                    selectedMonthDate.setMonth(monthIndex);
+                    
+                    // Update display
+                    document.getElementById('monthSelectValue').textContent = this.textContent;
+                    
+                    // Update selected state
+                    document.querySelectorAll('#monthSelectContent .period-select-item').forEach(i => {
+                        i.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    
+                    // Close dropdown
+                    document.getElementById('monthSelectContent').classList.remove('open');
+                    document.getElementById('monthSelectTrigger').removeAttribute('aria-expanded');
+                    
+                    updatePeriodView();
+                });
+            });
+            
+            // Setup year selector
+            const yearSelectItems = document.querySelectorAll('#yearSelectContent .period-select-item');
+            yearSelectItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const year = parseInt(this.getAttribute('data-value'));
+                    selectedMonthDate.setFullYear(year);
+                    
+                    // Update display
+                    document.getElementById('yearSelectValue').textContent = this.textContent;
+                    
+                    // Update selected state
+                    document.querySelectorAll('#yearSelectContent .period-select-item').forEach(i => {
+                        i.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    
+                    // Close dropdown
+                    document.getElementById('yearSelectContent').classList.remove('open');
+                    document.getElementById('yearSelectTrigger').removeAttribute('aria-expanded');
+                    
+                    updatePeriodView();
+                });
+            });
+        }
+        
+        function updateCurrentDateDisplay() {
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                const now = new Date();
+                const options = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                };
+                dateElement.textContent = now.toLocaleDateString('en-US', options);
+            }
+        }
+        
+        function addExpenseFromSlideOut() {
+            const amount = parseFloat(document.getElementById('slideOutExpenseAmount').value);
+            const category = document.getElementById('slideOutExpenseCategory').value;
+            const description = document.getElementById('slideOutExpenseDescription').value;
+            
+            let targetDate;
+            if (currentPeriodMode === 'month') {
+                targetDate = document.getElementById('slideOutExpenseDate').value;
+                if (!targetDate) {
+                    alert('Please select a date');
+                    return;
+                }
+            } else {
+                targetDate = getCurrentDate();
+            }
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            if (!category) {
+                alert('Please select a category');
+                return;
+            }
+            
+            const expenses = loadExpenses();
+            
+            if (!expenses[targetDate]) {
+                expenses[targetDate] = [];
+            }
+            
+            // Create expense with unique timestamp
+            const newExpense = {
+                amount: amount,
+                category: category,
+                description: description || '',
+                timestamp: Date.now() // This ensures a unique timestamp
+            };
+            
+            expenses[targetDate].push(newExpense);
+            
+            saveExpenses(expenses);
+            
+            // Clear form
+            document.getElementById('slideOutExpenseAmount').value = '';
+            document.getElementById('slideOutExpenseDescription').value = '';
+            
+            // Reset category to default using the dropdown function
+            selectSlideOutOption('expenseCategory', 'groceries', 'Groceries');
+            
+            // Clear custom datepicker
+            if (currentPeriodMode === 'month') {
+                clearDate('expenseCustomDatepicker');
+            }
+            
+            // Close slide-out
+            hideExpenseSlideOut();
+            
+            // Update display
+            updatePeriodView();
+            
+            console.log('Expense added:', newExpense);
+        }
+        
+        function addBalanceFromSlideOut() {
+            const amount = parseFloat(document.getElementById('slideOutBalanceAmount').value);
+            const targetDate = document.getElementById('slideOutBalanceDate').value;
+            const selectedAccount = document.getElementById('slideOutBalanceAccount').value;
+            
+            if (!amount || amount < 0) {
+                alert('Please enter a valid balance amount');
+                return;
+            }
+            
+            if (!targetDate) {
+                alert('Please select a date');
+                return;
+            }
+            
+            if (!selectedAccount) {
+                alert('Please select an account');
+                return;
+            }
+            
+            const balances = loadAccountBalances();
+            
+            if (!balances[selectedAccount]) {
+                balances[selectedAccount] = {};
+            }
+            
+            balances[selectedAccount][targetDate] = amount;
+            saveAccountBalances(balances);
+            
+            // Clear form
+            document.getElementById('slideOutBalanceAmount').value = '';
+            clearDate('balanceCustomDatepicker');
+            
+            // Close slide-out
+            hideBalanceSlideOut();
+            
+            // Update display
+            updateTotalSavingsDisplay();
+        }
+        
+        function togglePeriodSelect(selectType) {
+            const content = document.getElementById(selectType + 'SelectContent');
+            const trigger = document.getElementById(selectType + 'SelectTrigger');
+            const isOpen = content.classList.contains('open');
+            
+            // Close all other period dropdowns
+            document.querySelectorAll('.period-select-content').forEach(dropdown => {
+                dropdown.classList.remove('open');
+            });
+            document.querySelectorAll('.period-select-trigger').forEach(triggerEl => {
+                triggerEl.removeAttribute('aria-expanded');
+            });
+            
+            // Toggle current dropdown
+            if (!isOpen) {
+                content.classList.add('open');
+                trigger.setAttribute('aria-expanded', 'true');
+            }
+        }
+        
+        function toggleSlideOutSelect(selectType) {
+            const content = document.getElementById(selectType + 'Content');
+            const trigger = document.getElementById(selectType + 'Trigger');
+            const isOpen = content.classList.contains('open');
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.select-content').forEach(dropdown => {
+                dropdown.classList.remove('open');
+            });
+            document.querySelectorAll('.select-trigger').forEach(triggerEl => {
+                triggerEl.removeAttribute('aria-expanded');
+            });
+            
+            // Toggle current dropdown
+            if (!isOpen) {
+                content.classList.add('open');
+                trigger.setAttribute('aria-expanded', 'true');
+            }
+        }
+        
+        function selectSlideOutOption(selectType, value, text) {
+            const trigger = document.getElementById(selectType + 'Trigger');
+            const valueSpan = document.getElementById(selectType + 'Value');
+            const content = document.getElementById(selectType + 'Content');
+            const hiddenSelect = document.getElementById('slideOut' + selectType.charAt(0).toUpperCase() + selectType.slice(1));
+            
+            // Update display
+            if (valueSpan) {
+                valueSpan.textContent = text;
+            }
+            
+            // Update hidden select
+            if (hiddenSelect) {
+                hiddenSelect.value = value;
+            }
+            
+            // Update selected state
+            content.querySelectorAll('.select-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            const selectedItem = content.querySelector(`[data-value="${value}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('selected');
+            }
+            
+            // Close dropdown
+            content.classList.remove('open');
+            trigger.removeAttribute('aria-expanded');
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.select-container')) {
+                document.querySelectorAll('.select-content').forEach(dropdown => {
+                    dropdown.classList.remove('open');
+                });
+                document.querySelectorAll('.select-trigger').forEach(trigger => {
+                    trigger.removeAttribute('aria-expanded');
+                });
+            }
+            
+            if (!e.target.closest('.period-select-container')) {
+                document.querySelectorAll('.period-select-content').forEach(dropdown => {
+                    dropdown.classList.remove('open');
+                });
+                document.querySelectorAll('.period-select-trigger').forEach(trigger => {
+                    trigger.removeAttribute('aria-expanded');
+                });
+            }
+        });
+        
+        // ...existing code...
+    </script>
+</body>
 </html>
