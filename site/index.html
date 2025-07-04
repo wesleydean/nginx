@@ -281,6 +281,72 @@
             box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
         }
         
+        /* Swipe to Delete Functionality */
+        .swipe-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius);
+            margin-bottom: 0.5rem;
+        }
+        
+        .swipe-content {
+            position: relative;
+            background-color: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            transform: translateX(0);
+            transition: transform 0.2s ease;
+            z-index: 1;
+        }
+        
+        .swipe-action {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 80px;
+            background-color: hsl(var(--destructive));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: hsl(var(--destructive-foreground));
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+        
+        .swipe-action:hover {
+            background-color: hsl(var(--destructive) / 0.9);
+        }
+        
+        .swipe-container.swiped .swipe-content {
+            transform: translateX(-80px);
+        }
+        
+        .swipe-container.deleting .swipe-content {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        /* Hide original delete buttons when swipe is enabled */
+        .swipe-container .delete-btn,
+        .swipe-container .delete-balance-btn {
+            display: none;
+        }
+        
+        /* Remove borders from items inside swipe containers */
+        .swipe-container .expense-item {
+            border: none;
+            box-shadow: none;
+        }
+        
+        .swipe-container .balance-item {
+            border: none;
+            box-shadow: none;
+        }
+        
         /* Keep borders for slide-out content and modals */
         .slide-out-content .card,
         .modal-content .card,
@@ -3371,13 +3437,18 @@
                     }
                     
                     return `
-                        <div class="expense-item">
-                            <div class="expense-details">
-                                <div class="expense-description">${expense.description || expense.category}</div>
-                                <div class="expense-category">${displayDate}${expense.category}</div>
+                        <div class="swipe-container" data-type="expense" data-date="${expense.date}" data-timestamp="${expense.timestamp}">
+                            <div class="swipe-content">
+                                <div class="expense-item">
+                                    <div class="expense-details">
+                                        <div class="expense-description">${expense.description || expense.category}</div>
+                                        <div class="expense-category">${displayDate}${expense.category}</div>
+                                    </div>
+                                    <div class="expense-amount">$${expense.amount.toFixed(2)}</div>
+                                    <button class="delete-btn" onclick="deleteExpense('${expense.date}', ${expense.timestamp})">✕</button>
+                                </div>
                             </div>
-                            <div class="expense-amount">$${expense.amount.toFixed(2)}</div>
-                            <button class="delete-btn" onclick="deleteExpense('${expense.date}', ${expense.timestamp})">✕</button>
+                            <div class="swipe-action" onclick="deleteExpense('${expense.date}', ${expense.timestamp})">✕</div>
                         </div>
                     `;
                 }).join('');
@@ -4269,13 +4340,18 @@
                                 const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
                                 const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                                 return `
-                                    <div class="balance-item">
-                                        <div class="balance-details">
-                                            <div class="balance-date">${formattedDate}</div>
-                                            <div class="balance-account">${accountName}</div>
+                                    <div class="swipe-container" data-type="balance" data-account-id="${item.accountId}" data-date="${item.date}">
+                                        <div class="swipe-content">
+                                            <div class="balance-item">
+                                                <div class="balance-details">
+                                                    <div class="balance-date">${formattedDate}</div>
+                                                    <div class="balance-account">${accountName}</div>
+                                                </div>
+                                                <div class="balance-amount">$${item.balance.toFixed(2)}</div>
+                                                <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
+                                            </div>
                                         </div>
-                                        <div class="balance-amount">$${item.balance.toFixed(2)}</div>
-                                        <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
+                                        <div class="swipe-action" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</div>
                                     </div>
                                 `;
                             }).join('');
@@ -4288,13 +4364,18 @@
                         const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
                         const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                         return `
-                            <div class="balance-item">
-                                <div class="balance-details">
-                                    <div class="balance-date">${formattedDate}</div>
-                                    <div class="balance-account">${item.accountName}</div>
+                            <div class="swipe-container" data-type="balance" data-account-id="${item.accountId}" data-date="${item.date}">
+                                <div class="swipe-content">
+                                    <div class="balance-item">
+                                        <div class="balance-details">
+                                            <div class="balance-date">${formattedDate}</div>
+                                            <div class="balance-account">${item.accountName}</div>
+                                        </div>
+                                        <div class="balance-amount">$${item.balance.toFixed(2)}</div>
+                                        <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
+                                    </div>
                                 </div>
-                                <div class="balance-amount">$${item.balance.toFixed(2)}</div>
-                                <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
+                                <div class="swipe-action" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</div>
                             </div>
                         `;
                     }).join('');
@@ -5408,6 +5489,93 @@
         // Initial render on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', function() {
             renderBudgetTitle();
+        });
+
+        // Swipe to Delete Functionality
+        function initializeSwipeToDelete() {
+            let startX = 0;
+            let currentX = 0;
+            let isDragging = false;
+            let currentSwipeContainer = null;
+
+            function handleTouchStart(e) {
+                const touch = e.touches[0];
+                startX = touch.clientX;
+                currentX = startX;
+                isDragging = true;
+                
+                const swipeContainer = e.target.closest('.swipe-container');
+                if (swipeContainer) {
+                    currentSwipeContainer = swipeContainer;
+                    swipeContainer.style.transition = 'none';
+                }
+            }
+
+            function handleTouchMove(e) {
+                if (!isDragging || !currentSwipeContainer) return;
+                
+                e.preventDefault();
+                const touch = e.touches[0];
+                currentX = touch.clientX;
+                
+                const deltaX = currentX - startX;
+                
+                // Only allow left swipe (negative deltaX)
+                if (deltaX < 0) {
+                    const translateX = Math.max(deltaX, -80);
+                    currentSwipeContainer.querySelector('.swipe-content').style.transform = `translateX(${translateX}px)`;
+                }
+            }
+
+            function handleTouchEnd(e) {
+                if (!isDragging || !currentSwipeContainer) return;
+                
+                isDragging = false;
+                const deltaX = currentX - startX;
+                
+                currentSwipeContainer.style.transition = 'transform 0.2s ease';
+                
+                // If swiped more than 60px to the left, show delete action
+                if (deltaX < -60) {
+                    currentSwipeContainer.classList.add('swiped');
+                    currentSwipeContainer.querySelector('.swipe-content').style.transform = 'translateX(-80px)';
+                } else {
+                    // Reset to original position
+                    currentSwipeContainer.classList.remove('swiped');
+                    currentSwipeContainer.querySelector('.swipe-content').style.transform = 'translateX(0)';
+                }
+                
+                currentSwipeContainer = null;
+            }
+
+            // Add event listeners to the document
+            document.addEventListener('touchstart', handleTouchStart, { passive: false });
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+            // Also handle mouse events for desktop testing
+            document.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.swipe-container')) {
+                    handleTouchStart({ touches: [{ clientX: e.clientX }] });
+                }
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    handleTouchMove({ touches: [{ clientX: e.clientX }], preventDefault: () => {} });
+                }
+            });
+
+            document.addEventListener('mouseup', (e) => {
+                if (isDragging) {
+                    handleTouchEnd({});
+                }
+            });
+        }
+
+        // Initialize swipe functionality when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSwipeToDelete();
         });
     </script>
 </body>
