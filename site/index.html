@@ -273,7 +273,6 @@
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
             margin-bottom: 1rem;
         }
         
@@ -899,7 +898,6 @@
         .input-row {
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
             align-items: flex-end;
         }
         
@@ -1451,7 +1449,8 @@
         /* Compact Toggle - Full Width */
         .period-mode-toggle-compact {
             display: flex;
-            background: hsl(var(--muted));
+            background: hsl(210deg 33.58% 90.82% / 36%);
+            backdrop-filter: blur(10px);
             border-radius: var(--radius);
             padding: 2px;
             gap: 0.5rem;
@@ -2316,7 +2315,6 @@
         .slide-out-form {
             display: flex;
             flex-direction: column;
-            gap: 20px;
         }
         
         /* Handle bar for slide-out */
@@ -2526,6 +2524,62 @@
                 left: 50%;
                 transform: translateX(-50%);
             }
+        }
+
+        /* --- Slide-out form full-width fields --- */
+        .slide-out-form .form-group {
+            /* width: 100%; */
+            box-sizing: border-box;
+        }
+        .slide-out-form .input-row {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+            /* width: 100%; */
+            /* max-width: 100%; */
+        }
+        .slide-out-form .input-row .form-group,
+        .slide-out-form .input-row .select-container {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+        .slide-out-form input,
+        .slide-out-form select,
+        .slide-out-form .select-trigger {
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        .slide-out-form .select-trigger {
+            display: flex;
+        }
+        .slide-out-form .select-content {
+            min-width: 100%;
+        }
+        @media (max-width: 600px) {
+            .slide-out-form .input-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+        /* --- Slide-out form: Amount and Category side by side, override global input-group rules --- */
+        .slide-out-form .input-row {
+            display: flex;
+            flex-direction: row;
+            gap: 1rem;
+        }
+        .slide-out-form .input-row .form-group {
+            flex: 1 1 0;
+            min-width: 0;
+            margin-bottom: 0;
+        }
+        .slide-out-form .input-row .form-group label,
+        .slide-out-form .input-row .form-group input,
+        .slide-out-form .input-row .form-group select,
+        .slide-out-form .input-row .select-container {
+            display: initial;
+            width: 100%;
+            margin-bottom: 0.5rem;
         }
     </style>
 </head>
@@ -2819,43 +2873,44 @@
                     </div>
                 </div>
                 
+                <!-- Amount and Category side by side -->
                 <div class="input-row">
-                    <div class="form-group">
-                        <label class="form-label" for="slideOutExpenseAmount">Amount ($)</label>
-                        <input type="number" class="form-input" id="slideOutExpenseAmount" placeholder="0.00" step="0.01">
+                  <div class="form-group">
+                    <label class="form-label" for="slideOutExpenseAmount">Amount ($)</label>
+                    <input type="number" class="form-input" id="slideOutExpenseAmount" placeholder="0.00" step="0.01">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="slideOutExpenseCategory">Category</label>
+                    <div class="select-container">
+                      <div class="select-trigger" onclick="toggleSlideOutSelect('expenseCategory')" id="expenseCategoryTrigger">
+                        <span id="expenseCategoryValue">Groceries</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                      </div>
+                      <div class="select-content" id="expenseCategoryContent">
+                        <div class="select-item selected" data-value="groceries">Groceries</div>
+                        <div class="select-item" data-value="transportation">Transportation</div>
+                        <div class="select-item" data-value="dining">Dining Out</div>
+                        <div class="select-item" data-value="entertainment">Entertainment</div>
+                        <div class="select-item" data-value="personal">Personal Care</div>
+                        <div class="select-item" data-value="clothing">Clothing</div>
+                        <div class="select-item" data-value="health">Health/Fitness</div>
+                        <div class="select-item" data-value="subscriptions">Subscriptions</div>
+                        <div class="select-item" data-value="other">Other</div>
+                      </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="slideOutExpenseCategory">Category</label>
-                        <div class="select-container">
-                            <div class="select-trigger" onclick="toggleSlideOutSelect('expenseCategory')" id="expenseCategoryTrigger">
-                                <span id="expenseCategoryValue">Groceries</span>
-                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                            </div>
-                            <div class="select-content" id="expenseCategoryContent">
-                                <div class="select-item selected" data-value="groceries">Groceries</div>
-                                <div class="select-item" data-value="transportation">Transportation</div>
-                                <div class="select-item" data-value="dining">Dining Out</div>
-                                <div class="select-item" data-value="entertainment">Entertainment</div>
-                                <div class="select-item" data-value="personal">Personal Care</div>
-                                <div class="select-item" data-value="clothing">Clothing</div>
-                                <div class="select-item" data-value="health">Health/Fitness</div>
-                                <div class="select-item" data-value="subscriptions">Subscriptions</div>
-                                <div class="select-item" data-value="other">Other</div>
-                            </div>
-                        </div>
-                        <!-- Hidden native select for compatibility -->
-                        <select id="slideOutExpenseCategory" style="display: none;">
-                            <option value="groceries">Groceries</option>
-                            <option value="transportation">Transportation</option>
-                            <option value="dining">Dining Out</option>
-                            <option value="entertainment">Entertainment</option>
-                            <option value="personal">Personal Care</option>
-                            <option value="clothing">Clothing</option>
-                            <option value="health">Health/Fitness</option>
-                            <option value="subscriptions">Subscriptions</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
+                    <!-- Hidden native select for compatibility -->
+                    <select id="slideOutExpenseCategory" style="display: none;">
+                      <option value="groceries">Groceries</option>
+                      <option value="transportation">Transportation</option>
+                      <option value="dining">Dining Out</option>
+                      <option value="entertainment">Entertainment</option>
+                      <option value="personal">Personal Care</option>
+                      <option value="clothing">Clothing</option>
+                      <option value="health">Health/Fitness</option>
+                      <option value="subscriptions">Subscriptions</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
                 </div>
                 
                 <div class="form-group">
@@ -2997,20 +3052,25 @@
             </div>
             <div class="slide-out-form">
                 <div class="form-group">
-                    <label class="form-label">Month</label>
-                    <div class="select-container" style="width:100%">
-                        <div class="select-content open" id="monthGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;">
-                            <!-- Months will be populated by JS -->
-                        </div>
-                    </div>
+                    <label class="form-label" for="monthInput">Month</label>
+                    <select class="form-input" id="monthInput">
+                        <option value="0">January</option>
+                        <option value="1">February</option>
+                        <option value="2">March</option>
+                        <option value="3">April</option>
+                        <option value="4">May</option>
+                        <option value="5">June</option>
+                        <option value="6">July</option>
+                        <option value="7">August</option>
+                        <option value="8">September</option>
+                        <option value="9">October</option>
+                        <option value="10">November</option>
+                        <option value="11">December</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Year</label>
-                    <div class="select-container" style="width:100%">
-                        <div class="select-content open" id="yearGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;">
-                            <!-- Years will be populated by JS -->
-                        </div>
-                    </div>
+                    <label class="form-label" for="yearInput">Year</label>
+                    <input type="number" class="form-input" id="yearInput" min="2020" max="2030" step="1">
                 </div>
                 <button type="button" class="add-btn" id="applyMonthYearBtn" style="margin-top:1rem;">Apply</button>
             </div>
@@ -3975,6 +4035,16 @@
                 balanceAccountContent.innerHTML = '';
                 slideOutBalanceAccount.innerHTML = '';
                 
+                // Ensure we have at least one account
+                if (savingsAccounts.length === 0) {
+                    savingsAccounts = [
+                        { id: 'checking', name: 'Checking' },
+                        { id: 'savings', name: 'Savings' },
+                        { id: 'emergency', name: 'Emergency Fund' }
+                    ];
+                    saveSavingsAccounts(savingsAccounts);
+                }
+                
                 // Add account options
                 savingsAccounts.forEach((account, index) => {
                     // Add to custom dropdown
@@ -4010,20 +4080,31 @@
         
         function updateTotalSavingsDisplay() {
             const balances = loadAccountBalances();
-            const monthKey = getCurrentPeriodKey();
+            const periodKey = getCurrentPeriodKey();
             let totalBalance = 0;
             let accountsWithBalances = 0;
             
-            // Calculate total balance across all accounts for current month
+            // Calculate total balance across all accounts for current period
             Object.keys(balances).forEach(accountId => {
                 const accountBalances = balances[accountId] || {};
-                const monthBalances = Object.keys(accountBalances)
-                    .filter(date => date.startsWith(monthKey))
-                    .sort()
-                    .reverse();
+                let periodBalances;
                 
-                if (monthBalances.length > 0) {
-                    totalBalance += accountBalances[monthBalances[0]];
+                if (currentPeriodMode === 'today') {
+                    // For today mode, look for exact date match
+                    periodBalances = Object.keys(accountBalances)
+                        .filter(date => date === periodKey)
+                        .sort()
+                        .reverse();
+                } else {
+                    // For month mode, look for dates starting with month key
+                    periodBalances = Object.keys(accountBalances)
+                        .filter(date => date.startsWith(periodKey))
+                        .sort()
+                        .reverse();
+                }
+                
+                if (periodBalances.length > 0) {
+                    totalBalance += accountBalances[periodBalances[0]];
                     accountsWithBalances++;
                 }
             });
@@ -4036,7 +4117,8 @@
             
             const changeElement = document.getElementById('totalBalanceChange');
             if (changeElement) {
-                changeElement.textContent = `Total across ${accountsWithBalances} account${accountsWithBalances !== 1 ? 's' : ''} this month`;
+                const periodText = currentPeriodMode === 'today' ? 'today' : 'this month';
+                changeElement.textContent = `Total across ${accountsWithBalances} account${accountsWithBalances !== 1 ? 's' : ''} ${periodText}`;
             }
             
             // Update balance history
@@ -4045,15 +4127,25 @@
         
         function updateBalanceHistory() {
             const balances = loadAccountBalances();
-            const monthKey = getCurrentPeriodKey();
-            const monthBalances = [];
+            const periodKey = getCurrentPeriodKey();
+            const periodBalances = [];
             
-            // Get all balances for the selected month (not just current account)
+            // Get all balances for the selected period
             Object.keys(balances).forEach(accountId => {
                 const accountBalances = balances[accountId] || {};
                 Object.keys(accountBalances).forEach(date => {
-                    if (date.startsWith(monthKey)) {
-                        monthBalances.push({
+                    let shouldInclude = false;
+                    
+                    if (currentPeriodMode === 'today') {
+                        // For today mode, include exact date match
+                        shouldInclude = date === periodKey;
+                    } else {
+                        // For month mode, include dates starting with month key
+                        shouldInclude = date.startsWith(periodKey);
+                    }
+                    
+                    if (shouldInclude) {
+                        periodBalances.push({
                             date: date,
                             accountId: accountId,
                             accountName: savingsAccounts.find(acc => acc.id === accountId)?.name || accountId,
@@ -4064,7 +4156,7 @@
             });
             
             // Sort by date (newest first), then by account name for same dates
-            monthBalances.sort((a, b) => {
+            periodBalances.sort((a, b) => {
                 // Parse dates manually to avoid timezone issues
                 const dateA = a.date.split('-').map(Number);
                 const dateB = b.date.split('-').map(Number);
@@ -4079,10 +4171,11 @@
             const historyContainer = document.getElementById('balanceHistory');
             if (!historyContainer) return;
             
-            if (monthBalances.length === 0) {
-                historyContainer.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 20px;">No balance records this month</div>';
+            if (periodBalances.length === 0) {
+                const periodText = currentPeriodMode === 'today' ? 'today' : 'this month';
+                historyContainer.innerHTML = `<div style="text-align: center; color: #7f8c8d; padding: 20px;">No balance records ${periodText}</div>`;
             } else {
-                historyContainer.innerHTML = monthBalances.map(item => {
+                historyContainer.innerHTML = periodBalances.map(item => {
                     // Parse date manually to avoid timezone issues
                     const dateParts = item.date.split('-').map(Number);
                     const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
@@ -4219,6 +4312,7 @@
             document.getElementById('newAccountNameSlideOut').value = '';
             updateAccountManagementList();
             updateAccountSelector();
+            updateSlideOutAccountDropdown();
         }
         
         function deleteAccount(accountId) {
@@ -4243,6 +4337,7 @@
                 
                 updateAccountManagementList();
                 updateAccountSelector();
+                updateSlideOutAccountDropdown();
             }
         }
         
@@ -4308,16 +4403,16 @@
                 slideOutDateGroup.style.display = mode === 'month' ? 'block' : 'none';
             }
             
-            // Show/hide savings section - only in month mode
+            // Show savings section in both modes
             const savingsSection = document.getElementById('savingsSection');
             if (savingsSection) {
-                savingsSection.style.display = mode === 'month' ? 'block' : 'none';
+                savingsSection.style.display = 'block';
             }
             
-            // Toggle action buttons visibility
+            // Show balance action button in both modes
             const balanceActionBtn = document.getElementById('balanceActionBtn');
             if (balanceActionBtn) {
-                balanceActionBtn.style.display = mode === 'month' ? 'inline-flex' : 'none';
+                balanceActionBtn.style.display = 'inline-flex';
             }
             
             if (mode === 'month') {
@@ -4390,6 +4485,9 @@
             if (state && !state.selectedDate) {
                 selectToday(datepickerId);
             }
+            
+            // Ensure account dropdown is populated
+            updateSlideOutAccountDropdown();
         }
         
         function hideBalanceSlideOut() {
@@ -4687,6 +4785,9 @@
             
             // Initialize period mode
             setPeriodMode('today');
+            
+            // Initialize slide-out account dropdown
+            updateSlideOutAccountDropdown();
             
             // Force initialize Lucide icons with multiple attempts
             function initializeLucideIcons() {
@@ -5052,7 +5153,7 @@
         // Remove all code related to old dropdowns and their event listeners
         // Add new month/year slide-out logic
         function showMonthYearSlideOut() {
-            populateMonthYearGrids();
+            populateMonthYearInputs();
             document.getElementById('monthYearSlideOut').classList.add('active');
         }
         function hideMonthYearSlideOut() {
@@ -5060,41 +5161,30 @@
         }
         let tempSelectedMonth = selectedMonthDate.getMonth();
         let tempSelectedYear = selectedMonthDate.getFullYear();
-        function populateMonthYearGrids() {
-            const monthGrid = document.getElementById('monthGrid');
-            const yearGrid = document.getElementById('yearGrid');
-            const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-            monthGrid.innerHTML = '';
-            for (let i = 0; i < 12; i++) {
-                const div = document.createElement('div');
-                div.className = 'period-select-item' + (i === tempSelectedMonth ? ' selected' : '');
-                div.textContent = monthNames[i];
-                div.setAttribute('data-value', i);
-                div.onclick = function() {
-                    tempSelectedMonth = i;
-                    populateMonthYearGrids();
-                };
-                monthGrid.appendChild(div);
+        function populateMonthYearInputs() {
+            // Set current values in the input fields
+            const monthInput = document.getElementById('monthInput');
+            const yearInput = document.getElementById('yearInput');
+            
+            if (monthInput) {
+                monthInput.value = tempSelectedMonth;
             }
-            yearGrid.innerHTML = '';
-            const currentYear = new Date().getFullYear();
-            for (let y = currentYear - 2; y <= currentYear + 1; y++) {
-                const div = document.createElement('div');
-                div.className = 'period-select-item' + (y === tempSelectedYear ? ' selected' : '');
-                div.textContent = y;
-                div.setAttribute('data-value', y);
-                div.onclick = function() {
-                    tempSelectedYear = y;
-                    populateMonthYearGrids();
-                };
-                yearGrid.appendChild(div);
+            if (yearInput) {
+                yearInput.value = tempSelectedYear;
             }
         }
         document.getElementById('applyMonthYearBtn').onclick = function() {
-            selectedMonthDate = new Date(tempSelectedYear, tempSelectedMonth, 1);
-            hideMonthYearSlideOut();
-            updatePeriodDropdownValues();
-            updatePeriodView();
+            const monthInput = document.getElementById('monthInput');
+            const yearInput = document.getElementById('yearInput');
+            
+            if (monthInput && yearInput) {
+                tempSelectedMonth = parseInt(monthInput.value);
+                tempSelectedYear = parseInt(yearInput.value);
+                selectedMonthDate = new Date(tempSelectedYear, tempSelectedMonth, 1);
+                hideMonthYearSlideOut();
+                updatePeriodDropdownValues();
+                updatePeriodView();
+            }
         };
         // Update the button text in the card
         function updatePeriodDropdownValues() {
@@ -5131,7 +5221,8 @@
                 btn.id = 'monthYearSelectorBtn';
                 btn.onclick = showMonthYearSlideOut;
                 btn.style.background = 'none';
-                btn.style.border = 'none';
+                btn.style.border = '1px solid #ececec';
+                btn.style.borderRadius = '14px';
                 btn.style.display = 'inline-flex';
                 btn.style.alignItems = 'center';
                 btn.style.justifyContent = 'flex-start';
@@ -5139,10 +5230,10 @@
                 btn.style.fontWeight = '700';
                 btn.style.color = 'inherit';
                 btn.style.cursor = 'pointer';
-                btn.style.padding = '0';
+                btn.style.padding = '5px 7px';
                 btn.style.outline = 'none';
                 btn.style.width = 'auto';
-                btn.style.marginBottom = '0.25rem';
+                // btn.style.marginBottom = '0.25rem';
                 // Month/year text
                 const span = document.createElement('span');
                 span.id = 'monthYearSelectorText';
