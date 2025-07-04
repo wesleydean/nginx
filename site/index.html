@@ -2932,6 +2932,14 @@
         .quick-action-card:hover .quick-action-icon {
             background: linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--secondary) / 0.2));
         }
+
+        .quick-action-card:active {
+            transform: translateY(2px);
+        }
+
+        .fab-option:active {
+            transform: translateY(2px);
+        }
     </style>
 </head>
 <body>
@@ -3014,7 +3022,7 @@
                     <div class="quick-actions">
                         <div class="quick-action-card" onclick="showExpenseSlideOut()">
                             <div class="quick-action-icon">
-                                <i data-lucide="minus" class="w-6 h-6"></i>
+                                <i data-lucide="dollar-sign" class="w-6 h-6"></i>
                             </div>
                             <div class="quick-action-title">Add Expense</div>
                         </div>
