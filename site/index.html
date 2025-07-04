@@ -1578,7 +1578,7 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
             border-radius: 0;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             border-radius: 10px;
         }
         
@@ -2813,30 +2813,8 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
-        .quick-action-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)));
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .quick-action-card:hover::before {
-            transform: scaleX(1);
-        }
-
         .quick-action-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
             border-color: hsl(var(--ring));
-        }
-
-        .quick-action-card:active {
-            transform: translateY(-2px);
         }
 
         .quick-action-icon {
@@ -2848,12 +2826,10 @@
             justify-content: center;
             border-radius: 12px;
             background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--secondary) / 0.1));
-            transition: all 0.3s ease;
         }
 
         .quick-action-card:hover .quick-action-icon {
             background: linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--secondary) / 0.2));
-            transform: scale(1.1);
         }
 
         .quick-action-title {
@@ -2924,6 +2900,37 @@
         /* Savings section spacing */
         .savings-accounts-section {
             margin-top: 8px;
+        }
+
+        .quick-action-card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 16px;
+            padding: 24px 20px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .quick-action-card:hover {
+            border-color: hsl(var(--ring));
+        }
+
+        .quick-action-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--secondary) / 0.1));
+        }
+
+        .quick-action-card:hover .quick-action-icon {
+            background: linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--secondary) / 0.2));
         }
     </style>
 </head>
