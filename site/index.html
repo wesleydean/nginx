@@ -3235,9 +3235,7 @@
         function updatePeriodView() {
             updateBudgetDisplay();
             updateExpensesList();
-            if (currentPeriodMode === 'month') {
-                updateTotalSavingsDisplay();
-            }
+            updateTotalSavingsDisplay(); // Always update, regardless of mode
         }
         
         function updateBudgetDisplay() {
@@ -4166,6 +4164,9 @@
             let totalBalance = 0;
             let accountsWithBalances = 0;
             
+            console.log('updateTotalSavingsDisplay - currentPeriodMode:', currentPeriodMode);
+            console.log('updateTotalSavingsDisplay - periodKey:', periodKey);
+            
             // Calculate total balance across all accounts for current period
             Object.keys(balances).forEach(accountId => {
                 const accountBalances = balances[accountId] || {};
@@ -4185,11 +4186,18 @@
                         .reverse();
                 }
                 
+                console.log(`Account ${accountId} - periodBalances:`, periodBalances);
+                
                 if (periodBalances.length > 0) {
-                    totalBalance += accountBalances[periodBalances[0]];
+                    const accountBalance = accountBalances[periodBalances[0]];
+                    totalBalance += accountBalance;
                     accountsWithBalances++;
+                    console.log(`Account ${accountId} - balance: $${accountBalance}`);
                 }
             });
+            
+            console.log('Total balance calculated:', totalBalance);
+            console.log('Accounts with balances:', accountsWithBalances);
             
             // Update total balance display
             const totalBalanceElement = document.getElementById('totalAccountBalance');
