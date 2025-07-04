@@ -295,6 +295,22 @@
             background-color: hsl(var(--muted) / 0.3);
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
+            text-align: left;
+            align-items: flex-start;
+            padding: 1rem;
+        }
+        .stat-card > div {
+            text-align: left;
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+        }
+        .stat-card .text-sm,
+        .stat-card .text-2xl,
+        .stat-card .stat-label,
+        .stat-card .stat-value {
+            text-align: left;
+            margin-left: 0 !important;
+            padding-left: 0 !important;
         }
         
         .card-header {
@@ -5296,7 +5312,7 @@
                 btn.id = 'monthYearSelectorBtn';
                 btn.onclick = showMonthYearSlideOut;
                 btn.style.background = 'none';
-                btn.style.border = '1px solid #ececec';
+                btn.style.border = 'none'; // Remove border
                 btn.style.borderRadius = '14px';
                 btn.style.display = 'inline-flex';
                 btn.style.alignItems = 'center';
@@ -5305,10 +5321,9 @@
                 btn.style.fontWeight = '700';
                 btn.style.color = 'inherit';
                 btn.style.cursor = 'pointer';
-                btn.style.padding = '5px 7px';
+                btn.style.padding = '0'; // Remove padding
                 btn.style.outline = 'none';
                 btn.style.width = 'auto';
-                // btn.style.marginBottom = '0.25rem';
                 // Month/year text
                 const span = document.createElement('span');
                 span.id = 'monthYearSelectorText';
