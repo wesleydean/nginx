@@ -32,13 +32,38 @@
     
     <!-- Theme color for browser chrome -->
     <meta name="theme-color" content="#3b82f6">
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://unpkg.com/lucide@0.263.0/dist/umd/lucide.min.js"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Initialize Lucide icons when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeLucideIcons();
+            
+            // Add additional retries with increasing delays
+            setTimeout(initializeLucideIcons, 500);
+            setTimeout(initializeLucideIcons, 1000);
+        });
+        
+        function initializeLucideIcons() {
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                try {
+                    window.lucide.createIcons();
+                    console.log('Lucide icons initialized successfully');
+                } catch (error) {
+                    console.error('Error initializing Lucide icons:', error);
+                }
+            } else {
+                console.warn('Lucide not loaded yet, retrying...');
+                setTimeout(initializeLucideIcons, 100);
+            }
+        }
+    </script>
+    
     <style>
         /* shadcn/ui Design System */
         :root {
@@ -710,6 +735,21 @@
         .font-semibold { font-weight: 600; }
         .font-bold { font-weight: 700; }
         
+        /* Lucide Icon Fallbacks */
+        [data-lucide] {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 1em;
+            width: 1em;
+        }
+        
+        /* Fallback text for when icons don't load */
+        [data-lucide]:empty::before {
+            content: '•';
+            font-size: 1.2em;
+        }
+        
         .text-foreground { color: hsl(var(--foreground)); }
         .text-muted-foreground { color: hsl(var(--muted-foreground)); }
         .text-primary { color: hsl(var(--primary)); }
@@ -1163,7 +1203,7 @@
         .period-switch button.active {
             background-color: hsl(var(--background));
             color: hsl(var(--foreground));
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            box-shadow: 0 1px 3px 0 rgb(0, 0, 0 / 0.1);
         }
 
         .month-navigation {
@@ -1443,7 +1483,7 @@
         .period-mode-btn-compact.active {
             background-color: hsl(var(--background));
             color: hsl(var(--foreground));
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            box-shadow: 0 1px 3px 0 rgb(0, 0, 0 / 0.1);
         }
         
         .period-mode-btn-compact:hover:not(.active) {
@@ -2280,7 +2320,7 @@
         }
 
         .datepicker-trigger {
-            display: flex;
+                       display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 8px 12px;
@@ -3257,30 +3297,26 @@
             const dayOfMonth = today.getDate();
             const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
             const remainingDaysInMonth = daysInMonth - dayOfMonth;
-            
+
             // Calculate weekly spending
             let weeklySpent = 0;
+            let monthlySpent = 0; // <-- Add this missing declaration
             for (let i = 0; i < 7; i++) {
                 const date = new Date(today);
-                date.setDate(date.getDate() - i);
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                const dateKey = `${year}-${month}-${day}`;
+                date.setDate(today.getDate() - i);
+                const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                 const dayExpenses = expenses[dateKey] || [];
                 weeklySpent += dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
             }
-            
+
             // Calculate monthly spending
-            let monthlySpent = 0;
-            const currentMonth = getCurrentMonth();
             Object.keys(expenses).forEach(date => {
-                if (date.startsWith(currentMonth)) {
+                if (date.startsWith(getCurrentMonth())) {
                     const dayExpenses = expenses[date] || [];
                     monthlySpent += dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
                 }
             });
-            
+
             // Calculate daily burn rate (average spent per day)
             const dailyBurnRate = monthlySpent / dayOfMonth;
             
@@ -3858,6 +3894,17 @@
         
         function loadExpenses() {
             const stored = localStorage.getItem(EXPENSES_KEY);
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                        return parsed;
+                    }
+                } catch (e) {
+                    // Ignore parse errors and fall through to return empty object
+                }
+            }
+            return {};
         }
         
         function initializeMonthPicker() {
@@ -4992,7 +5039,53 @@
             }
         });
         
-        // ...existing code...
+
+        /**
+         * Loads savings accounts from localStorage or sets defaults if not present.
+         */
+        function initializeSavingsAccounts() {
+            const stored = localStorage.getItem('savingsAccounts');
+            if (stored) {
+                try {
+                    savingsAccounts = JSON.parse(stored);
+                    // Validate loaded data is an array of objects with id and name
+                    if (!Array.isArray(savingsAccounts) || !savingsAccounts.every(acc => acc && typeof acc.id === 'string' && typeof acc.name === 'string')) {
+                        throw new Error('Invalid savingsAccounts data');
+                    }
+                } catch (e) {
+                    // If parsing fails, fall back to defaults
+                    savingsAccounts = [
+                        { id: 'checking', name: 'Checking' },
+                        { id: 'savings', name: 'Savings' },
+                        { id: 'emergency', name: 'Emergency Fund' }
+                    ];
+                }
+            } else {
+                savingsAccounts = [
+                    { id: 'checking', name: 'Checking' },
+                    { id: 'savings', name: 'Savings' },
+                    { id: 'emergency', name: 'Emergency Fund' }
+                ];
+            }
+        }
+
+        /**
+         * Saves the current savingsAccounts array to localStorage.
+         * @param {Array<{id: string, name: string}>} accounts
+         */
+        function saveSavingsAccounts(accounts) {
+            if (!Array.isArray(accounts)) return;
+            localStorage.setItem('savingsAccounts', JSON.stringify(accounts));
+        }
+
+        /**
+         * Saves the expenses object to localStorage.
+         * @param {Record<string, Array<{amount: number, category: string, description: string, timestamp: number}>>} expenses
+         */
+        function saveExpenses(expenses) {
+            if (!expenses || typeof expenses !== 'object' || Array.isArray(expenses)) return;
+            localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
+        }
     </script>
 </body>
 </html>
