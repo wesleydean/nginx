@@ -3208,6 +3208,9 @@
             if (screenIndex === 1) {
                 updateReports();
                 setTimeout(updateChart, 300);
+            } else if (screenIndex === 0) {
+                // Ensure today mode is set when navigating to tracking screen
+                setPeriodMode('today');
             }
         }
         
@@ -4208,21 +4211,18 @@
             const balances = loadAccountBalances();
             const periodKey = getCurrentPeriodKey();
             const periodBalances = [];
-            
             // Get all balances for the selected period
             Object.keys(balances).forEach(accountId => {
                 const accountBalances = balances[accountId] || {};
                 Object.keys(accountBalances).forEach(date => {
                     let shouldInclude = false;
-                    
                     if (currentPeriodMode === 'today') {
-                        // For today mode, include exact date match
+                        // For today mode, include exact date match only
                         shouldInclude = date === periodKey;
                     } else {
                         // For month mode, include dates starting with month key
                         shouldInclude = date.startsWith(periodKey);
                     }
-                    
                     if (shouldInclude) {
                         periodBalances.push({
                             date: date,
@@ -4233,44 +4233,64 @@
                     }
                 });
             });
-            
-            // Sort by date (newest first), then by account name for same dates
-            periodBalances.sort((a, b) => {
-                // Parse dates manually to avoid timezone issues
-                const dateA = a.date.split('-').map(Number);
-                const dateB = b.date.split('-').map(Number);
-                const dateObjA = new Date(dateA[0], dateA[1] - 1, dateA[2]);
-                const dateObjB = new Date(dateB[0], dateB[1] - 1, dateB[2]);
-                
-                const dateCompare = dateObjB - dateObjA;
-                if (dateCompare !== 0) return dateCompare;
-                return a.accountName.localeCompare(b.accountName);
-            });
-            
             const historyContainer = document.getElementById('balanceHistory');
             if (!historyContainer) return;
-            
             if (periodBalances.length === 0) {
                 const periodText = currentPeriodMode === 'today' ? 'today' : 'this month';
                 historyContainer.innerHTML = `<div style="text-align: center; color: #7f8c8d; padding: 20px;">No balance records ${periodText}</div>`;
             } else {
-                historyContainer.innerHTML = periodBalances.map(item => {
-                    // Parse date manually to avoid timezone issues
-                    const dateParts = item.date.split('-').map(Number);
-                    const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-                    const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    
-                    return `
-                        <div class="balance-item">
-                            <div class="balance-details">
-                                <div class="balance-date">${formattedDate}</div>
-                                <div class="balance-account">${item.accountName}</div>
+                if (currentPeriodMode === 'month') {
+                    // ... existing month view code ...
+                    const grouped = {};
+                    periodBalances.forEach(item => {
+                        if (!grouped[item.accountId]) grouped[item.accountId] = [];
+                        grouped[item.accountId].push(item);
+                    });
+                    historyContainer.innerHTML = Object.keys(grouped).map(accountId => {
+                        const accountName = grouped[accountId][0].accountName;
+                        const balancesList = grouped[accountId]
+                            .sort((a, b) => {
+                                const dateA = a.date.split('-').map(Number);
+                                const dateB = b.date.split('-').map(Number);
+                                const dateObjA = new Date(dateA[0], dateA[1] - 1, dateA[2]);
+                                const dateObjB = new Date(dateB[0], dateB[1] - 1, dateB[2]);
+                                return dateObjB - dateObjA;
+                            })
+                            .map(item => {
+                                const dateParts = item.date.split('-').map(Number);
+                                const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                                const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                return `
+                                    <div class="balance-item">
+                                        <div class="balance-details">
+                                            <div class="balance-date">${formattedDate}</div>
+                                            <div class="balance-account">${accountName}</div>
+                                        </div>
+                                        <div class="balance-amount">$${item.balance.toFixed(2)}</div>
+                                        <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
+                                    </div>
+                                `;
+                            }).join('');
+                        return `<div style="margin-bottom:1.5rem;"><div style="font-weight:600;font-size:1rem;margin-bottom:0.5rem;">${accountName}</div>${balancesList}</div>`;
+                    }).join('');
+                } else {
+                    // Today view: only show today's records
+                    historyContainer.innerHTML = periodBalances.map(item => {
+                        const dateParts = item.date.split('-').map(Number);
+                        const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                        const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        return `
+                            <div class="balance-item">
+                                <div class="balance-details">
+                                    <div class="balance-date">${formattedDate}</div>
+                                    <div class="balance-account">${item.accountName}</div>
+                                </div>
+                                <div class="balance-amount">$${item.balance.toFixed(2)}</div>
+                                <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
                             </div>
-                            <div class="balance-amount">$${item.balance.toFixed(2)}</div>
-                            <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
-                        </div>
-                    `;
-                }).join('');
+                        `;
+                    }).join('');
+                }
             }
         }
         
@@ -4509,6 +4529,7 @@
             }
             
             updatePeriodView();
+            updateBalanceHistory();
         }
         
         function updatePeriodDropdownValues() {
