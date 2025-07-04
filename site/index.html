@@ -5059,23 +5059,6 @@
             localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
         }
 
-        // Helper to find the nearest data index from x coordinate
-        function getNearestIndex(x) {
-            const chartArea = spendingChart.chartArea;
-            if (!chartArea) return savingsData.length - 1;
-            const xScale = spendingChart.scales.x;
-            let minDist = Infinity;
-            let nearest = 0;
-            for (let i = 0; i < labels.length; i++) {
-                const px = xScale.getPixelForValue(i);
-                const dist = Math.abs(px - x);
-                if (dist < minDist) {
-                    minDist = dist;
-                    nearest = i;
-                }
-            }
-            return nearest;
-        }
 
     </script>
 </body>
