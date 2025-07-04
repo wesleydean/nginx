@@ -1435,7 +1435,6 @@
             z-index: 100;
             background-color: #ffffffa1; /* Semi-transparent white */
             border-bottom: 1px solid hsl(var(--border));
-            padding: 0.5rem 1rem;
             backdrop-filter: blur(10px);
             box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
             border-radius: 0;
@@ -1449,13 +1448,16 @@
             align-items: center;
         }
         
-        /* Compact Toggle */
+        /* Compact Toggle - Full Width */
         .period-mode-toggle-compact {
             display: flex;
             background: hsl(var(--muted));
             border-radius: var(--radius);
             padding: 2px;
-            gap: 2px;
+            gap: 0.5rem;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
         }
         
         .period-mode-btn-compact {
@@ -1468,6 +1470,8 @@
             color: hsl(var(--muted-foreground));
             cursor: pointer;
             transition: all 150ms ease;
+            flex: 1;
+            min-width: 0;
         }
         
         .period-mode-btn-compact.active {
@@ -1478,6 +1482,27 @@
         
         .period-mode-btn-compact:hover:not(.active) {
             background-color: hsl(var(--accent));
+        }
+        
+        /* Spacer Icons - Evenly Distributed */
+        .toggle-spacer-icons {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            flex: 1;
+            gap: 0.5rem;
+            padding: 0 0.5rem;
+        }
+        
+        .toggle-spacer-icons i {
+            color: hsl(var(--muted-foreground));
+            opacity: 0.6;
+            transition: all 150ms ease;
+        }
+        
+        .toggle-spacer-icons i:hover {
+            opacity: 1;
+            color: hsl(var(--foreground));
         }
         
         /* Enhanced Wealthsimple-style chart overlay */
@@ -2519,13 +2544,15 @@
                     <div class="period-selector-sticky" id="periodSelectorSticky">
                         <!-- Period Selector Header with Toggle on Left, Dropdowns on Right -->
                         <div class="period-selector-header">
-                            <!-- Today/Month Toggle (Left Side) -->
+                            <!-- Today/Month Toggle (Full Width) -->
                             <div class="period-mode-toggle-compact">
                                 <button onclick="setPeriodMode('today')" class="btn btn-ghost btn-sm period-mode-btn-compact active" id="todayBtnCompact" title="Today View">
-                                    <i data-lucide="sun" class="w-4 h-4"></i>
+                                    <i data-lucide="sun" class="w-4 h-4 mr-2"></i>
+                                    <span>Today</span>
                                 </button>
                                 <button onclick="setPeriodMode('month')" class="btn btn-ghost btn-sm period-mode-btn-compact" id="monthBtnCompact" title="Month View">
-                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                    <i data-lucide="calendar" class="w-4 h-4 mr-2"></i>
+                                    <span>Month</span>
                                 </button>
                             </div>
                         </div>
