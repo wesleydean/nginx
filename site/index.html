@@ -2933,62 +2933,64 @@
             </div>
             
             <div class="slide-out-form">
+                <!-- Date field above -->
                 <div class="form-group">
-                    <label class="form-label" for="slideOutBalanceDate">Date</label>
-                    <div class="custom-datepicker" id="balanceCustomDatepicker">
-                        <div class="datepicker-trigger" onclick="toggleDatepicker('balanceCustomDatepicker')"
-                             role="button" tabindex="0" aria-label="Select date" aria-expanded="false">
-                            <span class="datepicker-value" id="balanceCustomDatepickerValue">Select date</span>
-                            <i data-lucide="calendar" class="w-4 h-4"></i>
-                        </div>
-                        <div class="datepicker-popup" id="balanceCustomDatepickerPopup">
-                            <div class="datepicker-header">
-                                <button type="button" class="datepicker-nav" onclick="navigateMonth('balanceCustomDatepicker', -1)">
-                                    <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                                </button>
-                                <div class="datepicker-month-year" id="balanceCustomDatepickerMonthYear">
-                                    December 2024
-                                </div>
-                                <button type="button" class="datepicker-nav" onclick="navigateMonth('balanceCustomDatepicker', 1)">
-                                    <i data-lucide="chevron-right" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                            <div class="datepicker-grid" id="balanceCustomDatepickerGrid">
-                                <!-- Calendar grid will be populated by JavaScript -->
-                            </div>
-                            <div class="datepicker-footer">
-                                <button type="button" class="datepicker-btn datepicker-btn-secondary" onclick="clearDate('balanceCustomDatepicker')">
-                                    Clear
-                                </button>
-                                <button type="button" class="datepicker-btn datepicker-btn-primary" onclick="selectToday('balanceCustomDatepicker')">
-                                    Today
-                                </button>
-                            </div>
-                        </div>
-                        <input type="hidden" id="slideOutBalanceDate" name="slideOutBalanceDate">
+                  <label class="form-label" for="slideOutBalanceDate">Date</label>
+                  <div class="custom-datepicker" id="balanceCustomDatepicker">
+                    <div class="datepicker-trigger" onclick="toggleDatepicker('balanceCustomDatepicker')"
+                         role="button" tabindex="0" aria-label="Select date" aria-expanded="false">
+                      <span class="datepicker-value" id="balanceCustomDatepickerValue">Select date</span>
+                      <i data-lucide="calendar" class="w-4 h-4"></i>
                     </div>
+                    <div class="datepicker-popup" id="balanceCustomDatepickerPopup">
+                      <div class="datepicker-header">
+                        <button type="button" class="datepicker-nav" onclick="navigateMonth('balanceCustomDatepicker', -1)">
+                          <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                        </button>
+                        <div class="datepicker-month-year" id="balanceCustomDatepickerMonthYear">
+                          December 2024
+                        </div>
+                        <button type="button" class="datepicker-nav" onclick="navigateMonth('balanceCustomDatepicker', 1)">
+                          <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                        </button>
+                      </div>
+                      <div class="datepicker-grid" id="balanceCustomDatepickerGrid">
+                        <!-- Calendar grid will be populated by JavaScript -->
+                      </div>
+                      <div class="datepicker-footer">
+                        <button type="button" class="datepicker-btn datepicker-btn-secondary" onclick="clearDate('balanceCustomDatepicker')">
+                          Clear
+                        </button>
+                        <button type="button" class="datepicker-btn datepicker-btn-primary" onclick="selectToday('balanceCustomDatepicker')">
+                          Today
+                        </button>
+                      </div>
+                    </div>
+                    <input type="hidden" id="slideOutBalanceDate" name="slideOutBalanceDate">
+                  </div>
                 </div>
-                
-                <div class="form-group">
+                <!-- Account and Balance side by side -->
+                <div class="input-row">
+                  <div class="form-group">
                     <label class="form-label" for="slideOutBalanceAccount">Account</label>
                     <div class="select-container">
-                        <div class="select-trigger" onclick="toggleSlideOutSelect('balanceAccount')" id="balanceAccountTrigger">
-                            <span id="balanceAccountValue">Checking</span>
-                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                        </div>
-                        <div class="select-content" id="balanceAccountContent">
-                            <!-- Options will be populated by JavaScript -->
-                        </div>
+                      <div class="select-trigger" onclick="toggleSlideOutSelect('balanceAccount')" id="balanceAccountTrigger">
+                        <span id="balanceAccountValue">Checking</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                      </div>
+                      <div class="select-content" id="balanceAccountContent">
+                        <!-- Options will be populated by JavaScript -->
+                      </div>
                     </div>
                     <!-- Hidden native select for compatibility -->
                     <select id="slideOutBalanceAccount" style="display: none;">
-                        <!-- Options will be populated by JavaScript -->
+                      <!-- Options will be populated by JavaScript -->
                     </select>
-                </div>
-                
-                <div class="form-group">
+                  </div>
+                  <div class="form-group">
                     <label class="form-label" for="slideOutBalanceAmount">Balance ($)</label>
                     <input type="number" class="form-input" id="slideOutBalanceAmount" placeholder="0.00" step="0.01">
+                  </div>
                 </div>
                 
                 <button type="button" class="balance-add-btn" onclick="addBalanceFromSlideOut()">Add Balance</button>
