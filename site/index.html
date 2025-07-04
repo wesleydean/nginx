@@ -3591,20 +3591,40 @@
             const finalSavings = savingsData[savingsData.length - 1] || 0;
             const savingsGrowth = finalSavings - initialSavings;
             const savingsGrowthPercent = initialSavings > 0 ? (savingsGrowth / initialSavings) * 100 : 0;
-            
-            // Update chart header
+
+            // Chart header DOM elements
             const chartMainValue = document.getElementById('chartMainValue');
             const chartSubtitle = document.getElementById('chartSubtitle');
             const chartGrowth = document.getElementById('chartGrowth');
-            
-            if (chartMainValue) chartMainValue.textContent = `$${finalSavings.toFixed(2)}`;
-            if (chartSubtitle) chartSubtitle.textContent = 'Total Savings';
-            if (chartGrowth) {
+
+            // Helper to update chart header for a given index
+            function updateChartHeader(index) {
+                if (!chartMainValue || !chartSubtitle || !chartGrowth) return;
+                const saved = savingsData[index];
+                const spent = spendingData[index];
+                const dateLabel = labels[index];
+                // Main value: total saved
+                chartMainValue.textContent = `$${saved.toFixed(2)}`;
+                // Subtitle: show date and label
+                chartSubtitle.textContent = `${dateLabel} • Total Savings`;
+                // Growth: show spending for the day
+                chartGrowth.textContent = `Spent: $${spent.toFixed(2)}`;
+                chartGrowth.className = 'chart-growth';
+            }
+
+            // Helper to reset chart header to latest values
+            function resetChartHeader() {
+                if (!chartMainValue || !chartSubtitle || !chartGrowth) return;
+                chartMainValue.textContent = `$${finalSavings.toFixed(2)}`;
+                chartSubtitle.textContent = 'Total Savings';
                 const growthPrefix = savingsGrowth >= 0 ? '+' : '';
                 chartGrowth.textContent = `${growthPrefix}$${savingsGrowth.toFixed(2)} (${growthPrefix}${savingsGrowthPercent.toFixed(1)}%) ${currentChartPeriod === 'ALL' ? 'all time' : currentChartPeriod}`;
                 chartGrowth.className = 'chart-growth ' + (savingsGrowth >= 0 ? 'positive' : 'negative');
             }
-            
+
+            // Set default header
+            resetChartHeader();
+
             // Destroy previous chart instance if it exists
             if (spendingChart) {
                 spendingChart.destroy();
@@ -3677,62 +3697,7 @@
                             display: false
                         },
                         tooltip: {
-                            enabled: false,
-                            external: function(context) {
-                                // Enhanced custom tooltip implementation (Wealthsimple style)
-                                const tooltipEl = document.getElementById('chartTooltip');
-                                const tooltipDate = document.getElementById('tooltipDate');
-                                const tooltipSavings = document.getElementById('tooltipSavings');
-                                const tooltipSpending = document.getElementById('tooltipSpending');
-                                const chartOverlay = document.getElementById('chartOverlay');
-                                const chartCrosshair = document.getElementById('chartCrosshair');
-                                
-                                // Hide tooltip if no point is active
-                                if (context.tooltip.opacity === 0) {
-                                    chartOverlay.style.opacity = '0';
-                                    chartCrosshair.style.opacity = '0';
-                                    return;
-                                }
-                                
-                                // Set tooltip content
-                                if (tooltipDate && context.tooltip.dataPoints && context.tooltip.dataPoints.length) {
-                                    const dataPoint = context.tooltip.dataPoints[0];
-                                    
-                                    // Format date more elegantly
-                                    const formattedDate = dataPoint.label;
-                                    tooltipDate.textContent = formattedDate;
-                                    
-                                    // Get savings and spending values at this point
-                                    const index = dataPoint.dataIndex;
-                                    if (tooltipSavings) {
-                                        tooltipSavings.textContent = `$${savingsData[index].toFixed(2)}`;
-                                    }
-                                    if (tooltipSpending) {
-                                        tooltipSpending.textContent = `$${spendingData[index].toFixed(2)}`;
-                                    }
-                                    
-                                    // Position tooltip and crosshair with smooth animation
-                                    chartOverlay.style.opacity = '1';
-                                    if (chartCrosshair) {
-                                        const x = context.tooltip.caretX;
-                                        chartCrosshair.style.left = x + 'px';
-                                        chartCrosshair.style.opacity = '1';
-                                    }
-                                    
-                                    // Smart positioning for tooltip to avoid edge clipping
-                                    const tooltipPos = context.tooltip.caretX;
-                                    const chartWidth = context.chart.width;
-                                    
-                                    tooltipEl.style.opacity = '1';
-                                    if (tooltipPos < chartWidth / 2) {
-                                        tooltipEl.style.left = (tooltipPos + 15) + 'px';
-                                        tooltipEl.style.right = 'auto';
-                                    } else {
-                                        tooltipEl.style.right = (chartWidth - tooltipPos + 15) + 'px';
-                                        tooltipEl.style.left = 'auto';
-                                    }
-                                }
-                            }
+                            enabled: false // Disable Chart.js tooltip
                         }
                     },
                     scales: {
@@ -3741,7 +3706,6 @@
                                 display: false
                             },
                             ticks: {
-                                // Show fewer labels on small screens
                                 maxTicksLimit: window.innerWidth < 768 ? 4 : 8,
                                 font: {
                                     family: 'Inter, system-ui, sans-serif',
@@ -3766,7 +3730,6 @@
                             },
                             ticks: {
                                 callback: function(value) {
-                                    // Format currency nicely
                                     if (value >= 1000) {
                                         return '$' + (value/1000) + 'k';
                                     }
@@ -3785,83 +3748,92 @@
                     },
                     interaction: {
                         intersect: false,
-                        mode: 'index'
+                        mode: 'nearest'
                     },
                     hover: {
                         intersect: false,
-                        mode: 'index'
+                        mode: 'nearest'
                     },
                     elements: {
                         point: {
-                            hitRadius: 30 // Larger hit area for better mobile interaction
+                            hitRadius: 30
                         },
                         line: {
-                            tension: 0.4 // Smoother curves
+                            tension: 0.4
                         }
                     }
                 }
             });
-            
-            // Enhanced chart interactions for tooltip overlay
-            ctx.canvas.addEventListener('mousemove', function(e) {
-                const rect = ctx.canvas.getBoundingClientRect();
+
+            // Remove all previous custom drag/touch event listeners
+            // (No-op since we recreate the chart and canvas each time)
+
+            /**
+             * Custom popover for click/tap interaction on the chart.
+             * Shows left: total saved, right: total spending for the selected day.
+             */
+            const chartCanvas = ctx.canvas;
+            // const chartOverlay = document.getElementById('chartOverlay');
+            // const chartTooltip = document.getElementById('chartTooltip');
+            // const chartCrosshair = document.getElementById('chartCrosshair');
+
+            // Desktop: mousemove/drag
+            let isMouseDown = false;
+            chartCanvas.addEventListener('mousedown', function(e) {
+                isMouseDown = true;
+                const rect = chartCanvas.getBoundingClientRect();
                 const x = e.clientX - rect.left;
-                const chartOverlay = document.getElementById('chartOverlay');
-                const chartCrosshair = document.getElementById('chartCrosshair');
-                const chartTooltip = document.getElementById('chartTooltip');
-                
-                if (chartCrosshair && x >= 0 && x <= rect.width) {
-                    chartCrosshair.style.left = x + 'px';
-                    chartCrosshair.style.opacity = '1';
-                    
-                    // Show tooltip when hovering over chart
-                    if (chartOverlay) {
-                        chartOverlay.style.opacity = '1';
-                    }
-                }
+                const index = getNearestIndex(x);
+                updateChartHeader(index);
             });
-            
-            // Handle touch events for mobile devices
-            ctx.canvas.addEventListener('touchmove', function(e) {
-                e.preventDefault(); // Prevent scrolling
-                const rect = ctx.canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                const x = touch.clientX - rect.left;
-                const chartCrosshair = document.getElementById('chartCrosshair');
-                
-                if (chartCrosshair && x >= 0 && x <= rect.width) {
-                    chartCrosshair.style.left = x + 'px';
-                    chartCrosshair.style.opacity = '1';
-                    
-                    // Show tooltip when touching chart
-                    const chartOverlay = document.getElementById('chartOverlay');
-                    if (chartOverlay) {
-                        chartOverlay.style.opacity = '1';
-                    }
-                }
+            chartCanvas.addEventListener('mousemove', function(e) {
+                if (!isMouseDown) return;
+                const rect = chartCanvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const index = getNearestIndex(x);
+                updateChartHeader(index);
             });
-            
-            ctx.canvas.addEventListener('mouseleave', function() {
-                const chartOverlay = document.getElementById('chartOverlay');
-                const chartCrosshair = document.getElementById('chartCrosshair');
-                if (chartOverlay) {
-                    chartOverlay.style.opacity = '0';
-                }
-                if (chartCrosshair) {
-                    chartCrosshair.style.opacity = '0';
-                }
+            chartCanvas.addEventListener('mouseup', function() {
+                isMouseDown = false;
+                resetChartHeader();
             });
-            
-            // Hide overlay when touch ends
-            ctx.canvas.addEventListener('touchend', function() {
-                const chartOverlay = document.getElementById('chartOverlay');
-                const chartCrosshair = document.getElementById('chartCrosshair');
-                if (chartOverlay) {
-                    chartOverlay.style.opacity = '0';
-                }
-                if (chartCrosshair) {
-                    chartCrosshair.style.opacity = '0';
-                }
+            chartCanvas.addEventListener('mouseleave', function() {
+                isMouseDown = false;
+                resetChartHeader();
+            });
+            // Desktop: click (single day select)
+            chartCanvas.addEventListener('click', function(e) {
+                const rect = chartCanvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const index = getNearestIndex(x);
+                updateChartHeader(index);
+                setTimeout(resetChartHeader, 1500); // Auto-reset after 1.5s
+            });
+
+            // Mobile: touchmove/drag
+            let isTouchActive = false;
+            chartCanvas.addEventListener('touchstart', function(e) {
+                isTouchActive = true;
+                if (!e.touches || e.touches.length === 0) return;
+                const rect = chartCanvas.getBoundingClientRect();
+                const x = e.touches[0].clientX - rect.left;
+                const index = getNearestIndex(x);
+                updateChartHeader(index);
+            });
+            chartCanvas.addEventListener('touchmove', function(e) {
+                if (!isTouchActive || !e.touches || e.touches.length === 0) return;
+                const rect = chartCanvas.getBoundingClientRect();
+                const x = e.touches[0].clientX - rect.left;
+                const index = getNearestIndex(x);
+                updateChartHeader(index);
+            });
+            chartCanvas.addEventListener('touchend', function() {
+                isTouchActive = false;
+                resetChartHeader();
+            });
+            chartCanvas.addEventListener('touchcancel', function() {
+                isTouchActive = false;
+                resetChartHeader();
             });
         }
         
@@ -5085,6 +5057,24 @@
         function saveExpenses(expenses) {
             if (!expenses || typeof expenses !== 'object' || Array.isArray(expenses)) return;
             localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
+        }
+
+        // Helper to find the nearest data index from x coordinate
+        function getNearestIndex(x) {
+            const chartArea = spendingChart.chartArea;
+            if (!chartArea) return savingsData.length - 1;
+            const xScale = spendingChart.scales.x;
+            let minDist = Infinity;
+            let nearest = 0;
+            for (let i = 0; i < labels.length; i++) {
+                const px = xScale.getPixelForValue(i);
+                const dist = Math.abs(px - x);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = i;
+                }
+            }
+            return nearest;
         }
     </script>
 </body>
