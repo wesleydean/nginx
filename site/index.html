@@ -2722,6 +2722,215 @@
             width: 100%;
             margin-bottom: 0.5rem;
         }
+
+        /* Floating Action Button (FAB) Styles */
+        .fab-container {
+            position: fixed;
+            bottom: 80px; /* Above bottom nav */
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .fab-primary {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fab-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .fab-menu {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .fab-menu.active {
+            display: flex;
+        }
+
+        .fab-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .fab-option:hover {
+            background: hsl(var(--accent));
+            transform: translateX(-4px);
+        }
+
+        .fab-option-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Quick Action Cards Styles */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin: 24px 16px;
+            padding: 0;
+        }
+
+        .quick-action-card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 16px;
+            padding: 24px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .quick-action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .quick-action-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .quick-action-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+            border-color: hsl(var(--ring));
+        }
+
+        .quick-action-card:active {
+            transform: translateY(-2px);
+        }
+
+        .quick-action-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--secondary) / 0.1));
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-card:hover .quick-action-icon {
+            background: linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--secondary) / 0.2));
+            transform: scale(1.1);
+        }
+
+        .quick-action-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: hsl(var(--foreground));
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .quick-action-subtitle {
+            font-size: 0.8rem;
+            color: hsl(var(--muted-foreground));
+            line-height: 1.3;
+        }
+
+        /* Mobile optimizations for quick action cards */
+        @media (max-width: 480px) {
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                margin: 20px 12px;
+            }
+            
+            .quick-action-card {
+                padding: 20px 16px;
+            }
+            
+            .quick-action-icon {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 12px;
+            }
+            
+            .quick-action-title {
+                font-size: 0.9rem;
+            }
+            
+            .quick-action-subtitle {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Hide old action buttons - now using Quick Action Cards */
+        .action-buttons {
+            display: none !important;
+        }
+
+        /* Hide FAB - now using Quick Action Cards */
+        .fab-container {
+            display: none !important;
+        }
+
+        /* Better spacing between card sections */
+        .card {
+            margin-bottom: 24px;
+        }
+        
+        /* Extra spacing for specific sections */
+        #budgetDisplay {
+            margin-bottom: 32px;
+        }
+        
+        .expense-input {
+            margin-bottom: 32px;
+        }
+        
+        /* Quick actions spacing */
+        .quick-actions {
+            margin-bottom: 32px;
+        }
+        
+        /* Savings section spacing */
+        .savings-accounts-section {
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -2777,16 +2986,46 @@
                         </div>
                     </div>
                     
-                    <!-- Action Buttons -->
-                    <div class="action-buttons" id="actionButtons">
-                        <button class="btn btn-lg action-btn expense-btn" onclick="showExpenseSlideOut()">
-                            <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
-                            <span class="action-label">Add Expense</span>
+                    <!-- Floating Action Button (FAB) -->
+                    <div class="fab-container">
+                        <button class="fab-primary" onclick="toggleFabMenu()" id="fabMain">
+                            <i data-lucide="plus" class="w-6 h-6"></i>
                         </button>
-                        <button class="btn btn-lg action-btn balance-btn" id="balanceActionBtn" onclick="showBalanceSlideOut()" style="display: none;">
-                            <i data-lucide="piggy-bank" class="w-4 h-4 mr-2"></i>
-                            <span class="action-label">Add Balance</span>
-                        </button>
+                        
+                        <div class="fab-menu" id="fabMenu">
+                            <div class="fab-option" onclick="showExpenseSlideOut(); hideFabMenu();">
+                                <div class="fab-option-icon">
+                                    <i data-lucide="minus" class="w-4 h-4"></i>
+                                </div>
+                                <span>Add Expense</span>
+                            </div>
+                            
+                            <div class="fab-option" onclick="showBalanceSlideOut(); hideFabMenu();" id="fabBalanceOption" style="display: none;">
+                                <div class="fab-option-icon">
+                                    <i data-lucide="piggy-bank" class="w-4 h-4"></i>
+                                </div>
+                                <span>Add Balance</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Action Cards -->
+                    <div class="quick-actions">
+                        <div class="quick-action-card" onclick="showExpenseSlideOut()">
+                            <div class="quick-action-icon">
+                                <i data-lucide="minus" class="w-6 h-6"></i>
+                            </div>
+                            <div class="quick-action-title">Add Expense</div>
+                            <div class="quick-action-subtitle">Track spending</div>
+                        </div>
+                        
+                        <div class="quick-action-card" onclick="showBalanceSlideOut()" id="balanceActionCard">
+                            <div class="quick-action-icon">
+                                <i data-lucide="piggy-bank" class="w-6 h-6"></i>
+                            </div>
+                            <div class="quick-action-title">Add Balance</div>
+                            <div class="quick-action-subtitle">Update savings</div>
+                        </div>
                     </div>
                     
                     <!-- Add Expense -->
@@ -5584,6 +5823,27 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeSwipeToDelete();
         });
+
+        /**
+         * Update the visibility of balance-related UI elements
+         */
+        function updateBalanceUIVisibility(showBalance) {
+            const balanceBtn = document.getElementById('balanceActionBtn');
+            const fabBalanceOption = document.getElementById('fabBalanceOption');
+            const balanceActionCard = document.getElementById('balanceActionCard');
+            
+            if (balanceBtn) {
+                balanceBtn.style.display = showBalance ? 'flex' : 'none';
+            }
+            
+            if (fabBalanceOption) {
+                fabBalanceOption.style.display = showBalance ? 'flex' : 'none';
+            }
+            
+            if (balanceActionCard) {
+                balanceActionCard.style.display = showBalance ? 'block' : 'none';
+            }
+        }
     </script>
 </body>
 </html>
