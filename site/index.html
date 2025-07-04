@@ -1041,8 +1041,8 @@
         }
         
         .delete-btn {
-            background-color: hsl(var(--destructive));
-            color: hsl(var(--destructive-foreground));
+            background-color: hsl(0deg 0% 95.88%);
+            color: hsl(0deg 0% 24.54%);
             border: none;
             padding: 6px 10px;
             border-radius: var(--radius);
@@ -1899,8 +1899,8 @@
         }
         
         .delete-balance-btn {
-            background-color: hsl(var(--destructive));
-            color: hsl(var(--destructive-foreground));
+            background-color: hsl(0deg 0% 95.88%);
+            color: hsl(0deg 0% 24.54%);
             border: none;
             padding: 6px 10px;
             border-radius: var(--radius);
@@ -2128,8 +2128,8 @@
         }
         
         .delete-account-btn {
-            background-color: hsl(var(--destructive));
-            color: hsl(var(--destructive-foreground));
+            background-color: hsl(0deg 0% 95.88%);
+    color: hsl(0deg 0% 24.54%);
             border: none;
             padding: 4px 8px;
             border-radius: var(--radius);
@@ -2256,8 +2256,8 @@
         }
         
         .delete-account-btn {
-            background-color: hsl(var(--destructive));
-            color: hsl(var(--destructive-foreground));
+            background-color: hsl(0deg 0% 95.88%);
+            color: hsl(0deg 0% 24.54%);
             border: none;
             padding: 6px 12px;
             border-radius: var(--radius);
@@ -2671,12 +2671,17 @@
                             <p class="card-description" id="budgetDescription" style="text-align:left;">monthly spending budget</p>
                         </div>
                         <div class="card-content">
-                            <div class="text-3xl font-bold text-primary mb-4" id="budgetAmount">$41.30</div>
+                            <div class="flex items-center justify-between p-4 rounded-lg mb-2 stat-card">
+                                <div>
+                                    <div class="text-sm text-muted-foreground">Total Budget</div>
+                                    <div class="text-2xl font-semibold" id="budgetAmount">$41.30</div>
+                                </div>
+                            </div>
                             
-                            <div class="flex items-center justify-between p-4 rounded-lg" style="background-color: hsl(var(--muted));">
+                            <div class="flex items-center justify-between p-4 rounded-lg remaining-budget-section" style="background-color: hsl(var(--muted));">
                                 <div>
                                     <div class="text-sm text-muted-foreground" id="remainingLabel">Remaining Today</div>
-                                    <div class="text-xl font-semibold" id="remainingBudget">$41.30</div>
+                                    <div class="text-2xl font-semibold" id="remainingBudget">$41.30</div>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="status-indicator status-good" id="budgetStatus"></span>
@@ -3273,17 +3278,25 @@
             // Update status
             const statusIndicator = document.getElementById('budgetStatus');
             const statusText = document.getElementById('budgetStatusText');
+            const remainingBudgetContainer = document.querySelector('.remaining-budget-section');
+            const remainingBudgetAmount = document.getElementById('remainingBudget');
             
-            if (statusIndicator && statusText) {
+            if (statusIndicator && statusText && remainingBudgetContainer && remainingBudgetAmount) {
                 if (remaining > budget * 0.5) {
                     statusIndicator.className = 'status-indicator status-good';
                     statusText.textContent = 'On Track';
+                    remainingBudgetContainer.style.backgroundColor = 'hsl(156.06deg 40% 96%)';
+                    remainingBudgetAmount.style.color = 'hsl(156.06deg 40% 20%)';
                 } else if (remaining > 0) {
                     statusIndicator.className = 'status-indicator status-warning';
                     statusText.textContent = 'Watch Spending';
+                    remainingBudgetContainer.style.backgroundColor = 'hsl(47.9deg 95.8% 96%)';
+                    remainingBudgetAmount.style.color = 'hsl(47.9deg 95.8% 20%)';
                 } else {
                     statusIndicator.className = 'status-indicator status-danger';
                     statusText.textContent = 'Over Budget';
+                    remainingBudgetContainer.style.backgroundColor = 'hsl(0deg 84.2% 96%)';
+                    remainingBudgetAmount.style.color = 'hsl(0deg 84.2% 20%)';
                 }
             }
         }
