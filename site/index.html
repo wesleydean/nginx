@@ -242,7 +242,59 @@
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
             box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            padding: 1.5rem;
+            padding: .2rem;
+        }
+        
+        /* Today view: remove borders and shadows from main cards */
+        .today-view .card {
+            border: none;
+            box-shadow: none;
+            background-color: transparent;
+        }
+        
+        /* Keep borders for specific cards in today view that need them */
+        .today-view .expense-item {
+            border: 1px solid hsl(var(--border));
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        
+        .today-view .balance-item {
+            border: 1px solid hsl(var(--border));
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        
+        /* Month view: remove borders and shadows from main cards */
+        .card {
+            border: none;
+            box-shadow: none;
+            background-color: transparent;
+        }
+        
+        /* Keep borders for specific cards that need them */
+        .expense-item {
+            border: 1px solid hsl(var(--border));
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        
+        .balance-item {
+            border: 1px solid hsl(var(--border));
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        
+        /* Keep borders for slide-out content and modals */
+        .slide-out-content .card,
+        .modal-content .card,
+        .account-management-content .card {
+            border: 1px solid hsl(var(--border));
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            background-color: hsl(var(--card));
+        }
+        
+        /* Give stat cards a subtle background for better visual separation */
+        .stat-card {
+            background-color: hsl(var(--muted) / 0.3);
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
         }
         
         .card-header {
@@ -4393,6 +4445,12 @@
             if (todayBtn) todayBtn.classList.toggle('active', mode === 'today');
             if (monthBtn) monthBtn.classList.toggle('active', mode === 'month');
             
+            // Add/remove today-view class for styling
+            const screen = document.querySelector('.screen');
+            if (screen) {
+                screen.classList.toggle('today-view', mode === 'today');
+            }
+            
             // Show/hide dropdowns
             const periodDropdowns = document.getElementById('periodDropdowns');
             if (periodDropdowns) {
@@ -4827,6 +4885,12 @@
                     btn.classList.toggle('active', btn.id === 'periodYTD');
                 });
             }
+            
+            // Set initial today-view class
+            const screen = document.querySelector('.screen');
+            if (screen) {
+                screen.classList.add('today-view');
+            }
         });
         
         function setupDropdownEventListeners() {
@@ -5228,7 +5292,7 @@
                 btn.style.display = 'inline-flex';
                 btn.style.alignItems = 'center';
                 btn.style.justifyContent = 'flex-start';
-                btn.style.fontSize = '2rem';
+                btn.style.fontSize = '1.5rem';
                 btn.style.fontWeight = '700';
                 btn.style.color = 'inherit';
                 btn.style.cursor = 'pointer';
@@ -5264,7 +5328,7 @@
                 const h3 = document.createElement('h3');
                 h3.className = 'card-title';
                 h3.id = 'budgetPeriodLabel';
-                h3.style.fontSize = '2rem';
+                h3.style.fontSize = '1.5rem';
                 h3.style.fontWeight = '700';
                 h3.style.margin = '0';
                 h3.style.textAlign = 'left';
