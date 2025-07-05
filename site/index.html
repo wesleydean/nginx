@@ -1077,12 +1077,14 @@
             background-color: hsl(var(--primary));
             color: hsl(var(--primary-foreground));
             border: none;
-            padding: 14px 20px;
+            padding: 10px 16px;
             border-radius: var(--radius);
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            width: 100%;
+            display: block;
         }
         
         .add-btn:hover {
@@ -1920,14 +1922,14 @@
             background-color: hsl(var(--primary));
             color: hsl(var(--primary-foreground));
             border: none;
-            padding: 14px 20px;
+            padding: 10px 16px;
             border-radius: var(--radius);
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            min-width: 120px;
-            flex-shrink: 0;
+            width: 100%;
+            display: block;
         }
         
         .balance-add-btn:hover {
@@ -2198,9 +2200,9 @@
             background-color: hsl(var(--primary));
             color: hsl(var(--primary-foreground));
             border: none;
-            padding: 14px 20px;
+            padding: 10px 16px;
             border-radius: var(--radius);
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
             width: 100%;
@@ -2840,86 +2842,23 @@
             justify-content: center;
         }
 
-        /* Quick Action Cards Styles */
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 16px;
-            margin: 24px 16px;
-            padding: 0;
-        }
-
-        .quick-action-card {
-            background: hsl(var(--card));
-            border: 1px solid hsl(var(--border));
-            border-radius: 16px;
-            padding: 24px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .quick-action-card:hover {
-            border-color: hsl(var(--ring));
-        }
-
         .quick-action-icon {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
-            background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--secondary) / 0.1));
+            width: 2em;
+            height: 2em;
+            background: #fff;
+            border-radius: 50%;
+            color: hsl(var(--primary));
+            font-size: 1.1em;
         }
-
-        .quick-action-card:hover .quick-action-icon {
-            background: linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--secondary) / 0.2));
-        }
-
         .quick-action-title {
-            font-weight: 600;
-            font-size: 1rem;
-            color: hsl(var(--foreground));
-            margin-bottom: 6px;
-            line-height: 1.2;
-        }
-
-        .quick-action-subtitle {
-            font-size: 0.8rem;
-            color: hsl(var(--muted-foreground));
-            line-height: 1.3;
-        }
-
-        /* Mobile optimizations for quick action cards */
-        @media (max-width: 480px) {
-            .quick-actions {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-                margin: 20px 12px;
-            }
-            
-            .quick-action-card {
-                padding: 16px;
-            }
-            
-            .quick-action-icon {
-                width: 40px;
-                height: 40px;
-                margin-bottom: 12px;
-            }
-            
-            .quick-action-title {
-                font-size: 0.9rem;
-            }
-            
-            .quick-action-subtitle {
-                font-size: 0.75rem;
-            }
+            font-size: 1.08rem;
+            font-weight: 500;
+            margin: 0;
+            padding: 0;
+            color: #fff;
         }
 
         /* Hide old action buttons - now using Quick Action Cards */
@@ -2952,38 +2891,44 @@
         }
 
         .quick-action-card {
-            background: hsl(var(--card));
-            border: 1px solid hsl(var(--border));
-            border-radius: 16px;
-            padding: 24px 20px;
-            text-align: center;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .quick-action-card:hover {
-            border-color: hsl(var(--ring));
-        }
-
-        .quick-action-icon {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
-            background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--secondary) / 0.1));
+            gap: 12px;
+            padding: 0.7em 1.6em;
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            border-radius: 10px;
+            font-size: 1.08rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: none;
+            margin: 0;
+            min-height: 44px;
         }
-
-        .quick-action-card:hover .quick-action-icon {
-            background: linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--secondary) / 0.2));
+        .quick-action-card:hover {
+            background: hsl(var(--primary) / 0.92);
         }
-
-        .quick-action-card:active {
-            transform: translateY(2px);
+        .quick-action-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2em;
+            height: 2em;
+            background: #fff;
+            border-radius: 50%;
+            color: hsl(var(--primary));
+            font-size: 1.1em;
+            margin: 0;
+        }
+        .quick-action-title {
+            font-size: 1.08rem;
+            font-weight: 500;
+            margin: 0;
+            padding: 0;
+            color: #fff;
         }
 
         .fab-option:active {
@@ -3001,6 +2946,38 @@
 
         .fab-option:active {
             transform: translateY(2px);
+        }
+
+        /* Make form containers use grid for full-width buttons */
+        .slide-out-form,
+        .form-group:has(.add-btn),
+        .form-group:has(.balance-add-btn),
+        .form-group:has(.account-management-add-btn) {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        /* Ensure the button container takes full width */
+        .slide-out-form > .add-btn,
+        .slide-out-form > .balance-add-btn,
+        .account-management-add-form > .account-management-add-btn {
+            grid-column: 1 / -1;
+            width: 100%;
+            max-width: none;
+        }
+        
+        /* Make main expense form use grid for full-width button */
+        .expense-input {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .expense-input > .add-btn {
+            grid-column: 1 / -1;
+            width: 100%;
+            max-width: none;
         }
 
     </style>
@@ -3089,13 +3066,6 @@
                             </div>
                             <div class="quick-action-title">Add Expense</div>
                         </div>
-                        
-                        <div class="quick-action-card" onclick="showBalanceSlideOut()" id="balanceActionCard">
-                            <div class="quick-action-icon">
-                                <i data-lucide="piggy-bank" class="w-6 h-6"></i>
-                            </div>
-                            <div class="quick-action-title">Add Balance</div>
-                        </div>
                     </div>
                     
                     <!-- Add Expense -->
@@ -3146,8 +3116,85 @@
                         </div>
                     </div>
                     
+                    <!-- Savings Accounts Section - Moved to Save Screen -->
+                    <!-- <div class="card savings-accounts-section" id="savingsSection" style="display: none;">
+                        <div class="section-header">
+                            <h3 class="text-lg font-semibold">Account Balances</h3>
+                            <button class="btn btn-outline btn-sm" onclick="showAccountManagementModal()">
+                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                Accounts
+                            </button>
+                        </div>
+                        
+                        <div class="account-balance-display stat-card">
+                            <div class="current-balance" id="totalAccountBalance">$0.00</div>
+                            <div class="balance-change" id="totalBalanceChange">Total across all accounts this month</div>
+                        </div>
+                        
+                        <div class="balance-history" id="balanceHistory">
+                            <div style="text-align: center; color: #7f8c8d; padding: 20px;">
+                                No balance records this month
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+                
+                <!-- Screen 2: Save -->
+                <div class="screen">
+                    <!-- Sticky Period Selector for Save Screen -->
+                    <div class="period-selector-sticky" id="savePeriodSelectorSticky">
+                        <!-- Period Selector Header with Toggle on Left, Dropdowns on Right -->
+                        <div class="period-selector-header">
+                            <!-- Today/Month Toggle (Full Width) -->
+                            <div class="period-mode-toggle-compact">
+                                <button onclick="setSavePeriodMode('today')" class="btn btn-ghost btn-sm period-mode-btn-compact active" id="saveTodayBtnCompact" title="Today View">
+                                    <i data-lucide="sun" class="w-4 h-4 mr-2"></i>
+                                    <span>Today</span>
+                                </button>
+                                <button onclick="setSavePeriodMode('month')" class="btn btn-ghost btn-sm period-mode-btn-compact" id="saveMonthBtnCompact" title="Month View">
+                                    <i data-lucide="calendar" class="w-4 h-4 mr-2"></i>
+                                    <span>Month</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily/Monthly Saving Target Display -->
+                    <div class="card" id="saveTargetDisplay">
+                        <div class="card-header" style="text-align:center;">
+                            <div id="saveTargetTitleContainer" style="text-align:left;"></div>
+                            <p class="card-description" id="saveTargetDescription" style="text-align:left;">monthly saving target</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="flex items-center justify-between p-4 rounded-lg mb-2 stat-card">
+                                <div>
+                                    <div class="text-sm text-muted-foreground">Saving Target</div>
+                                    <div class="text-2xl font-semibold" id="saveTargetAmount">$144.43</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-4 rounded-lg remaining-budget-section" style="background-color: hsl(var(--muted)); position: relative;">
+                                <div>
+                                    <div class="text-sm text-muted-foreground" id="saveProgressLabel">Progress This Month</div>
+                                    <div class="text-2xl font-semibold" id="saveProgressAmount">$0.00</div>
+                                </div>
+                                <div class="status-label" id="saveStatusText" style="position: absolute; bottom: 8px; right: 8px; padding: 4px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 500; color: white; background-color: hsl(156.06deg 40% 40%);">On Track</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Action Cards for Save Screen -->
+                    <div class="quick-actions">
+                        <div class="quick-action-card" onclick="showBalanceSlideOut()" id="saveBalanceActionCard">
+                            <div class="quick-action-icon">
+                                <i data-lucide="piggy-bank" class="w-6 h-6"></i>
+                            </div>
+                            <div class="quick-action-title">Add Balance</div>
+                        </div>
+                    </div>
+                    
                     <!-- Savings Accounts Section -->
-                    <div class="card savings-accounts-section" id="savingsSection" style="display: none;">
+                    <div class="card savings-accounts-section" id="saveSavingsSection">
                         <div class="section-header">
                             <h3 class="text-lg font-semibold">Account Balances</h3>
                             <button class="btn btn-outline btn-sm" onclick="showAccountManagementModal()">
@@ -3158,26 +3205,15 @@
                         
                         <!-- Total Balance Display -->
                         <div class="account-balance-display stat-card">
-                            <div class="current-balance" id="totalAccountBalance">$0.00</div>
-                            <div class="balance-change" id="totalBalanceChange">Total across all accounts this month</div>
+                            <div class="current-balance" id="saveTotalAccountBalance">$0.00</div>
+                            <div class="balance-change" id="saveTotalBalanceChange">Total across all accounts this month</div>
                         </div>
                         
                         <!-- Balance History -->
-                        <div class="balance-history" id="balanceHistory">
+                        <div class="balance-history" id="saveBalanceHistory">
                             <div style="text-align: center; color: #7f8c8d; padding: 20px;">
                                 No balance records this month
                             </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Screen 2: Save -->
-                <div class="screen">
-                    <div class="card">
-                        <h3 class="card-title mb-4">Save</h3>
-                        <div style="text-align: center; color: #7f8c8d; padding: 40px 20px;">
-                            <i data-lucide="piggy-bank" class="w-16 h-16 mx-auto mb-4" style="opacity: 0.5;"></i>
-                            <p>Save screen content coming soon...</p>
                         </div>
                     </div>
                 </div>
@@ -3594,7 +3630,9 @@
 
         // Period tracking variables
         let currentPeriodMode = 'today'; // 'today' or 'month'
+        let currentSavePeriodMode = 'today'; // 'today' or 'month' for save screen
         let selectedMonthDate = new Date();
+        let selectedSaveMonthDate = new Date(); // Separate month date for save screen
         let currentChartPeriod = 'ALL'; // '1M', '3M', '6M', 'YTD', '1Y', 'ALL' - Changed from YTD to ALL to show all balance data
         
         let currentScreen = 0;
@@ -3641,6 +3679,7 @@
             } else if (screenIndex === 1) {
                 // Save screen - currently blank, ready for future functionality
                 console.log('Save screen loaded');
+                updateSaveScreen();
             }
         }
         
@@ -3666,6 +3705,7 @@
             updateBudgetDisplay();
             updateExpensesList();
             updateTotalSavingsDisplay(); // Always update, regardless of mode
+            updateSaveScreen(); // Update save screen as well
         }
         
         function updateBudgetDisplay() {
@@ -4945,6 +4985,7 @@
                 delete balances[accountId][date];
                 saveAccountBalances(balances);
                 updateTotalSavingsDisplay();
+                updateSaveScreen(); // Update save screen when balance is deleted
                 updateChart();
                 
                 // Update chart if on reports screen
@@ -5114,10 +5155,10 @@
             }
             
             // Show savings section in both modes
-            const savingsSection = document.getElementById('savingsSection');
-            if (savingsSection) {
-                savingsSection.style.display = 'block';
-            }
+            // const savingsSection = document.getElementById('savingsSection');
+            // if (savingsSection) {
+            //     savingsSection.style.display = 'block';
+            // }
             
             // Show balance action button in both modes
             const balanceActionBtn = document.getElementById('balanceActionBtn');
@@ -5217,6 +5258,16 @@
             }
             // Ensure account dropdown is populated
             updateSlideOutAccountDropdown();
+            
+            // Prepopulate balance amount with last balance for default selected account
+            if (savingsAccounts.length > 0) {
+                const defaultAccountId = savingsAccounts[0].id;
+                const lastBalance = getLastBalanceForAccount(defaultAccountId);
+                const balanceAmountInput = document.getElementById('slideOutBalanceAmount');
+                if (balanceAmountInput && lastBalance > 0) {
+                    balanceAmountInput.value = lastBalance.toFixed(2);
+                }
+            }
         }
         
         function hideExpenseSlideOut() {
@@ -5557,6 +5608,7 @@
             
             // Initial update of displays
             updatePeriodView();
+            updateSaveScreen(); // Initialize save screen
             
             // Initialize the chart with empty data
             if (document.getElementById('spendingChart')) {
@@ -5758,6 +5810,7 @@
             
             // Update display
             updateTotalSavingsDisplay();
+            updateSaveScreen(); // Update save screen when balance is added
             updateChart();
         }
         
@@ -5819,6 +5872,13 @@
                 const yearInput = document.getElementById('yearInput');
                 if (yearInput) {
                     yearInput.value = value;
+                }
+            } else if (selectType === 'balanceAccount') {
+                // Prepopulate balance amount with last balance for selected account
+                const lastBalance = getLastBalanceForAccount(value);
+                const balanceAmountInput = document.getElementById('slideOutBalanceAmount');
+                if (balanceAmountInput && lastBalance > 0) {
+                    balanceAmountInput.value = lastBalance.toFixed(2);
                 }
             }
             
@@ -6415,6 +6475,395 @@
                 maximumFractionDigits: 0
             });
         }
+
+        // Update save target display
+        function updateSaveTargetDisplay() {
+            const today = new Date();
+            const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+            const dayOfMonth = today.getDate();
+            
+            let targetAmount = 0;
+            let progressAmount = 0;
+            let progressPercentage = 0;
+            let lastBalanceDate = '';
+            let periodLabel = '';
+            let description = '';
+            
+            if (currentSavePeriodMode === 'today') {
+                // Daily saving target (monthly target divided by days in month)
+                targetAmount = MONTHLY_SAVINGS_TARGET / daysInMonth;
+                periodLabel = 'Daily Saving Target';
+                description = 'daily saving target';
+                
+                const progressLabel = document.getElementById('saveProgressLabel');
+                if (progressLabel) {
+                    progressLabel.textContent = 'Progress Today';
+                }
+            } else {
+                // Monthly saving target
+                targetAmount = MONTHLY_SAVINGS_TARGET;
+                periodLabel = `${selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} Saving Target`;
+                description = 'monthly saving target';
+                
+                const progressLabel = document.getElementById('saveProgressLabel');
+                if (progressLabel) {
+                    progressLabel.textContent = 'Progress This Month';
+                }
+            }
+            
+            // Calculate progress based on balance differences
+            const { currentTotal, previousTotal, lastDate } = getBalanceComparison();
+            progressAmount = currentTotal - previousTotal;
+            progressPercentage = previousTotal > 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0;
+            lastBalanceDate = lastDate;
+            
+            // Update display elements
+            const saveTargetTitleContainer = document.getElementById('saveTargetTitleContainer');
+            const saveTargetDescription = document.getElementById('saveTargetDescription');
+            const saveTargetAmount = document.getElementById('saveTargetAmount');
+            const saveProgressAmount = document.getElementById('saveProgressAmount');
+            
+            if (saveTargetTitleContainer) {
+                saveTargetTitleContainer.textContent = periodLabel;
+            }
+            if (saveTargetDescription) {
+                saveTargetDescription.textContent = description;
+            }
+            if (saveTargetAmount) {
+                saveTargetAmount.textContent = formatCurrency(targetAmount);
+            }
+            if (saveProgressAmount) {
+                const sign = progressAmount >= 0 ? '+' : '';
+                const percentageText = progressPercentage !== 0 ? ` (${sign}${progressPercentage.toFixed(1)}%)` : '';
+                saveProgressAmount.textContent = `${sign}${formatCurrency(progressAmount)}${percentageText}`;
+            }
+            
+            // Update save status
+            if (document.getElementById('saveStatusText')) {
+                const percentProgress = targetAmount > 0 ? (progressAmount / targetAmount) * 100 : 0;
+                let statusText = '';
+                let statusColor = '';
+                let cardBackgroundColor = '';
+                let amountColor = '';
+                
+                if (percentProgress >= 100) {
+                    statusText = 'Target Met!';
+                    statusColor = 'hsl(156.06deg 40% 40%)'; // Green
+                    cardBackgroundColor = 'hsl(156.06deg 40% 96%)'; // Light green background
+                    amountColor = 'hsl(156.06deg 40% 20%)'; // Dark green text
+                } else if (percentProgress >= 75) {
+                    statusText = 'On Track';
+                    statusColor = 'hsl(156.06deg 40% 40%)'; // Green
+                    cardBackgroundColor = 'hsl(156.06deg 40% 96%)'; // Light green background
+                    amountColor = 'hsl(156.06deg 40% 20%)'; // Dark green text
+                } else if (percentProgress >= 50) {
+                    statusText = 'Good Progress';
+                    statusColor = 'hsl(38deg 92% 50%)'; // Orange
+                    cardBackgroundColor = 'hsl(38deg 92% 96%)'; // Light orange background
+                    amountColor = 'hsl(38deg 92% 20%)'; // Dark orange text
+                } else {
+                    statusText = 'Behind Target';
+                    statusColor = 'hsl(0deg 84% 60%)'; // Red
+                    cardBackgroundColor = 'hsl(0deg 84% 96%)'; // Light red background
+                    amountColor = 'hsl(0deg 84% 20%)'; // Dark red text
+                }
+                
+                document.getElementById('saveStatusText').textContent = statusText;
+                document.getElementById('saveStatusText').style.backgroundColor = statusColor;
+                
+                // Update progress card background and text color
+                const progressContainer = document.querySelector('#saveTargetDisplay .remaining-budget-section');
+                const progressAmountEl = document.getElementById('saveProgressAmount');
+                
+                if (progressContainer && progressAmountEl) {
+                    progressContainer.style.backgroundColor = cardBackgroundColor;
+                    progressAmountEl.style.color = amountColor;
+                }
+            }
+            
+            // Update progress label with last balance date context
+            const progressLabel = document.getElementById('saveProgressLabel');
+            if (progressLabel && lastBalanceDate) {
+                const lastDateObj = new Date(lastBalanceDate);
+                const lastDateFormatted = lastDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const currentMode = currentSavePeriodMode === 'today' ? 'Today' : 'This Month';
+                progressLabel.textContent = `${currentMode} vs ${lastDateFormatted}`;
+            }
+        }
+        
+        // Get balance comparison for progress calculation
+        function getBalanceComparison() {
+            const balances = loadAccountBalances();
+            const today = getCurrentDate();
+            
+            // Get current total balance (sum of all accounts)
+            const currentTotal = getTotalBalanceForDate(balances, today);
+            
+            if (currentSavePeriodMode === 'today') {
+                // For daily: compare to yesterday or last available balance
+                const yesterday = getPreviousDate(today);
+                let previousTotal = getTotalBalanceForDate(balances, yesterday);
+                let lastDate = yesterday;
+                
+                // If no balance for yesterday, find the closest available balance
+                if (previousTotal === 0) {
+                    const availableDates = getAllAvailableDates(balances);
+                    const lastAvailableDate = availableDates.find(date => date < yesterday);
+                    if (lastAvailableDate) {
+                        previousTotal = getTotalBalanceForDate(balances, lastAvailableDate);
+                        lastDate = lastAvailableDate;
+                    }
+                }
+                
+                return { currentTotal, previousTotal, lastDate };
+            } else {
+                // For monthly: compare to same day last month or last available balance
+                const sameDayLastMonth = getSameDayLastMonth(today);
+                let previousTotal = getTotalBalanceForDate(balances, sameDayLastMonth);
+                let lastDate = sameDayLastMonth;
+                
+                // If no balance for same day last month, find the closest available balance
+                if (previousTotal === 0) {
+                    const availableDates = getAllAvailableDates(balances);
+                    const lastAvailableDate = availableDates.find(date => date < sameDayLastMonth);
+                    if (lastAvailableDate) {
+                        previousTotal = getTotalBalanceForDate(balances, lastAvailableDate);
+                        lastDate = lastAvailableDate;
+                    }
+                }
+                
+                return { currentTotal, previousTotal, lastDate };
+            }
+        }
+        
+        // Get total balance for a specific date
+        function getTotalBalanceForDate(balances, date) {
+            let totalBalance = 0;
+            
+            // Sum up all account balances for the given date
+            Object.keys(balances).forEach(accountId => {
+                const accountBalances = balances[accountId] || {};
+                if (accountBalances[date]) {
+                    totalBalance += accountBalances[date];
+                }
+            });
+            
+            return totalBalance;
+        }
+        
+        // Get previous date (yesterday)
+        function getPreviousDate(dateString) {
+            const date = new Date(dateString);
+            date.setDate(date.getDate() - 1);
+            return date.toISOString().split('T')[0];
+        }
+        
+        // Get same day last month
+        function getSameDayLastMonth(dateString) {
+            const date = new Date(dateString);
+            date.setMonth(date.getMonth() - 1);
+            
+            // Handle edge case: if current day doesn't exist in previous month
+            // (e.g., Jan 31 -> Feb 28/29), use the last day of previous month
+            const lastDayOfPrevMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+            if (date.getDate() > lastDayOfPrevMonth) {
+                date.setDate(lastDayOfPrevMonth);
+            }
+            
+            return date.toISOString().split('T')[0];
+        }
+
+        // Update save screen total savings display
+        function updateSaveTotalSavingsDisplay() {
+            const balances = loadAccountBalances();
+            const today = getCurrentDate();
+            
+            // Get current total balance
+            const currentTotal = getTotalBalanceForDate(balances, today);
+            
+            // Get comparison data
+            const { previousTotal, lastDate } = getBalanceComparison();
+            const balanceChange = currentTotal - previousTotal;
+            const balanceChangePercentage = previousTotal > 0 ? (balanceChange / previousTotal) * 100 : 0;
+            
+            // Update save screen balance display
+            const saveTotalAccountBalance = document.getElementById('saveTotalAccountBalance');
+            const saveTotalBalanceChange = document.getElementById('saveTotalBalanceChange');
+            
+            if (saveTotalAccountBalance) {
+                saveTotalAccountBalance.textContent = formatCurrency(currentTotal);
+            }
+            if (saveTotalBalanceChange) {
+                const sign = balanceChange >= 0 ? '+' : '';
+                const percentageText = balanceChangePercentage !== 0 ? ` (${sign}${balanceChangePercentage.toFixed(1)}%)` : '';
+                const lastDateFormatted = lastDate ? new Date(lastDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'previous';
+                saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)}${percentageText} vs ${lastDateFormatted}`;
+            }
+            
+            // Update save screen balance history
+            updateSaveBalanceHistory();
+        }
+        
+        // Update save screen balance history
+        function updateSaveBalanceHistory() {
+            const balances = loadAccountBalances();
+            const historyContainer = document.getElementById('saveBalanceHistory');
+            
+            if (!historyContainer) return;
+            
+            // Get balance records based on current period mode
+            const balanceRecords = [];
+            const today = getCurrentDate();
+            
+            Object.keys(balances).forEach(accountId => {
+                const accountBalances = balances[accountId] || {};
+                Object.keys(accountBalances).forEach(date => {
+                    let shouldInclude = false;
+                    
+                    if (currentSavePeriodMode === 'today') {
+                        // Only show today's balance records
+                        shouldInclude = date === today;
+                    } else {
+                        // Show all balance records for the current month
+                        const currentMonth = getCurrentMonth();
+                        shouldInclude = date.startsWith(currentMonth);
+                    }
+                    
+                    if (shouldInclude) {
+                        const balance = accountBalances[date];
+                        if (balance) {
+                            const accountName = savingsAccounts.find(acc => acc.id === accountId)?.name || accountId;
+                            balanceRecords.push({
+                                date: date,
+                                accountId: accountId,
+                                accountName: accountName,
+                                amount: balance,
+                                timestamp: new Date(date).getTime()
+                            });
+                        }
+                    }
+                });
+            });
+            
+            if (balanceRecords.length === 0) {
+                const noDataMessage = currentSavePeriodMode === 'today' 
+                    ? 'No balance records today' 
+                    : 'No balance records this month';
+                historyContainer.innerHTML = `<div style="text-align: center; color: #7f8c8d; padding: 20px;">${noDataMessage}</div>`;
+            } else {
+                if (currentSavePeriodMode === 'month') {
+                    // Group by account for month view
+                    const grouped = {};
+                    balanceRecords.forEach(item => {
+                        if (!grouped[item.accountId]) grouped[item.accountId] = [];
+                        grouped[item.accountId].push(item);
+                    });
+                    
+                    historyContainer.innerHTML = Object.keys(grouped).map(accountId => {
+                        const accountName = grouped[accountId][0].accountName;
+                        const balancesList = grouped[accountId]
+                            .sort((a, b) => {
+                                const dateA = a.date.split('-').map(Number);
+                                const dateB = b.date.split('-').map(Number);
+                                const dateObjA = new Date(dateA[0], dateA[1] - 1, dateA[2]);
+                                const dateObjB = new Date(dateB[0], dateB[1] - 1, dateB[2]);
+                                return dateObjB - dateObjA;
+                            })
+                            .map(item => {
+                                const dateObj = new Date(item.date);
+                                const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                
+                                return `
+                                    <div class="swipe-container" data-type="balance" data-date="${item.date}" data-timestamp="${item.timestamp}">
+                                        <div class="swipe-content">
+                                            <div class="expense-item">
+                                                <div class="expense-details">
+                                                    <div class="expense-description">${displayDate}</div>
+                                                    <div class="expense-category">Balance Update</div>
+                                                </div>
+                                                <div class="expense-amount positive">${formatCurrency(item.amount)}</div>
+                                            </div>
+                                        </div>
+                                        <div class="swipe-action" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</div>
+                                    </div>
+                                `;
+                            }).join('');
+                        
+                        return `<div style="margin-bottom:1.5rem;"><div style="font-weight:600;font-size:1rem;margin-bottom:0.5rem;">${accountName}</div>${balancesList}</div>`;
+                    }).join('');
+                } else {
+                    // Today view: show today's records without grouping
+                    historyContainer.innerHTML = balanceRecords.map(balance => {
+                        const dateObj = new Date(balance.date);
+                        const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        
+                        return `
+                            <div class="swipe-container" data-type="balance" data-date="${balance.date}" data-timestamp="${balance.timestamp}">
+                                <div class="swipe-content">
+                                    <div class="expense-item">
+                                        <div class="expense-details">
+                                            <div class="expense-description">${balance.accountName}</div>
+                                            <div class="expense-category">${displayDate} • Balance Update</div>
+                                        </div>
+                                        <div class="expense-amount positive">${formatCurrency(balance.amount)}</div>
+                                    </div>
+                                </div>
+                                <div class="swipe-action" onclick="deleteBalance('${balance.accountId}', '${balance.date}')">✕</div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+        }
+
+        // Get all available dates from balance data
+        function getAllAvailableDates(balances) {
+            const allDates = new Set();
+            
+            Object.keys(balances).forEach(accountId => {
+                const accountBalances = balances[accountId] || {};
+                Object.keys(accountBalances).forEach(date => {
+                    allDates.add(date);
+                });
+            });
+            
+            return Array.from(allDates).sort();
+        }
+
+        // Get the last balance for a specific account
+        function getLastBalanceForAccount(accountId) {
+            const balances = loadAccountBalances();
+            const accountBalances = balances[accountId] || {};
+            
+            if (Object.keys(accountBalances).length === 0) {
+                return 0; // No balance records for this account
+            }
+            
+            // Get all dates for this account and sort them (newest first)
+            const dates = Object.keys(accountBalances).sort().reverse();
+            return accountBalances[dates[0]] || 0;
+        }
+
+        // Update save screen display
+        function updateSaveScreen() {
+            updateSaveTargetDisplay();
+            updateSaveTotalSavingsDisplay();
+        }
+
+        // Set save period mode (today/month)
+        function setSavePeriodMode(mode) {
+            currentSavePeriodMode = mode;
+            
+            // Update compact button states
+            const saveTodayBtn = document.getElementById('saveTodayBtnCompact');
+            const saveMonthBtn = document.getElementById('saveMonthBtnCompact');
+            if (saveTodayBtn) saveTodayBtn.classList.toggle('active', mode === 'today');
+            if (saveMonthBtn) saveMonthBtn.classList.toggle('active', mode === 'month');
+            
+            // Update save screen display
+            updateSaveScreen();
+        }
+
     </script>
 </body>
 </html>
