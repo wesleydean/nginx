@@ -3766,6 +3766,139 @@
             }
         }
 
+        /* Swipe to delete functionality */
+        .swipe-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            touch-action: pan-y; /* Change to pan-y to enable horizontal swiping */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .swipe-content {
+            position: relative;
+            z-index: 1;
+            background: white;
+            transition: transform 0.2s ease;
+            width: 100%;
+            will-change: transform;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .swipe-action {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background-color: #e74c3c;
+            color: white;
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 0;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .swipe-container.swiped .swipe-content {
+            transform: translateX(-80px);
+        }
+
+        .swipe-container.deleting {
+            animation: slide-out 0.3s forwards;
+            height: 0;
+            margin: 0;
+            padding: 0;
+            opacity: 0;
+        }
+
+        @keyframes slide-out {
+            0% {
+                transform: translateX(0);
+                opacity: 1;
+                max-height: 100px;
+            }
+            75% {
+                transform: translateX(-100%);
+                opacity: 0;
+                max-height: 100px;
+            }
+            100% {
+                transform: translateX(-100%);
+                opacity: 0;
+                max-height: 0px;
+                margin: 0;
+                padding: 0;
+            }
+        }
+        
+        /* Make sure balance items have the same swipe styling as expense items */
+        .swipe-container .balance-item,
+        .swipe-container .modern-balance-history-item {
+            border: none;
+            box-shadow: none;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+        }
+
+        .modern-balance-history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .balance-history-date {
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+
+        .balance-history-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .balance-history-amount {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+        }
+
+        .balance-history-percent {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .balance-history-percent.positive {
+            color: #27ae60;
+        }
+
+        .balance-history-percent.negative {
+            color: #e74c3c;
+        }
+
+        .balance-history-percent.neutral {
+            color: #888;
+        }
+
+        .balance-arrow {
+            margin-right: 4px;
+        }
+
     
     </style>
 </head>
@@ -3999,7 +4132,7 @@
                         <div class="account-balance-display stat-card modern-balance-card">
                             <div class="balance-right-stack">
                                 <div class="current-balance-modern" id="saveTotalAccountBalance">$0.00</div>
-                                <div class="balance-change-modern" id="saveTotalBalanceChange">+0.00% all time</div>
+                                <div class="balance-change-modern" id="saveTotalBalanceChange">Total Balance</div>
                             </div>
                         </div>
                         
@@ -6066,7 +6199,7 @@
                                         <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
                                     </div>
                                 </div>
-                                <div class="swipe-action" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</div>
+                                <div class="swipe-action" onclick="deleteBalance('${item.accountId}', '${item.date}')"><i data-lucide="x" class="w-4 h-4"></i></div>
                             </div>
                         `;
                     }).join('');
@@ -6115,18 +6248,55 @@
         }
         
         function deleteBalance(accountId, date) {
+            console.log('Deleting balance:', accountId, date);
             const balances = loadAccountBalances();
             
             if (balances[accountId] && balances[accountId][date]) {
-                delete balances[accountId][date];
-                saveAccountBalances(balances);
-                updateTotalSavingsDisplay();
-                updateSaveScreen(); // Update save screen when balance is deleted
-                updateChart();
+                // Find the swipe container that holds this balance
+                const swipeContainer = document.querySelector(`.swipe-container[data-type="balance"][data-account-id="${accountId}"][data-date="${date}"]`);
                 
-                // Update chart if on reports screen
-                if (currentScreen === 1) {
-                    updateChart();
+                if (swipeContainer) {
+                    // Add deleting animation
+                    swipeContainer.classList.add('deleting');
+                    console.log('Adding deleting animation to container:', swipeContainer);
+                    
+                    // Wait for animation to complete before removing from storage
+                    setTimeout(() => {
+                        // Delete the balance entry
+                        delete balances[accountId][date];
+                        saveAccountBalances(balances);
+                        updateTotalSavingsDisplay();
+                        
+                        // Update screens based on current view
+                        if (document.getElementById('saveBalanceHistory')) {
+                            updateSaveScreen();
+                        } else {
+                            updateBalanceHistory();
+                        }
+                        
+                        // Update chart if on reports screen
+                        if (currentScreen === 2) {
+                            updateChart();
+                        }
+                    }, 300); // Match the CSS animation duration
+                } else {
+                    console.log('No swipe container found, deleting immediately');
+                    // No swipe container found, just delete immediately
+                    delete balances[accountId][date];
+                    saveAccountBalances(balances);
+                    updateTotalSavingsDisplay();
+                    
+                    // Update screens based on current view
+                    if (document.getElementById('saveBalanceHistory')) {
+                        updateSaveScreen();
+                    } else {
+                        updateBalanceHistory();
+                    }
+                    
+                    // Update chart if on reports screen
+                    if (currentScreen === 2) {
+                        updateChart();
+                    }
                 }
             }
         }
@@ -7349,33 +7519,50 @@
             let currentX = 0;
             let isDragging = false;
             let currentSwipeContainer = null;
+            
+            // Debug log for initialization
+            console.log('Initializing swipe-to-delete functionality');
 
             function handleTouchStart(e) {
-                const touch = e.touches[0];
+                const touch = e.touches ? e.touches[0] : e;
                 startX = touch.clientX;
                 currentX = startX;
-                isDragging = true;
                 
                 const swipeContainer = e.target.closest('.swipe-container');
                 if (swipeContainer) {
+                    console.log('Touch start on swipe container:', swipeContainer.dataset);
+                    isDragging = true;
                     currentSwipeContainer = swipeContainer;
                     swipeContainer.style.transition = 'none';
+                    
+                    // Prevent default only if it's a horizontal swipe on a container
+                    if (e.cancelable) {
+                        e.preventDefault();
+                    }
                 }
             }
 
             function handleTouchMove(e) {
                 if (!isDragging || !currentSwipeContainer) return;
                 
-                e.preventDefault();
-                const touch = e.touches[0];
+                const touch = e.touches ? e.touches[0] : e;
                 currentX = touch.clientX;
                 
                 const deltaX = currentX - startX;
+                console.log('Swipe delta:', deltaX);
                 
                 // Only allow left swipe (negative deltaX)
                 if (deltaX < 0) {
                     const translateX = Math.max(deltaX, -80);
-                    currentSwipeContainer.querySelector('.swipe-content').style.transform = `translateX(${translateX}px)`;
+                    const swipeContent = currentSwipeContainer.querySelector('.swipe-content');
+                    if (swipeContent) {
+                        swipeContent.style.transform = `translateX(${translateX}px)`;
+                        
+                        // Prevent page scrolling when swiping horizontally
+                        if (Math.abs(deltaX) > 10 && e.cancelable) {
+                            e.preventDefault();
+                        }
+                    }
                 }
             }
 
@@ -7384,43 +7571,73 @@
                 
                 isDragging = false;
                 const deltaX = currentX - startX;
+                console.log('Swipe end, delta:', deltaX);
                 
-                currentSwipeContainer.style.transition = 'transform 0.2s ease';
-                
-                // If swiped more than 60px to the left, show delete action
-                if (deltaX < -60) {
-                    currentSwipeContainer.classList.add('swiped');
-                    currentSwipeContainer.querySelector('.swipe-content').style.transform = 'translateX(-80px)';
-                } else {
-                    // Reset to original position
-                    currentSwipeContainer.classList.remove('swiped');
-                    currentSwipeContainer.querySelector('.swipe-content').style.transform = 'translateX(0)';
+                const swipeContent = currentSwipeContainer.querySelector('.swipe-content');
+                if (swipeContent) {
+                    swipeContent.style.transition = 'transform 0.2s ease';
+                    
+                    // If swiped more than 40px to the left, show delete action
+                    if (deltaX < -40) {
+                        currentSwipeContainer.classList.add('swiped');
+                        swipeContent.style.transform = 'translateX(-80px)';
+                        console.log('Swiped to show delete');
+                    } else {
+                        // Reset to original position
+                        currentSwipeContainer.classList.remove('swiped');
+                        swipeContent.style.transform = 'translateX(0)';
+                        console.log('Reset position');
+                    }
                 }
                 
                 currentSwipeContainer = null;
             }
 
+            // Helper function to reset any swiped items when tapping elsewhere
+            function handleDocumentClick(e) {
+                if (!e.target.closest('.swipe-container') && !e.target.closest('.swipe-action')) {
+                    document.querySelectorAll('.swipe-container.swiped').forEach(container => {
+                        container.classList.remove('swiped');
+                        const content = container.querySelector('.swipe-content');
+                        if (content) content.style.transform = 'translateX(0)';
+                    });
+                }
+            }
+
             // Add event listeners to the document
             document.addEventListener('touchstart', handleTouchStart, { passive: false });
             document.addEventListener('touchmove', handleTouchMove, { passive: false });
-            document.addEventListener('touchend', handleTouchEnd, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd, { passive: true });
+            document.addEventListener('click', handleDocumentClick);
 
             // Also handle mouse events for desktop testing
             document.addEventListener('mousedown', (e) => {
                 if (e.target.closest('.swipe-container')) {
-                    handleTouchStart({ touches: [{ clientX: e.clientX }] });
+                    handleTouchStart(e);
                 }
             });
 
             document.addEventListener('mousemove', (e) => {
                 if (isDragging) {
-                    handleTouchMove({ touches: [{ clientX: e.clientX }], preventDefault: () => {} });
+                    handleTouchMove(e);
                 }
             });
 
             document.addEventListener('mouseup', (e) => {
                 if (isDragging) {
-                    handleTouchEnd({});
+                    handleTouchEnd(e);
+                }
+            });
+            
+            // Add tap/click handler for swipe action buttons
+            document.addEventListener('click', (e) => {
+                const swipeAction = e.target.closest('.swipe-action');
+                if (swipeAction) {
+                    const container = swipeAction.parentElement;
+                    if (container && container.classList.contains('swipe-container')) {
+                        console.log('Delete action clicked');
+                        // The onclick attribute will handle the delete action
+                    }
                 }
             });
         }
@@ -7945,13 +8162,8 @@
                     saveTotalAccountBalance.textContent = formatCurrency(currentTotal);
                 }
                 if (saveTotalBalanceChange) {
-                    const sign = balanceChange >= 0 ? '+' : '';
-                    const percentageText = balanceChangePercentage !== 0 ? ` (${sign}${balanceChangePercentage.toFixed(1)}%)` : '';
-                    const lastDateFormatted = lastDate ? new Date(lastDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'previous';
-                    saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)}${percentageText} vs ${lastDateFormatted}`;
-                    
-                    // Add positive/negative class for proper styling
-                    saveTotalBalanceChange.className = 'balance-change-modern ' + (balanceChange >= 0 ? 'positive' : 'negative');
+                    saveTotalBalanceChange.textContent = 'Total Balance';
+                    saveTotalBalanceChange.className = 'balance-change-modern';
                 }
                 
                 // Update the date display
@@ -7984,17 +8196,8 @@
                 }
                 
                 if (saveTotalBalanceChange) {
-                    const sign = balanceChange >= 0 ? '+' : '';
-                    
-                    if (previousTotal === 0 || isNaN(previousTotal)) {
-                        // No previous month data case
-                        saveTotalBalanceChange.textContent = `Current balance: ${formatCurrency(currentTotal)}`;
-                        saveTotalBalanceChange.className = 'balance-change-modern';
-                    } else {
-                        // Normal case with previous data
-                        saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)}${percentageText} vs previous month`;
-                        saveTotalBalanceChange.className = 'balance-change-modern ' + (balanceChange >= 0 ? 'positive' : 'negative');
-                    }
+                    saveTotalBalanceChange.textContent = 'Total Balance';
+                    saveTotalBalanceChange.className = 'balance-change-modern';
                 }
                 
                 // Update the date display
@@ -8136,12 +8339,17 @@
                 
                 // Render updates
                 updatesWithPercents.forEach(update => {
-                    html += `<div class="modern-account-update-row">
-                        <div class="modern-update-date">${update.displayDate}</div>
-                        <div class="modern-update-amount-stack">
-                        <div class="modern-update-diff">${formatCurrency(update.amount)}</div>
-                        <div class="modern-update-percent ${update.percentClass}">${update.percent !== null ? `${update.arrow}${update.percent >= 0 ? '+' : ''}${update.percent.toFixed(2)}%` : '--'}</div>
+                    html += `<div class="swipe-container" data-type="balance" data-account-id="${accountId}" data-date="${update.date}">
+                        <div class="swipe-content">
+                            <div class="modern-account-update-row">
+                                <div class="modern-update-date">${update.displayDate}</div>
+                                <div class="modern-update-amount-stack">
+                                <div class="modern-update-diff">${formatCurrency(update.amount)}</div>
+                                <div class="modern-update-percent ${update.percentClass}">${update.percent !== null ? `${update.arrow}${update.percent >= 0 ? '+' : ''}${update.percent.toFixed(2)}%` : '--'}</div>
+                                </div>
+                            </div>
                         </div>
+                        <div class="swipe-action" onclick="deleteBalance('${accountId}', '${update.date}')"><i data-lucide="x" class="w-4 h-4"></i></div>
                     </div>`;
                 });
                 html += `</div></div></div>`;
