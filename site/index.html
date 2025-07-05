@@ -1446,7 +1446,7 @@
         .period-switch button.active {
             background-color: hsl(var(--background));
             color: hsl(var(--foreground));
-            box-shadow: 0 1px 3px 0 rgb(0, 0, 0 / 0.1);
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
         }
 
         .month-navigation {
@@ -1515,7 +1515,7 @@
         .chart-period-btn.active {
             background-color: hsl(var(--background));
             color: hsl(var(--foreground));
-            box-shadow: 0 1px 3px 0 rgb(0, 0, 0 / 0.1);
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
         }
 
         .chart-period-btn:hover:not(.active) {
@@ -7967,21 +7967,9 @@
             if (body.classList.contains('expanded')) {
                 body.classList.remove('expanded');
                 if (header) header.classList.remove('expanded');
-                if (chevron) {
-                    chevron.setAttribute('data-lucide', 'chevron-down');
-                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                        window.lucide.createIcons();
-                    }
-                }
             } else {
                 body.classList.add('expanded');
                 if (header) header.classList.add('expanded');
-                if (chevron) {
-                    chevron.setAttribute('data-lucide', 'chevron-up');
-                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                        window.lucide.createIcons();
-                    }
-                }
             }
         }
 
