@@ -166,6 +166,11 @@
             min-width: 44px;
         }
         
+        /* Ensure all form elements have minimum touch target size */
+        input, select, textarea, .form-input, .date-input, .select-trigger, .date-picker-trigger, .datepicker-trigger {
+            min-height: 44px; /* iOS recommended minimum touch target */
+        }
+        
         /* Disable hover effects on touch devices */
         @media (hover: none) and (pointer: coarse) {
             .btn:hover, button:hover, .swipe-action:hover {
@@ -475,6 +480,7 @@
         .form-input {
             display: flex;
             height: 2.5rem;
+            min-height: 44px; /* iOS recommended minimum touch target */
             width: 100%;
             border-radius: var(--radius);
             border: 1px solid hsl(var(--border));
@@ -514,6 +520,7 @@
         .select-trigger {
             display: flex;
             height: 2.5rem;
+            min-height: 44px; /* iOS recommended minimum touch target */
             width: 100%;
             align-items: center;
             justify-content: space-between;
@@ -597,6 +604,7 @@
         .date-input {
             display: flex;
             height: 2.5rem;
+            min-height: 44px; /* iOS recommended minimum touch target */
             width: 100%;
             border-radius: var(--radius);
             border: 1px solid hsl(var(--border));
@@ -641,6 +649,7 @@
         .date-picker-trigger {
             display: flex;
             height: 2.5rem;
+            min-height: 44px; /* iOS recommended minimum touch target */
             width: 100%;
             align-items: center;
             justify-content: space-between;
@@ -1112,6 +1121,7 @@
         
         .input-group input, .input-group select {
             width: 100%;
+            min-height: 44px; /* iOS recommended minimum touch target */
             padding: 14px 16px;
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
@@ -1957,6 +1967,7 @@
         
         .balance-input-row select {
             width: 100%;
+            min-height: 44px; /* iOS recommended minimum touch target */
             padding: 14px 16px;
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
@@ -2235,6 +2246,7 @@
         
         .account-management-input {
             width: 100%;
+            min-height: 44px; /* iOS recommended minimum touch target */
             padding: 14px 16px;
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
@@ -2343,6 +2355,7 @@
         
         .add-account-form input {
             flex: 1;
+            min-height: 44px; /* iOS recommended minimum touch target */
             padding: 10px;
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
@@ -2581,9 +2594,10 @@
         }
 
         .datepicker-trigger {
-                       display: flex;
+            display: flex;
             align-items: center;
             justify-content: space-between;
+            min-height: 44px; /* iOS recommended minimum touch target */
             padding: 8px 12px;
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
@@ -4147,7 +4161,7 @@
                 <h4 class="text-lg font-semibold mb-4">Add New Account</h4>
                 <div class="input-group">
                     <label for="newAccountName">Account Name</label>
-                    <input type="text" id="newAccountName" placeholder="e.g., Emergency Fund" style="width: 100%; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem;">
+                    <input type="text" id="newAccountName" placeholder="e.g., Emergency Fund" style="width: 100%; min-height: 44px; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem;">
                 </div>
                 <button class="add-account-btn" onclick="addNewAccount()">Add Account</button>
             </div>
