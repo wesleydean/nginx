@@ -963,8 +963,8 @@
         .p-4 { padding: 1rem; }
         .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
         .px-4 { padding-left: 1rem; padding-right: 1rem; }
-        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .py-2 { padding: 0.5rem 0; }
+        .py-3 { padding: 0.75rem 0; }
         
         .mb-2 { margin-bottom: 0.5rem; }
         .mb-4 { margin-bottom: 1rem; }
@@ -1150,7 +1150,7 @@
         }
         
         .expenses-list {
-            max-height: 300px;
+            /* max-height: 300px; */
             overflow-y: auto;
         }
         
@@ -3296,7 +3296,10 @@
         <div class="app-header">
             <div class="header-title" id="headerTitle">Spend</div>
             <div class="header-actions">
-                <button class="icon-btn" onclick="goToScreen(3)" aria-label="Settings">
+                <button class="icon-btn" id="backButton" onclick="goToScreen(previousScreen)" aria-label="Back" style="display: none;">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </button>
+                <button class="icon-btn" id="settingsButton" onclick="goToScreen(3)" aria-label="Settings">
                     <i data-lucide="settings" class="w-6 h-6"></i>
                 </button>
             </div>
@@ -4135,6 +4138,7 @@
         let currentChartPeriod = 'ALL'; // '1M', '3M', '6M', 'YTD', '1Y', 'ALL' - Changed from YTD to ALL to show all balance data
         
         let currentScreen = 0;
+        let previousScreen = 0; // Track previous screen for back button functionality
         let spendingChart;
         
         // Storage keys
@@ -7432,28 +7436,47 @@
          */
         function updateHeaderTitle() {
             const headerTitle = document.getElementById('headerTitle');
+            const backButton = document.getElementById('backButton');
+            const settingsButton = document.getElementById('settingsButton');
+            
             if (!headerTitle) return;
+            
             switch (currentScreen) {
                 case 0:
                     headerTitle.textContent = 'Spend';
+                    backButton.style.display = 'none';
+                    settingsButton.style.display = 'block';
                     break;
                 case 1:
                     headerTitle.textContent = 'Save';
+                    backButton.style.display = 'none';
+                    settingsButton.style.display = 'block';
                     break;
                 case 2:
                     headerTitle.textContent = 'Reports';
+                    backButton.style.display = 'none';
+                    settingsButton.style.display = 'block';
                     break;
                 case 3:
                     headerTitle.textContent = 'Settings';
+                    backButton.style.display = 'block';
+                    settingsButton.style.display = 'none';
                     break;
                 default:
                     headerTitle.textContent = '';
+                    backButton.style.display = 'none';
+                    settingsButton.style.display = 'block';
             }
         }
 
         // Update goToScreen to call updateHeaderTitle
         const originalGoToScreen = goToScreen;
         goToScreen = function(screenIndex) {
+            // Store previous screen only when going TO settings
+            if (screenIndex === 3) {
+                previousScreen = currentScreen;
+            }
+            
             currentScreen = screenIndex;
             const wrapper = document.getElementById('screensWrapper');
             wrapper.style.transform = `translateX(-${screenIndex * 100}vw)`;
