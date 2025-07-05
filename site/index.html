@@ -3185,7 +3185,18 @@
                     </div>
                 </div>
                 
-                <!-- Screen 2: Reports -->
+                <!-- Screen 2: Save -->
+                <div class="screen">
+                    <div class="card">
+                        <h3 class="card-title mb-4">Save</h3>
+                        <div style="text-align: center; color: #7f8c8d; padding: 40px 20px;">
+                            <i data-lucide="piggy-bank" class="w-16 h-16 mx-auto mb-4" style="opacity: 0.5;"></i>
+                            <p>Save screen content coming soon...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Screen 3: Reports -->
                 <div class="screen">
                     <!-- Weekly Summary -->
                     <div class="card weekly-summary">
@@ -3236,16 +3247,16 @@
                         <div class="chart-header">
                             <!-- Savings Row (Black) -->
                             <div class="chart-row savings-row">
+                                <div class="chart-subtitle" id="chartSubtitle">Total Savings</div>
                                 <div class="chart-main-value" id="chartMainValue">$0.00</div>
                                 <div class="chart-growth" id="chartGrowth">+$0.00 (+0%)</div>
-                                <div class="chart-subtitle" id="chartSubtitle">Total Savings</div>
                             </div>
                             
                             <!-- Spending Row (Gray) -->
                             <div class="chart-row spending-row">
+                                <div class="chart-subtitle spending" id="chartSpendingSubtitle">Total Spending</div>
                                 <div class="chart-main-value spending" id="chartSpendingValue">$0.00</div>
                                 <div class="chart-growth spending" id="chartSpendingGrowth">+$0.00 (+0%)</div>
-                                <div class="chart-subtitle spending" id="chartSpendingSubtitle">Total Spending</div>
                             </div>
                         </div>
                         
@@ -3294,6 +3305,12 @@
                 <div class="label">Spend</div>
             </div>
             <div class="nav-item" onclick="goToScreen(1)">
+                <div class="icon">
+                    <i data-lucide="piggy-bank" class="w-6 h-6"></i>
+                </div>
+                <div class="label">Save</div>
+            </div>
+            <div class="nav-item" onclick="goToScreen(2)">
                 <div class="icon">
                     <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
                 </div>
@@ -3644,12 +3661,15 @@
                 item.classList.toggle('active', index === screenIndex);
             });
             
-            if (screenIndex === 1) {
+            if (screenIndex === 2) {
                 updateReports();
                 setTimeout(updateChart, 300);
             } else if (screenIndex === 0) {
                 // Ensure today mode is set when navigating to tracking screen
                 setPeriodMode('today');
+            } else if (screenIndex === 1) {
+                // Save screen - currently blank, ready for future functionality
+                console.log('Save screen loaded');
             }
         }
         
