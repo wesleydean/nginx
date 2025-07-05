@@ -1756,7 +1756,7 @@
             pointer-events: none;
             transition: opacity 0.15s ease, left 0.05s linear;
         }
-        .chart-overlay.visible .chart-crosshair {
+        .chart-overlay.visible {
             opacity: 1;
         }
         @media (hover: none) and (pointer: coarse) {
@@ -1764,23 +1764,6 @@
                 width: 3px;
                 background: #222;
             }
-        }
-        
-        .chart-tooltip {
-            position: absolute;
-            background-color: white;
-            color: hsl(var(--foreground));
-            border-radius: calc(var(--radius) * 1.2);
-            padding: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(230, 230, 230, 0.8);
-            opacity: 0;
-            transition: opacity 0.2s ease, transform 0.15s ease;
-            pointer-events: none;
-            min-width: 220px;
-            z-index: 20;
-            transform: translateY(5px);
-            backdrop-filter: blur(8px);
         }
         
         .chart-overlay.visible .chart-tooltip {
@@ -3019,6 +3002,7 @@
         .fab-option:active {
             transform: translateY(2px);
         }
+
     </style>
 </head>
 <body>
@@ -3267,21 +3251,6 @@
                             <canvas id="spendingChart"></canvas>
                             <div class="chart-overlay" id="chartOverlay">
                                 <div class="chart-crosshair" id="chartCrosshair"></div>
-                                <div class="chart-tooltip" id="chartTooltip">
-                                    <div class="tooltip-date" id="tooltipDate"></div>
-                                    <div class="tooltip-values">
-                                        <div class="tooltip-value">
-                                            <span class="tooltip-dot savings"></span>
-                                            <span class="tooltip-label">Total Savings</span>
-                                            <span class="tooltip-amount" id="tooltipSavings">$0.00</span>
-                                        </div>
-                                        <div class="tooltip-value">
-                                            <span class="tooltip-dot spending"></span>
-                                            <span class="tooltip-label">Cumulative Spending</span>
-                                            <span class="tooltip-amount" id="tooltipSpending">$0.00</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                         
@@ -4385,10 +4354,7 @@
                         x: {
                             grid: { display: false },
                             ticks: {
-                                maxTicksLimit: window.innerWidth < 768 ? 4 : 8,
-                                font: { family: 'Inter, system-ui, sans-serif', size: 11 },
-                                color: 'hsl(var(--muted-foreground))',
-                                padding: 8
+                                display: false // Hide x-axis labels
                             },
                             border: { display: false }
                         },
@@ -4396,22 +4362,8 @@
                             grid: { display: false }, // Remove all horizontal grid lines
                             border: { display: false },
                             ticks: {
-                                callback: function(value, index, ticks) {
-                                    // Only show the max value (last tick)
-                                    if (index === ticks.length - 1) {
-                                        if (value >= 1000) {
-                                            return '$' + (value/1000) + 'k';
-                                        }
-                                        return '$' + value;
-                                    }
-                                    return '';
-                                },
-                                font: { family: 'Inter, system-ui, sans-serif', size: 11 },
-                                color: 'hsl(var(--muted-foreground))',
-                                padding: 8,
-                                maxTicksLimit: 6
-                            },
-                            beginAtZero: true
+                                display: false // Hide y-axis labels
+                            }
                         }
                     },
                     interaction: { intersect: false, mode: 'nearest' },
@@ -4585,12 +4537,16 @@
                     
                     // Position the crosshair at the selected point
                     chartCrosshair.style.left = `${pixelX}px`;
+                    // Ensure overlay is visible immediately on interaction
                     chartOverlay.classList.add('visible');
                 }
                 
                 spendingChart.update('none'); // Update without animation for immediate response
             }
 
+            /**
+             * Hides chart interaction effects (crosshair, tooltip) with a delay for better UX.
+             */
             function hideChartInteraction() {
                 if (!spendingChart || !spendingChart.data || !spendingChart.data.datasets) return;
                 
@@ -4604,12 +4560,13 @@
                     dataset.borderWidth = datasetIndex === 0 ? 3 : 2.5; // Keep normal line width
                 });
                 
-                // Hide the vertical crosshair line
+                // Hide the vertical crosshair line with a delay
                 const chartOverlay = document.getElementById('chartOverlay');
                 if (chartOverlay) {
-                    chartOverlay.classList.remove('visible');
+                    setTimeout(() => {
+                        chartOverlay.classList.remove('visible');
+                    }, 200); // 200ms delay for smoother UX
                 }
-                
                 spendingChart.update('none'); // Update without animation for immediate response
             }
         }
