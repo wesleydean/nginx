@@ -327,7 +327,7 @@
             flex: 1;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
+            padding: 1rem;
             background-color: hsl(var(--card));
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
@@ -3658,7 +3658,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 1rem 0;
+  padding: 1rem;
   margin-bottom: 0.2rem;
   background: #fff;
   border-radius: 0;
@@ -3822,6 +3822,7 @@
             opacity: 0;
             pointer-events: none;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
         .swipe-container.deleting .swipe-content {
             transform: translateX(-100%);
@@ -7651,20 +7652,38 @@
                         if (type === 'expense') {
                             const date = container.dataset.date;
                             const timestamp = parseInt(container.dataset.timestamp, 10);
+                            console.log('Expense swipe data:', { 
+                                container, 
+                                date, 
+                                timestamp, 
+                                type,
+                                allData: container.dataset 
+                            });
                             if (date && timestamp) {
                                 console.log('Calling deleteExpense from swipe action click');
                                 deleteExpense(date, timestamp);
                                 // Prevent event propagation
                                 e.stopPropagation();
+                            } else {
+                                console.error('Missing date or timestamp for expense deletion');
                             }
                         } else if (type === 'balance') {
                             const accountId = container.dataset.accountId;
                             const date = container.dataset.date;
+                            console.log('Balance swipe data:', { 
+                                container, 
+                                accountId, 
+                                date, 
+                                type,
+                                allData: container.dataset 
+                            });
                             if (accountId && date) {
                                 console.log('Calling deleteBalance from swipe action click');
                                 deleteBalance(accountId, date);
                                 // Prevent event propagation
                                 e.stopPropagation();
+                            } else {
+                                console.error('Missing accountId or date for balance deletion');
                             }
                         }
                     }
