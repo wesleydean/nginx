@@ -3288,18 +3288,306 @@
             padding-top: 1rem;
         }
 
+        /* Settings Slide-out Panel */
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .settings-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: hsl(var(--background));
+            z-index: 1001;
+            overflow-y: auto;
+            transition: right 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .settings-panel.active {
+            right: 0;
+        }
+
+        /* Main content slide transition */
+        .app-container {
+            transition: transform 0.3s ease;
+        }
+
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid hsl(var(--border));
+            background-color: hsl(var(--background));
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .settings-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            flex: 1;
+            text-align: center;
+        }
+
+        .settings-back {
+            background: none;
+            border: none;
+            color: hsl(var(--muted-foreground));
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-back:hover {
+            background-color: hsl(var(--muted));
+        }
+
+        .settings-content {
+            padding: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .settings-panel {
+                width: 400px;
+            }
+        }
+
+        
+        
+
+    
     </style>
 </head>
 <body>
     <div class="app-container">
+        <!-- Settings Slide-out Panel -->
+        <div class="settings-overlay" id="settingsOverlay">
+            <div class="settings-panel" id="settingsPanel">
+                <div class="settings-header">
+                    <button class="settings-back" onclick="closeSettings()" aria-label="Back">
+                        <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                    </button>
+                    <h2 class="settings-title">Settings</h2>
+                    <div style="width: 40px;"></div> <!-- Spacer for centering -->
+                </div>
+                <div class="settings-content" id="settingsContent">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-lg font-semibold">Income & Taxes</h3>
+                        </div>
+                        <div class="card-content">
+                            <!-- Tax Calculator Section -->
+                            <div class="tax-calculator-section">
+                                <div class="tax-calculator-header">
+                                    <h4 class="text-md font-semibold mb-3">Tax Calculator</h4>
+                                    <p class="text-sm text-muted-foreground mb-4">Enter your gross yearly income and province to auto-calculate taxes (2024 rates)</p>
+                                </div>
+                                
+                                <div class="tax-calculator-inputs">
+                                    <div class="form-group">
+                                        <label class="form-label" for="grossYearlyIncome">Gross Yearly Income</label>
+                                        <input type="number" class="form-input" id="grossYearlyIncome" placeholder="140000" min="0" step="1000">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label" for="provinceSelect">Province/Territory</label>
+                                        <div class="select-container">
+                                            <div class="select-trigger" onclick="toggleSlideOutSelect('province')" id="provinceTrigger">
+                                                <span id="provinceValue">Ontario</span>
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </div>
+                                            <div class="select-content" id="provinceContent">
+                                                <div class="select-item selected" data-value="ON">Ontario</div>
+                                                <div class="select-item" data-value="BC">British Columbia</div>
+                                                <div class="select-item" data-value="AB">Alberta</div>
+                                                <div class="select-item" data-value="SK">Saskatchewan</div>
+                                                <div class="select-item" data-value="MB">Manitoba</div>
+                                                <div class="select-item" data-value="QC">Quebec</div>
+                                                <div class="select-item" data-value="NB">New Brunswick</div>
+                                                <div class="select-item" data-value="NS">Nova Scotia</div>
+                                                <div class="select-item" data-value="PE">Prince Edward Island</div>
+                                                <div class="select-item" data-value="NL">Newfoundland and Labrador</div>
+                                                <div class="select-item" data-value="NT">Northwest Territories</div>
+                                                <div class="select-item" data-value="NU">Nunavut</div>
+                                                <div class="select-item" data-value="YT">Yukon</div>
+                                            </div>
+                                        </div>
+                                        <select id="provinceSelect" style="display: none;">
+                                            <option value="ON">Ontario</option>
+                                            <option value="BC">British Columbia</option>
+                                            <option value="AB">Alberta</option>
+                                            <option value="SK">Saskatchewan</option>
+                                            <option value="MB">Manitoba</option>
+                                            <option value="QC">Quebec</option>
+                                            <option value="NB">New Brunswick</option>
+                                            <option value="NS">Nova Scotia</option>
+                                            <option value="PE">Prince Edward Island</option>
+                                            <option value="NL">Newfoundland and Labrador</option>
+                                            <option value="NT">Northwest Territories</option>
+                                            <option value="NU">Nunavut</option>
+                                            <option value="YT">Yukon</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button type="button" class="calculate-btn" onclick="calculateTaxes()">Calculate Taxes</button>
+                                </div>
+                                
+                                <!-- Manual Override Section -->
+                                <div class="manual-override-section">
+                                    <div class="accordion-header" onclick="toggleAccordion('manualOverride')">
+                                        <h4 class="text-md font-semibold">Manual Override (Optional)</h4>
+                                        <i data-lucide="chevron-down" class="accordion-icon" id="manualOverrideIcon"></i>
+                                    </div>
+                                    <div class="accordion-content" id="manualOverrideContent">
+                                        <p class="text-sm text-muted-foreground mb-4">You can manually adjust the calculated values below if needed</p>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label" for="grossIncome">Gross Monthly Income</label>
+                                            <input type="number" class="form-input" id="grossIncome" placeholder="11667" min="0" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="federalTax">Federal Tax</label>
+                                            <input type="number" class="form-input" id="federalTax" placeholder="2500" min="0" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="provincialTax">Provincial Tax</label>
+                                            <input type="number" class="form-input" id="provincialTax" placeholder="750" min="0" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="cppEi">CPP/EI</label>
+                                            <input type="number" class="form-input" id="cppEi" placeholder="333" min="0" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="netIncome">Net Monthly Income</label>
+                                            <input type="number" class="form-input" id="netIncome" placeholder="8084" min="0" step="0.01">
+                                            <div class="form-help">Auto-calculated, but you can override if needed.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-divider"></div>
+                                
+                                <div class="tax-results" id="taxResults" style="display: none;">
+                                    <div class="tax-summary">
+                                        <div class="tax-item">
+                                            <div class="tax-label">Monthly Gross Income</div>
+                                            <div class="tax-value" id="monthlyGrossResult">$0.00</div>
+                                        </div>
+                                        <div class="tax-item">
+                                            <div class="tax-label">Federal Tax (Monthly)</div>
+                                            <div class="tax-value" id="federalTaxResult">$0.00</div>
+                                        </div>
+                                        <div class="tax-item">
+                                            <div class="tax-label">Provincial Tax (Monthly)</div>
+                                            <div class="tax-value" id="provincialTaxResult">$0.00</div>
+                                        </div>
+                                        <div class="tax-item">
+                                            <div class="tax-label">CPP/EI (Monthly)</div>
+                                            <div class="tax-value" id="cppEiResult">$0.00</div>
+                                        </div>
+                                        <div class="tax-item total">
+                                            <div class="tax-label">Net Monthly Income</div>
+                                            <div class="tax-value" id="netIncomeResult">$0.00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-lg font-semibold">Savings Goal</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label class="form-label" for="annualSavingsGoal">Annual Savings Goal</label>
+                                <input type="number" class="form-input" id="annualSavingsGoal" placeholder="52000" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="monthlySavingsTarget">Monthly Savings Target</label>
+                                <input type="number" class="form-input" id="monthlySavingsTarget" placeholder="4333" min="0" step="0.01" readonly>
+                                <div class="form-help">Auto-calculated from annual savings goal.</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-lg font-semibold">Expenses</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label class="form-label" for="fixedExpenses">Monthly Fixed Expenses</label>
+                                <input type="number" class="form-input" id="fixedExpenses" placeholder="2450" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="essentialExpenses">Monthly Essential Expenses</label>
+                                <input type="number" class="form-input" id="essentialExpenses" placeholder="750" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="discretionaryExpenses">Monthly Discretionary Expenses</label>
+                                <input type="number" class="form-input" id="discretionaryExpenses" placeholder="501" min="0" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-lg font-semibold">Budget Summary</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="budget-summary">
+                                <div class="budget-item">
+                                    <div class="budget-label">Remaining Budget</div>
+                                    <div class="budget-value" id="remainingBudgetSummary">$0.00</div>
+                                </div>
+                                <div class="budget-item">
+                                    <div class="budget-label">Savings Rate</div>
+                                    <div class="budget-value" id="savingsRateSummary">0%</div>
+                                </div>
+                                <div class="budget-item">
+                                    <div class="budget-label">Validation</div>
+                                    <div class="budget-value" id="budgetValidationSummary">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="add-btn" onclick="saveSimpleBudgetSettings()">Save Settings</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Add this just above the screens wrapper -->
         <div class="app-header">
             <div class="header-title" id="headerTitle">Spend</div>
             <div class="header-actions">
-                <button class="icon-btn" id="backButton" onclick="goToScreen(previousScreen)" aria-label="Back" style="display: none;">
-                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
-                </button>
-                <button class="icon-btn" id="settingsButton" onclick="goToScreen(3)" aria-label="Settings">
+                <button class="icon-btn" id="settingsButton" onclick="openSettings()" aria-label="Settings">
                     <i data-lucide="settings" class="w-6 h-6"></i>
                 </button>
             </div>
@@ -3616,193 +3904,7 @@
                     </div>
                 </div>
                 
-                <!-- Screen 3: Settings -->
-                <div class="screen" id="settingsScreen">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="text-lg font-semibold">Income & Taxes</h3>
-                        </div>
-                        <div class="card-content">
-                            <!-- Tax Calculator Section -->
-                            <div class="tax-calculator-section">
-                                <div class="tax-calculator-header">
-                                    <h4 class="text-md font-semibold mb-3">Tax Calculator</h4>
-                                    <p class="text-sm text-muted-foreground mb-4">Enter your gross yearly income and province to auto-calculate taxes (2024 rates)</p>
-                                </div>
-                                
-                                <div class="tax-calculator-inputs">
-                                    <div class="form-group">
-                                        <label class="form-label" for="grossYearlyIncome">Gross Yearly Income</label>
-                                        <input type="number" class="form-input" id="grossYearlyIncome" placeholder="140000" min="0" step="1000">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label" for="provinceSelect">Province/Territory</label>
-                                        <div class="select-container">
-                                            <div class="select-trigger" onclick="toggleSlideOutSelect('province')" id="provinceTrigger">
-                                                <span id="provinceValue">Ontario</span>
-                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                            </div>
-                                            <div class="select-content" id="provinceContent">
-                                                <div class="select-item selected" data-value="ON">Ontario</div>
-                                                <div class="select-item" data-value="BC">British Columbia</div>
-                                                <div class="select-item" data-value="AB">Alberta</div>
-                                                <div class="select-item" data-value="SK">Saskatchewan</div>
-                                                <div class="select-item" data-value="MB">Manitoba</div>
-                                                <div class="select-item" data-value="QC">Quebec</div>
-                                                <div class="select-item" data-value="NB">New Brunswick</div>
-                                                <div class="select-item" data-value="NS">Nova Scotia</div>
-                                                <div class="select-item" data-value="PE">Prince Edward Island</div>
-                                                <div class="select-item" data-value="NL">Newfoundland and Labrador</div>
-                                                <div class="select-item" data-value="NT">Northwest Territories</div>
-                                                <div class="select-item" data-value="NU">Nunavut</div>
-                                                <div class="select-item" data-value="YT">Yukon</div>
-                                            </div>
-                                        </div>
-                                        <select id="provinceSelect" style="display: none;">
-                                            <option value="ON">Ontario</option>
-                                            <option value="BC">British Columbia</option>
-                                            <option value="AB">Alberta</option>
-                                            <option value="SK">Saskatchewan</option>
-                                            <option value="MB">Manitoba</option>
-                                            <option value="QC">Quebec</option>
-                                            <option value="NB">New Brunswick</option>
-                                            <option value="NS">Nova Scotia</option>
-                                            <option value="PE">Prince Edward Island</option>
-                                            <option value="NL">Newfoundland and Labrador</option>
-                                            <option value="NT">Northwest Territories</option>
-                                            <option value="NU">Nunavut</option>
-                                            <option value="YT">Yukon</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <button type="button" class="calculate-btn" onclick="calculateTaxes()">Calculate Taxes</button>
-                                </div>
-                                
-                                <!-- Manual Override Section -->
-                                <div class="manual-override-section">
-                                    <div class="accordion-header" onclick="toggleAccordion('manualOverride')">
-                                        <h4 class="text-md font-semibold">Manual Override (Optional)</h4>
-                                        <i data-lucide="chevron-down" class="accordion-icon" id="manualOverrideIcon"></i>
-                                    </div>
-                                    <div class="accordion-content" id="manualOverrideContent">
-                                        <p class="text-sm text-muted-foreground mb-4">You can manually adjust the calculated values below if needed</p>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label" for="grossIncome">Gross Monthly Income</label>
-                                            <input type="number" class="form-input" id="grossIncome" placeholder="11667" min="0" step="0.01">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label" for="federalTax">Federal Tax</label>
-                                            <input type="number" class="form-input" id="federalTax" placeholder="2500" min="0" step="0.01">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label" for="provincialTax">Provincial Tax</label>
-                                            <input type="number" class="form-input" id="provincialTax" placeholder="750" min="0" step="0.01">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label" for="cppEi">CPP/EI</label>
-                                            <input type="number" class="form-input" id="cppEi" placeholder="333" min="0" step="0.01">
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="form-label" for="netIncome">Net Monthly Income</label>
-                                            <input type="number" class="form-input" id="netIncome" placeholder="8084" min="0" step="0.01">
-                                            <div class="form-help">Auto-calculated, but you can override if needed.</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-divider"></div>
-                                
-                                <div class="tax-results" id="taxResults" style="display: none;">
-                                    <div class="tax-summary">
-                                        <div class="tax-item">
-                                            <div class="tax-label">Monthly Gross Income</div>
-                                            <div class="tax-value" id="monthlyGrossResult">$0.00</div>
-                                        </div>
-                                        <div class="tax-item">
-                                            <div class="tax-label">Federal Tax (Monthly)</div>
-                                            <div class="tax-value" id="federalTaxResult">$0.00</div>
-                                        </div>
-                                        <div class="tax-item">
-                                            <div class="tax-label">Provincial Tax (Monthly)</div>
-                                            <div class="tax-value" id="provincialTaxResult">$0.00</div>
-                                        </div>
-                                        <div class="tax-item">
-                                            <div class="tax-label">CPP/EI (Monthly)</div>
-                                            <div class="tax-value" id="cppEiResult">$0.00</div>
-                                        </div>
-                                        <div class="tax-item total">
-                                            <div class="tax-label">Net Monthly Income</div>
-                                            <div class="tax-value" id="netIncomeResult">$0.00</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="text-lg font-semibold">Savings Goal</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="form-group">
-                                <label class="form-label" for="annualSavingsGoal">Annual Savings Goal</label>
-                                <input type="number" class="form-input" id="annualSavingsGoal" placeholder="52000" min="0" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="monthlySavingsTarget">Monthly Savings Target</label>
-                                <input type="number" class="form-input" id="monthlySavingsTarget" placeholder="4333" min="0" step="0.01" readonly>
-                                <div class="form-help">Auto-calculated from annual savings goal.</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="text-lg font-semibold">Expenses</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="form-group">
-                                <label class="form-label" for="fixedExpenses">Monthly Fixed Expenses</label>
-                                <input type="number" class="form-input" id="fixedExpenses" placeholder="2450" min="0" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="essentialExpenses">Monthly Essential Expenses</label>
-                                <input type="number" class="form-input" id="essentialExpenses" placeholder="750" min="0" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="discretionaryExpenses">Monthly Discretionary Expenses</label>
-                                <input type="number" class="form-input" id="discretionaryExpenses" placeholder="501" min="0" step="0.01">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="text-lg font-semibold">Budget Summary</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="budget-summary">
-                                <div class="budget-item">
-                                    <div class="budget-label">Remaining Budget</div>
-                                    <div class="budget-value" id="remainingBudgetSummary">$0.00</div>
-                                </div>
-                                <div class="budget-item">
-                                    <div class="budget-label">Savings Rate</div>
-                                    <div class="budget-value" id="savingsRateSummary">0%</div>
-                                </div>
-                                <div class="budget-item">
-                                    <div class="budget-label">Validation</div>
-                                    <div class="budget-value" id="budgetValidationSummary">-</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button type="button" class="add-btn" onclick="saveSimpleBudgetSettings()">Save Settings</button>
-                </div>
+
             </div>
         </div>
         
@@ -4138,7 +4240,6 @@
         let currentChartPeriod = 'ALL'; // '1M', '3M', '6M', 'YTD', '1Y', 'ALL' - Changed from YTD to ALL to show all balance data
         
         let currentScreen = 0;
-        let previousScreen = 0; // Track previous screen for back button functionality
         let spendingChart;
         
         // Storage keys
@@ -7436,7 +7537,6 @@
          */
         function updateHeaderTitle() {
             const headerTitle = document.getElementById('headerTitle');
-            const backButton = document.getElementById('backButton');
             const settingsButton = document.getElementById('settingsButton');
             
             if (!headerTitle) return;
@@ -7444,27 +7544,18 @@
             switch (currentScreen) {
                 case 0:
                     headerTitle.textContent = 'Spend';
-                    backButton.style.display = 'none';
                     settingsButton.style.display = 'block';
                     break;
                 case 1:
                     headerTitle.textContent = 'Save';
-                    backButton.style.display = 'none';
                     settingsButton.style.display = 'block';
                     break;
                 case 2:
                     headerTitle.textContent = 'Reports';
-                    backButton.style.display = 'none';
                     settingsButton.style.display = 'block';
-                    break;
-                case 3:
-                    headerTitle.textContent = 'Settings';
-                    backButton.style.display = 'block';
-                    settingsButton.style.display = 'none';
                     break;
                 default:
                     headerTitle.textContent = '';
-                    backButton.style.display = 'none';
                     settingsButton.style.display = 'block';
             }
         }
@@ -7472,11 +7563,6 @@
         // Update goToScreen to call updateHeaderTitle
         const originalGoToScreen = goToScreen;
         goToScreen = function(screenIndex) {
-            // Store previous screen only when going TO settings
-            if (screenIndex === 3) {
-                previousScreen = currentScreen;
-            }
-            
             currentScreen = screenIndex;
             const wrapper = document.getElementById('screensWrapper');
             wrapper.style.transform = `translateX(-${screenIndex * 100}vw)`;
@@ -7492,13 +7578,53 @@
                 setPeriodMode('today');
             } else if (screenIndex === 1) {
                 updateSaveScreen();
-            } else if (screenIndex === 3) {
-                loadSettings();
             }
         };
 
         document.addEventListener('DOMContentLoaded', function() {
             updateHeaderTitle();
+        });
+
+        // Settings Slide-out Functions
+        function openSettings() {
+            const overlay = document.getElementById('settingsOverlay');
+            const panel = document.getElementById('settingsPanel');
+            const appContainer = document.querySelector('.app-container');
+            
+            // Load settings data
+            loadSettings();
+            
+            // Show overlay and panel
+            overlay.classList.add('active');
+            panel.classList.add('active');
+            
+          
+            // Hide bottom navigation
+            document.querySelector('.bottom-nav').style.display = 'none';
+        }
+
+        function closeSettings() {
+            const overlay = document.getElementById('settingsOverlay');
+            const panel = document.getElementById('settingsPanel');
+            const appContainer = document.querySelector('.app-container');
+            
+            // Hide overlay and panel
+            overlay.classList.remove('active');
+            panel.classList.remove('active');
+    
+            
+            // Show bottom navigation
+            document.querySelector('.bottom-nav').style.display = 'flex';
+        }
+
+        // Close settings when clicking overlay
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('settingsOverlay');
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    closeSettings();
+                }
+            });
         });
 
         // Settings Functions
@@ -7612,6 +7738,7 @@
             }
             
             alert('Settings saved! All budgets and targets have been updated.');
+            closeSettings();
         }
 
         // Tax Calculator Functions
