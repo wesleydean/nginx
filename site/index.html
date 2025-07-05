@@ -3335,12 +3335,35 @@
             background-color: hsl(var(--background));
             z-index: 1001;
             overflow-y: auto;
-            transition: right 0.3s ease;
+            transition: right 0.3s ease, transform 0.3s ease;
             box-sizing: border-box;
         }
 
         .settings-panel.active {
             right: 0;
+        }
+
+        /* Budget panel transition */
+        .budget-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: hsl(var(--background));
+            z-index: 1002;
+            overflow-y: auto;
+            transition: right 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .budget-panel.active {
+            right: 0;
+        }
+
+        /* Settings panel slide transition when budget is open */
+        .settings-panel.budget-open {
+            transform: translateX(-10px);
         }
 
         /* Main content slide transition */
@@ -3395,6 +3418,9 @@
 
         @media (min-width: 768px) {
             .settings-panel {
+                width: 400px;
+            }
+            .budget-panel {
                 width: 400px;
             }
         }
@@ -3861,7 +3887,7 @@
     
     <!-- Budget Setup Slide-out -->
     <div class="settings-overlay" id="budgetOverlay">
-        <div class="settings-panel" id="budgetPanel">
+        <div class="budget-panel" id="budgetPanel">
             <div class="settings-header">
                 <button class="settings-back" onclick="closeBudgetSetup()" aria-label="Back">
                     <i data-lucide="arrow-left" class="w-6 h-6"></i>
@@ -8108,14 +8134,17 @@
         });
 
         function openBudgetSetup() {
-            // Close settings and open budget setup
-            closeSettings();
+            // Don't close settings, just slide to budget setup
             const budgetOverlay = document.getElementById('budgetOverlay');
             const budgetPanel = document.getElementById('budgetPanel');
+            const settingsPanel = document.getElementById('settingsPanel');
             
-            // Show budget overlay and panel using the same CSS classes as settings
+            // Show budget overlay and panel
             budgetOverlay.classList.add('active');
             budgetPanel.classList.add('active');
+            
+            // Slide settings panel left
+            settingsPanel.classList.add('budget-open');
             
             // Load existing settings into budget form
             loadBudgetSettings();
@@ -8124,10 +8153,14 @@
         function closeBudgetSetup() {
             const budgetOverlay = document.getElementById('budgetOverlay');
             const budgetPanel = document.getElementById('budgetPanel');
+            const settingsPanel = document.getElementById('settingsPanel');
             
             // Hide budget overlay and panel
             budgetOverlay.classList.remove('active');
             budgetPanel.classList.remove('active');
+            
+            // Slide settings panel back to center
+            settingsPanel.classList.remove('budget-open');
         }
         
         function loadBudgetSettings() {
