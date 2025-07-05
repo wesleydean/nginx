@@ -3072,6 +3072,79 @@
             align-items: center;
         }
 
+        /* Settings Screen Styles */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: hsl(var(--foreground));
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: hsl(var(--ring));
+            box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+        }
+
+        .form-help {
+            font-size: 0.75rem;
+            color: hsl(var(--muted-foreground));
+            margin-top: 0.25rem;
+        }
+
+        .budget-summary {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .budget-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: hsl(var(--muted));
+            border-radius: var(--radius);
+        }
+
+        .budget-label {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .budget-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+
+        .budget-value.positive {
+            color: hsl(var(--success));
+        }
+
+        .budget-value.negative {
+            color: hsl(var(--destructive));
+        }
+
+        .budget-value.warning {
+            color: hsl(var(--warning));
+        }
+
     </style>
 </head>
 <body>
@@ -3395,6 +3468,99 @@
                             <button class="chart-period-btn-wealthsimple" onclick="setChartPeriod('ALL')" id="periodALL">ALL</button>
                         </div>
                     </div>
+                </div>
+                
+                <!-- Screen 3: Settings -->
+                <div class="screen" id="settingsScreen">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-lg font-semibold">Income & Taxes</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label class="form-label" for="grossIncome">Gross Monthly Income</label>
+                                <input type="number" class="form-input" id="grossIncome" placeholder="11667" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="federalTax">Federal Tax</label>
+                                <input type="number" class="form-input" id="federalTax" placeholder="2500" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="provincialTax">Provincial Tax (Ontario)</label>
+                                <input type="number" class="form-input" id="provincialTax" placeholder="750" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="cppEi">CPP/EI</label>
+                                <input type="number" class="form-input" id="cppEi" placeholder="333" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="netIncome">Net Monthly Income</label>
+                                <input type="number" class="form-input" id="netIncome" placeholder="8084" min="0" step="0.01">
+                                <div class="form-help">Auto-calculated, but you can override if needed.</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-lg font-semibold">Savings Goal</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label class="form-label" for="annualSavingsGoal">Annual Savings Goal</label>
+                                <input type="number" class="form-input" id="annualSavingsGoal" placeholder="52000" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="monthlySavingsTarget">Monthly Savings Target</label>
+                                <input type="number" class="form-input" id="monthlySavingsTarget" placeholder="4333" min="0" step="0.01">
+                                <div class="form-help">Auto-calculated from annual, but you can override.</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-lg font-semibold">Expenses</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label class="form-label" for="fixedExpenses">Fixed Expenses (total)</label>
+                                <input type="number" class="form-input" id="fixedExpenses" placeholder="2450" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="essentialExpenses">Essential Expenses (total)</label>
+                                <input type="number" class="form-input" id="essentialExpenses" placeholder="750" min="0" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="discretionaryExpenses">Discretionary Expenses (total)</label>
+                                <input type="number" class="form-input" id="discretionaryExpenses" placeholder="501" min="0" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-lg font-semibold">Budget Summary</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="budget-summary">
+                                <div class="budget-item">
+                                    <div class="budget-label">Remaining Budget</div>
+                                    <div class="budget-value" id="remainingBudgetSummary">$0.00</div>
+                                </div>
+                                <div class="budget-item">
+                                    <div class="budget-label">Savings Rate</div>
+                                    <div class="budget-value" id="savingsRateSummary">0%</div>
+                                </div>
+                                <div class="budget-item">
+                                    <div class="budget-label">Validation</div>
+                                    <div class="budget-value" id="budgetValidationSummary">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="add-btn" onclick="saveSimpleBudgetSettings()">Save Settings</button>
                 </div>
             </div>
         </div>
@@ -3739,11 +3905,46 @@
         const SAVINGS_ACCOUNTS_KEY = 'savingsAccounts';
         const ACCOUNT_BALANCES_KEY = 'accountBalances';
         
-        // Budget constants
-        const DAILY_BUDGET = 41.30;
-        const WEEKLY_BUDGET = 286;
-        const MONTHLY_BUDGET = 1239;
-        const MONTHLY_SAVINGS_TARGET = 4333;
+        // Budget functions that get values from settings
+        function getDailyBudget() {
+            const settings = getSimpleBudgetSettings();
+            const discretionaryBudget = settings.discretionaryExpenses || 501;
+            return discretionaryBudget / 30; // Daily discretionary budget
+        }
+        
+        function getWeeklyBudget() {
+            return getDailyBudget() * 7;
+        }
+        
+        function getMonthlyBudget() {
+            const settings = getSimpleBudgetSettings();
+            return (settings.essentialExpenses || 750) + (settings.discretionaryExpenses || 501);
+        }
+        
+        function getMonthlySavingsTarget() {
+            const settings = getSimpleBudgetSettings();
+            return settings.monthlySavingsTarget || 4333;
+        }
+        
+        function getSimpleBudgetSettings() {
+            const savedSettings = localStorage.getItem('simpleBudgetSettings');
+            if (savedSettings) {
+                return JSON.parse(savedSettings);
+            }
+            // Return default values if no settings saved
+            return {
+                grossIncome: 11667,
+                federalTax: 2500,
+                provincialTax: 750,
+                cppEi: 333,
+                netIncome: 8084,
+                annualSavingsGoal: 52000,
+                monthlySavingsTarget: 4333,
+                fixedExpenses: 2450,
+                essentialExpenses: 750,
+                discretionaryExpenses: 501
+            };
+        }
         
         // Savings tracking variables
         savingsAccounts = [];
@@ -3840,7 +4041,7 @@
                 }
             }
             
-            const budget = currentPeriodMode === 'today' ? DAILY_BUDGET : MONTHLY_BUDGET;
+            const budget = currentPeriodMode === 'today' ? getDailyBudget() : getMonthlyBudget();
             const remaining = budget - totalSpent;
             
             // Update display elements if they exist
@@ -4043,15 +4244,15 @@
             const projectedTotalSpending = monthlySpent + projectedAdditionalSpending;
             
             // Calculate projected monthly savings
-            const projectedMonthlySavings = Math.max(0, MONTHLY_BUDGET - projectedTotalSpending);
+            const projectedMonthlySavings = Math.max(0, getMonthlyBudget() - projectedTotalSpending);
             
             // Calculate days left in budget (at current burn rate)
-            const remainingBudget = MONTHLY_BUDGET - monthlySpent;
+            const remainingBudget = getMonthlyBudget() - monthlySpent;
             const daysLeftInBudget = dailyBurnRate > 0 ? Math.floor(remainingBudget / dailyBurnRate) : remainingDaysInMonth;
             
             // Calculate savings rate (assuming budget = income - required savings)
             // This is an approximation - in reality, we'd need income data
-            const assumedIncome = MONTHLY_BUDGET + MONTHLY_SAVINGS_TARGET;
+            const assumedIncome = getMonthlyBudget() + getMonthlySavingsTarget();
             const projectedSavings = assumedIncome - projectedTotalSpending;
             const savingsRate = (projectedSavings / assumedIncome) * 100;
             
@@ -4061,7 +4262,7 @@
             const projectedMonthlySavingsEl = document.getElementById('projectedMonthlySavings');
             
             if (weeklySpentEl) weeklySpentEl.textContent = formatCurrencyWhole(weeklySpent);
-            if (weeklyRemainingEl) weeklyRemainingEl.textContent = formatCurrencyWhole(Math.max(0, WEEKLY_BUDGET - weeklySpent));
+            if (weeklyRemainingEl) weeklyRemainingEl.textContent = formatCurrencyWhole(Math.max(0, getWeeklyBudget() - weeklySpent));
             if (projectedMonthlySavingsEl) projectedMonthlySavingsEl.textContent = formatCurrencyWhole(projectedMonthlySavings);
             
             // Update monthly stats
@@ -4077,14 +4278,14 @@
             // Update month spent with percentage indicator
             if (monthlySpentEl) monthlySpentEl.textContent = formatCurrencyWhole(monthlySpent);
             if (monthSpentSubtitleEl) {
-                const percentUsed = (monthlySpent / MONTHLY_BUDGET) * 100;
-                monthSpentSubtitleEl.textContent = `${percentUsed.toFixed(0)}% of ${formatCurrency(MONTHLY_BUDGET)} budget`;
+                            const percentUsed = (monthlySpent / getMonthlyBudget()) * 100;
+            monthSpentSubtitleEl.textContent = `${percentUsed.toFixed(0)}% of ${formatCurrency(getMonthlyBudget())} budget`;
             }
             
             // Update daily burn rate with status
             if (dailyBurnRateEl) dailyBurnRateEl.textContent = formatCurrencyWhole(dailyBurnRate);
             if (burnRateStatusEl) {
-                const dailyTarget = MONTHLY_BUDGET / daysInMonth;
+                const dailyTarget = getMonthlyBudget() / daysInMonth;
                 const difference = dailyTarget - dailyBurnRate;
                 let burnRateStatus = '';
                 
@@ -4131,7 +4332,7 @@
                 savingsRateEl.textContent = `${Math.max(0, savingsRate).toFixed(0)}%`;
                 
                 // Styling based on savings goal
-                const targetSavingsRate = (MONTHLY_SAVINGS_TARGET / assumedIncome) * 100;
+                const targetSavingsRate = (getMonthlySavingsTarget() / assumedIncome) * 100;
                 if (savingsRate >= targetSavingsRate) {
                     savingsRateEl.className = 'stat-value positive';
                 } else if (savingsRate >= targetSavingsRate * 0.7) {
@@ -4142,7 +4343,7 @@
             }
             
             if (savingsRateSubtitleEl) {
-                savingsRateSubtitleEl.textContent = `vs ${(MONTHLY_SAVINGS_TARGET / assumedIncome * 100).toFixed(0)}% target`;
+                savingsRateSubtitleEl.textContent = `vs ${(getMonthlySavingsTarget() / assumedIncome * 100).toFixed(0)}% target`;
             }
             
             // Update month name in labels
@@ -6574,7 +6775,7 @@
             
             if (currentSavePeriodMode === 'today') {
                 // Daily saving target (monthly target divided by days in month)
-                targetAmount = MONTHLY_SAVINGS_TARGET / daysInMonth;
+                targetAmount = getMonthlySavingsTarget() / daysInMonth;
                 periodLabel = 'Daily Saving Target';
                 description = 'daily saving target';
                 
@@ -6584,7 +6785,7 @@
                 }
             } else {
                 // Monthly saving target
-                targetAmount = MONTHLY_SAVINGS_TARGET;
+                targetAmount = getMonthlySavingsTarget();
                 periodLabel = `${selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} Saving Target`;
                 description = 'monthly saving target';
                 
@@ -7033,6 +7234,143 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             updateHeaderTitle();
+        });
+
+        // Settings Functions
+        function loadSettings() {
+            loadSimpleBudgetSettings();
+            updateSimpleBudgetSummary();
+        }
+
+        function updateSimpleBudgetSummary() {
+            // Get values from inputs
+            const grossIncome = parseFloat(document.getElementById('grossIncome').value) || 0;
+            const federalTax = parseFloat(document.getElementById('federalTax').value) || 0;
+            const provincialTax = parseFloat(document.getElementById('provincialTax').value) || 0;
+            const cppEi = parseFloat(document.getElementById('cppEi').value) || 0;
+            let netIncome = parseFloat(document.getElementById('netIncome').value) || 0;
+            const annualSavingsGoal = parseFloat(document.getElementById('annualSavingsGoal').value) || 0;
+            let monthlySavingsTarget = parseFloat(document.getElementById('monthlySavingsTarget').value) || 0;
+            const fixedExpenses = parseFloat(document.getElementById('fixedExpenses').value) || 0;
+            const essentialExpenses = parseFloat(document.getElementById('essentialExpenses').value) || 0;
+            const discretionaryExpenses = parseFloat(document.getElementById('discretionaryExpenses').value) || 0;
+
+            // Auto-calculate net income if not manually overridden
+            const calculatedNet = grossIncome - federalTax - provincialTax - cppEi;
+            if (!document.getElementById('netIncome').dataset.manual) {
+                document.getElementById('netIncome').value = calculatedNet > 0 ? calculatedNet.toFixed(2) : '';
+                netIncome = calculatedNet;
+            }
+
+            // Auto-calculate monthly savings target if not manually overridden
+            const calculatedMonthlySavings = annualSavingsGoal / 12;
+            if (!document.getElementById('monthlySavingsTarget').dataset.manual) {
+                document.getElementById('monthlySavingsTarget').value = calculatedMonthlySavings > 0 ? calculatedMonthlySavings.toFixed(2) : '';
+                monthlySavingsTarget = calculatedMonthlySavings;
+            }
+
+            // Calculate remaining budget
+            const totalExpenses = fixedExpenses + essentialExpenses + discretionaryExpenses;
+            const remainingBudget = netIncome - monthlySavingsTarget - totalExpenses;
+            document.getElementById('remainingBudgetSummary').textContent = '$' + remainingBudget.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            // Calculate savings rate
+            const savingsRate = netIncome > 0 ? (monthlySavingsTarget / netIncome) * 100 : 0;
+            document.getElementById('savingsRateSummary').textContent = savingsRate.toFixed(1) + '%';
+
+            // Validation
+            let validation = '-';
+            if (remainingBudget >= -10 && remainingBudget <= 10) {
+                validation = '✅ Tight but feasible';
+            } else if (remainingBudget > 10) {
+                validation = '✅ Feasible';
+            } else {
+                validation = '⚠️ Over budget';
+            }
+            document.getElementById('budgetValidationSummary').textContent = validation;
+        }
+
+        function loadSimpleBudgetSettings() {
+            const savedSettings = localStorage.getItem('simpleBudgetSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                
+                // Populate form fields with saved values
+                document.getElementById('grossIncome').value = settings.grossIncome || '';
+                document.getElementById('federalTax').value = settings.federalTax || '';
+                document.getElementById('provincialTax').value = settings.provincialTax || '';
+                document.getElementById('cppEi').value = settings.cppEi || '';
+                document.getElementById('netIncome').value = settings.netIncome || '';
+                document.getElementById('annualSavingsGoal').value = settings.annualSavingsGoal || '';
+                document.getElementById('monthlySavingsTarget').value = settings.monthlySavingsTarget || '';
+                document.getElementById('fixedExpenses').value = settings.fixedExpenses || '';
+                document.getElementById('essentialExpenses').value = settings.essentialExpenses || '';
+                document.getElementById('discretionaryExpenses').value = settings.discretionaryExpenses || '';
+            } else {
+                // Set default values based on your budget breakdown
+                document.getElementById('grossIncome').value = '11667';
+                document.getElementById('federalTax').value = '2500';
+                document.getElementById('provincialTax').value = '750';
+                document.getElementById('cppEi').value = '333';
+                document.getElementById('netIncome').value = '8084';
+                document.getElementById('annualSavingsGoal').value = '52000';
+                document.getElementById('monthlySavingsTarget').value = '4333';
+                document.getElementById('fixedExpenses').value = '2450';
+                document.getElementById('essentialExpenses').value = '750';
+                document.getElementById('discretionaryExpenses').value = '501';
+            }
+        }
+
+        function saveSimpleBudgetSettings() {
+            const settings = {
+                grossIncome: parseFloat(document.getElementById('grossIncome').value) || 0,
+                federalTax: parseFloat(document.getElementById('federalTax').value) || 0,
+                provincialTax: parseFloat(document.getElementById('provincialTax').value) || 0,
+                cppEi: parseFloat(document.getElementById('cppEi').value) || 0,
+                netIncome: parseFloat(document.getElementById('netIncome').value) || 0,
+                annualSavingsGoal: parseFloat(document.getElementById('annualSavingsGoal').value) || 0,
+                monthlySavingsTarget: parseFloat(document.getElementById('monthlySavingsTarget').value) || 0,
+                fixedExpenses: parseFloat(document.getElementById('fixedExpenses').value) || 0,
+                essentialExpenses: parseFloat(document.getElementById('essentialExpenses').value) || 0,
+                discretionaryExpenses: parseFloat(document.getElementById('discretionaryExpenses').value) || 0
+            };
+            localStorage.setItem('simpleBudgetSettings', JSON.stringify(settings));
+            
+            // Update all displays to reflect new settings
+            updatePeriodView();
+            updateReports();
+            updateSaveScreen();
+            
+            alert('Settings saved! All budgets and targets have been updated.');
+        }
+
+        // Add event listeners for settings inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mark manual override for net income and monthly savings target
+            ['netIncome', 'monthlySavingsTarget'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', function() {
+                        this.dataset.manual = 'true';
+                        updateSimpleBudgetSummary();
+                    });
+                }
+            });
+
+            // Update summary on all input changes
+            ['grossIncome','federalTax','provincialTax','cppEi','annualSavingsGoal','fixedExpenses','essentialExpenses','discretionaryExpenses'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', function() {
+                        updateSimpleBudgetSummary();
+                    });
+                }
+            });
+
+            // Initial update if on settings screen
+            if (currentScreen === 3) {
+                updateSimpleBudgetSummary();
+            }
         });
 
     </script>
