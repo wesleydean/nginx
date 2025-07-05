@@ -2897,42 +2897,44 @@
             gap: 12px;
             padding: 0.7em 1.6em;
             background: #fff;
-            color: hsl(var(--primary));
-            border: 2px solid hsl(var(--primary));
-            border-radius: 999px;
+            color: hsl(var(--foreground));
+            border: 1.5px solid #e1e4e8;
+            border-radius: 12px;
             font-size: 1.08rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             transition: 
-                background 0.18s,
-                border-color 0.18s,
-                color 0.18s,
+                box-shadow 0.16s,
+                border-color 0.16s,
+                background 0.16s,
+                color 0.16s,
                 transform 0.12s;
-            box-shadow: none;
+            box-shadow: 0 1.5px 6px 0 rgba(27,31,35,0.04);
             margin: 0;
             min-height: 44px;
             outline: none;
         }
         .quick-action-card:hover,
         .quick-action-card:focus {
-            background: hsl(var(--primary) / 0.06);
-            border-color: hsl(var(--primary));
+            border-color: #c8ccd1;
+            box-shadow: 0 4px 12px 0 rgba(27,31,35,0.08);
+            background: #f6f8fa;
         }
         .quick-action-card:active {
-            background: hsl(var(--primary) / 0.12);
-            border-color: hsl(var(--primary));
-            color: hsl(var(--primary));
-            transform: scale(0.97);
+            background: #f3f4f6;
+            border-color: #b1b5bb;
+            color: hsl(var(--foreground));
+            transform: scale(0.98);
         }
         .quick-action-icon {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 2em;
-            height: 2em;
-            background: hsl(var(--primary) / 0.08);
+            width: 1.7em;
+            height: 1.7em;
+            background: none;
             border-radius: 50%;
-            color: hsl(var(--primary));
+            color: hsl(var(--foreground));
             font-size: 1.1em;
             margin: 0;
         }
@@ -2941,7 +2943,8 @@
             font-weight: 500;
             margin: 0;
             padding: 0;
-            color: hsl(var(--primary));
+            color: hsl(var(--foreground));
+            letter-spacing: 0.01em;
         }
 
         .fab-option:active {
