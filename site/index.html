@@ -2034,7 +2034,7 @@
         .balance-amount {
             font-size: 1.1rem;
             font-weight: 700;
-            color: hsl(var(--success));
+            color: hsl(var(--foreground));
         }
         
         .delete-balance-btn {
@@ -2848,7 +2848,7 @@
             justify-content: center;
             width: 2em;
             height: 2em;
-            background: #fff;
+            background: #ffffff48;
             border-radius: 50%;
             color: hsl(var(--primary));
             font-size: 1.1em;
@@ -2896,20 +2896,33 @@
             justify-content: center;
             gap: 12px;
             padding: 0.7em 1.6em;
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            border: none;
-            border-radius: 10px;
+            background: #fff;
+            color: hsl(var(--primary));
+            border: 2px solid hsl(var(--primary));
+            border-radius: 999px;
             font-size: 1.08rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: 
+                background 0.18s,
+                border-color 0.18s,
+                color 0.18s,
+                transform 0.12s;
             box-shadow: none;
             margin: 0;
             min-height: 44px;
+            outline: none;
         }
-        .quick-action-card:hover {
-            background: hsl(var(--primary) / 0.92);
+        .quick-action-card:hover,
+        .quick-action-card:focus {
+            background: hsl(var(--primary) / 0.06);
+            border-color: hsl(var(--primary));
+        }
+        .quick-action-card:active {
+            background: hsl(var(--primary) / 0.12);
+            border-color: hsl(var(--primary));
+            color: hsl(var(--primary));
+            transform: scale(0.97);
         }
         .quick-action-icon {
             display: flex;
@@ -2917,7 +2930,7 @@
             justify-content: center;
             width: 2em;
             height: 2em;
-            background: #fff;
+            background: hsl(var(--primary) / 0.08);
             border-radius: 50%;
             color: hsl(var(--primary));
             font-size: 1.1em;
@@ -2928,7 +2941,7 @@
             font-weight: 500;
             margin: 0;
             padding: 0;
-            color: #fff;
+            color: hsl(var(--primary));
         }
 
         .fab-option:active {
@@ -2978,6 +2991,10 @@
             grid-column: 1 / -1;
             width: 100%;
             max-width: none;
+        }
+
+        .expense-amount.positive {
+          color: hsl(var(--foreground));
         }
 
     </style>
@@ -3163,7 +3180,6 @@
                     <div class="card" id="saveTargetDisplay">
                         <div class="card-header" style="text-align:center;">
                             <div id="saveTargetTitleContainer" style="text-align:left;"></div>
-                            <p class="card-description" id="saveTargetDescription" style="text-align:left;">monthly saving target</p>
                         </div>
                         <div class="card-content">
                             <div class="flex items-center justify-between p-4 rounded-lg mb-2 stat-card">
