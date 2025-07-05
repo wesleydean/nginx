@@ -2360,14 +2360,13 @@
         .slide-out-close {
             background-color: hsl(var(--muted));
             border: none;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
             color: hsl(var(--foreground));
             transition: all 150ms ease;
         }
@@ -2438,14 +2437,13 @@
         .account-management-close {
             background-color: hsl(var(--muted));
             border: none;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
             color: hsl(var(--foreground));
             transition: all 150ms ease;
         }
@@ -4107,7 +4105,9 @@
         <div class="slide-out-content">
             <div class="slide-out-header">
                 <h3 class="slide-out-title">Add Expense</h3>
-                <button class="slide-out-close" onclick="hideExpenseSlideOut()">×</button>
+                <button class="slide-out-close" onclick="hideExpenseSlideOut()">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
             
             <div class="slide-out-form">
@@ -4203,7 +4203,9 @@
         <div class="slide-out-content">
             <div class="slide-out-header">
                 <h3 class="slide-out-title">Record Balance</h3>
-                <button class="slide-out-close" onclick="hideBalanceSlideOut()">×</button>
+                <button class="slide-out-close" onclick="hideBalanceSlideOut()">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
             
             <div class="slide-out-form">
@@ -4277,7 +4279,9 @@
         <div class="account-management-content">
             <div class="account-management-header">
                 <h3 class="account-management-title">Manage Accounts</h3>
-                <button class="account-management-close" onclick="hideAccountManagementSlideOut()">×</button>
+                <button class="account-management-close" onclick="hideAccountManagementSlideOut()">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
             </div>
             
             <div class="account-management-list" id="accountManagementList">
