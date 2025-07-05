@@ -1748,19 +1748,20 @@
         
         .chart-crosshair {
             position: absolute;
-            width: 1px;
+            width: 2px;
             height: 100%;
-            background: rgba(16, 185, 129, 0.6); /* Match green savings color */
+            background: #222;
             opacity: 0;
             transition: opacity 0.15s ease, left 0.05s linear;
             pointer-events: none;
+            z-index: 20;
         }
         
         /* Make crosshair more visible on mobile */
         @media (hover: none) and (pointer: coarse) {
             .chart-crosshair {
-                width: 2px;
-                background: rgba(16, 185, 129, 0.7);
+                width: 3px;
+                background: #222;
             }
         }
         
@@ -4528,46 +4529,47 @@
             function showChartInteraction(activeIndex) {
                 if (!spendingChart || !spendingChart.data || !spendingChart.data.datasets) return;
                 
-                // Show only the active point with hollow circles
+                // Show only the active point with hollow shapes
                 spendingChart.data.datasets.forEach((dataset, datasetIndex) => {
                     // Reset all point properties to ensure clean state
                     dataset.pointRadius = new Array(dataset.data.length).fill(0);
                     dataset.pointBackgroundColor = new Array(dataset.data.length).fill('transparent');
                     dataset.pointBorderColor = new Array(dataset.data.length).fill('transparent');
                     dataset.pointBorderWidth = new Array(dataset.data.length).fill(0);
+                    dataset.pointStyle = new Array(dataset.data.length).fill('circle');
                     dataset.pointHoverRadius = new Array(dataset.data.length).fill(0);
                     dataset.pointHoverBackgroundColor = new Array(dataset.data.length).fill('transparent');
                     dataset.pointHoverBorderColor = new Array(dataset.data.length).fill('transparent');
                     dataset.pointHoverBorderWidth = new Array(dataset.data.length).fill(0);
                     
-                    // Show only the active point with hollow circle
+                    // Show only the active point with hollow shape
                     if (activeIndex >= 0 && activeIndex < dataset.data.length) {
-                        dataset.pointRadius[activeIndex] = datasetIndex === 0 ? 8 : 6; // Larger for savings
-                        
-                        // Set hollow circle properties for the active point only
                         if (datasetIndex === 0) {
-                            // Savings dataset - green hollow circle
-                            dataset.pointBackgroundColor[activeIndex] = 'transparent';
+                            // Savings dataset - hollow green circle
+                            dataset.pointRadius[activeIndex] = 8;
+                            dataset.pointBackgroundColor[activeIndex] = '#fff';
                             dataset.pointBorderColor[activeIndex] = 'rgb(16, 185, 129)';
                             dataset.pointBorderWidth[activeIndex] = 3;
+                            dataset.pointStyle[activeIndex] = 'circle';
                             // Also set hover properties for the active point
                             dataset.pointHoverRadius[activeIndex] = 8;
-                            dataset.pointHoverBackgroundColor[activeIndex] = 'transparent';
+                            dataset.pointHoverBackgroundColor[activeIndex] = '#fff';
                             dataset.pointHoverBorderColor[activeIndex] = 'rgb(16, 185, 129)';
                             dataset.pointHoverBorderWidth[activeIndex] = 3;
                         } else {
-                            // Spending dataset - gray hollow circle
-                            dataset.pointBackgroundColor[activeIndex] = 'transparent';
+                            // Spending dataset - hollow gray square
+                            dataset.pointRadius[activeIndex] = 7;
+                            dataset.pointBackgroundColor[activeIndex] = '#fff';
                             dataset.pointBorderColor[activeIndex] = 'rgb(107, 114, 128)';
-                            dataset.pointBorderWidth[activeIndex] = 2;
+                            dataset.pointBorderWidth[activeIndex] = 2.5;
+                            dataset.pointStyle[activeIndex] = 'rect';
                             // Also set hover properties for the active point
-                            dataset.pointHoverRadius[activeIndex] = 6;
-                            dataset.pointHoverBackgroundColor[activeIndex] = 'transparent';
+                            dataset.pointHoverRadius[activeIndex] = 7;
+                            dataset.pointHoverBackgroundColor[activeIndex] = '#fff';
                             dataset.pointHoverBorderColor[activeIndex] = 'rgb(107, 114, 128)';
-                            dataset.pointHoverBorderWidth[activeIndex] = 2;
+                            dataset.pointHoverBorderWidth[activeIndex] = 2.5;
                         }
                     }
-                    
                     // Keep normal line width
                     dataset.borderWidth = datasetIndex === 0 ? 3 : 2.5;
                 });
