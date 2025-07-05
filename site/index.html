@@ -1295,10 +1295,6 @@
             color: hsl(var(--success));
         }
         
-        .stat-subtitle.negative {
-            color: hsl(var(--destructive));
-        }
-        
         .stat-subtitle.warning {
             color: hsl(var(--warning));
         }
@@ -1964,8 +1960,6 @@
             background-color: hsl(var(--secondary) / 0.8);
         }
         
-        /* Remove old account-tabs styles */
-        
         /* Mobile responsive for section header */
         @media (max-width: 480px) {
             .section-header h3 {
@@ -2103,8 +2097,8 @@
         }
         
         .balance-history {
-            max-height: 700px;
-            overflow-y: auto;
+            max-height: none !important;
+            overflow-y: visible !important;
         }
         
         .balance-item {
@@ -5429,7 +5423,7 @@
         }
         
         // Global variables
-        currentPeriodMode = 'today'; // or 'month'
+        currentPeriodMode = 'month'; // or 'month'
         savingsAccounts = [
             { id: 'checking', name: 'Checking' },
             { id: 'savings', name: 'Savings' },
@@ -6383,7 +6377,7 @@
             initializeSlideOutClickOutside();
             
             // Initialize period mode
-            setPeriodMode('today');
+            setPeriodMode('month');
             
             // Set chart period to ALL by default to show all balance data
             currentChartPeriod = 'ALL';
@@ -7627,112 +7621,90 @@
             
             if (!historyContainer) return;
             
-            // Get balance records based on current period mode
-            const balanceRecords = [];
-            const today = getCurrentDate();
-            
-            Object.keys(balances).forEach(accountId => {
-                const accountBalances = balances[accountId] || {};
-                Object.keys(accountBalances).forEach(date => {
-                    let shouldInclude = false;
-                    
-                    if (currentSavePeriodMode === 'today') {
-                        // Only show today's balance records
-                        shouldInclude = date === today;
-                    } else {
-                        // Show all balance records for the selected month
-                        const selectedMonthKey = getSelectedSaveMonthKey();
-                        shouldInclude = date.startsWith(selectedMonthKey);
-                    }
-                    
-                    if (shouldInclude) {
-                        const balance = accountBalances[date];
-                        if (balance) {
-                            const accountName = savingsAccounts.find(acc => acc.id === accountId)?.name || accountId;
-                            balanceRecords.push({
-                                date: date,
-                                accountId: accountId,
-                                accountName: accountName,
-                                amount: balance,
-                                timestamp: new Date(date).getTime()
-                            });
-                        }
-                    }
-                });
+            // Group balance records by account for the selected month
+            const selectedMonthKey = getSelectedSaveMonthKey();
+            const previousMonth = new Date(selectedSaveMonthDate);
+            previousMonth.setMonth(previousMonth.getMonth() - 1);
+            const previousMonthKey = `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, '0')}`;
+
+            // Prepare grouped data
+            const grouped = {};
+            savingsAccounts.forEach(account => {
+                const accountBalances = balances[account.id] || {};
+                // Get all updates for the selected month
+                const monthUpdates = Object.keys(accountBalances)
+                    .filter(date => date.startsWith(selectedMonthKey))
+                    .map(date => ({
+                        date,
+                        amount: accountBalances[date],
+                        timestamp: new Date(date).getTime()
+                    }))
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+                // Get last value from previous month
+                const prevMonthDates = Object.keys(accountBalances)
+                    .filter(date => date.startsWith(previousMonthKey))
+                    .sort();
+                const prevMonthLastDate = prevMonthDates.length > 0 ? prevMonthDates[prevMonthDates.length - 1] : null;
+                const prevMonthLastValue = prevMonthLastDate ? accountBalances[prevMonthLastDate] : 0;
+                grouped[account.id] = {
+                    name: account.name,
+                    monthUpdates,
+                    prevMonthLastValue
+                };
             });
-            
-            if (balanceRecords.length === 0) {
-                let noDataMessage;
-                if (currentSavePeriodMode === 'today') {
-                    noDataMessage = 'No balance records today';
-                } else {
-                    const selectedMonthName = selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-                    noDataMessage = `No balance records for ${selectedMonthName}`;
-                }
-                historyContainer.innerHTML = `<div style="text-align: center; color: #7f8c8d; padding: 20px;">${noDataMessage}</div>`;
+
+            // Render accordions
+            let html = '';
+            let anyData = false;
+            Object.keys(grouped).forEach(accountId => {
+                const { name, monthUpdates, prevMonthLastValue } = grouped[accountId];
+                if (monthUpdates.length === 0) return; // Only show accounts with data
+                anyData = true;
+                // Latest value for the selected month
+                const latest = monthUpdates[monthUpdates.length - 1];
+                // Accordion header: account name and latest value
+                html += `<div class="account-accordion" data-account-id="${accountId}">
+                    <div class="account-accordion-header" onclick="toggleAccountAccordion('${accountId}')">
+                        <span class="account-accordion-title">${name}</span>
+                        <span class="account-accordion-value">${formatCurrency(latest.amount)}</span>
+                        <span class="account-accordion-chevron" id="chevron-${accountId}">&#9660;</span>
+                    </div>
+                    <div class="account-accordion-body" id="accordion-body-${accountId}" style="display:none;">
+                        <div class="account-accordion-updates">`;
+                let prevValue = prevMonthLastValue;
+                monthUpdates.forEach(update => {
+                    const diff = update.amount - prevValue;
+                    const percent = prevValue !== 0 ? (diff / prevValue) * 100 : 0;
+                    const sign = diff > 0 ? '+' : '';
+                    const percentClass = percent > 0 ? 'positive' : percent < 0 ? 'negative' : 'neutral';
+                    const dateObj = new Date(update.date);
+                    const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    html += `<div class="account-update-row">
+                        <div class="account-update-date">${displayDate}</div>
+                        <div class="account-update-diff">${sign}${formatCurrency(diff)}</div>
+                        <div class="account-update-percent ${percentClass}">${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%</div>
+                    </div>`;
+                    prevValue = update.amount;
+                });
+                html += `</div></div></div>`;
+            });
+            if (!anyData) {
+                const selectedMonthName = selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                html = `<div style="text-align: center; color: #7f8c8d; padding: 20px;">No balance records for ${selectedMonthName}</div>`;
+            }
+            historyContainer.innerHTML = html;
+        }
+
+        // Accordion toggle function
+        function toggleAccountAccordion(accountId) {
+            const body = document.getElementById(`accordion-body-${accountId}`);
+            const chevron = document.getElementById(`chevron-${accountId}`);
+            if (body.style.display === 'none') {
+                body.style.display = 'block';
+                if (chevron) chevron.innerHTML = '&#9650;'; // Up
             } else {
-                if (currentSavePeriodMode === 'month') {
-                    // Group by account for month view
-                    const grouped = {};
-                    balanceRecords.forEach(item => {
-                        if (!grouped[item.accountId]) grouped[item.accountId] = [];
-                        grouped[item.accountId].push(item);
-                    });
-                    
-                    historyContainer.innerHTML = Object.keys(grouped).map(accountId => {
-                        const accountName = grouped[accountId][0].accountName;
-                        const balancesList = grouped[accountId]
-                            .sort((a, b) => {
-                                const dateA = a.date.split('-').map(Number);
-                                const dateB = b.date.split('-').map(Number);
-                                const dateObjA = new Date(dateA[0], dateA[1] - 1, dateA[2]);
-                                const dateObjB = new Date(dateB[0], dateB[1] - 1, dateB[2]);
-                                return dateObjB - dateObjA;
-                            })
-                            .map(item => {
-                                const dateObj = new Date(item.date);
-                                const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                                
-                                return `
-                                    <div class="swipe-container" data-type="balance" data-date="${item.date}" data-timestamp="${item.timestamp}">
-                                        <div class="swipe-content">
-                                            <div class="expense-item">
-                                                <div class="expense-details">
-                                                    <div class="expense-description">${displayDate}</div>
-                                                    <div class="expense-category">Balance Update</div>
-                                                </div>
-                                                <div class="expense-amount positive">${formatCurrency(item.amount)}</div>
-                                            </div>
-                                        </div>
-                                        <div class="swipe-action" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</div>
-                                    </div>
-                                `;
-                            }).join('');
-                        
-                        return `<div style="margin-bottom:1.5rem;"><div style="font-weight:600;font-size:1rem;margin-bottom:0.5rem;">${accountName}</div>${balancesList}</div>`;
-                    }).join('');
-                } else {
-                    // Today view: show today's records without grouping
-                    historyContainer.innerHTML = balanceRecords.map(balance => {
-                        const dateObj = new Date(balance.date);
-                        const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        
-                        return `
-                            <div class="swipe-container" data-type="balance" data-date="${balance.date}" data-timestamp="${balance.timestamp}">
-                                <div class="swipe-content">
-                                    <div class="expense-item">
-                                        <div class="expense-details">
-                                            <div class="expense-description">${balance.accountName}</div>
-                                            <div class="expense-category">${displayDate} • Balance Update</div>
-                                        </div>
-                                        <div class="expense-amount positive">${formatCurrency(balance.amount)}</div>
-                                    </div>
-                                </div>
-                                <div class="swipe-action" onclick="deleteBalance('${balance.accountId}', '${balance.date}')">✕</div>
-                            </div>
-                        `;
-                    }).join('');
-                }
+                body.style.display = 'none';
+                if (chevron) chevron.innerHTML = '&#9660;'; // Down
             }
         }
 
