@@ -3399,18 +3399,18 @@
                         <h3 class="card-title mb-4" id="expenseInputTitle">Add Expense</h3>
                         
                         <!-- Date picker for month mode -->
-                        <div class="input-group" id="datePickerGroup" style="display: none;">
-                            <label for="expenseDate">Date</label>
+                        <div class="form-group" id="datePickerGroup" style="display: none;">
+                            <label class="form-label" for="expenseDate">Date</label>
                             <input type="date" id="expenseDate" class="form-input">
                         </div>
                         <div class="input-row">
-                            <div class="input-group">
-                                <label for="expenseAmount">Amount ($)</label>
-                                <input type="number" id="expenseAmount" placeholder="0.00" step="0.01">
+                            <div class="form-group">
+                                <label class="form-label" for="expenseAmount">Amount ($)</label>
+                                <input type="number" id="expenseAmount" class="form-input" placeholder="0.00" step="0.01">
                             </div>
-                            <div class="input-group">
-                                <label for="expenseCategory">Category</label>
-                                <select id="expenseCategory">
+                            <div class="form-group">
+                                <label class="form-label" for="expenseCategory">Category</label>
+                                <select id="expenseCategory" class="form-input">
                                     <option value="groceries">Groceries</option>
                                     <option value="transportation">Transportation</option>
                                     <option value="dining">Dining Out</option>
@@ -3424,9 +3424,9 @@
                             </div>
                         </div>
                         
-                        <div class="input-group">
-                            <label for="expenseDescription">Description (optional)</label>
-                            <input type="text" id="expenseDescription" placeholder="What did you buy?">
+                        <div class="form-group">
+                            <label class="form-label" for="expenseDescription">Description (optional)</label>
+                            <input type="text" id="expenseDescription" class="form-input" placeholder="What did you buy?">
                         </div>
                         
                         <button class="add-btn" onclick="addExpense()">Add Expense</button>
@@ -4121,9 +4121,9 @@
             
             <div class="add-account-form">
                 <h4 class="text-lg font-semibold mb-4">Add New Account</h4>
-                <div class="input-group">
-                    <label for="newAccountName">Account Name</label>
-                    <input type="text" id="newAccountName" placeholder="e.g., Emergency Fund" style="width: 100%; min-height: 44px; padding: 12px 16px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 1rem;">
+                <div class="form-group">
+                    <label class="form-label" for="newAccountName">Account Name</label>
+                    <input type="text" id="newAccountName" class="form-input" placeholder="e.g., Emergency Fund">
                 </div>
                 <button class="add-account-btn" onclick="addNewAccount()">Add Account</button>
             </div>
