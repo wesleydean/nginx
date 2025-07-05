@@ -496,6 +496,12 @@
             opacity: 0.5;
         }
         
+        .form-input[readonly] {
+            background-color: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+            cursor: not-allowed;
+        }
+        
         .form-input::placeholder {
             color: hsl(var(--muted-foreground));
         }
@@ -2545,6 +2551,9 @@
             font-size: 1.2rem;
             color: hsl(var(--foreground));
             transition: all 150ms ease;
+            position: absolute;
+            right: 15px;
+            top: 15px;
         }
         
         .slide-out-close:hover {
@@ -3145,6 +3154,140 @@
             color: hsl(var(--warning));
         }
 
+        /* Tax Calculator Styles */
+        .tax-calculator-section {
+            /*  */
+        }
+
+        .tax-calculator-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .tax-calculator-inputs {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calculate-btn {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 150ms ease;
+            width: 100%;
+        }
+
+        .calculate-btn:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+
+        .tax-results {
+            background-color: hsl(var(--muted));
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tax-summary {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .tax-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .tax-item:last-child {
+            border-bottom: none;
+        }
+
+        .tax-item.total {
+            border-top: 2px solid hsl(var(--border));
+            border-bottom: none;
+            padding-top: 0.75rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        .tax-label {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .tax-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: hsl(var(--foreground));
+        }
+
+        .tax-item.total .tax-label,
+        .tax-item.total .tax-value {
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+
+        .form-divider {
+            height: 1px;
+            background-color: hsl(var(--border));
+            margin: 1rem 0;
+        }
+
+        .manual-override-section {
+            margin-top: 1rem;
+        }
+
+        /* Accordion Styles */
+        .accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: hsl(var(--muted));
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 150ms ease;
+            user-select: none;
+        }
+
+        .accordion-header:hover {
+            background-color: hsl(var(--muted) / 0.8);
+        }
+
+        .accordion-header h4 {
+            margin: 0;
+        }
+
+        .accordion-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            transition: transform 150ms ease;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .accordion-header.expanded .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 150ms ease;
+        }
+
+        .accordion-content.expanded {
+            max-height: 1000px;
+            padding-top: 1rem;
+        }
+
     </style>
 </head>
 <body>
@@ -3189,7 +3332,7 @@
                         <div class="card-content">
                             <div class="flex items-center justify-between p-4 rounded-lg mb-2 stat-card">
                                 <div>
-                                    <div class="text-sm text-muted-foreground">Total Budget</div>
+                                    <div class="text-sm text-muted-foreground">Discretionary Budget</div>
                                     <div class="text-2xl font-semibold" id="budgetAmount">$41.30</div>
                                 </div>
                             </div>
@@ -3477,26 +3620,121 @@
                             <h3 class="text-lg font-semibold">Income & Taxes</h3>
                         </div>
                         <div class="card-content">
-                            <div class="form-group">
-                                <label class="form-label" for="grossIncome">Gross Monthly Income</label>
-                                <input type="number" class="form-input" id="grossIncome" placeholder="11667" min="0" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="federalTax">Federal Tax</label>
-                                <input type="number" class="form-input" id="federalTax" placeholder="2500" min="0" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="provincialTax">Provincial Tax (Ontario)</label>
-                                <input type="number" class="form-input" id="provincialTax" placeholder="750" min="0" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="cppEi">CPP/EI</label>
-                                <input type="number" class="form-input" id="cppEi" placeholder="333" min="0" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="netIncome">Net Monthly Income</label>
-                                <input type="number" class="form-input" id="netIncome" placeholder="8084" min="0" step="0.01">
-                                <div class="form-help">Auto-calculated, but you can override if needed.</div>
+                            <!-- Tax Calculator Section -->
+                            <div class="tax-calculator-section">
+                                <div class="tax-calculator-header">
+                                    <h4 class="text-md font-semibold mb-3">Tax Calculator</h4>
+                                    <p class="text-sm text-muted-foreground mb-4">Enter your gross yearly income and province to auto-calculate taxes (2024 rates)</p>
+                                </div>
+                                
+                                <div class="tax-calculator-inputs">
+                                    <div class="form-group">
+                                        <label class="form-label" for="grossYearlyIncome">Gross Yearly Income</label>
+                                        <input type="number" class="form-input" id="grossYearlyIncome" placeholder="140000" min="0" step="1000">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label" for="provinceSelect">Province/Territory</label>
+                                        <div class="select-container">
+                                            <div class="select-trigger" onclick="toggleSlideOutSelect('province')" id="provinceTrigger">
+                                                <span id="provinceValue">Ontario</span>
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </div>
+                                            <div class="select-content" id="provinceContent">
+                                                <div class="select-item selected" data-value="ON">Ontario</div>
+                                                <div class="select-item" data-value="BC">British Columbia</div>
+                                                <div class="select-item" data-value="AB">Alberta</div>
+                                                <div class="select-item" data-value="SK">Saskatchewan</div>
+                                                <div class="select-item" data-value="MB">Manitoba</div>
+                                                <div class="select-item" data-value="QC">Quebec</div>
+                                                <div class="select-item" data-value="NB">New Brunswick</div>
+                                                <div class="select-item" data-value="NS">Nova Scotia</div>
+                                                <div class="select-item" data-value="PE">Prince Edward Island</div>
+                                                <div class="select-item" data-value="NL">Newfoundland and Labrador</div>
+                                                <div class="select-item" data-value="NT">Northwest Territories</div>
+                                                <div class="select-item" data-value="NU">Nunavut</div>
+                                                <div class="select-item" data-value="YT">Yukon</div>
+                                            </div>
+                                        </div>
+                                        <select id="provinceSelect" style="display: none;">
+                                            <option value="ON">Ontario</option>
+                                            <option value="BC">British Columbia</option>
+                                            <option value="AB">Alberta</option>
+                                            <option value="SK">Saskatchewan</option>
+                                            <option value="MB">Manitoba</option>
+                                            <option value="QC">Quebec</option>
+                                            <option value="NB">New Brunswick</option>
+                                            <option value="NS">Nova Scotia</option>
+                                            <option value="PE">Prince Edward Island</option>
+                                            <option value="NL">Newfoundland and Labrador</option>
+                                            <option value="NT">Northwest Territories</option>
+                                            <option value="NU">Nunavut</option>
+                                            <option value="YT">Yukon</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button type="button" class="calculate-btn" onclick="calculateTaxes()">Calculate Taxes</button>
+                                </div>
+                                
+                                <!-- Manual Override Section -->
+                                <div class="manual-override-section">
+                                    <div class="accordion-header" onclick="toggleAccordion('manualOverride')">
+                                        <h4 class="text-md font-semibold">Manual Override (Optional)</h4>
+                                        <i data-lucide="chevron-down" class="accordion-icon" id="manualOverrideIcon"></i>
+                                    </div>
+                                    <div class="accordion-content" id="manualOverrideContent">
+                                        <p class="text-sm text-muted-foreground mb-4">You can manually adjust the calculated values below if needed</p>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label" for="grossIncome">Gross Monthly Income</label>
+                                            <input type="number" class="form-input" id="grossIncome" placeholder="11667" min="0" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="federalTax">Federal Tax</label>
+                                            <input type="number" class="form-input" id="federalTax" placeholder="2500" min="0" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="provincialTax">Provincial Tax</label>
+                                            <input type="number" class="form-input" id="provincialTax" placeholder="750" min="0" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="cppEi">CPP/EI</label>
+                                            <input type="number" class="form-input" id="cppEi" placeholder="333" min="0" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="netIncome">Net Monthly Income</label>
+                                            <input type="number" class="form-input" id="netIncome" placeholder="8084" min="0" step="0.01">
+                                            <div class="form-help">Auto-calculated, but you can override if needed.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-divider"></div>
+                                
+                                <div class="tax-results" id="taxResults" style="display: none;">
+                                    <div class="tax-summary">
+                                        <div class="tax-item">
+                                            <div class="tax-label">Monthly Gross Income</div>
+                                            <div class="tax-value" id="monthlyGrossResult">$0.00</div>
+                                        </div>
+                                        <div class="tax-item">
+                                            <div class="tax-label">Federal Tax (Monthly)</div>
+                                            <div class="tax-value" id="federalTaxResult">$0.00</div>
+                                        </div>
+                                        <div class="tax-item">
+                                            <div class="tax-label">Provincial Tax (Monthly)</div>
+                                            <div class="tax-value" id="provincialTaxResult">$0.00</div>
+                                        </div>
+                                        <div class="tax-item">
+                                            <div class="tax-label">CPP/EI (Monthly)</div>
+                                            <div class="tax-value" id="cppEiResult">$0.00</div>
+                                        </div>
+                                        <div class="tax-item total">
+                                            <div class="tax-label">Net Monthly Income</div>
+                                            <div class="tax-value" id="netIncomeResult">$0.00</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3512,8 +3750,8 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="monthlySavingsTarget">Monthly Savings Target</label>
-                                <input type="number" class="form-input" id="monthlySavingsTarget" placeholder="4333" min="0" step="0.01">
-                                <div class="form-help">Auto-calculated from annual, but you can override.</div>
+                                <input type="number" class="form-input" id="monthlySavingsTarget" placeholder="4333" min="0" step="0.01" readonly>
+                                <div class="form-help">Auto-calculated from annual savings goal.</div>
                             </div>
                         </div>
                     </div>
@@ -3524,15 +3762,15 @@
                         </div>
                         <div class="card-content">
                             <div class="form-group">
-                                <label class="form-label" for="fixedExpenses">Fixed Expenses (total)</label>
+                                <label class="form-label" for="fixedExpenses">Monthly Fixed Expenses</label>
                                 <input type="number" class="form-input" id="fixedExpenses" placeholder="2450" min="0" step="0.01">
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="essentialExpenses">Essential Expenses (total)</label>
+                                <label class="form-label" for="essentialExpenses">Monthly Essential Expenses</label>
                                 <input type="number" class="form-input" id="essentialExpenses" placeholder="750" min="0" step="0.01">
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="discretionaryExpenses">Discretionary Expenses (total)</label>
+                                <label class="form-label" for="discretionaryExpenses">Monthly Discretionary Expenses</label>
                                 <input type="number" class="form-input" id="discretionaryExpenses" placeholder="501" min="0" step="0.01">
                             </div>
                         </div>
@@ -3909,7 +4147,9 @@
         function getDailyBudget() {
             const settings = getSimpleBudgetSettings();
             const discretionaryBudget = settings.discretionaryExpenses || 501;
-            return discretionaryBudget / 30; // Daily discretionary budget
+            const dailyBudget = discretionaryBudget / 30; // Daily discretionary budget
+            console.log('Daily budget calculated:', dailyBudget, 'from discretionary:', discretionaryBudget);
+            return dailyBudget;
         }
         
         function getWeeklyBudget() {
@@ -3918,7 +4158,9 @@
         
         function getMonthlyBudget() {
             const settings = getSimpleBudgetSettings();
-            return (settings.essentialExpenses || 750) + (settings.discretionaryExpenses || 501);
+            const budget = (settings.essentialExpenses || 750) + (settings.discretionaryExpenses || 501);
+            console.log('Monthly budget calculated:', budget, 'from settings:', settings);
+            return budget;
         }
         
         function getMonthlySavingsTarget() {
@@ -7262,12 +7504,10 @@
                 netIncome = calculatedNet;
             }
 
-            // Auto-calculate monthly savings target if not manually overridden
+            // Auto-calculate monthly savings target (now always calculated from annual goal)
             const calculatedMonthlySavings = annualSavingsGoal / 12;
-            if (!document.getElementById('monthlySavingsTarget').dataset.manual) {
-                document.getElementById('monthlySavingsTarget').value = calculatedMonthlySavings > 0 ? calculatedMonthlySavings.toFixed(2) : '';
-                monthlySavingsTarget = calculatedMonthlySavings;
-            }
+            document.getElementById('monthlySavingsTarget').value = calculatedMonthlySavings > 0 ? calculatedMonthlySavings.toFixed(2) : '';
+            monthlySavingsTarget = calculatedMonthlySavings;
 
             // Calculate remaining budget
             const totalExpenses = fixedExpenses + essentialExpenses + discretionaryExpenses;
@@ -7334,6 +7574,8 @@
                 essentialExpenses: parseFloat(document.getElementById('essentialExpenses').value) || 0,
                 discretionaryExpenses: parseFloat(document.getElementById('discretionaryExpenses').value) || 0
             };
+            
+            console.log('Saving settings:', settings);
             localStorage.setItem('simpleBudgetSettings', JSON.stringify(settings));
             
             // Update all displays to reflect new settings
@@ -7341,21 +7583,222 @@
             updateReports();
             updateSaveScreen();
             
+            // Update chart if on reports screen
+            if (currentScreen === 2) {
+                setTimeout(updateChart, 100);
+            }
+            
             alert('Settings saved! All budgets and targets have been updated.');
+        }
+
+        // Tax Calculator Functions
+        const TAX_BRACKETS_2024 = {
+            federal: [
+                { min: 0, max: 55967, rate: 0.15 },
+                { min: 55967, max: 111733, rate: 0.205 },
+                { min: 111733, max: 173205, rate: 0.26 },
+                { min: 173205, max: 246752, rate: 0.29 },
+                { min: 246752, max: Infinity, rate: 0.33 }
+            ],
+            provinces: {
+                ON: [ // Ontario
+                    { min: 0, max: 51446, rate: 0.0505 },
+                    { min: 51446, max: 102894, rate: 0.0915 },
+                    { min: 102894, max: 150000, rate: 0.1116 },
+                    { min: 150000, max: 220000, rate: 0.1216 },
+                    { min: 220000, max: Infinity, rate: 0.1316 }
+                ],
+                BC: [ // British Columbia
+                    { min: 0, max: 45654, rate: 0.0506 },
+                    { min: 45654, max: 91310, rate: 0.077 },
+                    { min: 91310, max: 104835, rate: 0.105 },
+                    { min: 104835, max: 127299, rate: 0.1229 },
+                    { min: 127299, max: 172602, rate: 0.147 },
+                    { min: 172602, max: 240716, rate: 0.168 },
+                    { min: 240716, max: Infinity, rate: 0.205 }
+                ],
+                AB: [ // Alberta
+                    { min: 0, max: 148269, rate: 0.10 },
+                    { min: 148269, max: 177922, rate: 0.12 },
+                    { min: 177922, max: 237230, rate: 0.13 },
+                    { min: 237230, max: 355845, rate: 0.14 },
+                    { min: 355845, max: Infinity, rate: 0.15 }
+                ],
+                SK: [ // Saskatchewan
+                    { min: 0, max: 52057, rate: 0.105 },
+                    { min: 52057, max: 148734, rate: 0.125 },
+                    { min: 148734, max: Infinity, rate: 0.145 }
+                ],
+                MB: [ // Manitoba
+                    { min: 0, max: 36842, rate: 0.108 },
+                    { min: 36842, max: 79625, rate: 0.1275 },
+                    { min: 79625, max: Infinity, rate: 0.174 }
+                ],
+                QC: [ // Quebec
+                    { min: 0, max: 49275, rate: 0.14 },
+                    { min: 49275, max: 98540, rate: 0.19 },
+                    { min: 98540, max: 119910, rate: 0.24 },
+                    { min: 119910, max: Infinity, rate: 0.2575 }
+                ],
+                NB: [ // New Brunswick
+                    { min: 0, max: 47715, rate: 0.0968 },
+                    { min: 47715, max: 95431, rate: 0.1482 },
+                    { min: 95431, max: 176756, rate: 0.1652 },
+                    { min: 176756, max: Infinity, rate: 0.195 }
+                ],
+                NS: [ // Nova Scotia
+                    { min: 0, max: 29590, rate: 0.0879 },
+                    { min: 29590, max: 59180, rate: 0.1495 },
+                    { min: 59180, max: 93000, rate: 0.1667 },
+                    { min: 93000, max: 150000, rate: 0.175 },
+                    { min: 150000, max: Infinity, rate: 0.21 }
+                ],
+                PE: [ // Prince Edward Island
+                    { min: 0, max: 31984, rate: 0.098 },
+                    { min: 31984, max: 63969, rate: 0.138 },
+                    { min: 63969, max: Infinity, rate: 0.167 }
+                ],
+                NL: [ // Newfoundland and Labrador
+                    { min: 0, max: 43198, rate: 0.087 },
+                    { min: 43198, max: 86395, rate: 0.145 },
+                    { min: 86395, max: 154244, rate: 0.158 },
+                    { min: 154244, max: 215943, rate: 0.173 },
+                    { min: 215943, max: 275870, rate: 0.183 },
+                    { min: 275870, max: 551739, rate: 0.198 },
+                    { min: 551739, max: 1103478, rate: 0.208 },
+                    { min: 1103478, max: Infinity, rate: 0.218 }
+                ],
+                NT: [ // Northwest Territories
+                    { min: 0, max: 50877, rate: 0.059 },
+                    { min: 50877, max: 101754, rate: 0.086 },
+                    { min: 101754, max: 165429, rate: 0.122 },
+                    { min: 165429, max: Infinity, rate: 0.1405 }
+                ],
+                NU: [ // Nunavut
+                    { min: 0, max: 50877, rate: 0.04 },
+                    { min: 50877, max: 101754, rate: 0.07 },
+                    { min: 101754, max: 165429, rate: 0.09 },
+                    { min: 165429, max: Infinity, rate: 0.115 }
+                ],
+                YT: [ // Yukon
+                    { min: 0, max: 55967, rate: 0.064 },
+                    { min: 55967, max: 111733, rate: 0.09 },
+                    { min: 111733, max: 173205, rate: 0.109 },
+                    { min: 173205, max: 500000, rate: 0.128 },
+                    { min: 500000, max: Infinity, rate: 0.15 }
+                ]
+            }
+        };
+
+        function calculateTaxes() {
+            const yearlyIncome = parseFloat(document.getElementById('grossYearlyIncome').value) || 0;
+            const province = document.getElementById('provinceValue').textContent;
+            const provinceCode = getProvinceCode(province);
+            
+            if (yearlyIncome <= 0) {
+                alert('Please enter a valid yearly income');
+                return;
+            }
+            
+            // Calculate federal tax
+            const federalTax = calculateTax(yearlyIncome, TAX_BRACKETS_2024.federal);
+            
+            // Calculate provincial tax
+            const provincialTax = calculateTax(yearlyIncome, TAX_BRACKETS_2024.provinces[provinceCode]);
+            
+            // Calculate CPP/EI (2024 rates)
+            const cppContribution = Math.min(yearlyIncome, 68500) * 0.0595; // 5.95% up to $68,500
+            const eiContribution = Math.min(yearlyIncome, 63100) * 0.0163; // 1.63% up to $63,100
+            const totalCppEi = cppContribution + eiContribution;
+            
+            // Calculate monthly amounts
+            const monthlyGross = yearlyIncome / 12;
+            const monthlyFederalTax = federalTax / 12;
+            const monthlyProvincialTax = provincialTax / 12;
+            const monthlyCppEi = totalCppEi / 12;
+            const monthlyNet = monthlyGross - monthlyFederalTax - monthlyProvincialTax - monthlyCppEi;
+            
+            // Display results
+            document.getElementById('monthlyGrossResult').textContent = formatCurrency(monthlyGross);
+            document.getElementById('federalTaxResult').textContent = formatCurrency(monthlyFederalTax);
+            document.getElementById('provincialTaxResult').textContent = formatCurrency(monthlyProvincialTax);
+            document.getElementById('cppEiResult').textContent = formatCurrency(monthlyCppEi);
+            document.getElementById('netIncomeResult').textContent = formatCurrency(monthlyNet);
+            
+            // Show results section
+            document.getElementById('taxResults').style.display = 'block';
+            
+            // Auto-populate manual override fields
+            document.getElementById('grossIncome').value = monthlyGross.toFixed(2);
+            document.getElementById('federalTax').value = monthlyFederalTax.toFixed(2);
+            document.getElementById('provincialTax').value = monthlyProvincialTax.toFixed(2);
+            document.getElementById('cppEi').value = monthlyCppEi.toFixed(2);
+            document.getElementById('netIncome').value = monthlyNet.toFixed(2);
+            
+            // Update budget summary
+            updateSimpleBudgetSummary();
+        }
+
+        function calculateTax(income, brackets) {
+            let totalTax = 0;
+            
+            for (let bracket of brackets) {
+                if (income > bracket.min) {
+                    const taxableInBracket = Math.min(income - bracket.min, bracket.max - bracket.min);
+                    totalTax += taxableInBracket * bracket.rate;
+                }
+            }
+            
+            return totalTax;
+        }
+
+        function getProvinceCode(provinceName) {
+            const provinceMap = {
+                'Ontario': 'ON',
+                'British Columbia': 'BC',
+                'Alberta': 'AB',
+                'Saskatchewan': 'SK',
+                'Manitoba': 'MB',
+                'Quebec': 'QC',
+                'New Brunswick': 'NB',
+                'Nova Scotia': 'NS',
+                'Prince Edward Island': 'PE',
+                'Newfoundland and Labrador': 'NL',
+                'Northwest Territories': 'NT',
+                'Nunavut': 'NU',
+                'Yukon': 'YT'
+            };
+            return provinceMap[provinceName] || 'ON';
+        }
+
+        function toggleAccordion(id) {
+            const header = document.querySelector(`[onclick="toggleAccordion('${id}')"]`);
+            const content = document.getElementById(`${id}Content`);
+            const icon = document.getElementById(`${id}Icon`);
+            
+            const isExpanded = header.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // Collapse
+                header.classList.remove('expanded');
+                content.classList.remove('expanded');
+            } else {
+                // Expand
+                header.classList.add('expanded');
+                content.classList.add('expanded');
+            }
         }
 
         // Add event listeners for settings inputs
         document.addEventListener('DOMContentLoaded', function() {
-            // Mark manual override for net income and monthly savings target
-            ['netIncome', 'monthlySavingsTarget'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.addEventListener('input', function() {
-                        this.dataset.manual = 'true';
-                        updateSimpleBudgetSummary();
-                    });
-                }
-            });
+            // Mark manual override for net income only (monthly savings target is now readonly)
+            const netIncomeEl = document.getElementById('netIncome');
+            if (netIncomeEl) {
+                netIncomeEl.addEventListener('input', function() {
+                    this.dataset.manual = 'true';
+                    updateSimpleBudgetSummary();
+                });
+            }
 
             // Update summary on all input changes
             ['grossIncome','federalTax','provincialTax','cppEi','annualSavingsGoal','fixedExpenses','essentialExpenses','discretionaryExpenses'].forEach(id => {
@@ -7367,10 +7810,33 @@
                 }
             });
 
+            // Special handling for annual savings goal - update monthly target and budget summary
+            const annualSavingsGoalEl = document.getElementById('annualSavingsGoal');
+            if (annualSavingsGoalEl) {
+                annualSavingsGoalEl.addEventListener('blur', function() {
+                    updateSimpleBudgetSummary();
+                });
+                
+                // Update on input for real-time feedback
+                annualSavingsGoalEl.addEventListener('input', function() {
+                    updateSimpleBudgetSummary();
+                });
+            }
+
             // Initial update if on settings screen
             if (currentScreen === 3) {
                 updateSimpleBudgetSummary();
             }
+
+            // Setup province dropdown
+            const provinceItems = document.querySelectorAll('#provinceContent .select-item');
+            provinceItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    const text = this.textContent;
+                    selectSlideOutOption('province', value, text);
+                });
+            });
         });
 
     </script>
