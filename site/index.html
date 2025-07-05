@@ -3444,7 +3444,28 @@
             <div class="slide-out-form">
                 <div class="form-group">
                     <label class="form-label" for="monthInput">Month</label>
-                    <select class="form-input" id="monthInput">
+                    <div class="select-container">
+                        <div class="select-trigger" onclick="toggleSlideOutSelect('monthSelect')" id="monthSelectTrigger">
+                            <span id="monthSelectValue">January</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                        <div class="select-content" id="monthSelectContent">
+                            <div class="select-item" data-value="0">January</div>
+                            <div class="select-item" data-value="1">February</div>
+                            <div class="select-item" data-value="2">March</div>
+                            <div class="select-item" data-value="3">April</div>
+                            <div class="select-item" data-value="4">May</div>
+                            <div class="select-item" data-value="5">June</div>
+                            <div class="select-item" data-value="6">July</div>
+                            <div class="select-item" data-value="7">August</div>
+                            <div class="select-item" data-value="8">September</div>
+                            <div class="select-item" data-value="9">October</div>
+                            <div class="select-item" data-value="10">November</div>
+                            <div class="select-item" data-value="11">December</div>
+                        </div>
+                    </div>
+                    <!-- Hidden native select for compatibility -->
+                    <select class="form-input" id="monthInput" style="display: none;">
                         <option value="0">January</option>
                         <option value="1">February</option>
                         <option value="2">March</option>
@@ -3461,7 +3482,19 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="yearInput">Year</label>
-                    <input type="number" class="form-input" id="yearInput" min="2020" max="2030" step="1">
+                    <div class="select-container">
+                        <div class="select-trigger" onclick="toggleSlideOutSelect('monthYear')" id="monthYearTrigger">
+                            <span id="monthYearValue">2024</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                        <div class="select-content" id="monthYearContent">
+                            <!-- Year options will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <!-- Hidden native select for compatibility -->
+                    <select id="yearInput" style="display: none;">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
                 </div>
                 <button type="button" class="add-btn" id="applyMonthYearBtn" style="margin-top:1rem;">Apply</button>
             </div>
@@ -4891,51 +4924,74 @@
         function showExpenseSlideOut() {
             const overlay = document.getElementById('expenseSlideOut');
             overlay.classList.add('active');
-            
             // Update date picker visibility in slide-out
             const slideOutDateGroup = document.getElementById('slideOutDatePickerGroup');
             if (slideOutDateGroup) {
                 slideOutDateGroup.style.display = currentPeriodMode === 'month' ? 'block' : 'none';
             }
-            
             // Initialize and set default date for custom datepicker if in month mode
             if (currentPeriodMode === 'month') {
-                // Initialize the datepicker if not already done
-                if (!datepickerStates['expenseCustomDatepicker']) {
-                        // Set to first day of selected month
-                        const firstDay = new Date(selectedMonthDate.getFullYear(), selectedMonthDate.getMonth(), 1);
-                        state.selectedDate = firstDay;
-                        state.currentMonth = firstDay.getMonth();
-                        state.currentYear = firstDay.getFullYear();
-                        updateDatepickerValue(datepickerId);
-                    }
+                const datepickerId = 'expenseCustomDatepicker';
+                if (!datepickerStates[datepickerId]) {
+                    initializeDatepicker(datepickerId);
+                }
+                const now = new Date();
+                let defaultDate;
+                if (
+                    selectedMonthDate.getFullYear() === now.getFullYear() &&
+                    selectedMonthDate.getMonth() === now.getMonth()
+                ) {
+                    defaultDate = now;
+                } else {
+                    defaultDate = new Date(selectedMonthDate.getFullYear(), selectedMonthDate.getMonth(), 1);
+                }
+                const state = datepickerStates[datepickerId];
+                state.selectedDate = defaultDate;
+                state.currentMonth = defaultDate.getMonth();
+                state.currentYear = defaultDate.getFullYear();
+                updateDatepickerValue(datepickerId);
+                renderCalendar(datepickerId);
+            }
+        }
+        function showBalanceSlideOut() {
+            const overlay = document.getElementById('balanceSlideOut');
+            overlay.classList.add('active');
+            // Initialize the datepicker if not already done
+            const datepickerId = 'balanceCustomDatepicker';
+            if (!datepickerStates[datepickerId]) {
+                initializeDatepicker(datepickerId);
+            }
+            if (currentPeriodMode === 'month') {
+                const now = new Date();
+                let defaultDate;
+                if (
+                    selectedMonthDate.getFullYear() === now.getFullYear() &&
+                    selectedMonthDate.getMonth() === now.getMonth()
+                ) {
+                    defaultDate = now;
+                } else {
+                    defaultDate = new Date(selectedMonthDate.getFullYear(), selectedMonthDate.getMonth(), 1);
+                }
+                const state = datepickerStates[datepickerId];
+                state.selectedDate = defaultDate;
+                state.currentMonth = defaultDate.getMonth();
+                state.currentYear = defaultDate.getFullYear();
+                updateDatepickerValue(datepickerId);
+                renderCalendar(datepickerId);
+            } else {
+                // Set default date to today if not already set
+                const state = datepickerStates[datepickerId];
+                if (state && !state.selectedDate) {
+                    selectToday(datepickerId);
                 }
             }
+            // Ensure account dropdown is populated
+            updateSlideOutAccountDropdown();
+        }
         
         function hideExpenseSlideOut() {
             const overlay = document.getElementById('expenseSlideOut');
             overlay.classList.remove('active');
-        }
-        
-        function showBalanceSlideOut() {
-            const overlay = document.getElementById('balanceSlideOut');
-            overlay.classList.add('active');
-            
-            // Initialize the datepicker if not already done
-            if (!datepickerStates['balanceCustomDatepicker']) {
-                initializeDatepicker('balanceCustomDatepicker');
-            }
-            
-            // Set default date to today
-            const datepickerId = 'balanceCustomDatepicker';
-            const state = datepickerStates[datepickerId];
-            
-            if (state && !state.selectedDate) {
-                selectToday(datepickerId);
-            }
-            
-            // Ensure account dropdown is populated
-            updateSlideOutAccountDropdown();
         }
         
         function hideBalanceSlideOut() {
@@ -5045,19 +5101,23 @@
                 dayElement.className = 'datepicker-day';
                 dayElement.textContent = day;
                 
-                // Check if this day is selected
-                if (state.selectedDate && 
-                    state.selectedDate.getDate() === day && 
-                    state.selectedDate.getMonth() === state.currentMonth && 
-                    state.selectedDate.getFullYear() === state.currentYear) {
-                    dayElement.classList.add('datepicker-day-selected');
+                // Highlight selected date
+                if (
+                    state.selectedDate &&
+                    state.selectedDate.getDate() === day &&
+                    state.selectedDate.getMonth() === state.currentMonth &&
+                    state.selectedDate.getFullYear() === state.currentYear
+                ) {
+                    dayElement.classList.add('selected');
                 }
                 
                 // Check if this day is today
                 const today = new Date();
-                if (today.getDate() === day && 
-                    today.getMonth() === state.currentMonth && 
-                    today.getFullYear() === state.currentYear) {
+                if (
+                    today.getDate() === day &&
+                    today.getMonth() === state.currentMonth &&
+                    today.getFullYear() === state.currentYear
+                ) {
                     dayElement.classList.add('datepicker-day-today');
                 }
                 
@@ -5510,6 +5570,21 @@
             const content = document.getElementById(selectType + 'Content');
             const hiddenSelect = document.getElementById('slideOut' + selectType.charAt(0).toUpperCase() + selectType.slice(1));
             
+            // Handle month/year slideout selections
+            if (selectType === 'monthSelect') {
+                tempSelectedMonth = parseInt(value);
+                const monthInput = document.getElementById('monthInput');
+                if (monthInput) {
+                    monthInput.value = value;
+                }
+            } else if (selectType === 'monthYear') {
+                tempSelectedYear = parseInt(value);
+                const yearInput = document.getElementById('yearInput');
+                if (yearInput) {
+                    yearInput.value = value;
+                }
+            }
+            
             // Update display
             if (valueSpan) {
                 valueSpan.textContent = text;
@@ -5619,27 +5694,84 @@
             // Set current values in the input fields
             const monthInput = document.getElementById('monthInput');
             const yearInput = document.getElementById('yearInput');
+            const monthYearValue = document.getElementById('monthYearValue');
+            const monthYearContent = document.getElementById('monthYearContent');
+            const monthSelectValue = document.getElementById('monthSelectValue');
+            const monthSelectContent = document.getElementById('monthSelectContent');
+            
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            // Update month display and selection
+            if (monthSelectValue) {
+                monthSelectValue.textContent = monthNames[tempSelectedMonth];
+            }
+            
+            // Update month dropdown selection
+            if (monthSelectContent) {
+                monthSelectContent.querySelectorAll('.select-item').forEach((item, index) => {
+                    item.classList.remove('selected');
+                    if (index === tempSelectedMonth) {
+                        item.classList.add('selected');
+                    }
+                    // Add click handler if not already added
+                    if (!item.onclick) {
+                        item.onclick = () => selectSlideOutOption('monthSelect', index.toString(), monthNames[index]);
+                    }
+                });
+            }
             
             if (monthInput) {
                 monthInput.value = tempSelectedMonth;
             }
+            
+            // Populate year dropdown with current year back 15 years
+            if (monthYearContent) {
+                const currentYear = new Date().getFullYear();
+                monthYearContent.innerHTML = '';
+                
+                for (let year = currentYear; year >= currentYear - 15; year--) {
+                    const yearItem = document.createElement('div');
+                    yearItem.className = 'select-item';
+                    yearItem.setAttribute('data-value', year.toString());
+                    yearItem.textContent = year.toString();
+                    yearItem.onclick = () => selectSlideOutOption('monthYear', year.toString(), year.toString());
+                    
+                    // Mark current selected year
+                    if (year === tempSelectedYear) {
+                        yearItem.classList.add('selected');
+                    }
+                    
+                    monthYearContent.appendChild(yearItem);
+                }
+            }
+            
+            // Update year display
+            if (monthYearValue) {
+                monthYearValue.textContent = tempSelectedYear.toString();
+            }
+            
+            // Update hidden select
             if (yearInput) {
                 yearInput.value = tempSelectedYear;
             }
         }
         document.getElementById('applyMonthYearBtn').onclick = function() {
-            const monthInput = document.getElementById('monthInput');
-            const yearInput = document.getElementById('yearInput');
-            
-            if (monthInput && yearInput) {
-                tempSelectedMonth = parseInt(monthInput.value);
-                tempSelectedYear = parseInt(yearInput.value);
+            // Use the temp variables directly
+            if (typeof tempSelectedMonth === 'number' && typeof tempSelectedYear === 'number' && !isNaN(tempSelectedMonth) && !isNaN(tempSelectedYear)) {
                 selectedMonthDate = new Date(tempSelectedYear, tempSelectedMonth, 1);
-                hideMonthYearSlideOut();
-                updatePeriodDropdownValues();
-                updatePeriodView();
             }
+            hideMonthYearSlideOut();
+            updatePeriodDropdownValues();
+            updatePeriodView();
         };
+        function getMonthYearString(date) {
+            const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+            if (!date || typeof date.getMonth !== 'function' || isNaN(date.getMonth()) || isNaN(date.getFullYear())) {
+                return 'Select a month';
+            }
+            return `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+        }
         // Update the button text in the card
         function updatePeriodDropdownValues() {
             const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
