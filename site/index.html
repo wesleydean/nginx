@@ -346,7 +346,7 @@
             margin-bottom: 0.5rem;
             background-color: hsl(var(--card));
             border: 1px solid hsl(var(--border));
-            /* box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); */
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
         }
         
         .swipe-content {
@@ -356,7 +356,7 @@
             box-shadow: none;
             transform: translateX(0);
             transition: transform 0.2s ease;
-            z-index: 1;
+            z-index: 2;
             border-radius: var(--radius);
         }
         
@@ -371,11 +371,13 @@
             align-items: center;
             justify-content: center;
             color: hsl(var(--destructive-foreground));
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             font-weight: bold;
             cursor: pointer;
-            z-index: 0;
+            z-index: 5;
             border-radius: 0 var(--radius) var(--radius) 0;
+            -webkit-tap-highlight-color: rgba(255,255,255,0.3);
+            touch-action: manipulation;
         }
         
         .swipe-action:hover {
@@ -386,9 +388,31 @@
             transform: translateX(-80px);
         }
         
+        .swipe-container.deleting {
+            animation: slide-out 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
         .swipe-container.deleting .swipe-content {
             transform: translateX(-100%);
-            transition: transform 0.3s ease;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+        }
+        
+        @keyframes slide-out {
+            0% {
+                height: auto;
+                margin-bottom: 0.5rem;
+                opacity: 1;
+                transform: translateX(0);
+            }
+            100% {
+                height: 0;
+                margin-bottom: 0;
+                opacity: 0;
+                transform: translateX(-100%);
+            }
         }
         
         /* Hide original delete buttons when swipe is enabled */
@@ -3804,10 +3828,11 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            z-index: 0;
+            z-index: 10; /* Higher z-index to ensure it's above other elements */
             border-radius: 0 8px 8px 0;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
+            touch-action: none; /* Disable browser handling of all panning and zooming gestures */
         }
 
         .swipe-container.swiped .swipe-content {
@@ -3815,18 +3840,18 @@
         }
 
         .swipe-container.deleting {
-            animation: slide-out 0.3s forwards;
+            animation: slide-out 0.3s ease-out forwards;
             height: 0;
             margin: 0;
             padding: 0;
             opacity: 0;
             pointer-events: none;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.3s ease-out;
         }
         .swipe-container.deleting .swipe-content {
             transform: translateX(-100%);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease-out;
             opacity: 0;
         }
 
@@ -3835,6 +3860,7 @@
                 transform: translateX(0);
                 opacity: 1;
                 max-height: 100px;
+                margin-bottom: 8px;
             }
             75% {
                 transform: translateX(-100%);
@@ -5109,7 +5135,7 @@
                     }
                     
                     return `
-                        <div class="swipe-container" data-type="expense" data-date="${expense.date}" data-timestamp="${expense.timestamp}" onclick="editExpense('${expense.date}', ${expense.timestamp})">
+                        <div class="swipe-container" data-type="expense" data-date="${expense.date}" data-timestamp="${expense.timestamp}">
                             <div class="swipe-content">
                                 <div class="expense-item">
                                     <div class="expense-details">
@@ -5119,7 +5145,7 @@
                                     <div class="expense-amount">${formatCurrency(expense.amount)}</div>
                                 </div>
                             </div>
-                            <div class="swipe-action" onclick="deleteExpense('${expense.date}', ${expense.timestamp}); event.stopPropagation();"><i data-lucide="x" class="w-4 h-4"></i></div>
+                            <div class="swipe-action" onclick="handleExpenseDelete(this); event.stopPropagation(); return false;"><i data-lucide="x" class="w-5 h-5"></i></div>
                         </div>
                     `;
                 }).join('');
@@ -5127,39 +5153,94 @@
         }
         
         function deleteExpense(date, timestamp) {
-            const expenses = loadExpenses();
+            console.log('⚠️ deleteExpense function called with date:', date, 'and timestamp:', timestamp);
+            timestamp = parseInt(timestamp, 10); // Ensure timestamp is a number
             
-            // Handle the case where date might be undefined for today mode
-            const targetDate = date || getCurrentDate();
+            if (!date || isNaN(timestamp)) {
+                console.error('Invalid date or timestamp:', { date, timestamp });
+                alert('Invalid date or timestamp. Cannot delete expense.');
+                return;
+            }
             
-            if (expenses[targetDate]) {
-                // Filter out the expense with the matching timestamp
-                const originalLength = expenses[targetDate].length;
-                expenses[targetDate] = expenses[targetDate].filter(expense => expense.timestamp !== timestamp);
+            try {
+                const expenses = loadExpenses();
+                console.log('Current expenses for date:', date, expenses[date]);
                 
-                // Check if the expense was actually removed
-                if (expenses[targetDate].length === originalLength) {
-                    console.error('Expense not found with timestamp:', timestamp);
-                    alert('Could not find expense to delete. Please refresh and try again.');
-                    return;
+                // Handle the case where date might be undefined for today mode
+                const targetDate = date || getCurrentDate();
+                console.log('Target date for deletion:', targetDate);
+                
+                if (expenses[targetDate]) {
+                    console.log('Found expenses for target date:', expenses[targetDate].length);
+                    console.log('Expense timestamps:', expenses[targetDate].map(e => e.timestamp));
+                    
+                    // Filter out the expense with the matching timestamp
+                    const originalLength = expenses[targetDate].length;
+                    expenses[targetDate] = expenses[targetDate].filter(expense => {
+                        const match = expense.timestamp !== timestamp;
+                        console.log(`Comparing ${expense.timestamp} with ${timestamp}: ${match ? 'keep' : 'remove'}`);
+                        return expense.timestamp !== timestamp;
+                    });
+                    
+                    // Check if the expense was actually removed
+                    if (expenses[targetDate].length === originalLength) {
+                        console.error('⚠️ Expense not found with timestamp:', timestamp);
+                        alert('Could not find expense to delete. Please refresh and try again.');
+                        
+                        // Remove the 'deleting' class from the element to restore it
+                        const swipeContainer = document.querySelector(`.swipe-container[data-timestamp="${timestamp}"]`);
+                        if (swipeContainer) {
+                            swipeContainer.classList.remove('deleting');
+                        }
+                        
+                        return;
+                    }
+                    
+                    console.log('After filtering, expenses length:', expenses[targetDate].length);
+                    
+                    // Remove the date entry if no expenses left for that date
+                    if (expenses[targetDate].length === 0) {
+                        console.log('No expenses left for date, removing date entry');
+                        delete expenses[targetDate];
+                    }
+                    
+                    // Save the updated expenses
+                    console.log('Saving updated expenses');
+                    saveExpenses(expenses);
+                    
+                    // Force refresh UI
+                    const listContainer = document.getElementById('expensesList');
+                    if (listContainer) {
+                        console.log('Forcing expense list refresh');
+                        updateExpensesList();
+                    }
+                    
+                    // Update the rest of the display
+                    console.log('Updating UI after deletion');
+                    updatePeriodView();
+                    updateChart();
+                    
+                    console.log('✅ Expense deleted successfully');
+             
+                } else {
+                    console.error('No expenses found for date:', targetDate);
+                    alert('Could not find expenses for this date. Please refresh and try again.');
+                    
+                    // Remove the 'deleting' class from the element to restore it
+                    const swipeContainer = document.querySelector(`.swipe-container[data-timestamp="${timestamp}"]`);
+                    if (swipeContainer) {
+                        swipeContainer.classList.remove('deleting');
+                    }
                 }
+            } catch (error) {
+                console.error('Error in deleteExpense function:', error);
+                alert('An error occurred while deleting the expense. Please try again.');
                 
-                // Remove the date entry if no expenses left for that date
-                if (expenses[targetDate].length === 0) {
-                    delete expenses[targetDate];
+                // Remove the 'deleting' class from the element to restore it
+                const swipeContainer = document.querySelector(`.swipe-container[data-timestamp="${timestamp}"]`);
+                if (swipeContainer) {
+                    swipeContainer.classList.remove('deleting');
                 }
-                
-                // Save the updated expenses
-                saveExpenses(expenses);
-                
-                // Update the display
-                updatePeriodView();
-                updateChart();
-                
-                console.log('Expense deleted successfully');
-            } else {
-                console.error('No expenses found for date:', targetDate);
-                alert('Could not find expenses for this date. Please refresh and try again.');
             }
         }
         
@@ -6181,10 +6262,10 @@
                                                     <div class="balance-history-amount">${formatCurrency(item.balance)}</div>
                                                     ${percentChange !== null ? `<div class="balance-history-percent ${percentChange > 0 ? 'positive' : percentChange < 0 ? 'negative' : 'neutral'}">${arrow}${percentChange > 0 ? '+' : ''}${percentChange.toFixed(2)}%</div>` : ''}
                                                 </div>
-                                                <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')"><i data-lucide="x" class="w-4 h-4"></i></button>
+                                                <button class="delete-balance-btn" onclick="handleBalanceDelete(this); return false;"><i data-lucide="x" class="w-4 h-4"></i></button>
                                             </div>
                                         </div>
-                                        <div class="swipe-action" onclick="deleteBalance('${item.accountId}', '${item.date}')"><i data-lucide="x" class="w-4 h-4"></i></div>
+                                        <div class="swipe-action" onclick="handleBalanceDelete(this); event.stopPropagation(); return false;"><i data-lucide="x" class="w-4 h-4"></i></div>
                                     </div>
                                 `;
                             }).join('');
@@ -6205,10 +6286,10 @@
                                             <div class="balance-account">${item.accountName}</div>
                                         </div>
                                         <div class="balance-amount">${formatCurrency(item.balance)}</div>
-                                        <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
+                                        <button class="delete-balance-btn" onclick="handleBalanceDelete(this); return false;"><i data-lucide="x" class="w-4 h-4"></i></button>
                                     </div>
                                 </div>
-                                <div class="swipe-action" onclick="deleteBalance('${item.accountId}', '${item.date}')"><i data-lucide="x" class="w-4 h-4"></i></div>
+                                <div class="swipe-action" onclick="handleBalanceDelete(this); event.stopPropagation(); return false;"><i data-lucide="x" class="w-4 h-4"></i></div>
                             </div>
                         `;
                     }).join('');
@@ -6265,6 +6346,11 @@
                 const swipeContainer = document.querySelector(`.swipe-container[data-type="balance"][data-account-id="${accountId}"][data-date="${date}"]`);
                 
                 if (swipeContainer) {
+                    // Save accordion state before deletion
+                    const accordionId = `accordion-body-${accountId}`;
+                    const accordionBody = document.getElementById(accordionId);
+                    const wasExpanded = accordionBody ? accordionBody.classList.contains('expanded') : false;
+                    
                     // Add deleting animation
                     swipeContainer.classList.add('deleting');
                     console.log('Adding deleting animation to container:', swipeContainer);
@@ -6279,6 +6365,14 @@
                         // Update screens based on current view
                         if (document.getElementById('saveBalanceHistory')) {
                             updateSaveScreen();
+                            
+                            // Restore accordion state after update
+                            setTimeout(() => {
+                                const newAccordionBody = document.getElementById(accordionId);
+                                if (newAccordionBody && wasExpanded && !newAccordionBody.classList.contains('expanded')) {
+                                    toggleAccountAccordion(accountId);
+                                }
+                            }, 10);
                         } else {
                             updateBalanceHistory();
                         }
@@ -7298,8 +7392,31 @@
          * @param {Record<string, Array<{amount: number, category: string, description: string, timestamp: number}>>} expenses
          */
         function saveExpenses(expenses) {
-            if (!expenses || typeof expenses !== 'object' || Array.isArray(expenses)) return;
-            localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
+            if (!expenses || typeof expenses !== 'object' || Array.isArray(expenses)) {
+                console.error('Invalid expenses object:', expenses);
+                return;
+            }
+            
+            console.log('Saving expenses to localStorage');
+            try {
+                localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
+                
+                // Verify what was saved
+                setTimeout(() => {
+                    const savedData = localStorage.getItem(EXPENSES_KEY);
+                    console.log('Verified localStorage after save - item exists:', !!savedData);
+                    
+                    // Check if the specific expense was removed
+                    try {
+                        const parsedData = JSON.parse(savedData);
+                        console.log('Parsed saved data has keys:', Object.keys(parsedData));
+                    } catch (e) {
+                        console.error('Could not parse saved data');
+                    }
+                }, 10);
+            } catch (error) {
+                console.error('Error saving expenses to localStorage:', error);
+            }
         }
 
         // Remove old period-date-dropdowns from sticky selector
@@ -7528,25 +7645,30 @@
             let currentX = 0;
             let isDragging = false;
             let currentSwipeContainer = null;
+            let isSwipeAction = false; // Flag to track if swipe is active
             
-            // Debug log for initialization
-            console.log('Initializing swipe-to-delete functionality');
+            console.log('Initializing simplified swipe-to-delete functionality');
 
             function handleTouchStart(e) {
                 const touch = e.touches ? e.touches[0] : e;
                 startX = touch.clientX;
                 currentX = startX;
                 
+                // Don't start a swipe if we clicked on the delete button
+                if (e.target.closest('.swipe-action')) {
+                    return;
+                }
+                
                 const swipeContainer = e.target.closest('.swipe-container');
                 if (swipeContainer) {
-                    console.log('Touch start on swipe container:', swipeContainer.dataset);
                     isDragging = true;
+                    isSwipeAction = false; // Reset swipe action flag
                     currentSwipeContainer = swipeContainer;
-                    swipeContainer.style.transition = 'none';
                     
-                    // Prevent default only if it's a horizontal swipe on a container
-                    if (e.cancelable) {
-                        e.preventDefault();
+                    // Remove transition during drag
+                    const swipeContent = swipeContainer.querySelector('.swipe-content');
+                    if (swipeContent) {
+                        swipeContent.style.transition = 'none';
                     }
                 }
             }
@@ -7558,10 +7680,10 @@
                 currentX = touch.clientX;
                 
                 const deltaX = currentX - startX;
-                console.log('Swipe delta:', deltaX);
                 
                 // Only allow left swipe (negative deltaX)
                 if (deltaX < 0) {
+                    isSwipeAction = true; // Mark as a swipe action
                     const translateX = Math.max(deltaX, -80);
                     const swipeContent = currentSwipeContainer.querySelector('.swipe-content');
                     if (swipeContent) {
@@ -7580,22 +7702,19 @@
                 
                 isDragging = false;
                 const deltaX = currentX - startX;
-                console.log('Swipe end, delta:', deltaX);
-                
                 const swipeContent = currentSwipeContainer.querySelector('.swipe-content');
+                
                 if (swipeContent) {
                     swipeContent.style.transition = 'transform 0.2s ease';
                     
-                    // If swiped more than 30px to the left, show delete action (lowered threshold)
+                    // If swiped more than 30px to the left, show delete action
                     if (deltaX < -30) {
                         currentSwipeContainer.classList.add('swiped');
                         swipeContent.style.transform = 'translateX(-80px)';
-                        console.log('Swiped to show delete');
                     } else {
                         // Reset to original position
                         currentSwipeContainer.classList.remove('swiped');
                         swipeContent.style.transform = 'translateX(0)';
-                        console.log('Reset position');
                     }
                 }
                 
@@ -7604,12 +7723,52 @@
 
             // Helper function to reset any swiped items when tapping elsewhere
             function handleDocumentClick(e) {
-                if (!e.target.closest('.swipe-container') && !e.target.closest('.swipe-action')) {
+                // Don't reset if clicking on swipe action (delete button)
+                if (e.target.closest('.swipe-action')) {
+                    return;
+                }
+                
+                // Reset all swiped items when clicking outside
+                if (!e.target.closest('.swipe-container')) {
                     document.querySelectorAll('.swipe-container.swiped').forEach(container => {
                         container.classList.remove('swiped');
                         const content = container.querySelector('.swipe-content');
                         if (content) content.style.transform = 'translateX(0)';
                     });
+                }
+            }
+            
+            // Add custom click handler for swipe containers to handle edit functionality
+            function handleContainerClick(e) {
+                // If we're in a swipe action, don't trigger edit
+                if (isSwipeAction) {
+                    isSwipeAction = false;
+                    return;
+                }
+                
+                // Don't trigger edit if we're clicking on the delete button
+                if (e.target.closest('.swipe-action')) {
+                    console.log('Click on swipe action, ignoring for edit');
+                    return;
+                }
+                
+                const container = e.target.closest('.swipe-container');
+                if (container) {
+                    const type = container.dataset.type;
+                    console.log('Container click detected for type:', type);
+                    
+                    // Handle expense edit
+                    if (type === 'expense') {
+                        const date = container.dataset.date;
+                        const timestamp = container.dataset.timestamp;
+                        if (date && timestamp) {
+                            console.log('Calling editExpense with:', { date, timestamp });
+                            // Only call editExpense if this was a tap, not a swipe
+                            editExpense(date, timestamp);
+                        }
+                    }
+                    // Handle balance edit (if needed)
+                    // else if (type === 'balance') { ... }
                 }
             }
 
@@ -7618,77 +7777,14 @@
             document.addEventListener('touchmove', handleTouchMove, { passive: false });
             document.addEventListener('touchend', handleTouchEnd, { passive: true });
             document.addEventListener('click', handleDocumentClick);
+            document.addEventListener('click', handleContainerClick);
 
             // Also handle mouse events for desktop testing
-            document.addEventListener('mousedown', (e) => {
-                if (e.target.closest('.swipe-container')) {
-                    handleTouchStart(e);
-                }
-            });
-
+            document.addEventListener('mousedown', handleTouchStart);
             document.addEventListener('mousemove', (e) => {
-                if (isDragging) {
-                    handleTouchMove(e);
-                }
+                if (isDragging) handleTouchMove(e);
             });
-
-            document.addEventListener('mouseup', (e) => {
-                if (isDragging) {
-                    handleTouchEnd(e);
-                }
-            });
-            
-            // Add tap/click handler for swipe action buttons
-            document.addEventListener('click', (e) => {
-                const swipeAction = e.target.closest('.swipe-action');
-                if (swipeAction) {
-                    const container = swipeAction.parentElement;
-                    if (container && container.classList.contains('swipe-container')) {
-                        console.log('Delete action clicked');
-                        
-                        // Get the type of item being deleted
-                        const type = container.dataset.type;
-                        
-                        if (type === 'expense') {
-                            const date = container.dataset.date;
-                            const timestamp = parseInt(container.dataset.timestamp, 10);
-                            console.log('Expense swipe data:', { 
-                                container, 
-                                date, 
-                                timestamp, 
-                                type,
-                                allData: container.dataset 
-                            });
-                            if (date && timestamp) {
-                                console.log('Calling deleteExpense from swipe action click');
-                                deleteExpense(date, timestamp);
-                                // Prevent event propagation
-                                e.stopPropagation();
-                            } else {
-                                console.error('Missing date or timestamp for expense deletion');
-                            }
-                        } else if (type === 'balance') {
-                            const accountId = container.dataset.accountId;
-                            const date = container.dataset.date;
-                            console.log('Balance swipe data:', { 
-                                container, 
-                                accountId, 
-                                date, 
-                                type,
-                                allData: container.dataset 
-                            });
-                            if (accountId && date) {
-                                console.log('Calling deleteBalance from swipe action click');
-                                deleteBalance(accountId, date);
-                                // Prevent event propagation
-                                e.stopPropagation();
-                            } else {
-                                console.error('Missing accountId or date for balance deletion');
-                            }
-                        }
-                    }
-                }
-            });
+            document.addEventListener('mouseup', handleTouchEnd);
         }
 
         // Initialize swipe functionality when DOM is loaded
@@ -8398,7 +8494,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="swipe-action" onclick="deleteBalance('${accountId}', '${update.date}')"><i data-lucide="x" class="w-4 h-4"></i></div>
+                        <div class="swipe-action" onclick="handleBalanceDelete(this); event.stopPropagation(); return false;"><i data-lucide="x" class="w-4 h-4"></i></div>
                     </div>`;
                 });
                 html += `</div></div></div>`;
@@ -9393,6 +9489,84 @@
         function capitalizeFirstLetter(str) {
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
+        function handleExpenseDelete(element, e) {
+            // Use the provided event or the global event
+            const evt = e || window.event;
+            
+            // Stop propagation immediately to prevent any click events from bubbling
+            if (evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+            }
+            
+            console.log('handleExpenseDelete called');
+            
+            // Find the parent swipe-container and get its data attributes
+            const container = element.closest('.swipe-container');
+            if (!container) {
+                console.error('Could not find parent swipe container');
+                return;
+            }
+            
+            // Get expense data from the container
+            const date = container.dataset.date;
+            const timestamp = container.dataset.timestamp;
+            
+            console.log('Expense data from container:', { date, timestamp });
+            
+            if (!date || !timestamp) {
+                console.error('Missing date or timestamp for expense deletion');
+                return;
+            }
+            
+            // Add visual feedback - mark container as deleting
+            container.classList.add('deleting');
+            
+            // Call deleteExpense with the data after a short delay to allow animation
+            setTimeout(() => {
+                deleteExpense(date, timestamp);
+            }, 10); // Short timeout to ensure animation starts
+}
+
+        function handleBalanceDelete(element, e) {
+            // Use the provided event or the global event
+            const evt = e || window.event;
+            
+            // Stop propagation immediately to prevent any click events from bubbling
+            if (evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+            }
+            
+            console.log('handleBalanceDelete called');
+            
+            // Find the parent swipe-container and get its data attributes
+            const container = element.closest('.swipe-container');
+            if (!container) {
+                console.error('Could not find parent swipe container');
+                return;
+            }
+            
+            // Get balance data from the container
+            const accountId = container.dataset.accountId;
+            const date = container.dataset.date;
+            
+            console.log('Balance data from container:', { accountId, date });
+            
+            if (!accountId || !date) {
+                console.error('Missing accountId or date for balance deletion');
+                return;
+            }
+            
+            // Add visual feedback - mark container as deleting
+            container.classList.add('deleting');
+            
+            // Call deleteBalance with the data
+            setTimeout(() => {
+                deleteBalance(accountId, date);
+            }, 10); // Short timeout to ensure animation starts
+        }
+
 
     </script>
 </body>
