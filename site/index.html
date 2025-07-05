@@ -3706,6 +3706,67 @@
         
 
     
+        /* Modern Balance Card Styling */
+        .modern-balance-card {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            /* align-items: center; */
+            padding: 20px;
+            /* background-color: white; */
+            border-radius: 16px;
+            /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); */
+            margin-bottom: 20px;
+        }
+        
+        .balance-date-modern {
+            font-size: 1rem;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+        }
+        
+        .balance-right-stack {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .current-balance-modern {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+            margin-bottom: 4px;
+        }
+        
+        .balance-change-modern {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+        }
+        
+        .balance-change-modern.positive {
+            color: #27ae60;
+        }
+        
+        .balance-change-modern.negative {
+            color: #e74c3c;
+        }
+        
+        /* Mobile responsiveness for modern balance card */
+        @media (max-width: 480px) {
+            .modern-balance-card {
+                padding: 15px;
+            }
+            
+            .current-balance-modern {
+                font-size: 1.5rem;
+            }
+            
+            .balance-date-modern {
+                font-size: 0.9rem;
+            }
+        }
+
+    
     </style>
 </head>
 <body>
@@ -3936,7 +3997,6 @@
                         
                         <!-- Total Balance Display -->
                         <div class="account-balance-display stat-card modern-balance-card">
-                            <div class="balance-date-modern" id="saveBalanceDate">--</div>
                             <div class="balance-right-stack">
                                 <div class="current-balance-modern" id="saveTotalAccountBalance">$0.00</div>
                                 <div class="balance-change-modern" id="saveTotalBalanceChange">+0.00% all time</div>
@@ -4879,14 +4939,14 @@
                     if (a.date !== b.date) {
                         return new Date(b.date) - new Date(a.date); // latest date first
                     }
-                    // If same date, sort by created ascending
+                    // If same date, sort by created descending (newest first)
                     const createdA = a.created || a.timestamp;
                     const createdB = b.created || b.timestamp;
                     if (createdA !== createdB) {
-                        return createdA - createdB;
+                        return createdB - createdA; // Reversed order
                     }
                     // If created timestamps are the same, use timestamp for stable ordering
-                    return a.timestamp - b.timestamp;
+                    return b.timestamp - a.timestamp; // Reversed order
                 });
                 
                 const monthName = selectedMonthDate.toLocaleDateString('en-US', { month: 'long' });
@@ -7772,7 +7832,15 @@
                         .reverse();
                     
                     if (monthBalances.length > 0) {
-                        currentTotal += accountBalances[monthBalances[0]];
+                        const latestBalance = accountBalances[monthBalances[0]];
+                        // Handle both old format (direct number) and new format (object with amount)
+                        const amount = latestBalance && typeof latestBalance === 'object' ? 
+                            latestBalance.amount : latestBalance;
+                            
+                        if (typeof amount === 'number' && !isNaN(amount)) {
+                            currentTotal += amount;
+                        }
+                        
                         if (!lastDate || monthBalances[0] > lastDate) {
                             lastDate = monthBalances[0];
                         }
@@ -7795,7 +7863,15 @@
                         .reverse();
                     
                     if (previousMonthBalances.length > 0) {
-                        previousTotal += accountBalances[previousMonthBalances[0]];
+                        const latestBalance = accountBalances[previousMonthBalances[0]];
+                        // Handle both old format (direct number) and new format (object with amount)
+                        const amount = latestBalance && typeof latestBalance === 'object' ? 
+                            latestBalance.amount : latestBalance;
+                            
+                        if (typeof amount === 'number' && !isNaN(amount)) {
+                            previousTotal += amount;
+                        }
+                        
                         if (!previousLastDate || previousMonthBalances[0] > previousLastDate) {
                             previousLastDate = previousMonthBalances[0];
                         }
@@ -7814,7 +7890,13 @@
             Object.keys(balances).forEach(accountId => {
                 const accountBalances = balances[accountId] || {};
                 if (accountBalances[date]) {
-                    totalBalance += accountBalances[date];
+                    const balance = accountBalances[date];
+                    // Handle both old format (direct number) and new format (object with amount)
+                    const amount = balance && typeof balance === 'object' ? balance.amount : balance;
+                    
+                    if (typeof amount === 'number' && !isNaN(amount)) {
+                        totalBalance += amount;
+                    }
                 }
             });
             
@@ -7867,12 +7949,31 @@
                     const percentageText = balanceChangePercentage !== 0 ? ` (${sign}${balanceChangePercentage.toFixed(1)}%)` : '';
                     const lastDateFormatted = lastDate ? new Date(lastDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'previous';
                     saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)}${percentageText} vs ${lastDateFormatted}`;
+                    
+                    // Add positive/negative class for proper styling
+                    saveTotalBalanceChange.className = 'balance-change-modern ' + (balanceChange >= 0 ? 'positive' : 'negative');
+                }
+                
+                // Update the date display
+                const saveBalanceDate = document.getElementById('saveBalanceDate');
+                if (saveBalanceDate) {
+                    const today = new Date();
+                    saveBalanceDate.textContent = today.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                 }
             } else {
                 // For monthly mode, use selected month data
                 const { currentTotal, previousTotal, lastDate } = getSaveBalanceComparison();
                 const balanceChange = currentTotal - previousTotal;
-                const balanceChangePercentage = previousTotal > 0 ? (balanceChange / previousTotal) * 100 : 0;
+                
+                // Only calculate percentage if we have valid previous data
+                let balanceChangePercentage = 0;
+                let percentageText = '';
+                
+                if (previousTotal > 0 && !isNaN(previousTotal)) {
+                    balanceChangePercentage = (balanceChange / previousTotal) * 100;
+                    const sign = balanceChange >= 0 ? '+' : '';
+                    percentageText = ` (${sign}${balanceChangePercentage.toFixed(1)}%)`;
+                }
                 
                 // Update save screen balance display
                 const saveTotalAccountBalance = document.getElementById('saveTotalAccountBalance');
@@ -7881,12 +7982,26 @@
                 if (saveTotalAccountBalance) {
                     saveTotalAccountBalance.textContent = formatCurrency(currentTotal);
                 }
+                
                 if (saveTotalBalanceChange) {
                     const sign = balanceChange >= 0 ? '+' : '';
-                    const percentageText = balanceChangePercentage !== 0 ? ` (${sign}${balanceChangePercentage.toFixed(1)}%)` : '';
-                    const lastDateFormatted = lastDate ? new Date(lastDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'previous';
+                    
+                    if (previousTotal === 0 || isNaN(previousTotal)) {
+                        // No previous month data case
+                        saveTotalBalanceChange.textContent = `Current balance: ${formatCurrency(currentTotal)}`;
+                        saveTotalBalanceChange.className = 'balance-change-modern';
+                    } else {
+                        // Normal case with previous data
+                        saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)}${percentageText} vs previous month`;
+                        saveTotalBalanceChange.className = 'balance-change-modern ' + (balanceChange >= 0 ? 'positive' : 'negative');
+                    }
+                }
+                
+                // Update the date display
+                const saveBalanceDate = document.getElementById('saveBalanceDate');
+                if (saveBalanceDate) {
                     const selectedMonthName = selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long' });
-                    saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)}${percentageText} vs previous month`;
+                    saveBalanceDate.textContent = selectedMonthName;
                 }
             }
             
@@ -8082,12 +8197,21 @@
             const accountBalances = balances[accountId] || {};
             
             if (Object.keys(accountBalances).length === 0) {
-                return 0; // No balance records for this account
+                return { amount: 0 }; // No balance records for this account
             }
             
             // Get all dates for this account and sort them (newest first)
             const dates = Object.keys(accountBalances).sort().reverse();
-            return accountBalances[dates[0]] || 0;
+            const lastBalance = accountBalances[dates[0]];
+            
+            // Handle both old format (direct number) and new format (object with amount)
+            if (lastBalance === null || lastBalance === undefined) {
+                return { amount: 0 };
+            } else if (typeof lastBalance === 'object') {
+                return lastBalance;
+            } else {
+                return { amount: lastBalance };
+            }
         }
 
         // Update save screen display
