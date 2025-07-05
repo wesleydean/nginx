@@ -1752,12 +1752,13 @@
             height: 100%;
             background: #222;
             opacity: 0;
-            transition: opacity 0.15s ease, left 0.05s linear;
-            pointer-events: none;
             z-index: 20;
+            pointer-events: none;
+            transition: opacity 0.15s ease, left 0.05s linear;
         }
-        
-        /* Make crosshair more visible on mobile */
+        .chart-overlay.visible .chart-crosshair {
+            opacity: 1;
+        }
         @media (hover: none) and (pointer: coarse) {
             .chart-crosshair {
                 width: 3px;
