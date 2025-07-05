@@ -125,6 +125,52 @@
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             border-color: hsl(var(--border));
+            /* Disable text selection and improve mobile touch behavior */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            /* Optimize touch behavior for mobile */
+            -webkit-touch-callout: none;
+            -webkit-touch-action: manipulation;
+            touch-action: manipulation;
+        }
+        
+        /* Allow text selection for specific elements that need it */
+        input, textarea, [contenteditable="true"], .selectable-text {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        
+        /* Prevent text selection on buttons and interactive elements */
+        button, .btn, .swipe-container, .expense-item, .balance-item, .card {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-touch-action: manipulation;
+            touch-action: manipulation;
+        }
+        
+        /* Disable context menu on long press for mobile */
+        * {
+            -webkit-touch-callout: none;
+        }
+        
+        /* Improve touch targets for mobile */
+        .btn, button, .swipe-container, .expense-item, .balance-item {
+            min-height: 44px; /* iOS recommended minimum touch target */
+            min-width: 44px;
+        }
+        
+        /* Disable hover effects on touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .btn:hover, button:hover, .swipe-action:hover {
+                background-color: inherit;
+            }
         }
         
         body {
