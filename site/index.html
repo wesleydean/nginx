@@ -1438,6 +1438,65 @@
             padding: 0 6px;
         }
         
+        /* Chart row container for savings and spending */
+        .chart-row {
+            margin-bottom: 16px;
+        }
+        
+        .chart-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Savings row styling (black) */
+        .savings-row .chart-main-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+            margin-bottom: 4px;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+        
+        .savings-row .chart-subtitle {
+            font-size: 1rem;
+            color: hsl(var(--muted-foreground));
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .savings-row .chart-growth {
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 4px 0;
+            margin-bottom: 8px;
+        }
+        
+        /* Spending row styling (gray) */
+        .spending-row .chart-main-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #6B7280; /* Gray color for spending */
+            margin-bottom: 4px;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+        
+        .spending-row .chart-subtitle {
+            font-size: 0.9rem;
+            color: #9CA3AF; /* Lighter gray for subtitle */
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .spending-row .chart-growth {
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 4px 0;
+            margin-bottom: 8px;
+            color: #6B7280; /* Gray color for spending growth */
+        }
+        
+        /* Legacy styles for backward compatibility */
         .chart-main-value {
             font-size: 2.5rem;
             font-weight: 700;
@@ -2945,6 +3004,19 @@
         .fab-option:active {
             transform: translateY(2px);
         }
+
+        .chart-overlay.visible .chart-tooltip {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .chart-overlay.visible .chart-crosshair {
+            opacity: 1;
+        }
+
+        .fab-option:active {
+            transform: translateY(2px);
+        }
     </style>
 </head>
 <body>
@@ -3160,11 +3232,21 @@
                     
                     <!-- Wealthsimple-Style Chart -->
                     <div class="chart-container-wrapper">
-                        <!-- Chart Header with Main Value -->
+                        <!-- Chart Header with Two Rows: Savings and Spending -->
                         <div class="chart-header">
-                            <div class="chart-main-value" id="chartMainValue">$0.00</div>
-                            <div class="chart-subtitle" id="chartSubtitle">Total Savings</div>
-                            <div class="chart-growth" id="chartGrowth">+$0.00 (+0%) all time</div>
+                            <!-- Savings Row (Black) -->
+                            <div class="chart-row savings-row">
+                                <div class="chart-main-value" id="chartMainValue">$0.00</div>
+                                <div class="chart-growth" id="chartGrowth">+$0.00 (+0%)</div>
+                                <div class="chart-subtitle" id="chartSubtitle">Total Savings</div>
+                            </div>
+                            
+                            <!-- Spending Row (Gray) -->
+                            <div class="chart-row spending-row">
+                                <div class="chart-main-value spending" id="chartSpendingValue">$0.00</div>
+                                <div class="chart-growth spending" id="chartSpendingGrowth">+$0.00 (+0%)</div>
+                                <div class="chart-subtitle spending" id="chartSpendingSubtitle">Total Spending</div>
+                            </div>
                         </div>
                         
                         <!-- Chart with Overlay -->
@@ -3525,7 +3607,7 @@
         // Period tracking variables
         let currentPeriodMode = 'today'; // 'today' or 'month'
         let selectedMonthDate = new Date();
-        let currentChartPeriod = 'ALL'; // '1M', '3M', '6M', 'YTD', '1Y', 'ALL'
+        let currentChartPeriod = 'ALL'; // '1M', '3M', '6M', 'YTD', '1Y', 'ALL' - Changed from YTD to ALL to show all balance data
         
         let currentScreen = 0;
         let spendingChart;
@@ -3641,32 +3723,51 @@
             const budgetAmount = document.getElementById('budgetAmount');
             const remainingBudget = document.getElementById('remainingBudget');
             
-            if (budgetPeriodLabel) budgetPeriodLabel.textContent = periodLabel;
-            if (budgetDescription) budgetDescription.textContent = description;
-            if (budgetAmount) budgetAmount.textContent = `$${budget.toFixed(2)}`;
-            if (remainingBudget) remainingBudget.textContent = `$${remaining.toFixed(2)}`;
+            if (budgetPeriodLabel) {
+                budgetPeriodLabel.textContent = periodLabel;
+            }
+            if (budgetAmount) {
+                budgetAmount.textContent = formatCurrency(budget);
+            }
+            if (remainingBudget) {
+                remainingBudget.textContent = formatCurrency(remaining);
+            }
             
-            // Update status
-            const statusText = document.getElementById('budgetStatusText');
-            const remainingBudgetContainer = document.querySelector('.remaining-budget-section');
-            const remainingBudgetAmount = document.getElementById('remainingBudget');
-            
-            if (statusText && remainingBudgetContainer && remainingBudgetAmount) {
-                if (remaining > budget * 0.5) {
-                    statusText.textContent = 'On Track';
-                    statusText.style.backgroundColor = 'hsl(156.06deg 40% 40%)';
-                    remainingBudgetContainer.style.backgroundColor = 'hsl(156.06deg 40% 96%)';
-                    remainingBudgetAmount.style.color = 'hsl(156.06deg 40% 20%)';
-                } else if (remaining > 0) {
-                    statusText.textContent = 'Watch Spending';
-                    statusText.style.backgroundColor = 'hsl(47.9deg 95.8% 40%)';
-                    remainingBudgetContainer.style.backgroundColor = 'hsl(47.9deg 95.8% 96%)';
-                    remainingBudgetAmount.style.color = 'hsl(47.9deg 95.8% 20%)';
+            // Update budget status
+            if (document.getElementById('budgetStatusText')) {
+                const percentUsed = (totalSpent / budget) * 100;
+                let statusText = '';
+                let statusColor = '';
+                let cardBackgroundColor = '';
+                let amountColor = '';
+                
+                if (percentUsed >= 90) {
+                    statusText = 'Over Budget';
+                    statusColor = 'hsl(0deg 84% 60%)'; // Red
+                    cardBackgroundColor = 'hsl(0deg 84% 96%)'; // Light red background
+                    amountColor = 'hsl(0deg 84% 20%)'; // Dark red text
+                } else if (percentUsed >= 75) {
+                    statusText = 'Warning';
+                    statusColor = 'hsl(38deg 92% 50%)'; // Orange
+                    cardBackgroundColor = 'hsl(38deg 92% 96%)'; // Light orange background
+                    amountColor = 'hsl(38deg 92% 20%)'; // Dark orange text
                 } else {
-                    statusText.textContent = 'Over Budget';
-                    statusText.style.backgroundColor = 'hsl(0deg 84.2% 40%)';
-                    remainingBudgetContainer.style.backgroundColor = 'hsl(0deg 84.2% 96%)';
-                    remainingBudgetAmount.style.color = 'hsl(0deg 84.2% 20%)';
+                    statusText = 'On Track';
+                    statusColor = 'hsl(156.06deg 40% 40%)'; // Green
+                    cardBackgroundColor = 'hsl(156.06deg 40% 96%)'; // Light green background
+                    amountColor = 'hsl(156.06deg 40% 20%)'; // Dark green text
+                }
+                
+                document.getElementById('budgetStatusText').textContent = statusText;
+                document.getElementById('budgetStatusText').style.backgroundColor = statusColor;
+                
+                // Update remaining budget card background and text color
+                const remainingBudgetContainer = document.querySelector('.remaining-budget-section');
+                const remainingBudgetAmount = document.getElementById('remainingBudget');
+                
+                if (remainingBudgetContainer && remainingBudgetAmount) {
+                    remainingBudgetContainer.style.backgroundColor = cardBackgroundColor;
+                    remainingBudgetAmount.style.color = amountColor;
                 }
             }
         }
@@ -3732,11 +3833,10 @@
                             <div class="swipe-content">
                                 <div class="expense-item">
                                     <div class="expense-details">
-                                        <div class="expense-description">${expense.description || expense.category}</div>
+                                        ${expense.description ? `<div class="expense-description">${expense.description}</div>` : ''}
                                         <div class="expense-category">${displayDate}${expense.category}</div>
                                     </div>
-                                    <div class="expense-amount">$${expense.amount.toFixed(2)}</div>
-                                    <button class="delete-btn" onclick="deleteExpense('${expense.date}', ${expense.timestamp})">✕</button>
+                                    <div class="expense-amount">${formatCurrency(expense.amount)}</div>
                                 </div>
                             </div>
                             <div class="swipe-action" onclick="deleteExpense('${expense.date}', ${expense.timestamp})">✕</div>
@@ -3774,6 +3874,7 @@
                 
                 // Update the display
                 updatePeriodView();
+                updateChart();
                 
                 console.log('Expense deleted successfully');
             } else {
@@ -3834,9 +3935,9 @@
             const weeklyRemainingEl = document.getElementById('weeklyRemaining');
             const projectedMonthlySavingsEl = document.getElementById('projectedMonthlySavings');
             
-            if (weeklySpentEl) weeklySpentEl.textContent = `$${weeklySpent.toFixed(0)}`;
-            if (weeklyRemainingEl) weeklyRemainingEl.textContent = `$${Math.max(0, WEEKLY_BUDGET - weeklySpent).toFixed(0)}`;
-            if (projectedMonthlySavingsEl) projectedMonthlySavingsEl.textContent = `$${projectedMonthlySavings.toFixed(0)}`;
+            if (weeklySpentEl) weeklySpentEl.textContent = formatCurrencyWhole(weeklySpent);
+            if (weeklyRemainingEl) weeklyRemainingEl.textContent = formatCurrencyWhole(Math.max(0, WEEKLY_BUDGET - weeklySpent));
+            if (projectedMonthlySavingsEl) projectedMonthlySavingsEl.textContent = formatCurrencyWhole(projectedMonthlySavings);
             
             // Update monthly stats
             const monthlySpentEl = document.getElementById('monthlySpent');
@@ -3849,24 +3950,24 @@
             const savingsRateSubtitleEl = document.getElementById('savingsRateSubtitle');
             
             // Update month spent with percentage indicator
-            if (monthlySpentEl) monthlySpentEl.textContent = `$${monthlySpent.toFixed(0)}`;
+            if (monthlySpentEl) monthlySpentEl.textContent = formatCurrencyWhole(monthlySpent);
             if (monthSpentSubtitleEl) {
                 const percentUsed = (monthlySpent / MONTHLY_BUDGET) * 100;
-                monthSpentSubtitleEl.textContent = `${percentUsed.toFixed(0)}% of $${MONTHLY_BUDGET} budget`;
+                monthSpentSubtitleEl.textContent = `${percentUsed.toFixed(0)}% of ${formatCurrency(MONTHLY_BUDGET)} budget`;
             }
             
             // Update daily burn rate with status
-            if (dailyBurnRateEl) dailyBurnRateEl.textContent = `$${dailyBurnRate.toFixed(0)}`;
+            if (dailyBurnRateEl) dailyBurnRateEl.textContent = formatCurrencyWhole(dailyBurnRate);
             if (burnRateStatusEl) {
                 const dailyTarget = MONTHLY_BUDGET / daysInMonth;
                 const difference = dailyTarget - dailyBurnRate;
                 let burnRateStatus = '';
                 
                 if (difference > 0) {
-                    burnRateStatus = `$${difference.toFixed(0)} under target`;
+                    burnRateStatus = `${formatCurrencyWhole(difference)} under target`;
                     burnRateStatusEl.className = 'stat-subtitle positive';
                 } else if (difference < 0) {
-                    burnRateStatus = `$${Math.abs(difference).toFixed(0)} over target`;
+                    burnRateStatus = `${formatCurrencyWhole(Math.abs(difference))} over target`;
                     burnRateStatusEl.className = 'stat-subtitle negative';
                 } else {
                     burnRateStatus = 'right on target';
@@ -4060,17 +4161,41 @@
             
             // Get all balance records and sort by date
             const balanceRecords = [];
+            console.log('=== CHART BALANCE DEBUGGING ===');
+            console.log('Chart period:', currentChartPeriod);
+            console.log('Date range:', dateKeys[0], 'to', dateKeys[dateKeys.length - 1]);
+            console.log('All balances from localStorage:', balances);
+            
+            // Create a map to sum up all account balances for each date
+            const dateBalanceMap = new Map();
+            
             Object.keys(balances).forEach(accountId => {
                 const accountBalances = balances[accountId] || {};
+                console.log(`Account ${accountId} balances:`, accountBalances);
                 Object.keys(accountBalances).forEach(date => {
+                    console.log(`Checking balance date: ${date} (in range: ${date >= dateKeys[0] && date <= dateKeys[dateKeys.length - 1]})`);
                     if (date >= dateKeys[0] && date <= dateKeys[dateKeys.length - 1]) {
-                        balanceRecords.push({
-                            date: date,
-                            amount: accountBalances[date]
-                        });
+                        const currentBalance = dateBalanceMap.get(date) || 0;
+                        const accountBalance = accountBalances[date];
+                        const newTotal = currentBalance + accountBalance;
+                        dateBalanceMap.set(date, newTotal);
+                        console.log(`✓ Added balance for ${date}: $${accountBalance} (account: ${accountId}) → Total: $${newTotal}`);
+                    } else {
+                        console.log(`✗ Skipped balance record: ${date} = $${accountBalances[date]} (outside date range)`);
                     }
                 });
             });
+            
+            // Convert the map to balance records array
+            dateBalanceMap.forEach((totalAmount, date) => {
+                balanceRecords.push({
+                    date: date,
+                    amount: totalAmount
+                });
+            });
+            
+            console.log('Final balance records for chart (summed by date):', balanceRecords);
+            console.log('=== END CHART BALANCE DEBUGGING ===');
             
             // Sort balance records by date
             balanceRecords.sort((a, b) => a.date.localeCompare(b.date));
@@ -4102,34 +4227,75 @@
             const savingsGrowth = finalSavings - initialSavings;
             const savingsGrowthPercent = initialSavings > 0 ? (savingsGrowth / initialSavings) * 100 : 0;
 
-            // Chart header DOM elements
+            // Calculate total spending and growth
+            const initialSpending = spendingData[0] || 0;
+            const finalSpending = spendingData[spendingData.length - 1] || 0;
+            const spendingGrowth = finalSpending - initialSpending;
+            const spendingGrowthPercent = initialSpending > 0 ? (spendingGrowth / initialSpending) * 100 : 0;
+
+            // Chart header DOM elements for both rows
             const chartMainValue = document.getElementById('chartMainValue');
             const chartSubtitle = document.getElementById('chartSubtitle');
             const chartGrowth = document.getElementById('chartGrowth');
+            const chartSpendingValue = document.getElementById('chartSpendingValue');
+            const chartSpendingSubtitle = document.getElementById('chartSpendingSubtitle');
+            const chartSpendingGrowth = document.getElementById('chartSpendingGrowth');
 
-            // Helper to update chart header for a given index
+            /**
+             * Updates chart header for a given index showing both savings and spending values.
+             * @param {number} index - The data index to display.
+             */
             function updateChartHeader(index) {
-                if (!chartMainValue || !chartSubtitle || !chartGrowth) return;
+                if (!chartMainValue || !chartSubtitle || !chartGrowth || 
+                    !chartSpendingValue || !chartSpendingSubtitle || !chartSpendingGrowth) return;
+                
                 const saved = savingsData[index];
                 const spent = spendingData[index];
                 const dateLabel = labels[index];
-                // Main value: total saved
-                chartMainValue.textContent = `$${saved.toFixed(2)}`;
-                // Subtitle: show date and label
+                
+                // Update savings row
+                chartMainValue.textContent = formatCurrency(saved);
                 chartSubtitle.textContent = `${dateLabel} • Total Savings`;
-                // Growth: show spending for the day
-                chartGrowth.textContent = `Spent: $${spent.toFixed(2)}`;
-                chartGrowth.className = 'chart-growth';
+                
+                // Calculate savings growth from start to this point
+                const savingsGrowthToDate = saved - initialSavings;
+                const savingsGrowthPercentToDate = initialSavings > 0 ? (savingsGrowthToDate / initialSavings) * 100 : 0;
+                const savingsGrowthPrefix = savingsGrowthToDate >= 0 ? '+' : '';
+                chartGrowth.textContent = `${savingsGrowthPrefix}${formatCurrency(savingsGrowthToDate)} (${savingsGrowthPrefix}${savingsGrowthPercentToDate.toFixed(1)}%)`;
+                chartGrowth.className = 'chart-growth ' + (savingsGrowthToDate >= 0 ? 'positive' : 'negative');
+                
+                // Update spending row
+                chartSpendingValue.textContent = formatCurrency(spent);
+                chartSpendingSubtitle.textContent = `${dateLabel} • Total Spending`;
+                
+                // Calculate spending growth from start to this point
+                const spendingGrowthToDate = spent - initialSpending;
+                const spendingGrowthPercentToDate = initialSpending > 0 ? (spendingGrowthToDate / initialSpending) * 100 : 0;
+                const spendingGrowthPrefix = spendingGrowthToDate >= 0 ? '+' : '';
+                chartSpendingGrowth.textContent = `${spendingGrowthPrefix}${formatCurrency(spendingGrowthToDate)} (${spendingGrowthPrefix}${spendingGrowthPercentToDate.toFixed(1)}%)`;
+                chartSpendingGrowth.className = 'chart-growth spending ' + (spendingGrowthToDate >= 0 ? 'positive' : 'negative');
             }
 
-            // Helper to reset chart header to latest values
+            /**
+             * Resets chart header to show latest total values for both savings and spending.
+             */
             function resetChartHeader() {
-                if (!chartMainValue || !chartSubtitle || !chartGrowth) return;
-                chartMainValue.textContent = `$${finalSavings.toFixed(2)}`;
+                if (!chartMainValue || !chartSubtitle || !chartGrowth || 
+                    !chartSpendingValue || !chartSpendingSubtitle || !chartSpendingGrowth) return;
+                
+                // Update savings row with final values
+                chartMainValue.textContent = formatCurrency(finalSavings);
                 chartSubtitle.textContent = 'Total Savings';
-                const growthPrefix = savingsGrowth >= 0 ? '+' : '';
-                chartGrowth.textContent = `${growthPrefix}$${savingsGrowth.toFixed(2)} (${growthPrefix}${savingsGrowthPercent.toFixed(1)}%) ${currentChartPeriod === 'ALL' ? 'all time' : currentChartPeriod}`;
+                const savingsGrowthPrefix = savingsGrowth >= 0 ? '+' : '';
+                chartGrowth.textContent = `${savingsGrowthPrefix}${formatCurrency(savingsGrowth)} (${savingsGrowthPrefix}${savingsGrowthPercent.toFixed(1)}%)`;
                 chartGrowth.className = 'chart-growth ' + (savingsGrowth >= 0 ? 'positive' : 'negative');
+                
+                // Update spending row with final values
+                chartSpendingValue.textContent = formatCurrency(finalSpending);
+                chartSpendingSubtitle.textContent = 'Total Spending';
+                const spendingGrowthPrefix = spendingGrowth >= 0 ? '+' : '';
+                chartSpendingGrowth.textContent = `${spendingGrowthPrefix}${formatCurrency(spendingGrowth)} (${spendingGrowthPrefix}${spendingGrowthPercent.toFixed(1)}%)`;
+                chartSpendingGrowth.className = 'chart-growth spending ' + (spendingGrowth >= 0 ? 'positive' : 'negative');
             }
 
             // Set default header
@@ -4137,6 +4303,8 @@
 
             // Destroy previous chart instance if it exists
             if (spendingChart) {
+                // Clean up any existing interaction state
+                hideChartInteraction();
                 spendingChart.destroy();
             }
             
@@ -4146,13 +4314,6 @@
             savingsGradient.addColorStop(0.6, 'rgba(16, 185, 129, 0.05)');
             savingsGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
             
-            // Create enhanced gradient for spending
-            const spendingGradient = ctx.createLinearGradient(0, 0, 0, 400);
-            spendingGradient.addColorStop(0, 'rgba(234, 67, 53, 0.15)');
-            spendingGradient.addColorStop(0.6, 'rgba(234, 67, 53, 0.05)');
-            spendingGradient.addColorStop(1, 'rgba(234, 67, 53, 0)');
-            
-            // Create the chart
             spendingChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -4161,94 +4322,69 @@
                         {
                             label: 'Total Savings',
                             data: savingsData,
-                            borderColor: 'rgb(16, 185, 129)', // Green color for savings
+                            borderColor: 'rgb(16, 185, 129)',
                             backgroundColor: savingsGradient,
                             tension: 0.4,
                             fill: true,
                             pointRadius: 0,
-                            pointHoverRadius: 6,
-                            pointHoverBackgroundColor: 'rgb(16, 185, 129)',
-                            pointHoverBorderColor: '#fff',
-                            pointHoverBorderWidth: 2,
-                            borderWidth: 2.5,
-                            z: 10 // Higher z-index to ensure it's on top
+                            borderWidth: 3,
+                            z: 10,
+                            pointHitRadius: 20,
+                            pointBackgroundColor: 'transparent',
+                            pointBorderColor: 'transparent',
+                            pointBorderWidth: 0
                         },
                         {
                             label: 'Cumulative Spending',
                             data: spendingData,
-                            borderColor: 'rgb(107, 114, 128)', // Gray color for spending
-                            backgroundColor: spendingGradient,
+                            borderColor: 'rgb(107, 114, 128)', // Gray
+                            backgroundColor: 'transparent', // No fill
                             tension: 0.4,
-                            fill: true,
+                            fill: false, // No fill for spending
+                            borderDash: [4, 4], // Dotted line
                             pointRadius: 0,
-                            pointHoverRadius: 5,
-                            pointHoverBackgroundColor: 'rgb(107, 114, 128)',
-                            pointHoverBorderColor: '#fff',
-                            pointHoverBorderWidth: 2,
-                            borderWidth: 2,
-                            z: 5
+                            borderWidth: 2.5,
+                            z: 5,
+                            pointHitRadius: 15,
+                            pointBackgroundColor: 'transparent',
+                            pointBorderColor: 'transparent',
+                            pointBorderWidth: 0
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    animations: {
-                        tension: {
-                            duration: 1000,
-                            easing: 'easeOutQuad',
-                            from: 0.8,
-                            to: 0.4,
-                            loop: false
-                        }
-                    },
                     plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            enabled: false // Disable Chart.js tooltip
-                        }
+                        legend: { display: false },
+                        tooltip: { enabled: false }
                     },
                     scales: {
                         x: {
-                            grid: {
-                                display: false
-                            },
+                            grid: { display: false },
                             ticks: {
                                 maxTicksLimit: window.innerWidth < 768 ? 4 : 8,
-                                font: {
-                                    family: 'Inter, system-ui, sans-serif',
-                                    size: 11
-                                },
+                                font: { family: 'Inter, system-ui, sans-serif', size: 11 },
                                 color: 'hsl(var(--muted-foreground))',
                                 padding: 8
                             },
-                            border: {
-                                display: false
-                            }
+                            border: { display: false }
                         },
                         y: {
-                            grid: {
-                                color: 'hsl(var(--border) / 0.15)',
-                                drawBorder: false,
-                                tickLength: 8,
-                                lineWidth: 1
-                            },
-                            border: {
-                                display: false
-                            },
+                            grid: { display: false }, // Remove all horizontal grid lines
+                            border: { display: false },
                             ticks: {
-                                callback: function(value) {
-                                    if (value >= 1000) {
-                                        return '$' + (value/1000) + 'k';
+                                callback: function(value, index, ticks) {
+                                    // Only show the max value (last tick)
+                                    if (index === ticks.length - 1) {
+                                        if (value >= 1000) {
+                                            return '$' + (value/1000) + 'k';
+                                        }
+                                        return '$' + value;
                                     }
-                                    return '$' + value;
+                                    return '';
                                 },
-                                font: {
-                                    family: 'Inter, system-ui, sans-serif',
-                                    size: 11
-                                },
+                                font: { family: 'Inter, system-ui, sans-serif', size: 11 },
                                 color: 'hsl(var(--muted-foreground))',
                                 padding: 8,
                                 maxTicksLimit: 6
@@ -4256,95 +4392,203 @@
                             beginAtZero: true
                         }
                     },
-                    interaction: {
-                        intersect: false,
-                        mode: 'nearest'
-                    },
-                    hover: {
-                        intersect: false,
-                        mode: 'nearest'
-                    },
+                    interaction: { intersect: false, mode: 'nearest' },
+                    hover: { intersect: false, mode: 'nearest', enabled: false },
                     elements: {
                         point: {
-                            hitRadius: 30
+                            hitRadius: 30,
+                            hoverRadius: 0,
+                            radius: 0,
+                            hoverBackgroundColor: 'transparent',
+                            hoverBorderColor: 'transparent',
+                            hoverBorderWidth: 0
                         },
-                        line: {
-                            tension: 0.4
-                        }
+                        line: { tension: 0.4 }
                     }
                 }
             });
 
-            // Remove all previous custom drag/touch event listeners
-            // (No-op since we recreate the chart and canvas each time)
+            // --- INTERACTION: LONG PRESS THEN DRAG ---
+            // Require 1-second long press before enabling drag interaction
+            let interactionEnabled = false;
+            let longPressTimeout = null;
+            let lastActiveIndex = null;
 
             /**
-             * Custom popover for click/tap interaction on the chart.
-             * Shows left: total saved, right: total spending for the selected day.
+             * Enables chart interaction and shows crosshair/tooltip at the given x position.
+             * @param {number} x - The x coordinate relative to the chart canvas.
              */
-            const chartCanvas = ctx.canvas;
-            // const chartOverlay = document.getElementById('chartOverlay');
-            // const chartTooltip = document.getElementById('chartTooltip');
-            // const chartCrosshair = document.getElementById('chartCrosshair');
-
-            // Desktop: mousemove/drag
-            let isMouseDown = false;
-            chartCanvas.addEventListener('mousedown', function(e) {
-                isMouseDown = true;
-                const rect = chartCanvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
+            function enableChartInteraction(x) {
+                interactionEnabled = true;
                 const index = getNearestIndex(x);
                 updateChartHeader(index);
+                showChartInteraction(index);
+                lastActiveIndex = index;
+            }
+
+            /**
+             * Disables chart interaction and hides crosshair/tooltip.
+             */
+            function disableChartInteraction() {
+                interactionEnabled = false;
+                resetChartHeader();
+                hideChartInteraction();
+                lastActiveIndex = null;
+            }
+
+            const chartCanvas = ctx.canvas;
+
+            // Remove all previous listeners (Chart.js re-creates canvas, so this is safe)
+            chartCanvas.onmousedown = null;
+            chartCanvas.onmousemove = null;
+            chartCanvas.onmouseup = null;
+            chartCanvas.onmouseleave = null;
+            chartCanvas.onclick = null;
+            chartCanvas.ontouchstart = null;
+            chartCanvas.ontouchmove = null;
+            chartCanvas.ontouchend = null;
+            chartCanvas.ontouchcancel = null;
+
+            // Mouse events: require 1-second long press before enabling drag
+            chartCanvas.addEventListener('mousedown', function(e) {
+                if (longPressTimeout) clearTimeout(longPressTimeout);
+                longPressTimeout = setTimeout(() => {
+                    const x = e.clientX - chartCanvas.getBoundingClientRect().left;
+                    enableChartInteraction(x);
+                }, 1000); // 1 second long press required
             });
             chartCanvas.addEventListener('mousemove', function(e) {
-                if (!isMouseDown) return;
-                const rect = chartCanvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
+                if (!interactionEnabled) return;
+                const x = e.clientX - chartCanvas.getBoundingClientRect().left;
                 const index = getNearestIndex(x);
-                updateChartHeader(index);
+                if (index !== lastActiveIndex) {
+                    updateChartHeader(index);
+                    showChartInteraction(index);
+                    lastActiveIndex = index;
+                }
             });
             chartCanvas.addEventListener('mouseup', function() {
-                isMouseDown = false;
-                resetChartHeader();
+                if (longPressTimeout) clearTimeout(longPressTimeout);
+                if (interactionEnabled) disableChartInteraction();
             });
             chartCanvas.addEventListener('mouseleave', function() {
-                isMouseDown = false;
-                resetChartHeader();
-            });
-            // Desktop: click (single day select)
-            chartCanvas.addEventListener('click', function(e) {
-                const rect = chartCanvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const index = getNearestIndex(x);
-                updateChartHeader(index);
-                setTimeout(resetChartHeader, 1500); // Auto-reset after 1.5s
+                if (longPressTimeout) clearTimeout(longPressTimeout);
+                if (interactionEnabled) disableChartInteraction();
             });
 
-            // Mobile: touchmove/drag
-            let isTouchActive = false;
+            // Touch events: require 1-second long press before enabling drag
             chartCanvas.addEventListener('touchstart', function(e) {
-                isTouchActive = true;
+                if (longPressTimeout) clearTimeout(longPressTimeout);
                 if (!e.touches || e.touches.length === 0) return;
-                const rect = chartCanvas.getBoundingClientRect();
-                const x = e.touches[0].clientX - rect.left;
-                const index = getNearestIndex(x);
-                updateChartHeader(index);
+                longPressTimeout = setTimeout(() => {
+                    const x = e.touches[0].clientX - chartCanvas.getBoundingClientRect().left;
+                    enableChartInteraction(x);
+                }, 1000); // 1 second long press required
             });
             chartCanvas.addEventListener('touchmove', function(e) {
-                if (!isTouchActive || !e.touches || e.touches.length === 0) return;
-                const rect = chartCanvas.getBoundingClientRect();
-                const x = e.touches[0].clientX - rect.left;
+                if (!interactionEnabled || !e.touches || e.touches.length === 0) return;
+                const x = e.touches[0].clientX - chartCanvas.getBoundingClientRect().left;
                 const index = getNearestIndex(x);
-                updateChartHeader(index);
+                if (index !== lastActiveIndex) {
+                    updateChartHeader(index);
+                    showChartInteraction(index);
+                    lastActiveIndex = index;
+                }
             });
             chartCanvas.addEventListener('touchend', function() {
-                isTouchActive = false;
-                resetChartHeader();
+                if (longPressTimeout) clearTimeout(longPressTimeout);
+                if (interactionEnabled) disableChartInteraction();
             });
             chartCanvas.addEventListener('touchcancel', function() {
-                isTouchActive = false;
-                resetChartHeader();
+                if (longPressTimeout) clearTimeout(longPressTimeout);
+                if (interactionEnabled) disableChartInteraction();
             });
+
+            // Helper functions to show/hide chart interaction effects
+            function showChartInteraction(activeIndex) {
+                if (!spendingChart || !spendingChart.data || !spendingChart.data.datasets) return;
+                
+                // Show only the active point with hollow circles
+                spendingChart.data.datasets.forEach((dataset, datasetIndex) => {
+                    // Reset all point properties to ensure clean state
+                    dataset.pointRadius = new Array(dataset.data.length).fill(0);
+                    dataset.pointBackgroundColor = new Array(dataset.data.length).fill('transparent');
+                    dataset.pointBorderColor = new Array(dataset.data.length).fill('transparent');
+                    dataset.pointBorderWidth = new Array(dataset.data.length).fill(0);
+                    dataset.pointHoverRadius = new Array(dataset.data.length).fill(0);
+                    dataset.pointHoverBackgroundColor = new Array(dataset.data.length).fill('transparent');
+                    dataset.pointHoverBorderColor = new Array(dataset.data.length).fill('transparent');
+                    dataset.pointHoverBorderWidth = new Array(dataset.data.length).fill(0);
+                    
+                    // Show only the active point with hollow circle
+                    if (activeIndex >= 0 && activeIndex < dataset.data.length) {
+                        dataset.pointRadius[activeIndex] = datasetIndex === 0 ? 8 : 6; // Larger for savings
+                        
+                        // Set hollow circle properties for the active point only
+                        if (datasetIndex === 0) {
+                            // Savings dataset - green hollow circle
+                            dataset.pointBackgroundColor[activeIndex] = 'transparent';
+                            dataset.pointBorderColor[activeIndex] = 'rgb(16, 185, 129)';
+                            dataset.pointBorderWidth[activeIndex] = 3;
+                            // Also set hover properties for the active point
+                            dataset.pointHoverRadius[activeIndex] = 8;
+                            dataset.pointHoverBackgroundColor[activeIndex] = 'transparent';
+                            dataset.pointHoverBorderColor[activeIndex] = 'rgb(16, 185, 129)';
+                            dataset.pointHoverBorderWidth[activeIndex] = 3;
+                        } else {
+                            // Spending dataset - gray hollow circle
+                            dataset.pointBackgroundColor[activeIndex] = 'transparent';
+                            dataset.pointBorderColor[activeIndex] = 'rgb(107, 114, 128)';
+                            dataset.pointBorderWidth[activeIndex] = 2;
+                            // Also set hover properties for the active point
+                            dataset.pointHoverRadius[activeIndex] = 6;
+                            dataset.pointHoverBackgroundColor[activeIndex] = 'transparent';
+                            dataset.pointHoverBorderColor[activeIndex] = 'rgb(107, 114, 128)';
+                            dataset.pointHoverBorderWidth[activeIndex] = 2;
+                        }
+                    }
+                    
+                    // Keep normal line width
+                    dataset.borderWidth = datasetIndex === 0 ? 3 : 2.5;
+                });
+                
+                // Show and position the vertical crosshair line
+                const chartOverlay = document.getElementById('chartOverlay');
+                const chartCrosshair = document.getElementById('chartCrosshair');
+                
+                if (chartOverlay && chartCrosshair) {
+                    const xScale = spendingChart.scales.x;
+                    const pixelX = xScale.getPixelForValue(activeIndex);
+                    
+                    // Position the crosshair at the selected point
+                    chartCrosshair.style.left = `${pixelX}px`;
+                    chartOverlay.classList.add('visible');
+                }
+                
+                spendingChart.update('none'); // Update without animation for immediate response
+            }
+
+            function hideChartInteraction() {
+                if (!spendingChart || !spendingChart.data || !spendingChart.data.datasets) return;
+                
+                // Completely reset all data points to ensure no sticky dots
+                spendingChart.data.datasets.forEach((dataset, datasetIndex) => {
+                    // Reset all point properties to clean state
+                    dataset.pointRadius = 0; // Hide all points
+                    dataset.pointBackgroundColor = 'transparent';
+                    dataset.pointBorderColor = 'transparent';
+                    dataset.pointBorderWidth = 0;
+                    dataset.borderWidth = datasetIndex === 0 ? 3 : 2.5; // Keep normal line width
+                });
+                
+                // Hide the vertical crosshair line
+                const chartOverlay = document.getElementById('chartOverlay');
+                if (chartOverlay) {
+                    chartOverlay.classList.remove('visible');
+                }
+                
+                spendingChart.update('none'); // Update without animation for immediate response
+            }
         }
         
         // Global variables
@@ -4564,7 +4808,7 @@
             // Update total balance display
             const totalBalanceElement = document.getElementById('totalAccountBalance');
             if (totalBalanceElement) {
-                totalBalanceElement.textContent = `$${totalBalance.toFixed(2)}`;
+                totalBalanceElement.textContent = formatCurrency(totalBalance);
             }
             
             const changeElement = document.getElementById('totalBalanceChange');
@@ -4638,7 +4882,7 @@
                                                     <div class="balance-date">${formattedDate}</div>
                                                     <div class="balance-account">${accountName}</div>
                                                 </div>
-                                                <div class="balance-amount">$${item.balance.toFixed(2)}</div>
+                                                <div class="balance-amount">${formatCurrency(item.balance)}</div>
                                                 <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
                                             </div>
                                         </div>
@@ -4662,7 +4906,7 @@
                                             <div class="balance-date">${formattedDate}</div>
                                             <div class="balance-account">${item.accountName}</div>
                                         </div>
-                                        <div class="balance-amount">$${item.balance.toFixed(2)}</div>
+                                        <div class="balance-amount">${formatCurrency(item.balance)}</div>
                                         <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
                                     </div>
                                 </div>
@@ -4721,6 +4965,7 @@
                 delete balances[accountId][date];
                 saveAccountBalances(balances);
                 updateTotalSavingsDisplay();
+                updateChart();
                 
                 // Update chart if on reports screen
                 if (currentScreen === 1) {
@@ -5299,6 +5544,9 @@
             // Initialize period mode
             setPeriodMode('today');
             
+            // Set chart period to ALL by default to show all balance data
+            currentChartPeriod = 'ALL';
+            
             // Initialize slide-out account dropdown
             updateSlideOutAccountDropdown();
             
@@ -5344,6 +5592,9 @@
             if (screen) {
                 screen.classList.add('today-view');
             }
+            
+            // Add test data button for development/testing
+            addTestDataButton();
         });
         
         function setupDropdownEventListeners() {
@@ -5485,7 +5736,7 @@
             
             // Update display
             updatePeriodView();
-            
+            updateChart();
             console.log('Expense added:', newExpense);
         }
         
@@ -5527,6 +5778,7 @@
             
             // Update display
             updateTotalSavingsDisplay();
+            updateChart();
         }
         
         function togglePeriodSelect(selectType) {
@@ -5987,6 +6239,201 @@
             if (balanceActionCard) {
                 balanceActionCard.style.display = showBalance ? 'block' : 'none';
             }
+        }
+
+        /**
+         * Loads comprehensive test data for both balances and expenses from January to today.
+         * This function creates realistic financial data for testing the chart and reports.
+         */
+        function loadTestData() {
+            console.log('Loading comprehensive test data...');
+            
+            // Get current date and calculate January 1st of current year
+            const today = new Date();
+            const januaryFirst = new Date(today.getFullYear(), 0, 1);
+            
+            // Initialize test data structures
+            const testBalances = {
+                checking: {},
+                savings: {},
+                emergency: {}
+            };
+            
+            const testExpenses = {};
+            
+            // Generate balance data with realistic growth patterns
+            let currentDate = new Date(januaryFirst);
+            let checkingBalance = 2500; // Starting balance
+            let savingsBalance = 8000; // Starting balance
+            let emergencyBalance = 3000; // Starting balance
+            
+            while (currentDate <= today) {
+                const dateKey = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+                
+                // Add some random balance updates (not every day)
+                if (Math.random() < 0.1) { // 10% chance of balance update
+                    // Simulate salary deposits and transfers
+                    if (Math.random() < 0.3) {
+                        checkingBalance += 2500 + Math.random() * 500; // Salary deposit
+                    }
+                    if (Math.random() < 0.2) {
+                        const transfer = 500 + Math.random() * 1000;
+                        checkingBalance -= transfer;
+                        savingsBalance += transfer;
+                    }
+                    if (Math.random() < 0.15) {
+                        const emergencyTransfer = 200 + Math.random() * 300;
+                        savingsBalance -= emergencyTransfer;
+                        emergencyBalance += emergencyTransfer;
+                    }
+                    
+                    // Add some spending from checking
+                    checkingBalance -= Math.random() * 200;
+                    
+                    // Add some interest to savings
+                    savingsBalance += savingsBalance * 0.001; // 0.1% monthly interest
+                    emergencyBalance += emergencyBalance * 0.0005; // 0.05% monthly interest
+                }
+                
+                // Record balances for this date
+                testBalances.checking[dateKey] = Math.round(checkingBalance);
+                testBalances.savings[dateKey] = Math.round(savingsBalance);
+                testBalances.emergency[dateKey] = Math.round(emergencyBalance);
+                
+                // Generate expense data (not every day)
+                if (Math.random() < 0.7) { // 70% chance of expenses
+                    const expenseCategories = ['groceries', 'transportation', 'dining', 'entertainment', 'personal', 'clothing', 'health', 'subscriptions', 'other'];
+                    const numExpenses = Math.floor(Math.random() * 3) + 1; // 1-3 expenses per day
+                    
+                    testExpenses[dateKey] = [];
+                    
+                    for (let i = 0; i < numExpenses; i++) {
+                        const category = expenseCategories[Math.floor(Math.random() * expenseCategories.length)];
+                        let amount = 0;
+                        
+                        // Generate realistic amounts based on category
+                        switch (category) {
+                            case 'groceries':
+                                amount = 15 + Math.random() * 85; // $15-100
+                                break;
+                            case 'transportation':
+                                amount = 5 + Math.random() * 45; // $5-50
+                                break;
+                            case 'dining':
+                                amount = 12 + Math.random() * 38; // $12-50
+                                break;
+                            case 'entertainment':
+                                amount = 8 + Math.random() * 42; // $8-50
+                                break;
+                            case 'personal':
+                                amount = 10 + Math.random() * 40; // $10-50
+                                break;
+                            case 'clothing':
+                                amount = 25 + Math.random() * 75; // $25-100
+                                break;
+                            case 'health':
+                                amount = 15 + Math.random() * 35; // $15-50
+                                break;
+                            case 'subscriptions':
+                                amount = 5 + Math.random() * 25; // $5-30
+                                break;
+                            case 'other':
+                                amount = 5 + Math.random() * 45; // $5-50
+                                break;
+                        }
+                        
+                        testExpenses[dateKey].push({
+                            amount: Math.round(amount * 100) / 100, // Round to 2 decimal places
+                            category: category,
+                            description: `${category.charAt(0).toUpperCase() + category.slice(1)} expense`,
+                            timestamp: Date.now() + i // Ensure unique timestamps
+                        });
+                    }
+                }
+                
+                // Move to next day
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            // Save test data to localStorage
+            localStorage.setItem('accountBalances', JSON.stringify(testBalances));
+            localStorage.setItem('dailyExpenses', JSON.stringify(testExpenses));
+            
+            // Initialize savings accounts if not already set
+            const existingAccounts = localStorage.getItem('savingsAccounts');
+            if (!existingAccounts) {
+                const defaultAccounts = [
+                    { id: 'checking', name: 'Checking', type: 'checking' },
+                    { id: 'savings', name: 'Savings', type: 'savings' },
+                    { id: 'emergency', name: 'Emergency Fund', type: 'emergency' }
+                ];
+                localStorage.setItem('savingsAccounts', JSON.stringify(defaultAccounts));
+            }
+            
+            console.log('Test data loaded successfully!');
+            console.log('Balance data:', testBalances);
+            console.log('Expense data sample:', Object.keys(testExpenses).slice(0, 5).map(date => ({ date, expenses: testExpenses[date] })));
+            
+            // Refresh the display
+            updatePeriodView();
+            if (currentScreen === 1) {
+                updateChart();
+            }
+            
+            // Show success message
+            alert('Test data loaded successfully! Check the Reports screen to see the chart with comprehensive data from January to today.');
+        }
+        
+        // Add button to load test data (for development/testing purposes)
+        function addTestDataButton() {
+            const button = document.createElement('button');
+            button.textContent = 'Load Test Data';
+            button.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                z-index: 9999;
+                background: #10B981;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-size: 12px;
+                cursor: pointer;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            `;
+            button.onclick = loadTestData;
+            document.body.appendChild(button);
+        }
+
+        /**
+         * Formats a number as a currency string with proper commas and 2 decimal places.
+         * @param {number} amount - The amount to format.
+         * @returns {string} Formatted currency string (e.g., "$1,234.56").
+         */
+        function formatCurrency(amount) {
+            if (typeof amount !== 'number' || isNaN(amount)) {
+                return '$0.00';
+            }
+            return '$' + amount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+        
+        /**
+         * Formats a number as a currency string without decimal places for whole amounts.
+         * @param {number} amount - The amount to format.
+         * @returns {string} Formatted currency string (e.g., "$1,234").
+         */
+        function formatCurrencyWhole(amount) {
+            if (typeof amount !== 'number' || isNaN(amount)) {
+                return '$0';
+            }
+            return '$' + amount.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
         }
     </script>
 </body>
