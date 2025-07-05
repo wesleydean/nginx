@@ -497,6 +497,11 @@
             border-color: hsl(var(--ring));
         }
         
+        .form-input[rows] {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
         .form-input:disabled {
             cursor: not-allowed;
             opacity: 0.5;
@@ -1157,6 +1162,22 @@
         
         .add-btn:active {
             transform: translateY(1px);
+        }
+        
+        /* Settings menu add-btn styling */
+        .settings-menu-btn-item .add-btn {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 1rem;
+            font-size: 1.08rem;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            margin: 0;
+        }
+        
+        .settings-menu-btn-item .add-btn .settings-menu-icon {
+            color: #fff;
         }
         
         .expenses-list {
@@ -3871,7 +3892,7 @@
                         <span class="settings-menu-arrow"><i data-lucide="chevron-right" class="w-5 h-5"></i></span>
                     </li>
                     <li class="settings-menu-item settings-menu-btn-item">
-                      <button class="btn btn-primary settings-menu-btn" onclick="loadSampleBudget()">
+                      <button class="add-btn" onclick="loadSampleBudget()">
                         <span class="settings-menu-icon"><i data-lucide="database" class="w-5 h-5"></i></span>
                         <span class="settings-menu-label">Load Sample Budget</span>
                       </button>
@@ -4066,6 +4087,42 @@
                 </div>
                 
                 <button type="button" class="add-btn" onclick="saveBudgetSettings()">Save Budget</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Support Page Slide-out -->
+    <div class="settings-overlay" id="supportOverlay">
+        <div class="budget-panel" id="supportPanel">
+            <div class="settings-header">
+                <button class="settings-back" onclick="closeSupport()" aria-label="Back">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </button>
+                <h2 class="settings-title">Support</h2>
+                <div style="width: 40px;"></div> <!-- Spacer for centering -->
+            </div>
+
+            <div class="settings-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="text-lg font-semibold">Contact Us</h3>
+                    </div>
+                    <div class="card-content">
+                        <p class="text-sm text-muted-foreground mb-4">Need help? Send us a message and we'll get back to you as soon as possible.</p>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="supportTitle">Subject</label>
+                            <input type="text" class="form-input" id="supportTitle" placeholder="Brief description of your issue">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="supportDescription">Message</label>
+                            <textarea class="form-input" id="supportDescription" rows="6" placeholder="Please describe your issue or question in detail..."></textarea>
+                        </div>
+                        
+                        <button type="button" class="add-btn" onclick="sendSupportEmail()">Send Message</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -8309,8 +8366,58 @@
             alert('Sample budget loaded! (Implement actual logic)');
         }
         function openSupport() {
-            // TODO: Implement support modal or redirect
-            alert('Support coming soon!');
+            // Don't close settings, just slide to support page
+            const supportOverlay = document.getElementById('supportOverlay');
+            const supportPanel = document.getElementById('supportPanel');
+            const settingsPanel = document.getElementById('settingsPanel');
+            
+            // Show support overlay and panel
+            supportOverlay.classList.add('active');
+            supportPanel.classList.add('active');
+            
+            // Slide settings panel left
+            settingsPanel.classList.add('budget-open');
+        }
+        
+        function closeSupport() {
+            const supportOverlay = document.getElementById('supportOverlay');
+            const supportPanel = document.getElementById('supportPanel');
+            const settingsPanel = document.getElementById('settingsPanel');
+            
+            // Hide support overlay and panel
+            supportOverlay.classList.remove('active');
+            supportPanel.classList.remove('active');
+            
+            // Slide settings panel back to center
+            settingsPanel.classList.remove('budget-open');
+            
+            // Clear form fields
+            document.getElementById('supportTitle').value = '';
+            document.getElementById('supportDescription').value = '';
+        }
+        
+        function sendSupportEmail() {
+            const title = document.getElementById('supportTitle').value.trim();
+            const description = document.getElementById('supportDescription').value.trim();
+            
+            if (!title || !description) {
+                alert('Please fill in both subject and message fields.');
+                return;
+            }
+            
+            // Create mailto link
+            const subject = encodeURIComponent(`Expense Tracker Support: ${title}`);
+            const body = encodeURIComponent(`Subject: ${title}\n\nMessage:\n${description}\n\n---\nSent from Expense Tracker App`);
+            const mailtoLink = `mailto:wdean.francis@gmail.com?subject=${subject}&body=${body}`;
+            
+            // Open email client
+            window.location.href = mailtoLink;
+            
+            // Close support page
+            closeSupport();
+            
+            // Show success message
+            alert('Email client opened! Please send the email to complete your support request.');
         }
         function backToSettingsMenu() {
             document.getElementById('settingsForm').style.display = 'none';
