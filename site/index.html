@@ -1170,10 +1170,25 @@
             align-items: center;
             justify-content: flex-start;
             gap: 1rem;
-            font-size: 1.08rem;
-            font-weight: 500;
-            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 10px 16px;
             margin: 0;
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .settings-menu-btn-item .add-btn:hover {
+            background-color: hsl(var(--primary) / 0.9);
+        }
+        
+        .settings-menu-btn-item .add-btn:active {
+            transform: translateY(1px);
         }
         
         .settings-menu-btn-item .add-btn .settings-menu-icon {
@@ -2124,236 +2139,6 @@
         }
         
         .delete-balance-btn {
-            background-color: hsl(0deg 0% 95.88%);
-    color: hsl(0deg 0% 24.54%);
-            border: none;
-            padding: 6px 10px;
-            border-radius: var(--radius);
-            font-size: 0.8rem;
-            cursor: pointer;
-            margin-left: 10px;
-            transition: all 150ms ease;
-        }
-        
-        .delete-balance-btn:hover {
-            background-color: hsl(var(--destructive) / 0.9);
-        }
-        
-        /* Account Management Slide-out */
-        .account-management-slide-out {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 2000;
-        }
-        
-        .account-management-slide-out.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .account-management-content {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: hsl(var(--background));
-            border-radius: 20px 20px 0 0;
-            padding: 20px 20px 40px;
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .account-management-slide-out.active .account-management-content {
-            transform: translateY(0);
-        }
-        
-        .account-management-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid hsl(var(--border));
-        }
-        
-        .account-management-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: hsl(var(--foreground));
-        }
-        
-        .account-management-close {
-            background-color: hsl(var(--muted));
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            color: hsl(var(--foreground));
-            transition: all 150ms ease;
-        }
-        
-        .account-management-close:hover {
-            background-color: hsl(var(--muted) / 0.8);
-        }
-        
-        .account-management-list {
-            margin-bottom: 30px;
-            max-height: 40vh;
-            overflow-y: auto;
-        }
-        
-        .account-management-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            background-color: hsl(var(--card));
-            border: 1px solid hsl(var(--border));
-            border-radius: var(--radius);
-            margin-bottom: 8px;
-        }
-        
-        .account-management-name {
-            font-weight: 500;
-            color: hsl(var(--foreground));
-            font-size: 1rem;
-        }
-        
-        .account-management-delete-btn {
-            background-color: hsl(var(--destructive));
-            color: hsl(var(--destructive-foreground));
-            border: none;
-            padding: 8px 12px;
-            border-radius: var(--radius);
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 150ms ease;
-            font-weight: 500;
-        }
-        
-        .account-management-delete-btn:hover {
-            background-color: hsl(var(--destructive) / 0.9);
-        }
-        
-        .account-management-add-form {
-            padding-top: 20px;
-            border-top: 1px solid hsl(var(--border));
-        }
-        
-        .account-management-add-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: hsl(var(--foreground));
-            margin-bottom: 15px;
-        }
-        
-        .account-management-input-group {
-            margin-bottom: 15px;
-        }
-        
-        .account-management-input {
-            width: 100%;
-            min-height: 44px; /* iOS recommended minimum touch target */
-            padding: 14px 16px;
-            border: 1px solid hsl(var(--border));
-            border-radius: var(--radius);
-            font-size: 1rem;
-            background-color: hsl(var(--background));
-            color: hsl(var(--foreground));
-            transition: all 150ms ease;
-        }
-        
-        .account-management-input:focus {
-            outline: 2px solid hsl(var(--ring));
-            outline-offset: 2px;
-            border-color: hsl(var(--ring));
-        }
-        
-        .account-management-add-btn {
-            background-color: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-            border: none;
-            padding: 10px 16px;
-            border-radius: var(--radius);
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: all 150ms ease;
-        }
-        
-        .account-management-add-btn:hover {
-            background-color: hsl(var(--primary) / 0.9);
-        }
-        
-        /* Handle bar for account management slide-out */
-        .account-management-handle {
-            width: 40px;
-            height: 4px;
-            background-color: hsl(var(--muted-foreground));
-            border-radius: 2px;
-            margin: 0 auto 15px;
-        }
-        
-        /* Legacy modal styles - hidden but kept for backwards compatibility */
-        .account-management-modal {
-            display: none !important;
-        }
-        
-        .modal-content {
-            display: none !important;
-        }
-        
-        .modal-header {
-            display: none !important;
-        }
-        
-        .modal-title {
-            display: none !important;
-        }
-        
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #666;
-        }
-        
-        .account-list {
-            margin-bottom: 20px;
-        }
-        
-        .account-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background-color: hsl(var(--muted));
-            border-radius: var(--radius);
-            margin-bottom: 8px;
-        }
-        
-        .account-name {
-            font-weight: 500;
-            color: hsl(var(--foreground));
-        }
-        
-        .delete-account-btn {
             background-color: hsl(0deg 0% 95.88%);
     color: hsl(0deg 0% 24.54%);
             border: none;
@@ -3892,10 +3677,10 @@
                         <span class="settings-menu-arrow"><i data-lucide="chevron-right" class="w-5 h-5"></i></span>
                     </li>
                     <li class="settings-menu-item settings-menu-btn-item">
-                      <button class="add-btn" onclick="loadSampleBudget()">
-                        <span class="settings-menu-icon"><i data-lucide="database" class="w-5 h-5"></i></span>
-                        <span class="settings-menu-label">Load Sample Budget</span>
-                      </button>
+                      <div class="quick-action-card" style="width:100%;box-sizing:border-box;" onclick="loadSampleBudget()">
+                        <span class="quick-action-icon"><i data-lucide="database" class="w-5 h-5"></i></span>
+                        <span class="quick-action-title">Load Sample Budget</span>
+                      </div>
                     </li>
                   </ul>
             </div>
@@ -4388,7 +4173,7 @@
                         <option value="7">August</option>
                         <option value="8">September</option>
                         <option value="9">October</option>
-                        <option value="10">November</option>
+                        <option value="10">November</div>
                         <option value="11">December</option>
                     </select>
                 </div>
@@ -8362,8 +8147,7 @@
             alert('Budget settings saved successfully!');
         }
         function loadSampleBudget() {
-            // TODO: Implement sample data loading logic
-            alert('Sample budget loaded! (Implement actual logic)');
+            loadTestData();
         }
         function openSupport() {
             // Don't close settings, just slide to support page
