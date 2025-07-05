@@ -986,11 +986,13 @@
         }
         
         .app-header {
-            background-color: hsl(var(--card));
-            border-bottom: 1px solid hsl(var(--border));
-            padding: 1rem 1.5rem;
-            text-align: center;
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: #fff;
+            position: relative;
+            z-index: 10;
         }
         
         .app-header h1 {
@@ -3046,13 +3048,42 @@
           color: hsl(var(--foreground));
         }
 
+        .header-title {
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-align: center;
+            flex: 1;
+        }
+
+        .header-actions {
+            position: absolute;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+
     </style>
 </head>
 <body>
     <div class="app-container">
+        <!-- Add this just above the screens wrapper -->
         <div class="app-header">
-            <h1>Daily Expense Tracker</h1>
-            <div class="date-display" id="currentDate"></div>
+            <div class="header-title" id="headerTitle">Spend</div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="goToScreen(3)" aria-label="Settings">
+                    <i data-lucide="settings" class="w-6 h-6"></i>
+                </button>
+            </div>
         </div>
         
         <div class="content-container">
@@ -5678,7 +5709,7 @@
             }
             
             // Add test data button for development/testing
-            addTestDataButton();
+            // addTestDataButton();
         });
         
         function setupDropdownEventListeners() {
@@ -6952,6 +6983,57 @@
                 });
             });
         }
+
+        /**
+         * Updates the header title based on the current screen.
+         */
+        function updateHeaderTitle() {
+            const headerTitle = document.getElementById('headerTitle');
+            if (!headerTitle) return;
+            switch (currentScreen) {
+                case 0:
+                    headerTitle.textContent = 'Spend';
+                    break;
+                case 1:
+                    headerTitle.textContent = 'Save';
+                    break;
+                case 2:
+                    headerTitle.textContent = 'Reports';
+                    break;
+                case 3:
+                    headerTitle.textContent = 'Settings';
+                    break;
+                default:
+                    headerTitle.textContent = '';
+            }
+        }
+
+        // Update goToScreen to call updateHeaderTitle
+        const originalGoToScreen = goToScreen;
+        goToScreen = function(screenIndex) {
+            currentScreen = screenIndex;
+            const wrapper = document.getElementById('screensWrapper');
+            wrapper.style.transform = `translateX(-${screenIndex * 100}vw)`;
+            document.querySelectorAll('.nav-item').forEach((item, index) => {
+                item.classList.toggle('active', index === screenIndex);
+            });
+            updateHeaderTitle();
+            // ... existing code for updating screens ...
+            if (screenIndex === 2) {
+                updateReports();
+                setTimeout(updateChart, 300);
+            } else if (screenIndex === 0) {
+                setPeriodMode('today');
+            } else if (screenIndex === 1) {
+                updateSaveScreen();
+            } else if (screenIndex === 3) {
+                loadSettings();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateHeaderTitle();
+        });
 
     </script>
 </body>
