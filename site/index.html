@@ -3656,7 +3656,7 @@
                 <!-- Screen 2: Save -->
                 <div class="screen">
                     <!-- Sticky Period Selector for Save Screen -->
-                    <div class="period-selector-sticky" id="savePeriodSelectorSticky">
+                    <div class="period-selector-sticky" id="savePeriodSelectorSticky" style="display: none;">
                         <!-- Period Selector Header with Toggle on Left, Dropdowns on Right -->
                         <div class="period-selector-header">
                             <!-- Today/Month Toggle (Full Width) -->
@@ -4407,7 +4407,7 @@
 
         // Period tracking variables
         let currentPeriodMode = 'today'; // 'today' or 'month'
-        let currentSavePeriodMode = 'today'; // 'today' or 'month' for save screen
+        let currentSavePeriodMode = 'month'; // 'today' or 'month' for save screen
         let selectedMonthDate = new Date();
         let selectedSaveMonthDate = new Date(); // Separate month date for save screen
         let currentChartPeriod = 'ALL'; // '1M', '3M', '6M', 'YTD', '1Y', 'ALL' - Changed from YTD to ALL to show all balance data
@@ -4495,6 +4495,8 @@
             } else if (screenIndex === 1) {
                 // Save screen - currently blank, ready for future functionality
                 console.log('Save screen loaded');
+                // Set month mode as default for save screen
+                setSavePeriodMode('month');
                 updateSaveScreen();
             }
         }
@@ -5445,6 +5447,10 @@
         function getCurrentMonth() {
             const now = new Date();
             return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+        
+        function getSelectedSaveMonthKey() {
+            return `${selectedSaveMonthDate.getFullYear()}-${String(selectedSaveMonthDate.getMonth() + 1).padStart(2, '0')}`;
         }
         
         function isCurrentMonth() {
@@ -6789,6 +6795,18 @@
         // Remove all code related to old dropdowns and their event listeners
         // Add new month/year slide-out logic
         function showMonthYearSlideOut() {
+            // Determine if this is for save screen based on current screen
+            isSaveScreenSelection = (currentScreen === 1);
+            
+            // Set temp values based on which screen we're on
+            if (isSaveScreenSelection) {
+                tempSelectedMonth = selectedSaveMonthDate.getMonth();
+                tempSelectedYear = selectedSaveMonthDate.getFullYear();
+            } else {
+                tempSelectedMonth = selectedMonthDate.getMonth();
+                tempSelectedYear = selectedMonthDate.getFullYear();
+            }
+            
             populateMonthYearInputs();
             document.getElementById('monthYearSlideOut').classList.add('active');
         }
@@ -6797,6 +6815,7 @@
         }
         let tempSelectedMonth = selectedMonthDate.getMonth();
         let tempSelectedYear = selectedMonthDate.getFullYear();
+        let isSaveScreenSelection = false; // Track if we're selecting for save screen
         function populateMonthYearInputs() {
             // Set current values in the input fields
             const monthInput = document.getElementById('monthInput');
@@ -6866,11 +6885,16 @@
         document.getElementById('applyMonthYearBtn').onclick = function() {
             // Use the temp variables directly
             if (typeof tempSelectedMonth === 'number' && typeof tempSelectedYear === 'number' && !isNaN(tempSelectedMonth) && !isNaN(tempSelectedYear)) {
-                selectedMonthDate = new Date(tempSelectedYear, tempSelectedMonth, 1);
+                if (isSaveScreenSelection) {
+                    selectedSaveMonthDate = new Date(tempSelectedYear, tempSelectedMonth, 1);
+                    updateSaveScreen();
+                } else {
+                    selectedMonthDate = new Date(tempSelectedYear, tempSelectedMonth, 1);
+                    updatePeriodDropdownValues();
+                    updatePeriodView();
+                }
             }
             hideMonthYearSlideOut();
-            updatePeriodDropdownValues();
-            updatePeriodView();
         };
         function getMonthYearString(date) {
             const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -6891,6 +6915,9 @@
             if (budgetPeriodLabel) {
                 budgetPeriodLabel.textContent = `${monthNames[selectedMonthDate.getMonth()]} ${selectedMonthDate.getFullYear()}`;
             }
+            
+            // Also update save screen selector if it exists
+            updateSaveMonthYearSelector();
         }
         // Remove old period dropdowns from DOM
         document.addEventListener('DOMContentLoaded', function() {
@@ -6981,6 +7008,7 @@
         // Initial render on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', function() {
             renderBudgetTitle();
+            renderSaveTitle();
         });
 
         // Swipe to Delete Functionality
@@ -7322,20 +7350,18 @@
             }
             
             // Calculate progress based on balance differences
-            const { currentTotal, previousTotal, lastDate } = getBalanceComparison();
+            const { currentTotal, previousTotal, lastDate } = getSaveBalanceComparison();
             progressAmount = currentTotal - previousTotal;
             progressPercentage = previousTotal > 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0;
             lastBalanceDate = lastDate;
             
             // Update display elements
-            const saveTargetTitleContainer = document.getElementById('saveTargetTitleContainer');
             const saveTargetDescription = document.getElementById('saveTargetDescription');
             const saveTargetAmount = document.getElementById('saveTargetAmount');
             const saveProgressAmount = document.getElementById('saveProgressAmount');
             
-            if (saveTargetTitleContainer) {
-                saveTargetTitleContainer.textContent = periodLabel;
-            }
+            // Update the month/year selector text
+            updateSaveMonthYearSelector();
             if (saveTargetDescription) {
                 saveTargetDescription.textContent = description;
             }
@@ -7394,10 +7420,14 @@
             // Update progress label with last balance date context
             const progressLabel = document.getElementById('saveProgressLabel');
             if (progressLabel && lastBalanceDate) {
-                const lastDateObj = new Date(lastBalanceDate);
-                const lastDateFormatted = lastDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                const currentMode = currentSavePeriodMode === 'today' ? 'Today' : 'This Month';
-                progressLabel.textContent = `${currentMode} vs ${lastDateFormatted}`;
+                if (currentSavePeriodMode === 'today') {
+                    const lastDateObj = new Date(lastBalanceDate);
+                    const lastDateFormatted = lastDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    progressLabel.textContent = `Today vs ${lastDateFormatted}`;
+                } else {
+                    const selectedMonthName = selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                    progressLabel.textContent = `${selectedMonthName} vs previous month`;
+                }
             }
         }
         
@@ -7446,6 +7476,62 @@
             }
         }
         
+        // Get balance comparison for save screen (uses selected month)
+        function getSaveBalanceComparison() {
+            const balances = loadAccountBalances();
+            
+            if (currentSavePeriodMode === 'today') {
+                // For daily mode, use the same logic as regular comparison
+                return getBalanceComparison();
+            } else {
+                // For monthly mode, get the latest balance for the selected month
+                const selectedMonthKey = getSelectedSaveMonthKey();
+                let currentTotal = 0;
+                let lastDate = '';
+                
+                // Get the latest balance for the selected month
+                Object.keys(balances).forEach(accountId => {
+                    const accountBalances = balances[accountId] || {};
+                    const monthBalances = Object.keys(accountBalances)
+                        .filter(date => date.startsWith(selectedMonthKey))
+                        .sort()
+                        .reverse();
+                    
+                    if (monthBalances.length > 0) {
+                        currentTotal += accountBalances[monthBalances[0]];
+                        if (!lastDate || monthBalances[0] > lastDate) {
+                            lastDate = monthBalances[0];
+                        }
+                    }
+                });
+                
+                // Get the previous month's balance for comparison
+                const previousMonth = new Date(selectedSaveMonthDate);
+                previousMonth.setMonth(previousMonth.getMonth() - 1);
+                const previousMonthKey = `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, '0')}`;
+                
+                let previousTotal = 0;
+                let previousLastDate = '';
+                
+                Object.keys(balances).forEach(accountId => {
+                    const accountBalances = balances[accountId] || {};
+                    const previousMonthBalances = Object.keys(accountBalances)
+                        .filter(date => date.startsWith(previousMonthKey))
+                        .sort()
+                        .reverse();
+                    
+                    if (previousMonthBalances.length > 0) {
+                        previousTotal += accountBalances[previousMonthBalances[0]];
+                        if (!previousLastDate || previousMonthBalances[0] > previousLastDate) {
+                            previousLastDate = previousMonthBalances[0];
+                        }
+                    }
+                });
+                
+                return { currentTotal, previousTotal, lastDate: previousLastDate };
+            }
+        }
+        
         // Get total balance for a specific date
         function getTotalBalanceForDate(balances, date) {
             let totalBalance = 0;
@@ -7486,28 +7572,48 @@
         // Update save screen total savings display
         function updateSaveTotalSavingsDisplay() {
             const balances = loadAccountBalances();
-            const today = getCurrentDate();
             
-            // Get current total balance
-            const currentTotal = getTotalBalanceForDate(balances, today);
-            
-            // Get comparison data
-            const { previousTotal, lastDate } = getBalanceComparison();
-            const balanceChange = currentTotal - previousTotal;
-            const balanceChangePercentage = previousTotal > 0 ? (balanceChange / previousTotal) * 100 : 0;
-            
-            // Update save screen balance display
-            const saveTotalAccountBalance = document.getElementById('saveTotalAccountBalance');
-            const saveTotalBalanceChange = document.getElementById('saveTotalBalanceChange');
-            
-            if (saveTotalAccountBalance) {
-                saveTotalAccountBalance.textContent = formatCurrency(currentTotal);
-            }
-            if (saveTotalBalanceChange) {
-                const sign = balanceChange >= 0 ? '+' : '';
-                const percentageText = balanceChangePercentage !== 0 ? ` (${sign}${balanceChangePercentage.toFixed(1)}%)` : '';
-                const lastDateFormatted = lastDate ? new Date(lastDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'previous';
-                saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)}${percentageText} vs ${lastDateFormatted}`;
+            if (currentSavePeriodMode === 'today') {
+                // For today mode, use current date
+                const today = getCurrentDate();
+                const currentTotal = getTotalBalanceForDate(balances, today);
+                const { previousTotal, lastDate } = getBalanceComparison();
+                const balanceChange = currentTotal - previousTotal;
+                const balanceChangePercentage = previousTotal > 0 ? (balanceChange / previousTotal) * 100 : 0;
+                
+                // Update save screen balance display
+                const saveTotalAccountBalance = document.getElementById('saveTotalAccountBalance');
+                const saveTotalBalanceChange = document.getElementById('saveTotalBalanceChange');
+                
+                if (saveTotalAccountBalance) {
+                    saveTotalAccountBalance.textContent = formatCurrency(currentTotal);
+                }
+                if (saveTotalBalanceChange) {
+                    const sign = balanceChange >= 0 ? '+' : '';
+                    const percentageText = balanceChangePercentage !== 0 ? ` (${sign}${balanceChangePercentage.toFixed(1)}%)` : '';
+                    const lastDateFormatted = lastDate ? new Date(lastDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'previous';
+                    saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)}${percentageText} vs ${lastDateFormatted}`;
+                }
+            } else {
+                // For monthly mode, use selected month data
+                const { currentTotal, previousTotal, lastDate } = getSaveBalanceComparison();
+                const balanceChange = currentTotal - previousTotal;
+                const balanceChangePercentage = previousTotal > 0 ? (balanceChange / previousTotal) * 100 : 0;
+                
+                // Update save screen balance display
+                const saveTotalAccountBalance = document.getElementById('saveTotalAccountBalance');
+                const saveTotalBalanceChange = document.getElementById('saveTotalBalanceChange');
+                
+                if (saveTotalAccountBalance) {
+                    saveTotalAccountBalance.textContent = formatCurrency(currentTotal);
+                }
+                if (saveTotalBalanceChange) {
+                    const sign = balanceChange >= 0 ? '+' : '';
+                    const percentageText = balanceChangePercentage !== 0 ? ` (${sign}${balanceChangePercentage.toFixed(1)}%)` : '';
+                    const lastDateFormatted = lastDate ? new Date(lastDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'previous';
+                    const selectedMonthName = selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long' });
+                    saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)}${percentageText} vs previous month`;
+                }
             }
             
             // Update save screen balance history
@@ -7534,9 +7640,9 @@
                         // Only show today's balance records
                         shouldInclude = date === today;
                     } else {
-                        // Show all balance records for the current month
-                        const currentMonth = getCurrentMonth();
-                        shouldInclude = date.startsWith(currentMonth);
+                        // Show all balance records for the selected month
+                        const selectedMonthKey = getSelectedSaveMonthKey();
+                        shouldInclude = date.startsWith(selectedMonthKey);
                     }
                     
                     if (shouldInclude) {
@@ -7556,9 +7662,13 @@
             });
             
             if (balanceRecords.length === 0) {
-                const noDataMessage = currentSavePeriodMode === 'today' 
-                    ? 'No balance records today' 
-                    : 'No balance records this month';
+                let noDataMessage;
+                if (currentSavePeriodMode === 'today') {
+                    noDataMessage = 'No balance records today';
+                } else {
+                    const selectedMonthName = selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                    noDataMessage = `No balance records for ${selectedMonthName}`;
+                }
                 historyContainer.innerHTML = `<div style="text-align: center; color: #7f8c8d; padding: 20px;">${noDataMessage}</div>`;
             } else {
                 if (currentSavePeriodMode === 'month') {
@@ -7656,8 +7766,81 @@
 
         // Update save screen display
         function updateSaveScreen() {
+            renderSaveTitle();
             updateSaveTargetDisplay();
             updateSaveTotalSavingsDisplay();
+        }
+
+        /**
+         * Renders the save screen title area with month/year selector.
+         * Shows a large, centered, clickable month/year with chevron.
+         */
+        function renderSaveTitle() {
+            const container = document.getElementById('saveTargetTitleContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            // Create month/year selector button
+            const btn = document.createElement('button');
+            btn.id = 'saveMonthYearSelectorBtn';
+            btn.onclick = showSaveMonthYearSlideOut;
+            btn.style.background = 'none';
+            btn.style.border = 'none';
+            btn.style.borderRadius = '14px';
+            btn.style.display = 'inline-flex';
+            btn.style.alignItems = 'center';
+            btn.style.justifyContent = 'flex-start';
+            btn.style.fontSize = '1.5rem';
+            btn.style.fontWeight = '700';
+            btn.style.color = 'inherit';
+            btn.style.cursor = 'pointer';
+            btn.style.padding = '0';
+            btn.style.outline = 'none';
+            btn.style.width = 'auto';
+            
+            // Month/year text
+            const span = document.createElement('span');
+            span.id = 'saveMonthYearSelectorText';
+            span.textContent = getMonthYearString(selectedSaveMonthDate);
+            
+            // Lucide chevron icon
+            const icon = document.createElement('i');
+            icon.setAttribute('data-lucide', 'chevron-down');
+            icon.className = 'w-7 h-7';
+            icon.style.marginLeft = '0.5rem';
+            icon.style.color = 'hsl(var(--muted-foreground))';
+            
+            btn.appendChild(span);
+            btn.appendChild(icon);
+            container.appendChild(btn);
+            
+            // Ensure Lucide icons are rendered
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+            } else {
+                setTimeout(() => {
+                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                        window.lucide.createIcons();
+                    }
+                }, 100);
+            }
+        }
+
+        /**
+         * Shows the save month/year selection slide-out
+         */
+        function showSaveMonthYearSlideOut() {
+            showMonthYearSlideOut();
+        }
+
+        /**
+         * Updates the save month/year selector text
+         */
+        function updateSaveMonthYearSelector() {
+            const btnText = document.getElementById('saveMonthYearSelectorText');
+            if (btnText) {
+                btnText.textContent = getMonthYearString(selectedSaveMonthDate);
+            }
         }
 
         // Set save period mode (today/month)
@@ -7756,6 +7939,8 @@
             } else if (screenIndex === 0) {
                 setPeriodMode('today');
             } else if (screenIndex === 1) {
+                // Set month mode as default for save screen
+                setSavePeriodMode('month');
                 updateSaveScreen();
             }
         };
