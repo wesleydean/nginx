@@ -2348,7 +2348,7 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 1px solid #f0f0f0;
+            position: relative;
         }
         
         .slide-out-title {
@@ -2370,9 +2370,6 @@
             font-size: 1.2rem;
             color: hsl(var(--foreground));
             transition: all 150ms ease;
-            position: absolute;
-            right: 15px;
-            top: 15px;
         }
         
         .slide-out-close:hover {
@@ -2384,14 +2381,7 @@
             flex-direction: column;
         }
         
-        /* Handle bar for slide-out */
-        .slide-out-handle {
-            width: 40px;
-            height: 4px;
-            background-color: hsl(var(--muted-foreground));
-            border-radius: 2px;
-            margin: 0 auto 15px;
-        }
+        /* Handle bar for slide-out - removed */
 
         /* Account Management Slide-out Styles */
         .account-management-slide-out {
@@ -2436,7 +2426,6 @@
             align-items: center;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 1px solid hsl(var(--border));
             position: relative;
         }
         
@@ -2459,9 +2448,6 @@
             font-size: 1.2rem;
             color: hsl(var(--foreground));
             transition: all 150ms ease;
-            position: absolute;
-            right: 0;
-            top: 0;
         }
         
         .account-management-close:hover {
@@ -2469,11 +2455,7 @@
         }
         
         .account-management-handle {
-            width: 40px;
-            height: 4px;
-            background-color: hsl(var(--muted-foreground));
-            border-radius: 2px;
-            margin: 0 auto 15px;
+            display: none;
         }
         
         .account-management-list {
@@ -4123,7 +4105,6 @@
     <!-- Expense Slide-out -->
     <div class="slide-out-overlay" id="expenseSlideOut">
         <div class="slide-out-content">
-            <div class="slide-out-handle"></div>
             <div class="slide-out-header">
                 <h3 class="slide-out-title">Add Expense</h3>
                 <button class="slide-out-close" onclick="hideExpenseSlideOut()">×</button>
@@ -4220,7 +4201,6 @@
     <!-- Balance Slide-out -->
     <div class="slide-out-overlay" id="balanceSlideOut">
         <div class="slide-out-content">
-            <div class="slide-out-handle"></div>
             <div class="slide-out-header">
                 <h3 class="slide-out-title">Record Balance</h3>
                 <button class="slide-out-close" onclick="hideBalanceSlideOut()">×</button>
@@ -4295,7 +4275,6 @@
     <!-- Account Management Slide-out -->
     <div class="account-management-slide-out" id="accountManagementSlideOut">
         <div class="account-management-content">
-            <div class="account-management-handle"></div>
             <div class="account-management-header">
                 <h3 class="account-management-title">Manage Accounts</h3>
                 <button class="account-management-close" onclick="hideAccountManagementSlideOut()">×</button>
