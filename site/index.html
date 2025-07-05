@@ -4897,7 +4897,7 @@
                     }
                     
                     return `
-                        <div class="swipe-container" data-type="expense" data-date="${expense.date}" data-timestamp="${expense.timestamp}">
+                        <div class="swipe-container" data-type="expense" data-date="${expense.date}" data-timestamp="${expense.timestamp}" onclick="editExpense('${expense.date}', ${expense.timestamp})">
                             <div class="swipe-content">
                                 <div class="expense-item">
                                     <div class="expense-details">
@@ -4907,7 +4907,7 @@
                                     <div class="expense-amount">${formatCurrency(expense.amount)}</div>
                                 </div>
                             </div>
-                            <div class="swipe-action" onclick="deleteExpense('${expense.date}', ${expense.timestamp})">✕</div>
+                            <div class="swipe-action" onclick="deleteExpense('${expense.date}', ${expense.timestamp}); event.stopPropagation();">✕</div>
                         </div>
                     `;
                 }).join('');
@@ -8819,6 +8819,87 @@
         function backToSettingsMenu() {
             document.getElementById('settingsForm').style.display = 'none';
             document.getElementById('settingsMenu').style.display = '';
+        }
+
+
+        // --- Expense Editing Support ---
+        let editingExpense = null;
+        function editExpense(date, timestamp) {
+            const expenses = loadExpenses();
+            const expenseList = expenses[date] || [];
+            const expense = expenseList.find(e => e.timestamp === Number(timestamp));
+            if (!expense) return;
+            editingExpense = { date, timestamp: Number(timestamp) };
+            showExpenseSlideOut();
+            // Set date (for month mode)
+            if (currentPeriodMode === 'month') {
+                const datepickerId = 'expenseCustomDatepicker';
+                if (!datepickerStates[datepickerId]) {
+                    initializeDatepicker(datepickerId);
+                }
+                const state = datepickerStates[datepickerId];
+                state.selectedDate = new Date(date);
+                updateDatepickerValue(datepickerId);
+                renderCalendar(datepickerId);
+            }
+            document.getElementById('slideOutExpenseAmount').value = expense.amount;
+            selectSlideOutOption('expenseCategory', expense.category, capitalizeFirstLetter(expense.category));
+            document.getElementById('slideOutExpenseDescription').value = expense.description || '';
+            // Change CTA text and handler
+            const ctaBtn = document.querySelector('.slide-out-form .add-btn');
+            if (ctaBtn) {
+                ctaBtn.textContent = 'Save Expense';
+                ctaBtn.onclick = saveEditedExpense;
+            }
+        }
+        function saveEditedExpense() {
+            if (!editingExpense) return;
+            const amount = parseFloat(document.getElementById('slideOutExpenseAmount').value);
+            const category = document.getElementById('slideOutExpenseCategory').value;
+            const description = document.getElementById('slideOutExpenseDescription').value;
+            let targetDate = currentPeriodMode === 'month'
+                ? document.getElementById('slideOutExpenseDate').value
+                : getCurrentDate();
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            if (!category) {
+                alert('Please select a category');
+                return;
+            }
+            const expenses = loadExpenses();
+            // Remove the old expense
+            let oldList = expenses[editingExpense.date] || [];
+            oldList = oldList.filter(e => e.timestamp !== editingExpense.timestamp);
+            expenses[editingExpense.date] = oldList;
+            // Add the updated expense
+            if (!expenses[targetDate]) expenses[targetDate] = [];
+            expenses[targetDate].push({
+                amount,
+                category,
+                description: description || '',
+                timestamp: editingExpense.timestamp
+            });
+            saveExpenses(expenses);
+            // Reset form and editing state
+            document.getElementById('slideOutExpenseAmount').value = '';
+            document.getElementById('slideOutExpenseDescription').value = '';
+            selectSlideOutOption('expenseCategory', 'groceries', 'Groceries');
+            if (currentPeriodMode === 'month') clearDate('expenseCustomDatepicker');
+            editingExpense = null;
+            // Restore CTA
+            const ctaBtn = document.querySelector('.slide-out-form .add-btn');
+            if (ctaBtn) {
+                ctaBtn.textContent = 'Add Expense';
+                ctaBtn.onclick = addExpenseFromSlideOut;
+            }
+            hideExpenseSlideOut();
+            updatePeriodView();
+            updateChart();
+        }
+        function capitalizeFirstLetter(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
     </script>
