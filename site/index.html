@@ -5935,11 +5935,20 @@
                         const accountName = grouped[accountId][0].accountName;
                         const balancesList = grouped[accountId]
                             .sort((a, b) => {
+                                // Sort by date (desc), then by created (asc) for stability
                                 const dateA = a.date.split('-').map(Number);
                                 const dateB = b.date.split('-').map(Number);
                                 const dateObjA = new Date(dateA[0], dateA[1] - 1, dateA[2]);
                                 const dateObjB = new Date(dateB[0], dateB[1] - 1, dateB[2]);
-                                return dateObjB - dateObjA;
+                                
+                                if (dateObjA.getTime() !== dateObjB.getTime()) {
+                                    return dateObjB - dateObjA; // latest date first
+                                }
+                                
+                                // If same date, sort by created timestamp for stability
+                                const createdA = a.created || new Date(a.date).getTime();
+                                const createdB = b.created || new Date(b.date).getTime();
+                                return createdA - createdB;
                             })
                             .map((item, idx, arr) => {
                                 const dateParts = item.date.split('-').map(Number);
@@ -7914,7 +7923,15 @@
                             updated: entry.updated || entry.created || new Date(date).getTime()
                         };
                     })
-                    .sort((a, b) => (a.created || new Date(a.date).getTime()) - (b.created || new Date(b.date).getTime()));
+                    .sort((a, b) => {
+                        const createdA = a.created || new Date(a.date).getTime();
+                        const createdB = b.created || new Date(b.date).getTime();
+                        if (createdA !== createdB) {
+                            return createdB - createdA; // Most recent first
+                        }
+                        // If created timestamps are the same, use date for stable ordering (descending)
+                        return b.date.localeCompare(a.date);
+                    });
                 // Get last value from previous month
                 const prevMonthDates = Object.keys(accountBalances)
                     .filter(date => date.startsWith(previousMonthKey))
