@@ -3568,7 +3568,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 1rem 0;
   cursor: pointer;
   border-radius: 18px 18px 0 0;
   background: #fff;
@@ -3600,7 +3600,7 @@
   display: none;
 }
 .modern-account-balance {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: #222;
   line-height: 1.1;
@@ -3622,7 +3622,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
   background: none !important;
   border-radius: 0 !important;
   width: auto;
@@ -3634,10 +3634,19 @@
   background: none;
 }
 .modern-account-accordion-body {
-  padding: 0 1rem 0.5rem 1rem;
+  padding: 0;
   background: none;
   border-radius: 0 0 18px 18px;
   box-shadow: none;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.modern-account-accordion-body.expanded {
+  max-height: 1000px;
+  opacity: 1;
+  transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.25s cubic-bezier(0.4,0,0.2,1);
 }
 .modern-account-updates {
   margin: 0;
@@ -7911,7 +7920,7 @@
                         </div>
                         <i data-lucide="chevron-down" class="modern-account-chevron" id="chevron-${accountId}"></i>
                     </div>
-                    <div class="modern-account-accordion-body" id="accordion-body-${accountId}" style="display:none;">
+                    <div class="modern-account-accordion-body" id="accordion-body-${accountId}">
                         <div class="modern-account-updates">
                 `;
                 let prevValue = prevMonthLastValue;
@@ -7949,20 +7958,26 @@
             const body = document.getElementById(`accordion-body-${accountId}`);
             const chevron = document.getElementById(`chevron-${accountId}`);
             const header = document.querySelector(`.modern-account-accordion[data-account-id='${accountId}'] .modern-account-accordion-header`);
-            if (body.style.display === 'none') {
-                body.style.display = 'block';
-                if (header) header.classList.add('expanded');
+            // Remove any inline styles that might have been set
+            if (body) {
+                body.style.display = '';
+                body.style.maxHeight = '';
+                body.style.opacity = '';
+            }
+            if (body.classList.contains('expanded')) {
+                body.classList.remove('expanded');
+                if (header) header.classList.remove('expanded');
                 if (chevron) {
-                    chevron.setAttribute('data-lucide', 'chevron-up');
+                    chevron.setAttribute('data-lucide', 'chevron-down');
                     if (window.lucide && typeof window.lucide.createIcons === 'function') {
                         window.lucide.createIcons();
                     }
                 }
             } else {
-                body.style.display = 'none';
-                if (header) header.classList.remove('expanded');
+                body.classList.add('expanded');
+                if (header) header.classList.add('expanded');
                 if (chevron) {
-                    chevron.setAttribute('data-lucide', 'chevron-down');
+                    chevron.setAttribute('data-lucide', 'chevron-up');
                     if (window.lucide && typeof window.lucide.createIcons === 'function') {
                         window.lucide.createIcons();
                     }
