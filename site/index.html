@@ -345,7 +345,7 @@
             margin-bottom: 0.5rem;
             background-color: hsl(var(--card));
             border: 1px solid hsl(var(--border));
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            /* box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); */
         }
         
         .swipe-content {
@@ -3479,6 +3479,85 @@
 .settings-menu-btn .settings-menu-icon {
   color: #fff;
 }
+
+.account-accordion {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 1.2rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+.account-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  font-weight: bold;
+  background: #fff;
+  border-bottom: 1px solid #f3f4f6;
+  border-radius: 12px 12px 0 0;
+}
+.account-accordion-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.account-accordion-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: hsl(var(--success));
+  margin-left: auto;
+}
+.account-accordion-chevron {
+  font-size: 1.2rem;
+  margin-left: 0.5rem;
+  color: #888;
+}
+.account-accordion-body {
+  padding: 0.5rem 1.5rem 1rem 1.5rem;
+  background: #fafbfc;
+  border-radius: 0 0 12px 12px;
+}
+.account-accordion-updates {
+  margin: 0;
+  padding: 0;
+}
+.account-update-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+  font-size: 1rem;
+}
+.account-update-row:last-child {
+  border-bottom: none;
+}
+.account-update-date {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 500;
+}
+.account-update-diff {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-left: 1rem;
+}
+.account-update-percent {
+  font-size: 0.95rem;
+  margin-left: 1rem;
+  margin-top: 0.1rem;
+  color: #888;
+}
+.account-update-percent.positive {
+  color: #27ae60;
+}
+.account-update-percent.negative {
+  color: #e74c3c;
+}
+.account-update-percent.neutral {
+  color: #888;
+}
         
 
     
@@ -3711,9 +3790,12 @@
                         </div>
                         
                         <!-- Total Balance Display -->
-                        <div class="account-balance-display stat-card">
-                            <div class="current-balance" id="saveTotalAccountBalance">$0.00</div>
-                            <div class="balance-change" id="saveTotalBalanceChange">Total across all accounts this month</div>
+                        <div class="account-balance-display stat-card modern-balance-card">
+                            <div class="balance-date-modern" id="saveBalanceDate">--</div>
+                            <div class="balance-right-stack">
+                                <div class="current-balance-modern" id="saveTotalAccountBalance">$0.00</div>
+                                <div class="balance-change-modern" id="saveTotalBalanceChange">+0.00% all time</div>
+                            </div>
                         </div>
                         
                         <!-- Balance History -->
@@ -5705,23 +5787,39 @@
                                 const dateObjB = new Date(dateB[0], dateB[1] - 1, dateB[2]);
                                 return dateObjB - dateObjA;
                             })
-                            .map(item => {
+                            .map((item, idx, arr) => {
                                 const dateParts = item.date.split('-').map(Number);
                                 const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
                                 const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                // Calculate percent change vs previous entry in this month
+                                let percentChange = null;
+                                let arrow = '';
+                                if (idx > 0) {
+                                    const prev = arr[idx - 1];
+                                    if (prev && prev.balance !== 0) {
+                                        percentChange = ((item.balance - prev.balance) / prev.balance) * 100;
+                                        if (percentChange > 0.01) {
+                                            arrow = '<i data-lucide="arrow-up-right" class="balance-arrow positive"></i>';
+                                        } else if (percentChange < -0.01) {
+                                            arrow = '<i data-lucide="arrow-down-right" class="balance-arrow negative"></i>';
+                                        } else {
+                                            arrow = '<i data-lucide="arrow-right" class="balance-arrow neutral"></i>';
+                                        }
+                                    }
+                                }
                                 return `
                                     <div class="swipe-container" data-type="balance" data-account-id="${item.accountId}" data-date="${item.date}">
                                         <div class="swipe-content">
-                                            <div class="balance-item">
-                                                <div class="balance-details">
-                                                    <div class="balance-date">${formattedDate}</div>
-                                                    <div class="balance-account">${accountName}</div>
+                                            <div class="modern-balance-history-item">
+                                                <div class="balance-history-date">${formattedDate}</div>
+                                                <div class="balance-history-right">
+                                                    <div class="balance-history-amount">${formatCurrency(item.balance)}</div>
+                                                    ${percentChange !== null ? `<div class="balance-history-percent ${percentChange > 0 ? 'positive' : percentChange < 0 ? 'negative' : 'neutral'}">${arrow}${percentChange > 0 ? '+' : ''}${percentChange.toFixed(2)}%</div>` : ''}
                                                 </div>
-                                                <div class="balance-amount">${formatCurrency(item.balance)}</div>
-                                                <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</button>
+                                                <button class="delete-balance-btn" onclick="deleteBalance('${item.accountId}', '${item.date}')"><i data-lucide="x" class="w-4 h-4"></i></button>
                                             </div>
                                         </div>
-                                        <div class="swipe-action" onclick="deleteBalance('${item.accountId}', '${item.date}')">✕</div>
+                                        <div class="swipe-action" onclick="deleteBalance('${item.accountId}', '${item.date}')"><i data-lucide="x" class="w-4 h-4"></i></div>
                                     </div>
                                 `;
                             }).join('');
