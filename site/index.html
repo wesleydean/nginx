@@ -1696,6 +1696,7 @@
             letter-spacing: 0.02em;
             position: relative;
             z-index: 1;
+            min-height: 0;
         }
         
         .chart-period-btn-wealthsimple.active {
@@ -4859,6 +4860,7 @@
                 }));
                 if (titleElement) titleElement.textContent = "Today's Expenses";
             } else {
+                // Month mode: gather all expenses for the selected month
                 const monthKey = getCurrentPeriodKey();
                 Object.keys(expenses).forEach(date => {
                     if (date.startsWith(monthKey)) {
@@ -4872,11 +4874,19 @@
                     }
                 });
                 
-                // Sort by date (newest first), then by timestamp
+                // Sort: by date (desc), then by created (asc), then by timestamp for stability
                 periodExpenses.sort((a, b) => {
-                    const dateCompare = new Date(b.date) - new Date(a.date);
-                    if (dateCompare !== 0) return dateCompare;
-                    return b.timestamp - a.timestamp;
+                    if (a.date !== b.date) {
+                        return new Date(b.date) - new Date(a.date); // latest date first
+                    }
+                    // If same date, sort by created ascending
+                    const createdA = a.created || a.timestamp;
+                    const createdB = b.created || b.timestamp;
+                    if (createdA !== createdB) {
+                        return createdA - createdB;
+                    }
+                    // If created timestamps are the same, use timestamp for stable ordering
+                    return a.timestamp - b.timestamp;
                 });
                 
                 const monthName = selectedMonthDate.toLocaleDateString('en-US', { month: 'long' });
@@ -6785,12 +6795,14 @@
                 expenses[targetDate] = [];
             }
             
-            // Create expense with unique timestamp
+            const now = Date.now();
             const newExpense = {
                 amount: amount,
                 category: category,
                 description: description || '',
-                timestamp: Date.now() // This ensures a unique timestamp
+                timestamp: now, // legacy
+                created: now,
+                updated: now
             };
             
             expenses[targetDate].push(newExpense);
@@ -6844,7 +6856,22 @@
                 balances[selectedAccount] = {};
             }
             
-            balances[selectedAccount][targetDate] = amount;
+            if (!balances[selectedAccount][targetDate]) {
+                balances[selectedAccount][targetDate] = {
+                    amount: amount,
+                    created: Date.now(),
+                    updated: Date.now()
+                };
+            } else {
+                // If already exists, treat as update
+                const old = balances[selectedAccount][targetDate];
+                balances[selectedAccount][targetDate] = {
+                    amount: amount,
+                    created: old.created || Date.now(),
+                    updated: Date.now()
+                };
+            }
+            
             saveAccountBalances(balances);
             
             // Clear form
@@ -7460,7 +7487,9 @@
                             amount: Math.round(amount * 100) / 100, // Round to 2 decimal places
                             category: category,
                             description: `${category.charAt(0).toUpperCase() + category.slice(1)} expense`,
-                            timestamp: Date.now() + i // Ensure unique timestamps
+                            timestamp: Date.now() + i, // Ensure unique timestamps
+                            created: Date.now() + i,
+                            updated: Date.now() + i
                         });
                     }
                 }
@@ -7873,21 +7902,25 @@
             const grouped = {};
             savingsAccounts.forEach(account => {
                 const accountBalances = balances[account.id] || {};
-                // Get all updates for the selected month
+                // Get all updates for the selected month, sort by created
                 const monthUpdates = Object.keys(accountBalances)
                     .filter(date => date.startsWith(selectedMonthKey))
-                    .map(date => ({
-                        date,
-                        amount: accountBalances[date],
-                        timestamp: new Date(date).getTime()
-                    }))
-                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+                    .map(date => {
+                        const entry = accountBalances[date];
+                        return {
+                            date,
+                            amount: entry.amount !== undefined ? entry.amount : entry,
+                            created: entry.created || new Date(date).getTime(),
+                            updated: entry.updated || entry.created || new Date(date).getTime()
+                        };
+                    })
+                    .sort((a, b) => (a.created || new Date(a.date).getTime()) - (b.created || new Date(b.date).getTime()));
                 // Get last value from previous month
                 const prevMonthDates = Object.keys(accountBalances)
                     .filter(date => date.startsWith(previousMonthKey))
                     .sort();
                 const prevMonthLastDate = prevMonthDates.length > 0 ? prevMonthDates[prevMonthDates.length - 1] : null;
-                const prevMonthLastValue = prevMonthLastDate ? accountBalances[prevMonthLastDate] : 0;
+                const prevMonthLastValue = prevMonthLastDate ? (accountBalances[prevMonthLastDate].amount !== undefined ? accountBalances[prevMonthLastDate].amount : accountBalances[prevMonthLastDate]) : 0;
                 grouped[account.id] = {
                     name: account.name,
                     monthUpdates,
@@ -7903,7 +7936,7 @@
                 if (monthUpdates.length === 0) return; // Only show accounts with data
                 anyData = true;
                 // Latest value for the selected month
-                const latest = monthUpdates[0];
+                const latest = monthUpdates[monthUpdates.length - 1];
                 // Calculate all-time percent (from first ever value)
                 const accountBalances = balances[accountId] || {};
                 const allDates = Object.keys(accountBalances).sort();
@@ -8838,7 +8871,9 @@
                     initializeDatepicker(datepickerId);
                 }
                 const state = datepickerStates[datepickerId];
-                state.selectedDate = new Date(date);
+                // Parse date properly to avoid timezone issues
+                const dateParts = date.split('-').map(Number);
+                state.selectedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
                 updateDatepickerValue(datepickerId);
                 renderCalendar(datepickerId);
             }
@@ -8869,18 +8904,38 @@
                 return;
             }
             const expenses = loadExpenses();
-            // Remove the old expense
+            // Remove the old expense and get its index
             let oldList = expenses[editingExpense.date] || [];
+            const oldIndex = oldList.findIndex(e => e.timestamp === editingExpense.timestamp);
+            const oldExpense = oldList.find(e => e.timestamp === editingExpense.timestamp);
+            
+            // Preserve the original created timestamp
+            const created = oldExpense && oldExpense.created ? oldExpense.created : editingExpense.timestamp;
+            
+            // Remove the old expense
             oldList = oldList.filter(e => e.timestamp !== editingExpense.timestamp);
             expenses[editingExpense.date] = oldList;
-            // Add the updated expense
-            if (!expenses[targetDate]) expenses[targetDate] = [];
-            expenses[targetDate].push({
+            
+            // Create the updated expense
+            const updatedExpense = {
                 amount,
                 category,
                 description: description || '',
-                timestamp: editingExpense.timestamp
-            });
+                timestamp: editingExpense.timestamp,
+                created: created, // Preserve original created timestamp
+                updated: Date.now()
+            };
+            
+            // Add the updated expense at the same index if date is unchanged, else push to new date
+            if (!expenses[targetDate]) expenses[targetDate] = [];
+            
+            if (editingExpense.date === targetDate && oldIndex !== -1) {
+                // Insert at the same position to maintain order
+                expenses[targetDate].splice(oldIndex, 0, updatedExpense);
+            } else {
+                // If date changed, add to the end of the new date's list
+                expenses[targetDate].push(updatedExpense);
+            }
             saveExpenses(expenses);
             // Reset form and editing state
             document.getElementById('slideOutExpenseAmount').value = '';
@@ -8904,4 +8959,5 @@
 
     </script>
 </body>
+</html>
 </html>
