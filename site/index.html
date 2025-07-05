@@ -1295,8 +1295,8 @@
             color: hsl(var(--success));
         }
         
-        .stat-subtitle.warning {
-            color: hsl(var(--warning));
+        .stat-subtitle.positive {
+            color: hsl(var(--success));
         }
         
         .stat-value.positive {
@@ -3446,10 +3446,6 @@
   align-items: center;
   color: #111;
 }
-.settings-menu-label {
-  flex: 1;
-  color: #111;
-}
 .settings-menu-arrow {
   margin-left: auto;
   color: #111;
@@ -3558,6 +3554,145 @@
 .account-update-percent.neutral {
   color: #888;
 }
+
+/* Modern Wealthsimple-style Account Accordion Styles */
+.modern-account-accordion {
+  border: none;
+  border-radius: 18px;
+  margin-bottom: 1.5rem;
+  background: #fff;
+  box-shadow: none;
+  transition: none;
+}
+.modern-account-accordion-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem;
+  cursor: pointer;
+  border-radius: 18px 18px 0 0;
+  background: #fff;
+  transition: none;
+  box-shadow: none;
+}
+
+.modern-account-header-left {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.modern-account-title {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #222;
+  letter-spacing: 0.01em;
+}
+.modern-account-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: 1.2rem;
+  font-size: 0.98rem;
+  transition: opacity 0.2s;
+}
+.modern-account-accordion-header.expanded .modern-account-header-right {
+  display: none;
+}
+.modern-account-balance {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #222;
+  line-height: 1.1;
+}
+.modern-account-percent {
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin-top: 0.18rem;
+  color: #27ae60;
+}
+.modern-account-percent.negative {
+  color: #e74c3c;
+}
+.modern-account-chevron {
+  font-size: 1.45rem;
+  margin-left: 1.2rem;
+  color: #bbb;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  background: none !important;
+  border-radius: 0 !important;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+}
+.modern-account-accordion-header.expanded .modern-account-chevron {
+  transform: rotate(180deg);
+  background: none;
+}
+.modern-account-accordion-body {
+  padding: 0 1rem 0.5rem 1rem;
+  background: none;
+  border-radius: 0 0 18px 18px;
+  box-shadow: none;
+}
+.modern-account-updates {
+  margin: 0;
+  padding: 0;
+}
+.modern-account-update-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem 0;
+  margin-bottom: 0.2rem;
+  background: #fff;
+  border-radius: 0;
+  box-shadow: none;
+  font-size: 1.08rem;
+  border-bottom: none;
+  width: 100%;
+}
+.modern-account-update-row:last-child {
+  margin-bottom: 0;
+}
+.modern-update-date {
+  font-size: 1.01rem;
+  color: #444;
+  font-weight: 600;
+  flex: 1 1 40%;
+  align-self: center;
+}
+.modern-update-amount-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: 1 1 60%;
+  min-width: 0;
+}
+.modern-update-diff {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #222;
+  margin-left: 0;
+  margin-bottom: 0.15rem;
+}
+.modern-update-percent {
+  font-size: 1.01rem;
+  color: #27ae60;
+  font-weight: 600;
+  margin-left: 0;
+}
+.modern-update-percent.negative {
+  color: #e74c3c;
+}
+.modern-update-percent.neutral {
+  color: #888;
+}
+
         
 
     
@@ -7737,7 +7872,7 @@
                         amount: accountBalances[date],
                         timestamp: new Date(date).getTime()
                     }))
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
                 // Get last value from previous month
                 const prevMonthDates = Object.keys(accountBalances)
                     .filter(date => date.startsWith(previousMonthKey))
@@ -7751,7 +7886,7 @@
                 };
             });
 
-            // Render accordions
+            // Render modern accordions
             let html = '';
             let anyData = false;
             Object.keys(grouped).forEach(accountId => {
@@ -7759,16 +7894,26 @@
                 if (monthUpdates.length === 0) return; // Only show accounts with data
                 anyData = true;
                 // Latest value for the selected month
-                const latest = monthUpdates[monthUpdates.length - 1];
-                // Accordion header: account name and latest value
-                html += `<div class="account-accordion" data-account-id="${accountId}">
-                    <div class="account-accordion-header" onclick="toggleAccountAccordion('${accountId}')">
-                        <span class="account-accordion-title">${name}</span>
-                        <span class="account-accordion-value">${formatCurrency(latest.amount)}</span>
-                        <span class="account-accordion-chevron" id="chevron-${accountId}">&#9660;</span>
+                const latest = monthUpdates[0];
+                // Calculate all-time percent (from first ever value)
+                const accountBalances = balances[accountId] || {};
+                const allDates = Object.keys(accountBalances).sort();
+                const firstValue = allDates.length > 0 ? accountBalances[allDates[0]] : 0;
+                const allTimePercent = firstValue && latest.amount ? ((latest.amount - firstValue) / firstValue) * 100 : 0;
+                // Accordion header: account name, latest value
+                html += `<div class="modern-account-accordion" data-account-id="${accountId}">
+                    <div class="modern-account-accordion-header" onclick="toggleAccountAccordion('${accountId}')">
+                        <div class="modern-account-header-left">
+                            <div class="modern-account-title">${name}</div>
+                        </div>
+                        <div class="modern-account-header-right">
+                            <div class="modern-account-balance">${formatCurrency(latest.amount)}</div>
+                        </div>
+                        <i data-lucide="chevron-down" class="modern-account-chevron" id="chevron-${accountId}"></i>
                     </div>
-                    <div class="account-accordion-body" id="accordion-body-${accountId}" style="display:none;">
-                        <div class="account-accordion-updates">`;
+                    <div class="modern-account-accordion-body" id="accordion-body-${accountId}" style="display:none;">
+                        <div class="modern-account-updates">
+                `;
                 let prevValue = prevMonthLastValue;
                 monthUpdates.forEach(update => {
                     const diff = update.amount - prevValue;
@@ -7777,10 +7922,12 @@
                     const percentClass = percent > 0 ? 'positive' : percent < 0 ? 'negative' : 'neutral';
                     const dateObj = new Date(update.date);
                     const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    html += `<div class="account-update-row">
-                        <div class="account-update-date">${displayDate}</div>
-                        <div class="account-update-diff">${sign}${formatCurrency(diff)}</div>
-                        <div class="account-update-percent ${percentClass}">${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%</div>
+                    html += `<div class="modern-account-update-row">
+                        <div class="modern-update-date">${displayDate}</div>
+                        <div class="modern-update-amount-stack">
+                          <div class="modern-update-diff">${formatCurrency(update.amount)}</div>
+                          <div class="modern-update-percent ${percentClass}">${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%</div>
+                        </div>
                     </div>`;
                     prevValue = update.amount;
                 });
@@ -7791,18 +7938,35 @@
                 html = `<div style="text-align: center; color: #7f8c8d; padding: 20px;">No balance records for ${selectedMonthName}</div>`;
             }
             historyContainer.innerHTML = html;
+            // Ensure Lucide icons are rendered
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+            }
         }
 
         // Accordion toggle function
         function toggleAccountAccordion(accountId) {
             const body = document.getElementById(`accordion-body-${accountId}`);
             const chevron = document.getElementById(`chevron-${accountId}`);
+            const header = document.querySelector(`.modern-account-accordion[data-account-id='${accountId}'] .modern-account-accordion-header`);
             if (body.style.display === 'none') {
                 body.style.display = 'block';
-                if (chevron) chevron.innerHTML = '&#9650;'; // Up
+                if (header) header.classList.add('expanded');
+                if (chevron) {
+                    chevron.setAttribute('data-lucide', 'chevron-up');
+                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                        window.lucide.createIcons();
+                    }
+                }
             } else {
                 body.style.display = 'none';
-                if (chevron) chevron.innerHTML = '&#9660;'; // Down
+                if (header) header.classList.remove('expanded');
+                if (chevron) {
+                    chevron.setAttribute('data-lucide', 'chevron-down');
+                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                        window.lucide.createIcons();
+                    }
+                }
             }
         }
 
