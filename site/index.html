@@ -7973,19 +7973,32 @@
                     <div class="modern-account-accordion-body" id="accordion-body-${accountId}">
                         <div class="modern-account-updates">
                 `;
-                let prevValue = prevMonthLastValue;
+                let prevValue = null;
                 monthUpdates.forEach(update => {
-                    const diff = update.amount - prevValue;
-                    const percent = prevValue !== 0 ? (diff / prevValue) * 100 : 0;
-                    const sign = diff > 0 ? '+' : '';
+                    let percent = null;
+                    let arrow = '';
+                    if (prevValue !== null && prevValue !== 0) {
+                        percent = ((update.amount - prevValue) / Math.abs(prevValue)) * 100;
+                        if (percent > 0.01) {
+                            arrow = '<i data-lucide="arrow-up-right" class="balance-arrow positive"></i>';
+                        } else if (percent < -0.01) {
+                            arrow = '<i data-lucide="arrow-down-right" class="balance-arrow negative"></i>';
+                        } else {
+                            arrow = '<i data-lucide="arrow-right" class="balance-arrow neutral"></i>';
+                        }
+                    }
                     const percentClass = percent > 0 ? 'positive' : percent < 0 ? 'negative' : 'neutral';
-                    const dateObj = new Date(update.date);
+                    
+                    const [year, month, day] = update.date.split('-').map(Number); // or update.date
+                    const dateObj = new Date(year, month - 1, day);
                     const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+
                     html += `<div class="modern-account-update-row">
                         <div class="modern-update-date">${displayDate}</div>
                         <div class="modern-update-amount-stack">
-                          <div class="modern-update-diff">${formatCurrency(update.amount)}</div>
-                          <div class="modern-update-percent ${percentClass}">${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%</div>
+                        <div class="modern-update-diff">${formatCurrency(update.amount)}</div>
+                        <div class="modern-update-percent ${percentClass}">${percent !== null ? `${arrow}${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%` : '--'}</div>
                         </div>
                     </div>`;
                     prevValue = update.amount;
