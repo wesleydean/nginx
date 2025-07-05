@@ -3081,7 +3081,6 @@
                     <div class="card" id="budgetDisplay">
                         <div class="card-header" style="text-align:center;">
                             <div id="budgetTitleContainer" style="text-align:left;"></div>
-                            <p class="card-description" id="budgetDescription" style="text-align:left;">monthly spending budget</p>
                         </div>
                         <div class="card-content">
                             <div class="flex items-center justify-between p-4 rounded-lg mb-2 stat-card">
@@ -3815,7 +3814,6 @@
             
             // Update display elements if they exist
             const budgetPeriodLabel = document.getElementById('budgetPeriodLabel');
-            const budgetDescription = document.getElementById('budgetDescription');
             const budgetAmount = document.getElementById('budgetAmount');
             const remainingBudget = document.getElementById('remainingBudget');
             
@@ -5289,44 +5287,30 @@
                 renderCalendar(datepickerId);
             }
         }
+        
         function showBalanceSlideOut() {
             const overlay = document.getElementById('balanceSlideOut');
             overlay.classList.add('active');
-            // Initialize the datepicker if not already done
+            // Initialize datepicker if not already done
             const datepickerId = 'balanceCustomDatepicker';
             if (!datepickerStates[datepickerId]) {
                 initializeDatepicker(datepickerId);
             }
-            if (currentPeriodMode === 'month') {
-                const now = new Date();
-                let defaultDate;
-                if (
-                    selectedMonthDate.getFullYear() === now.getFullYear() &&
-                    selectedMonthDate.getMonth() === now.getMonth()
-                ) {
-                    defaultDate = now;
-                } else {
-                    defaultDate = new Date(selectedMonthDate.getFullYear(), selectedMonthDate.getMonth(), 1);
-                }
-                const state = datepickerStates[datepickerId];
-                state.selectedDate = defaultDate;
-                state.currentMonth = defaultDate.getMonth();
-                state.currentYear = defaultDate.getFullYear();
-                updateDatepickerValue(datepickerId);
-                renderCalendar(datepickerId);
-            } else {
-                // Set default date to today if not already set
-                const state = datepickerStates[datepickerId];
-                if (state && !state.selectedDate) {
-                    selectToday(datepickerId);
-                }
-            }
-            // Ensure account dropdown is populated
+            // Set default date to today
+            const now = new Date();
+            const state = datepickerStates[datepickerId];
+            state.selectedDate = now;
+            state.currentMonth = now.getMonth();
+            state.currentYear = now.getFullYear();
+            updateDatepickerValue(datepickerId);
+            renderCalendar(datepickerId);
+            
+            // Update account dropdown
             updateSlideOutAccountDropdown();
             
-            // Prepopulate balance amount with last balance for default selected account
-            if (savingsAccounts.length > 0) {
-                const defaultAccountId = savingsAccounts[0].id;
+            // Pre-fill with last balance for default account
+            const defaultAccountId = getDefaultAccountId();
+            if (defaultAccountId) {
                 const lastBalance = getLastBalanceForAccount(defaultAccountId);
                 const balanceAmountInput = document.getElementById('slideOutBalanceAmount');
                 if (balanceAmountInput && lastBalance > 0) {
@@ -5636,6 +5620,9 @@
             // Initialize dropdown event listeners
             setupDropdownEventListeners();
             setupPeriodDropdownEventListeners();
+            
+            // Initialize click-outside-to-close functionality for slide-out menus
+            initializeSlideOutClickOutside();
             
             // Initialize period mode
             setPeriodMode('today');
@@ -6927,6 +6914,43 @@
             
             // Update save screen display
             updateSaveScreen();
+        }
+
+        /**
+         * Initialize click-outside-to-close functionality for all slide-out menus
+         * This function sets up event listeners on the overlay backgrounds to close menus when clicked
+         */
+        function initializeSlideOutClickOutside() {
+            // Get all slide-out overlays
+            const slideOutOverlays = document.querySelectorAll('.slide-out-overlay, .account-management-slide-out');
+            
+            slideOutOverlays.forEach(overlay => {
+                overlay.addEventListener('click', function(event) {
+                    // Check if the click was on the overlay background (not on the content)
+                    if (event.target === overlay) {
+                        // Close the specific slide-out based on its ID
+                        const slideOutId = overlay.id;
+                        switch (slideOutId) {
+                            case 'expenseSlideOut':
+                                hideExpenseSlideOut();
+                                break;
+                            case 'balanceSlideOut':
+                                hideBalanceSlideOut();
+                                break;
+                            case 'monthYearSlideOut':
+                                hideMonthYearSlideOut();
+                                break;
+                            case 'accountManagementSlideOut':
+                                hideAccountManagementSlideOut();
+                                break;
+                            default:
+                                // Generic fallback - remove active class
+                                overlay.classList.remove('active');
+                                break;
+                        }
+                    }
+                });
+            });
         }
 
     </script>
