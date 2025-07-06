@@ -1717,6 +1717,7 @@
         .chart-container-wrapper {
             margin-top: 20px;
             padding-top: 10px;
+            position: relative;
         }
         
         .chart-header {
@@ -2014,10 +2015,17 @@
             position: relative;
             height: 300px;
             margin-top: 20px;
-            /* Add subtle border and shadow for Wealthsimple look */
             border-radius: var(--radius);
             overflow: hidden;
             touch-action: pan-y; /* Allow vertical scrolling */
+        }
+        
+        /* Full width styling for specific chart */
+        .chart-container.full-width-chart {
+            margin-left: -1.6rem;
+            margin-right: -1rem;
+            width: calc(100% + 2.8rem);
+            border-radius: 0;
         }
         
         #spendingChart {
@@ -4408,7 +4416,7 @@ margin-right: 0.5rem;
                         </div>
                         
                         <!-- Chart with Overlay -->
-                        <div class="card chart-container">
+                        <div class="card chart-container full-width-chart">
                             <canvas id="spendingChart"></canvas>
                             <div class="chart-overlay" id="chartOverlay">
                                 <div class="chart-crosshair" id="chartCrosshair"></div>
