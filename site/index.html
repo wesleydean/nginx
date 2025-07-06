@@ -3696,16 +3696,16 @@
 
 /* Modern Wealthsimple-style Account Accordion Styles */
 .modern-account-accordion {
-  border: none;
-  border-radius: 18px;
-  margin-bottom: 1.5rem;
-  background: #fff;
-  box-shadow: none;
-  transition: none;
+    border: none;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: none;
+    transition: none;
+    margin-bottom: 0.8rem;
 }
 .modern-account-accordion-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   padding: 1rem 0;
   cursor: pointer;
@@ -3722,13 +3722,15 @@
   justify-content: center;
 }
 .modern-account-title {
-  font-size: 1.18rem;
-  font-weight: 700;
-  color: #222;
-  letter-spacing: 0.01em;
+ font-size: 0.9rem;
+text-transform: uppercase;
+font-weight: 800;
+color: #787878;
+letter-spacing: 0.04em;
 }
 .modern-account-header-right {
   display: flex;
+margin-right: 0.5rem;   
   flex-direction: column;
   align-items: flex-end;
   margin-left: 1.2rem;
@@ -3753,20 +3755,28 @@
 .modern-account-percent.negative {
   color: #e74c3c;
 }
+.account-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    width: 30px;
+    height: 30px;
+    box-shadow: none;
+    background-color: rgb(187 187 187 / 20%);
+}
 .modern-account-chevron {
-  font-size: 1.45rem;
-  margin-left: 1.2rem;
-  color: #bbb;
-  align-self: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-  background: none !important;
-  border-radius: 0 !important;
-  width: auto;
-  height: auto;
-  box-shadow: none;
+    font-size: 1.45rem;
+    display: flex;
+    color: #bbb;
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    background: none !important;
+    border-radius: 0 !important;
+    width: 18px;
+    box-shadow: none;
 }
 .modern-account-accordion-header.expanded .modern-account-chevron {
   transform: rotate(180deg);
@@ -8576,7 +8586,7 @@
                         <div class="modern-account-header-right">
                             <div class="modern-account-balance">${formatCurrency(latest.amount)}</div>
                         </div>
-                        <i data-lucide="chevron-down" class="modern-account-chevron" id="chevron-${accountId}"></i>
+                        <div class="account-chevron"><i data-lucide="chevron-down" class="modern-account-chevron" id="chevron-${accountId}"></i></div>
                     </div>
                     <div class="modern-account-accordion-body" id="accordion-body-${accountId}">
                         <div class="modern-account-updates">
