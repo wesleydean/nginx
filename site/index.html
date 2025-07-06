@@ -2039,10 +2039,18 @@
             position: absolute;
             width: 2px;
             height: 100%;
-            background: #222;
+            background: rgba(107, 114, 128, 0.7); /* Changed to gray color to match chart */
             opacity: 0;
             z-index: 20;
             pointer-events: none;
+            /* Dashed line effect */
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(107, 114, 128, 0.7) 0px,
+                rgba(107, 114, 128, 0.7) 6px,
+                transparent 6px,
+                transparent 12px
+            );
             transition: opacity 0.15s ease, left 0.05s linear;
         }
         .chart-overlay.visible {
