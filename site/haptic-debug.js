@@ -243,7 +243,8 @@ function addHapticTestButton() {
     // Add event listener
     testButton.addEventListener('click', toggleHapticTestPanel);
     
-    document.body.appendChild(testButton);
+    // Append to body (disable for now)
+    // document.body.appendChild(testButton);
 }
 
 // Initialize haptic testing
