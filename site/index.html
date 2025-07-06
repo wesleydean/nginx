@@ -536,8 +536,10 @@
         }
         
         .card-header {
+            position: sticky;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            align-items: center;
             padding-bottom: 1rem;
         }
         
@@ -1142,6 +1144,7 @@
             flex-shrink: 0;
             overflow-y: auto;
             padding: 1rem;
+            padding-top: 0;;
             background-color: hsl(var(--background));
         }
         
@@ -1509,40 +1512,78 @@
 
         .period-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            justify-content: space-between;
+            width: 100%;
         }
 
         .period-title {
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0;
             color: hsl(var(--foreground));
         }
 
-        .period-switch {
+        /* Icon-only toggle for day/month - styled like chart-period-selector-bottom */
+        .period-icon-toggle {
             display: flex;
-            background-color: hsl(var(--muted));
-            border-radius: var(--radius);
-            padding: 2px;
+            align-items: center;
+            background: hsl(var(--muted));
+            border-radius: calc(var(--radius) * 2.5);
+            padding: 4px;
+            margin-left: auto;
         }
-
-        .period-switch button {
-            padding: 6px 12px;
+        
+        .period-icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
             border: none;
             background: transparent;
-            border-radius: calc(var(--radius) - 2px);
-            font-size: 0.8rem;
-            font-weight: 500;
+            border-radius: calc(var(--radius) * 2);
             cursor: pointer;
             transition: all 0.2s ease;
             color: hsl(var(--muted-foreground));
+            padding: 0;
+        }
+        
+        .period-icon-btn.active {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .period-icon-btn:hover:not(.active) {
+            color: hsl(var(--foreground));
+        }
+        
+        .period-icon-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Original period switch (to be hidden/replaced) */
+        .period-switch {
+            display: none; /* Hide the original switch */
+        }
+
+        .period-switch button {
+            background-color: transparent;
+            border: none;
+            color: hsl(var(--muted-foreground));
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.2s ease;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius);
         }
 
         .period-switch button.active {
-            background-color: hsl(var(--background));
             color: hsl(var(--foreground));
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            background-color: hsl(var(--muted));
         }
 
         .month-navigation {
@@ -3548,7 +3589,7 @@
   align-items: center;
 }
 .settings-menu-btn-item {
-  padding: 1.25rem 0.5rem;
+  padding: 2rem 0.5rem 0rem 0.5rem;
   border-bottom: none;
 }
 .settings-menu-btn {
@@ -4007,28 +4048,19 @@
             <div class="screens-wrapper" id="screensWrapper">
                 <!-- Screen 1: Tracking -->
                 <div class="screen">
-                    <!-- Sticky Period Selector -->
-                    <div class="period-selector-sticky" id="periodSelectorSticky">
-                        <!-- Period Selector Header with Toggle on Left, Dropdowns on Right -->
-                        <div class="period-selector-header">
-                            <!-- Today/Month Toggle (Full Width) -->
-                            <div class="period-mode-toggle-compact">
-                                <button onclick="setPeriodMode('today')" class="btn btn-ghost btn-sm period-mode-btn-compact active" id="todayBtnCompact" title="Today View">
-                                    <i data-lucide="sun" class="w-4 h-4 mr-2"></i>
-                                    <span>Today</span>
-                                </button>
-                                <button onclick="setPeriodMode('month')" class="btn btn-ghost btn-sm period-mode-btn-compact" id="monthBtnCompact" title="Month View">
-                                    <i data-lucide="calendar" class="w-4 h-4 mr-2"></i>
-                                    <span>Month</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Daily Budget Display -->
                     <div class="card" id="budgetDisplay">
                         <div class="card-header" style="text-align:center;">
                             <div id="budgetTitleContainer" style="text-align:left;"></div>
+                            <!-- Icon-only Today/Month Toggle - Only this is included -->
+                            <div class="period-icon-toggle">
+                                <button onclick="setPeriodMode('today')" class="period-icon-btn active" id="todayBtnIcon" title="Today View">
+                                    <i data-lucide="sun" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="setPeriodMode('month')" class="period-icon-btn" id="monthBtnIcon" title="Month View">
+                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="card-content">
                             <div class="flex items-center justify-between p-4 rounded-lg mb-2 stat-card">
@@ -4158,8 +4190,22 @@
                     <div class="period-selector-sticky" id="savePeriodSelectorSticky" style="display: none;">
                         <!-- Period Selector Header with Toggle on Left, Dropdowns on Right -->
                         <div class="period-selector-header">
-                            <!-- Today/Month Toggle (Full Width) -->
-                            <div class="period-mode-toggle-compact">
+                            <div class="card-header" style="flex-direction: row; align-items: center; justify-content: space-between; padding-bottom: 0;">
+                                <div class="period-title">July 2025</div>
+                                
+                                <!-- Icon-only Today/Month Toggle - Only this is included -->
+                                <div class="period-icon-toggle">
+                                    <button onclick="setSavePeriodMode('today')" class="period-icon-btn active" id="saveTodayBtnIcon" title="Today View">
+                                        <i data-lucide="sun" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="setSavePeriodMode('month')" class="period-icon-btn" id="saveMonthBtnIcon" title="Month View">
+                                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Original Toggle (Hidden) -->
+                            <div class="period-mode-toggle-compact" style="display: none;">
                                 <button onclick="setSavePeriodMode('today')" class="btn btn-ghost btn-sm period-mode-btn-compact active" id="saveTodayBtnCompact" title="Today View">
                                     <i data-lucide="sun" class="w-4 h-4 mr-2"></i>
                                     <span>Today</span>
@@ -4369,6 +4415,12 @@
                       <div class="quick-action-card" style="width:100%;box-sizing:border-box;" onclick="loadSampleBudget()">
                         <span class="quick-action-icon"><i data-lucide="database" class="w-5 h-5"></i></span>
                         <span class="quick-action-title">Load Sample Budget</span>
+                      </div>
+                    </li>
+                    <li class="settings-menu-item settings-menu-btn-item">
+                      <div class="quick-action-card" style="width:100%;box-sizing:border-box;" onclick="clearAllData()">
+                        <span class="quick-action-icon"><i data-lucide="trash-2" class="w-5 h-5"></i></span>
+                        <span class="quick-action-title">Clear All Data</span>
                       </div>
                     </li>
                   </ul>
@@ -6629,6 +6681,12 @@
             if (todayBtn) todayBtn.classList.toggle('active', mode === 'today');
             if (monthBtn) monthBtn.classList.toggle('active', mode === 'month');
             
+            // Update icon-only button states
+            const todayBtnIcon = document.getElementById('todayBtnIcon');
+            const monthBtnIcon = document.getElementById('monthBtnIcon');
+            if (todayBtnIcon) todayBtnIcon.classList.toggle('active', mode === 'today');
+            if (monthBtnIcon) monthBtnIcon.classList.toggle('active', mode === 'month');
+            
             // Add/remove today-view class for styling
             const screen = document.querySelector('.screen');
             if (screen) {
@@ -8740,6 +8798,12 @@
             if (saveTodayBtn) saveTodayBtn.classList.toggle('active', mode === 'today');
             if (saveMonthBtn) saveMonthBtn.classList.toggle('active', mode === 'month');
             
+            // Update icon-only button states
+            const saveTodayBtnIcon = document.getElementById('saveTodayBtnIcon');
+            const saveMonthBtnIcon = document.getElementById('saveMonthBtnIcon');
+            if (saveTodayBtnIcon) saveTodayBtnIcon.classList.toggle('active', mode === 'today');
+            if (saveMonthBtnIcon) saveMonthBtnIcon.classList.toggle('active', mode === 'month');
+            
             // Update save screen display
             updateSaveScreen();
         }
@@ -9412,6 +9476,41 @@
         function loadSampleBudget() {
             loadTestData();
         }
+        
+        function clearAllData() {
+            // Confirm before clearing all data
+            if (confirm("Are you sure you want to clear all data? This action cannot be undone.")) {
+                try {
+                    // Clear all application-related data from localStorage
+                    const keysToRemove = [
+                        'accountBalances',
+                        'dailyExpenses',
+                        'expenses',
+                        'simpleBudgetSettings',
+                        'savingsAccounts',
+                        'budgetSettings'
+                    ];
+                    
+                    // Clear each key
+                    keysToRemove.forEach(key => {
+                        console.log(`Removing localStorage key: ${key}`);
+                        localStorage.removeItem(key);
+                    });
+                    
+                    // For additional safety, clear all localStorage
+                    console.log('Clearing all localStorage');
+                    localStorage.clear();
+                    
+                    // Reload the page to reflect changes
+                    alert("All data has been cleared successfully.");
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Error clearing data:', error);
+                    alert("An error occurred while clearing data.");
+                }
+            }
+        }
+        
         function openSupport() {
             // Don't close settings, just slide to support page
             const supportOverlay = document.getElementById('supportOverlay');
