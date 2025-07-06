@@ -351,6 +351,13 @@
             background-color: hsl(var(--card));
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
+            transition: transform 0.12s, background-color 0.16s;
+            cursor: pointer;
+        }
+        
+        .expense-item:active {
+            transform: scale(0.98);
+            background-color: hsl(var(--muted));
         }
         
         .balance-item {
@@ -1455,7 +1462,7 @@
             padding: 0.5rem;
             margin: 0 1.5rem; /* Increased margin for better spacing */
             cursor: pointer;
-            transition: all 150ms ease;
+            transition: all 150ms ease, transform 0.12s;
             border-radius: var(--radius);
             user-select: none;
             color: hsl(var(--muted-foreground) / 0.5); /* More grayed out for inactive items */
@@ -1471,6 +1478,10 @@
         
         .nav-item:hover:not(.active) {
             color: hsl(var(--foreground) / 0.8); /* Slightly darker on hover */
+        }
+        
+        .nav-item:active {
+            transform: scale(0.92);
         }
         
         .nav-item .icon {
