@@ -15,6 +15,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Expenses">
     
+    <!-- Capacitor and haptic feedback support -->
+    <script src="capacitor.js"></script>
+    <script src="haptics.js"></script>
+    
     <!-- iOS icons -->
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
@@ -6038,8 +6042,10 @@ margin-right: 0.5rem;
                     if (index !== lastActiveIndex) {
                         updateChartHeader(index);
                         showChartInteraction(index);
-                        // activate haptic feedback if available
-                        if (navigator.vibrate) navigator.vibrate(50); // Short vibration for feedback
+                        // Use our enhanced haptic feedback utility
+                        if (window.Haptics) {
+                            window.Haptics.impact('medium');
+                        }
                         lastActiveIndex = index;
                     }
                 }
