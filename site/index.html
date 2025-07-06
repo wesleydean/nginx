@@ -1440,43 +1440,49 @@
         .bottom-nav {
             background-color: hsl(var(--card));
             border-top: 1px solid hsl(var(--border));
-            padding: 0.5rem 0;
+            padding: 1.25rem 0; /* Further increased padding for iOS swipe bar clearance */
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             align-items: center;
             backdrop-filter: blur(10px);
+            position: relative;
         }
         
         .nav-item {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding: 0.5rem 1rem;
+            padding: 0.5rem;
+            margin: 0 1.5rem; /* Increased margin for better spacing */
             cursor: pointer;
             transition: all 150ms ease;
             border-radius: var(--radius);
-            min-width: 80px;
             user-select: none;
-            color: hsl(var(--muted-foreground));
+            color: hsl(var(--muted-foreground) / 0.6); /* Grayed out for inactive items */
+            position: relative;
         }
         
         .nav-item.active {
-            background-color: hsl(var(--accent));
-            color: hsl(var(--accent-foreground));
+            color: hsl(var(--foreground)); /* Darker color for active item */
+            font-weight: 500; /* Slightly bolder to enhance visibility */
         }
         
         .nav-item:hover:not(.active) {
-            background-color: hsl(var(--accent) / 0.5);
+            color: hsl(var(--foreground) / 0.8); /* Slightly darker on hover */
         }
         
         .nav-item .icon {
             font-size: 1.3rem;
-            margin-bottom: 0.25rem;
+            transition: all 150ms ease;
         }
         
+        /* Make icon size slightly bigger for active state */
+        .nav-item.active .icon {
+            transform: scale(1.05);
+        }
+        
+        /* Hide labels as requested */
         .nav-item .label {
-            font-size: 0.75rem;
-            font-weight: 500;
+            display: none;
         }
         
         .screen::-webkit-scrollbar {
