@@ -1,27 +1,67 @@
-// Simplified Capacitor plugin implementation for haptic feedback in PWAs
+// Enhanced haptic feedback implementation for PWAs
 window.Capacitor = window.Capacitor || {};
 window.Capacitor.Plugins = window.Capacitor.Plugins || {};
 
-// Implement a simple haptics plugin for iOS
+// Detect device
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+const isAndroid = /Android/.test(navigator.userAgent);
+
+// Create a hidden audio element for iOS haptic workaround
+let hapticAudio = null;
+
+// Initialize audio for iOS haptic workaround
+function initHapticAudio() {
+    if (hapticAudio) return hapticAudio;
+    
+    hapticAudio = document.createElement('audio');
+    hapticAudio.id = 'hapticAudio';
+    hapticAudio.preload = 'auto';
+    hapticAudio.volume = 0; // Silent audio
+    
+    // Create a tiny silent audio file and set it up
+    try {
+        // We're now allowed to use data URIs with our updated CSP
+        hapticAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'; // Empty WAV
+    } catch (e) {
+        console.error("Error setting audio source:", e);
+        // Fallback: create a short silent mp3 file and add it to the project
+        hapticAudio.src = 'silent.mp3';
+    }
+    
+    document.body.appendChild(hapticAudio);
+    
+    return hapticAudio;
+}
+
+// iOS haptic workaround - play and pause audio to engage audio system,
+// which sometimes triggers the haptic engine on button clicks
+function triggerAudioHaptic() {
+    try {
+        const audio = initHapticAudio();
+        audio.play().then(() => {
+            setTimeout(() => {
+                audio.pause();
+                audio.currentTime = 0;
+            }, 20);
+        }).catch(e => console.log('Audio haptic error:', e));
+    } catch (e) {
+        console.log('Audio haptic setup error:', e);
+    }
+}
+
+// Implement a more reliable haptics plugin
 window.Capacitor.Plugins.Haptics = {
     // Impact feedback function (light, medium, heavy)
     impact: function(options) {
         const style = (options && options.style) || 'medium';
         
-        // Try to use the native iOS haptic API if available
-        if ('ImpactFeedbackGenerator' in window) {
-            try {
-                const impactFeedback = new window.ImpactFeedbackGenerator(style);
-                impactFeedback.prepare();
-                impactFeedback.impact();
-                return Promise.resolve();
-            } catch (e) {
-                console.log('Native haptics error:', e);
-            }
+        // For iOS - use audio trick + user-activated touch events
+        if (isIOS) {
+            triggerAudioHaptic();
         }
         
-        // Fallback to vibration API for Android
-        if (window.navigator && window.navigator.vibrate) {
+        // For Android - use vibration API
+        if (isAndroid && window.navigator && window.navigator.vibrate) {
             let duration = 50; // default medium
             
             if (style === 'light') {
@@ -31,10 +71,8 @@ window.Capacitor.Plugins.Haptics = {
             }
             
             window.navigator.vibrate(duration);
-            return Promise.resolve();
         }
         
-        // No haptic feedback available
         return Promise.resolve();
     },
     
@@ -42,20 +80,13 @@ window.Capacitor.Plugins.Haptics = {
     notification: function(options) {
         const type = (options && options.type) || 'success';
         
-        // Try to use the native iOS haptic API if available
-        if ('NotificationFeedbackGenerator' in window) {
-            try {
-                const notificationFeedback = new window.NotificationFeedbackGenerator();
-                notificationFeedback.prepare();
-                notificationFeedback.notification(type);
-                return Promise.resolve();
-            } catch (e) {
-                console.log('Native haptics error:', e);
-            }
+        // For iOS - use audio trick + user-activated touch events
+        if (isIOS) {
+            triggerAudioHaptic();
         }
         
-        // Fallback to vibration API for Android
-        if (window.navigator && window.navigator.vibrate) {
+        // For Android - use vibration API with patterns
+        if (isAndroid && window.navigator && window.navigator.vibrate) {
             let pattern;
             
             switch (type) {
@@ -73,34 +104,23 @@ window.Capacitor.Plugins.Haptics = {
             }
             
             window.navigator.vibrate(pattern);
-            return Promise.resolve();
         }
         
-        // No haptic feedback available
         return Promise.resolve();
     },
     
     // Selection changed feedback (for iOS)
     selectionChanged: function() {
-        // Try to use the native iOS haptic API if available
-        if ('SelectionFeedbackGenerator' in window) {
-            try {
-                const selectionFeedback = new window.SelectionFeedbackGenerator();
-                selectionFeedback.prepare();
-                selectionFeedback.selectionChanged();
-                return Promise.resolve();
-            } catch (e) {
-                console.log('Native haptics error:', e);
-            }
+        // For iOS - use a very subtle audio trick
+        if (isIOS) {
+            triggerAudioHaptic();
         }
         
-        // Minimal vibration for Android
-        if (window.navigator && window.navigator.vibrate) {
+        // For Android - use minimal vibration
+        if (isAndroid && window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate(10);
-            return Promise.resolve();
         }
         
-        // No haptic feedback available
         return Promise.resolve();
     },
     
@@ -108,44 +128,33 @@ window.Capacitor.Plugins.Haptics = {
     vibrate: function(options) {
         const duration = (options && options.duration) ? options.duration : 300;
         
-        if (window.navigator && window.navigator.vibrate) {
+        // For iOS - use audio trick
+        if (isIOS) {
+            triggerAudioHaptic();
+        }
+        
+        // For Android - use vibration API
+        if (isAndroid && window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate(duration);
-            return Promise.resolve();
         }
         
         return Promise.resolve();
     }
 };
 
-// iOS-specific polyfills for testing in browser
-if (typeof window !== 'undefined' && !('ImpactFeedbackGenerator' in window) && 
-    /iPhone|iPad|iPod/.test(navigator.userAgent)) {
-    
-    window.ImpactFeedbackGenerator = class ImpactFeedbackGenerator {
-        constructor(style) {
-            this.style = style;
-        }
-        
-        prepare() {}
-        
-        impact() {
-            console.log('iOS haptic impact:', this.style);
-        }
-    };
-    
-    window.NotificationFeedbackGenerator = class NotificationFeedbackGenerator {
-        prepare() {}
-        
-        notification(type) {
-            console.log('iOS haptic notification:', type);
-        }
-    };
-    
-    window.SelectionFeedbackGenerator = class SelectionFeedbackGenerator {
-        prepare() {}
-        
-        selectionChanged() {
-            console.log('iOS haptic selection changed');
-        }
-    };
-}
+// Add click listener to document to activate iOS audio context 
+// (iOS requires user interaction to enable audio)
+document.addEventListener('click', function() {
+    // Initialize audio on first user interaction
+    if (isIOS && !hapticAudio) {
+        initHapticAudio();
+    }
+}, { once: true });
+
+// Add a simple test function
+window.testHaptics = function() {
+    console.log('Testing haptic feedback...');
+    window.Capacitor.Plugins.Haptics.impact({style: 'medium'})
+        .then(() => console.log('Haptic impact completed'))
+        .catch(e => console.error('Haptic error:', e));
+};
