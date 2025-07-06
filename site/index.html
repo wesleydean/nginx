@@ -1457,13 +1457,15 @@
             transition: all 150ms ease;
             border-radius: var(--radius);
             user-select: none;
-            color: hsl(var(--muted-foreground) / 0.6); /* Grayed out for inactive items */
+            color: hsl(var(--muted-foreground) / 0.5); /* More grayed out for inactive items */
             position: relative;
+            opacity: 0.6; /* Additional opacity to ensure graying out */
         }
         
         .nav-item.active {
             color: hsl(var(--foreground)); /* Darker color for active item */
             font-weight: 500; /* Slightly bolder to enhance visibility */
+            opacity: 1; /* Full opacity for active item */
         }
         
         .nav-item:hover:not(.active) {
@@ -1473,6 +1475,7 @@
         .nav-item .icon {
             font-size: 1.3rem;
             transition: all 150ms ease;
+            color: inherit; /* Ensure icon inherits the parent's color */
         }
         
         /* Make icon size slightly bigger for active state */
