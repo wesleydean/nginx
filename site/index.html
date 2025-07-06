@@ -1048,6 +1048,28 @@
             justify-content: center;
             height: 1em;
             width: 1em;
+            color: hsl(var(--foreground)); /* Set icons to use the foreground color by default */
+        }
+        
+        /* Icon color handling for specific icons */
+        @media (prefers-color-scheme: light) {
+            [data-lucide="settings"] {
+                color: #000; /* Black in light mode */
+            }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            [data-lucide="settings"] {
+                color: hsl(var(--foreground)); /* Light color in dark mode */
+            }
+        }
+        
+        /* Always make icons in dark buttons (like Add Expense) white */
+        .quick-action-card [data-lucide],
+        .expense-btn [data-lucide],
+        .balance-btn [data-lucide],
+        .add-btn [data-lucide] {
+            color: #ffffff;
         }
         
         /* Fallback text for when icons don't load */
@@ -1539,7 +1561,7 @@
             align-items: center;
             justify-content: center;
             width: 36px;
-            height: 36px;
+            height: 30px;
             border: none;
             background: transparent;
             border-radius: calc(var(--radius) * 2);
@@ -3588,7 +3610,7 @@
   align-items: center;
 }
 .settings-menu-btn-item {
-  padding: 2rem 0.5rem 0rem 0.5rem;
+  padding: 1rem 0.5rem 0rem 0.5rem;
   border-bottom: none;
 }
 .settings-menu-btn {
