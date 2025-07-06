@@ -365,29 +365,25 @@
             box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
         }
         
-        /* Swipe to Delete Functionality */
+
         .swipe-container {
             position: relative;
-            overflow: hidden;
-            border-radius: var(--radius);
-            margin-bottom: 0.5rem;
-            background-color: hsl(var(--destructive));
-            border: none;
-        }
-        
-        .swipe-content {
+            /* border-radius: var(--radius); */
+            /* margin-bottom: 0.5rem; */
+            background-color: hsl(var(--background)); /* Changed from destructive to background */
+            /* border: none; */
             position: relative;
-            background-color: hsl(var(--card));
-            border: 1px solid hsl(var(--border));
-            box-shadow: none;
-            transform: translateX(0);
-            transition: transform 0.2s ease;
-            z-index: 2;
-            border-radius: var(--radius);
+            overflow: hidden;
             width: 100%;
-            will-change: transform;
+            border-radius: var(--radius);
+            margin-bottom: 8px;
+            touch-action: pan-y; /* Change to pan-y to enable horizontal swiping */
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            overflow: hidden !important;
         }
-        
+       
         /* .swipe-action {
             position: absolute;
             top: 0;
@@ -455,6 +451,11 @@
             border-bottom-right-radius: 0;
         }
         
+        /* Ensure swipe container maintains background even when swiped */
+        .swipe-container.swiped {
+            background-color: hsl(var(--background));
+        }
+        
         .swipe-container.deleting {
             animation: fade-out 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
             pointer-events: none;
@@ -498,7 +499,7 @@
             width: 100%;
             margin: 0;
             height: 100%;
-            border-radius: var(--radius);
+            border-radius: var(--radius); /* This matches parent container's radius */
             display: flex;
             align-items: center;
         }
@@ -510,7 +511,7 @@
             width: 100%;
             margin: 0;
             height: 100%;
-            border-radius: var(--radius);
+            border-radius: var(--radius); /* This matches parent container's radius */
             display: flex;
             align-items: center;
         }
@@ -556,9 +557,9 @@
         }
         
         .card-title {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             font-weight: 600;
-            line-height: 1;
+            line-height: 1.2;
             margin: 0;
             color: hsl(var(--foreground));
         }
@@ -1080,7 +1081,8 @@
         .quick-action-card [data-lucide],
         .expense-btn [data-lucide],
         .balance-btn [data-lucide],
-        .add-btn [data-lucide] {
+        .add-btn [data-lucide],
+        .swipe-action [data-lucide] {
             color: #ffffff;
         }
         
@@ -3960,31 +3962,28 @@ margin-right: 0.5rem;
             }
         }
 
-        /* Swipe to delete functionality */
-        .swipe-container {
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            touch-action: pan-y; /* Change to pan-y to enable horizontal swiping */
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-        }
+      
 
+         
         .swipe-content {
             position: relative;
-            z-index: 1;
-            background: white;
-            transition: transform 0.2s ease;
-            width: 100%;
-            will-change: transform;
-            display: flex;
             align-items: center;
             justify-content: space-between;
+            display: flex;
+            background-color: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            box-shadow: none;
+            transform: translateX(0);
+            transition: transform 0.2s ease;
+            z-index: 2;
+            border-radius: var(--radius);
+            width: 100%;
+            /* will-change: transform; */
+            overflow: hidden; /* Add overflow hidden to prevent content from showing outside the border radius */
+            position: relative;
+            width: 100%;
         }
-
+        
        
 
         .swipe-container.swiped .swipe-content {
@@ -4031,7 +4030,7 @@ margin-right: 0.5rem;
         /* Make sure balance items have the same swipe styling as expense items */
         .swipe-container .balance-item,
         .swipe-container .modern-balance-history-item {
-            border: none;
+            /* border: none; */
             box-shadow: none;
             width: 100%;
             display: flex;
@@ -4506,7 +4505,7 @@ margin-right: 0.5rem;
             <div class="settings-content">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="text-lg font-semibold">Income & Taxes</h3>
+                        <h3 class="text-xl font-semibold">Income & Taxes</h3>
                     </div>
                     <div class="card-content">
                         <!-- Tax Calculator Section -->
@@ -4615,7 +4614,7 @@ margin-right: 0.5rem;
                 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="text-lg font-semibold">Savings Goal</h3>
+                        <h3 class="text-xl font-semibold">Savings Goal</h3>
                     </div>
                     <div class="card-content">
                         <div class="form-group">
@@ -4632,7 +4631,7 @@ margin-right: 0.5rem;
                 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="text-lg font-semibold">Expenses</h3>
+                        <h3 class="text-xl font-semibold">Expenses</h3>
                     </div>
                     <div class="card-content">
                         <div class="form-group">
@@ -4652,7 +4651,7 @@ margin-right: 0.5rem;
                 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="text-lg font-semibold">Budget Summary</h3>
+                        <h3 class="text-xl font-semibold">Budget Summary</h3>
                     </div>
                     <div class="card-content">
                         <div class="budget-summary">
