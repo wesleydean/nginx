@@ -1991,10 +1991,11 @@
             /* Add subtle border and shadow for Wealthsimple look */
             border-radius: var(--radius);
             overflow: hidden;
+            touch-action: pan-y; /* Allow vertical scrolling */
         }
         
         #spendingChart {
-            touch-action: none; /* Prevent default touch behaviors */
+            touch-action: pan-y; /* Allow vertical scrolling */
             cursor: crosshair;
             padding: 10px 0;
         }
@@ -2004,6 +2005,7 @@
             #spendingChart {
                 cursor: default;
                 padding: 15px 0; /* More padding on mobile for better touch area */
+                touch-action: pan-y; /* Ensure vertical scrolling works on mobile */
             }
         }
         
@@ -3316,7 +3318,7 @@
 
         /* Tax Calculator Styles */
         .tax-calculator-section {
-            /*  */
+            margin-bottom: 1rem;
         }
 
         .tax-calculator-header {
@@ -5920,7 +5922,6 @@ margin-right: 0.5rem;
             });
 
             // --- INTERACTION: LONG PRESS THEN DRAG ---
-            // Require 1-second long press before enabling drag interaction
             let interactionEnabled = false;
             let longPressTimeout = null;
             let lastActiveIndex = null;
@@ -5966,7 +5967,7 @@ margin-right: 0.5rem;
                 longPressTimeout = setTimeout(() => {
                     const x = e.clientX - chartCanvas.getBoundingClientRect().left;
                     enableChartInteraction(x);
-                }, 1000); // 1 second long press required
+                }, 200); // 1 second long press required
             });
             chartCanvas.addEventListener('mousemove', function(e) {
                 if (!interactionEnabled) return;
@@ -5988,24 +5989,61 @@ margin-right: 0.5rem;
             });
 
             // Touch events: require 1-second long press before enabling drag
+            // Use initial touch position to detect direction
+            let initialTouchY = 0;
+            let initialTouchX = 0;
+            let touchDirection = null; // 'vertical' or 'horizontal'
+            
             chartCanvas.addEventListener('touchstart', function(e) {
                 if (longPressTimeout) clearTimeout(longPressTimeout);
                 if (!e.touches || e.touches.length === 0) return;
+                
+                // Store initial touch position
+                initialTouchX = e.touches[0].clientX;
+                initialTouchY = e.touches[0].clientY;
+                touchDirection = null; // Reset direction on new touch
+                
                 longPressTimeout = setTimeout(() => {
                     const x = e.touches[0].clientX - chartCanvas.getBoundingClientRect().left;
                     enableChartInteraction(x);
-                }, 1000); // 1 second long press required
+                }, 200); // 1 second long press required
             });
+            
             chartCanvas.addEventListener('touchmove', function(e) {
-                if (!interactionEnabled || !e.touches || e.touches.length === 0) return;
-                const x = e.touches[0].clientX - chartCanvas.getBoundingClientRect().left;
-                const index = getNearestIndex(x);
-                if (index !== lastActiveIndex) {
-                    updateChartHeader(index);
-                    showChartInteraction(index);
-                    lastActiveIndex = index;
+                if (!e.touches || e.touches.length === 0) return;
+                
+                // If we haven't determined direction yet, do so based on movement
+                if (touchDirection === null) {
+                    const deltaX = Math.abs(e.touches[0].clientX - initialTouchX);
+                    const deltaY = Math.abs(e.touches[0].clientY - initialTouchY);
+                    
+                    // If moving more vertically than horizontally, allow normal scroll
+                    if (deltaY > deltaX && deltaY > 10) {
+                        touchDirection = 'vertical';
+                        if (longPressTimeout) clearTimeout(longPressTimeout);
+                        return;
+                    } else if (deltaX > 10) {
+                        touchDirection = 'horizontal';
+                    }
                 }
-            });
+                
+                // If scrolling vertically, allow normal browser behavior
+                if (touchDirection === 'vertical') return;
+                
+                // Only prevent default for horizontal movements when interaction is enabled
+                if (interactionEnabled) {
+                    e.preventDefault(); // Prevent scrolling when interacting with chart
+                    const x = e.touches[0].clientX - chartCanvas.getBoundingClientRect().left;
+                    const index = getNearestIndex(x);
+                    if (index !== lastActiveIndex) {
+                        updateChartHeader(index);
+                        showChartInteraction(index);
+                        // activate haptic feedback if available
+                        if (navigator.vibrate) navigator.vibrate(50); // Short vibration for feedback
+                        lastActiveIndex = index;
+                    }
+                }
+            }, { passive: false }); // Need to set passive: false to call preventDefault
             chartCanvas.addEventListener('touchend', function() {
                 if (longPressTimeout) clearTimeout(longPressTimeout);
                 if (interactionEnabled) disableChartInteraction();
