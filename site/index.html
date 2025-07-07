@@ -1358,7 +1358,6 @@
             color: #444;
             font-weight: 600;
             flex: 1 1 40%;
-            align-self: center;
         }
         
         .expense-category {
@@ -3881,7 +3880,7 @@ margin-right: 0.5rem;
     width: 30px;
     height: 30px;
     box-shadow: none;
-    background-color: rgb(187 187 187 / 20%);
+    background-color: hsl(var(--muted) / 0.5);
 }
 .modern-account-chevron {
     font-size: 1.45rem;
@@ -4155,6 +4154,15 @@ margin-right: 0.5rem;
             margin-right: 4px;
         }
 
+        .last-updated-note {
+            font-size: 0.8rem; 
+            color: #a2a2a2; 
+            margin-top: 0; 
+            margin-bottom: 10px; 
+            text-align: left;  
+            display: none;
+        }
+
     
     </style>
 </head>
@@ -4383,12 +4391,18 @@ margin-right: 0.5rem;
                     <!-- Savings Accounts Section -->
                     <div class="card savings-accounts-section" id="saveSavingsSection">
                         <div class="section-header">
-                            <h3 class="card-title">Account Balances</h3>
+                            <h3 class="card-title">
+                                Account Balances
+                                 <div class="last-updated-note" id="lastUpdatedNote">
+                            Last updated: loading...
+                        </div>
+                            </h3>
                             <button class="btn btn-outline btn-sm" onclick="showAccountManagementModal()" style="border-radius: 20px;">
                                 <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
                                 Manage
                             </button>
                         </div>
+                       
                         
                         <!-- Total Balance Display -->
                         <div class="account-balance-display stat-card modern-balance-card">
@@ -5125,8 +5139,8 @@ margin-right: 0.5rem;
         // Period tracking variables
         let currentPeriodMode = 'month'; // 'today' or 'month'
         let currentSavePeriodMode = 'month'; // 'today' or 'month' for save screen
-        let selectedMonthDate = new Date();
-        let selectedSaveMonthDate = new Date(); // Separate month date for save screen
+        let selectedMonthDate = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
+        let selectedSaveMonthDate = new Date(2025, 6, 7); // Separate month date for save screen, July 7, 2025
         let currentChartPeriod = 'ALL'; // '1M', '3M', '6M', 'YTD', '1Y', 'ALL' - Changed from YTD to ALL to show all balance data
         
         let currentScreen = 0;
@@ -5220,7 +5234,8 @@ margin-right: 0.5rem;
         
         
         function getCurrentDate() {
-            const now = new Date();
+            // Hard-coded date for consistency: July 7, 2025
+            const now = new Date(2025, 6, 7); // Month is 0-indexed (6 = July)
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
@@ -5515,7 +5530,7 @@ margin-right: 0.5rem;
         function updateReports() {
             // Update weekly and monthly stats
             const expenses = loadExpenses();
-            const today = new Date();
+            const today = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
             const dayOfMonth = today.getDate();
             const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
             const remainingDaysInMonth = daysInMonth - dayOfMonth;
@@ -5654,7 +5669,8 @@ margin-right: 0.5rem;
         }
         
         function updateMonthLabel() {
-            const monthName = new Date().toLocaleDateString('en-US', { month: 'long' });
+            // Hard-coded date for consistency: July 7, 2025
+            const monthName = new Date(2025, 6, 7).toLocaleDateString('en-US', { month: 'long' });
             const monthSpentLabelEl = document.getElementById('monthSpentLabel');
             
             if (monthSpentLabelEl) {
@@ -5705,7 +5721,7 @@ margin-right: 0.5rem;
             const ctx = document.getElementById('spendingChart').getContext('2d');
             
             // Calculate date range based on selected period
-            const endDate = new Date();
+            const endDate = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
             let startDate;
 
              // Helper to find the nearest data index from x coordinate
@@ -5728,28 +5744,28 @@ margin-right: 0.5rem;
             
             switch (currentChartPeriod) {
                 case '1M':
-                    startDate = new Date();
+                    startDate = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
                     startDate.setMonth(startDate.getMonth() - 1);
                     break;
                 case '3M':
-                    startDate = new Date();
+                    startDate = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
                     startDate.setMonth(startDate.getMonth() - 3);
                     break;
                 case '6M':
-                    startDate = new Date();
+                    startDate = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
                     startDate.setMonth(startDate.getMonth() - 6);
                     break;
                 case 'YTD':
                     startDate = new Date(endDate.getFullYear(), 0, 1); // Jan 1st of current year
                     break;
                 case '1Y':
-                    startDate = new Date();
+                    startDate = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
                     startDate.setFullYear(startDate.getFullYear() - 1);
                     break;
                 case 'ALL':
                 default:
                     // For 'ALL', go back 2 years or to the first record, whichever is earlier
-                    startDate = new Date();
+                    startDate = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
                     startDate.setFullYear(startDate.getFullYear() - 2);
                     break;
             }
@@ -6306,7 +6322,8 @@ margin-right: 0.5rem;
         }
         
         function getCurrentMonth() {
-            const now = new Date();
+            // Hard-coded date for consistency: July 7, 2025
+            const now = new Date(2025, 6, 7); // Month is 0-indexed (6 = July)
             return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         }
         
@@ -6315,7 +6332,7 @@ margin-right: 0.5rem;
         }
         
         function isCurrentMonth() {
-            const now = new Date();
+            const now = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
             return selectedMonthDate.getMonth() === now.getMonth() && 
                    selectedMonthDate.getFullYear() === now.getFullYear();
         }
@@ -6346,7 +6363,7 @@ margin-right: 0.5rem;
             yearDropdown.innerHTML = '';
             
             // Generate years (2 years back to current year)
-            const currentYear = new Date().getFullYear();
+            const currentYear = new Date(2025, 6, 7).getFullYear(); // Hard-coded to July 7, 2025
             for (let year = currentYear - 2; year <= currentYear; year++) {
                 const option = document.createElement('option');
                 option.value = year;
@@ -6969,7 +6986,7 @@ margin-right: 0.5rem;
                 if (!datepickerStates[datepickerId]) {
                     initializeDatepicker(datepickerId);
                 }
-                const now = new Date();
+                const now = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
                 let defaultDate;
                 if (
                     selectedMonthDate.getFullYear() === now.getFullYear() &&
@@ -6997,7 +7014,7 @@ margin-right: 0.5rem;
                 initializeDatepicker(datepickerId);
             }
             // Set default date to today
-            const now = new Date();
+            const now = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
             const state = datepickerStates[datepickerId];
             state.selectedDate = now;
             state.currentMonth = now.getMonth();
@@ -7378,7 +7395,7 @@ margin-right: 0.5rem;
             }
             
             // Add test data button for development/testing
-            // addTestDataButton();
+            addTestDataButton();
         });
         
         function setupDropdownEventListeners() {
@@ -7448,7 +7465,7 @@ margin-right: 0.5rem;
         function updateCurrentDateDisplay() {
             const dateElement = document.getElementById('currentDate');
             if (dateElement) {
-                const now = new Date();
+                const now = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
                 const options = { 
                     weekday: 'long', 
                     year: 'numeric', 
@@ -8178,53 +8195,325 @@ margin-right: 0.5rem;
             const today = new Date();
             const januaryFirst = new Date(today.getFullYear(), 0, 1);
             
-            // Initialize test data structures
+            // Initialize test data structures with more account types
             const testBalances = {
                 checking: {},
                 savings: {},
-                emergency: {}
+                emergency: {},
+                investment: {},
+                retirement: {},
+                crypto: {}
             };
             
             const testExpenses = {};
             
-            // Generate balance data with realistic growth patterns
+            // Generate balance data with realistic growth patterns - limited to 3 entries per month per account
             let currentDate = new Date(januaryFirst);
-            let checkingBalance = 2500; // Starting balance
-            let savingsBalance = 8000; // Starting balance
-            let emergencyBalance = 3000; // Starting balance
+            
+            // Starting balances with more realistic values - ensure they start lower and increase over time
+            // Start with lower values to show growth over time
+            let checkingBalance = 1500 + Math.random() * 1000; // $1500-2500
+            let savingsBalance = 5000 + Math.random() * 2000; // $5000-7000
+            let emergencyBalance = 2000 + Math.random() * 1000; // $2000-3000
+            let investmentBalance = 10000 + Math.random() * 5000; // $10000-15000
+            let retirementBalance = 30000 + Math.random() * 15000; // $30000-45000
+            let cryptoBalance = 1000 + Math.random() * 1000; // $1000-2000
+            
+            // Set a steady growth rate for each account (monthly)
+            const growthRates = {
+                checking: 0.02 + Math.random() * 0.03, // 2-5% monthly growth
+                savings: 0.03 + Math.random() * 0.02,  // 3-5% monthly growth
+                emergency: 0.01 + Math.random() * 0.01, // 1-2% monthly growth
+                investment: 0.04 + Math.random() * 0.04, // 4-8% monthly growth
+                retirement: 0.03 + Math.random() * 0.03, // 3-6% monthly growth
+                crypto: 0.05 + Math.random() * 0.1  // 5-15% monthly growth (more volatile)
+            };
+            
+            // Market trend simulation - creates more realistic patterns
+            let marketTrend = 0; // Neutral market
+            let marketCycle = 0;
+            let cryptoVolatility = 1;
+            
+            // Paycheck dates - simulate bi-weekly payments
+            const paycheckDates = [];
+            let paycheckDate = new Date(januaryFirst);
+            // Start with first Friday in January
+            while (paycheckDate.getDay() !== 5) { // 5 is Friday
+                paycheckDate.setDate(paycheckDate.getDate() + 1);
+            }
+            // Generate bi-weekly paycheck dates
+            while (paycheckDate <= today) {
+                paycheckDates.push(new Date(paycheckDate));
+                paycheckDate.setDate(paycheckDate.getDate() + 14); // Every two weeks
+            }
+            
+            // Tax refund date - usually between February and April
+            const taxRefundMonth = 2 + Math.floor(Math.random() * 3); // February (2) to April (4)
+            const taxRefundDay = 5 + Math.floor(Math.random() * 20); // Between 5th and 25th
+            const taxRefundDate = new Date(today.getFullYear(), taxRefundMonth, taxRefundDay);
+            
+            // Holiday/bonus dates
+            const bonusDate = new Date(today.getFullYear(), 11, 15); // December 15th
+            
+            // Track how many entries we've created per month per account
+            const entriesPerMonth = {};
             
             while (currentDate <= today) {
                 const dateKey = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+                const month = currentDate.getMonth();
+                const year = currentDate.getFullYear();
+                const monthKey = `${year}-${month}`;
+                const dayOfMonth = currentDate.getDate();
                 
-                // Add some random balance updates (not every day)
-                if (Math.random() < 0.1) { // 10% chance of balance update
-                    // Simulate salary deposits and transfers
-                    if (Math.random() < 0.3) {
-                        checkingBalance += 2500 + Math.random() * 500; // Salary deposit
-                    }
-                    if (Math.random() < 0.2) {
-                        const transfer = 500 + Math.random() * 1000;
-                        checkingBalance -= transfer;
-                        savingsBalance += transfer;
-                    }
-                    if (Math.random() < 0.15) {
-                        const emergencyTransfer = 200 + Math.random() * 300;
-                        savingsBalance -= emergencyTransfer;
-                        emergencyBalance += emergencyTransfer;
-                    }
-                    
-                    // Add some spending from checking
-                    checkingBalance -= Math.random() * 200;
-                    
-                    // Add some interest to savings
-                    savingsBalance += savingsBalance * 0.001; // 0.1% monthly interest
-                    emergencyBalance += emergencyBalance * 0.0005; // 0.05% monthly interest
+                // Initialize entries counter for new month
+                if (!entriesPerMonth[monthKey]) {
+                    entriesPerMonth[monthKey] = {
+                        checking: 0,
+                        savings: 0,
+                        emergency: 0,
+                        investment: 0,
+                        retirement: 0,
+                        crypto: 0
+                    };
                 }
                 
-                // Record balances for this date
-                testBalances.checking[dateKey] = Math.round(checkingBalance);
-                testBalances.savings[dateKey] = Math.round(savingsBalance);
-                testBalances.emergency[dateKey] = Math.round(emergencyBalance);
+                // Update market trends periodically (creates realistic waves)
+                marketCycle += 0.1;
+                marketTrend = Math.sin(marketCycle) * 0.8; // -0.8 to 0.8 range
+                
+                // Periodically update crypto volatility
+                cryptoVolatility = 1 + Math.sin(marketCycle * 2) * 0.5; // 0.5 to 1.5 range
+                
+                // Check if today is a paycheck date
+                const isPayday = paycheckDates.some(date => 
+                    date.getFullYear() === currentDate.getFullYear() &&
+                    date.getMonth() === currentDate.getMonth() &&
+                    date.getDate() === currentDate.getDate()
+                );
+                
+                // Determine if we should record a balance update for this day
+                // Prioritize important dates: paydays, month start/end, and tax refund/bonus days
+                const isMonthStart = dayOfMonth === 1;
+                const isMonthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate() === dayOfMonth;
+                const isTaxRefundDay = currentDate.getFullYear() === taxRefundDate.getFullYear() && 
+                                      currentDate.getMonth() === taxRefundDate.getMonth() && 
+                                      currentDate.getDate() === taxRefundDate.getDate();
+                const isBonusDay = currentDate.getFullYear() === bonusDate.getFullYear() && 
+                                  currentDate.getMonth() === bonusDate.getMonth() && 
+                                  currentDate.getDate() === bonusDate.getDate();
+                
+                // Record these important days regardless of other factors
+                const isVeryImportantDay = isMonthStart || isMonthEnd || isPayday || isTaxRefundDay || isBonusDay;
+                
+                // For other days, calculate if we should record based on:
+                // 1. How many entries we already have this month
+                // 2. How much time has passed since the last recorded entry
+                // 3. How significant the balance changes have been
+                
+                // Track significant changes in balances (> 5% from previous day)
+                const significantChanges = {
+                    checking: Math.abs(checkingBalance - (testBalances.checking[getPreviousDateKey(dateKey)] || 0)) > checkingBalance * 0.05,
+                    savings: Math.abs(savingsBalance - (testBalances.savings[getPreviousDateKey(dateKey)] || 0)) > savingsBalance * 0.05,
+                    emergency: Math.abs(emergencyBalance - (testBalances.emergency[getPreviousDateKey(dateKey)] || 0)) > emergencyBalance * 0.05,
+                    investment: Math.abs(investmentBalance - (testBalances.investment[getPreviousDateKey(dateKey)] || 0)) > investmentBalance * 0.05,
+                    retirement: Math.abs(retirementBalance - (testBalances.retirement[getPreviousDateKey(dateKey)] || 0)) > retirementBalance * 0.05,
+                    crypto: Math.abs(cryptoBalance - (testBalances.crypto[getPreviousDateKey(dateKey)] || 0)) > cryptoBalance * 0.05
+                };
+                
+                // If there's a significant change in any account, we might want to record it
+                const hasSignificantChange = Object.values(significantChanges).some(change => change);
+                
+                // Higher chance of recording if we have fewer entries already
+                const entriesThisMonth = Object.values(entriesPerMonth[monthKey]).reduce((sum, count) => sum + count, 0);
+                const fewEntriesBoost = entriesThisMonth < 6 ? 0.15 : 0; // Boost chance if we have fewer than 6 total entries
+                
+                // Combine factors for a weighted decision
+                const shouldRecordToday = isVeryImportantDay || 
+                                        hasSignificantChange || 
+                                        Math.random() < (0.05 + fewEntriesBoost); // 5-20% chance
+                
+                // Check if we're still under the limit of 3 entries per month per account
+                const canAddMoreEntries = Object.values(entriesPerMonth[monthKey]).some(count => count < 3);
+                
+                // Helper function to get previous date key
+                function getPreviousDateKey(dateKey) {
+                    const date = new Date(dateKey);
+                    date.setDate(date.getDate() - 1);
+                    return date.toISOString().split('T')[0];
+                }
+                
+                // Regular daily simulation
+                // Add some balance updates for important days or based on our weighted decision
+                if (shouldRecordToday && canAddMoreEntries) { // Record if we should and still under limit
+                    // Simulate salary deposits on paydays
+                    if (isPayday) {
+                        const salary = 2500 + Math.random() * 500;
+                        checkingBalance += salary; // Salary deposit
+                        
+                        // Automatic transfers to savings and retirement on payday
+                        const savingsTransfer = salary * (0.1 + Math.random() * 0.1); // 10-20%
+                        const retirementTransfer = salary * (0.05 + Math.random() * 0.05); // 5-10%
+                        
+                        checkingBalance -= savingsTransfer;
+                        savingsBalance += savingsTransfer;
+                        
+                        checkingBalance -= retirementTransfer;
+                        retirementBalance += retirementTransfer;
+                    }
+                    
+                    // Random transfers between accounts
+                    if (Math.random() < 0.15) {
+                        const transfer = 500 + Math.random() * 1000;
+                        if (checkingBalance > transfer + 1000) { // Only if enough buffer
+                            checkingBalance -= transfer;
+                            savingsBalance += transfer;
+                        }
+                    }
+                    
+                    // Occasional emergency fund contributions
+                    if (Math.random() < 0.08) {
+                        const emergencyTransfer = 200 + Math.random() * 300;
+                        if (savingsBalance > emergencyTransfer + 1000) {
+                            savingsBalance -= emergencyTransfer;
+                            emergencyBalance += emergencyTransfer;
+                        }
+                    }
+                    
+                    // Random investment activity
+                    if (Math.random() < 0.1) {
+                        const investAmount = 500 + Math.random() * 1000;
+                        if (savingsBalance > investAmount + 2000) {
+                            savingsBalance -= investAmount;
+                            investmentBalance += investAmount;
+                        }
+                    }
+                    
+                    // Random crypto trading
+                    if (Math.random() < 0.05) {
+                        const cryptoAmount = 200 + Math.random() * 500;
+                        if (checkingBalance > cryptoAmount + 1000) {
+                            checkingBalance -= cryptoAmount;
+                            cryptoBalance += cryptoAmount;
+                        }
+                    }
+                    
+                    // Tax refund deposit
+                    if (currentDate.getFullYear() === taxRefundDate.getFullYear() && 
+                        currentDate.getMonth() === taxRefundDate.getMonth() && 
+                        currentDate.getDate() === taxRefundDate.getDate()) {
+                        const refundAmount = 1200 + Math.random() * 1800; // $1200-3000
+                        checkingBalance += refundAmount;
+                    }
+                    
+                    // Year-end bonus
+                    if (currentDate.getFullYear() === bonusDate.getFullYear() && 
+                        currentDate.getMonth() === bonusDate.getMonth() && 
+                        currentDate.getDate() === bonusDate.getDate()) {
+                        const bonusAmount = 3000 + Math.random() * 2000; // $3000-5000
+                        checkingBalance += bonusAmount;
+                    }
+                    
+                    // Add some daily spending from checking (more on weekends)
+                    const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+                    const dailySpending = isWeekend ? 
+                        (50 + Math.random() * 150) : // $50-200 on weekends
+                        (20 + Math.random() * 80);  // $20-100 on weekdays
+                    checkingBalance = Math.max(500, checkingBalance - dailySpending); // Keep minimum $500
+                    
+                    // Market fluctuations affect investment accounts
+                    const dailyMarketChange = marketTrend + (Math.random() * 0.02 - 0.01); // -0.01 to +0.01 + trend
+                    investmentBalance += investmentBalance * dailyMarketChange * 0.01; // Apply percentage change
+                    retirementBalance += retirementBalance * dailyMarketChange * 0.008; // Slightly less volatile
+                    
+                    // Crypto is even more volatile
+                    const cryptoChange = dailyMarketChange * 4 * cryptoVolatility;
+                    cryptoBalance += cryptoBalance * cryptoChange * 0.01;
+                    
+                    // Add some interest to savings and emergency fund
+                    // Higher interest during certain months (promotional rates)
+                    const interestMultiplier = (month === 1 || month === 7) ? 2 : 1; // Feb and Aug
+                    savingsBalance += savingsBalance * 0.0004 * interestMultiplier; // ~0.04% daily (APY ~1.5%)
+                    emergencyBalance += emergencyBalance * 0.0005 * interestMultiplier; // ~0.05% daily (APY ~1.8%)
+                }
+                
+                // Always ensure balances stay above minimum values
+                checkingBalance = Math.max(100, checkingBalance);
+                savingsBalance = Math.max(100, savingsBalance);
+                emergencyBalance = Math.max(100, emergencyBalance);
+                investmentBalance = Math.max(100, investmentBalance);
+                retirementBalance = Math.max(100, retirementBalance);
+                cryptoBalance = Math.max(10, cryptoBalance);
+                
+                // For each account, check previous entries this month and ensure new balance is different
+                const checkPreviousEntryDifferent = (accountType, currentBalance) => {
+                    // Get all dates with entries for this account in the current month
+                    const datesWithEntries = Object.keys(testBalances[accountType])
+                        .filter(date => date.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`));
+                    
+                    // Check if any previous entries have the same rounded balance value
+                    if (datesWithEntries.length > 0) {
+                        const roundedCurrentBalance = accountType.includes('investment') || accountType.includes('crypto') || accountType.includes('retirement')
+                            ? Math.round(currentBalance * 100) / 100  // Round to cents for investments
+                            : Math.round(currentBalance);              // Round to dollars for regular accounts
+                            
+                        // Check if this exact balance already exists
+                        const hasSameBalance = datesWithEntries.some(date => {
+                            return Math.abs(testBalances[accountType][date] - roundedCurrentBalance) < 0.01;
+                        });
+                        
+                        // If same balance exists, add a small random change (0.5%-2%)
+                        if (hasSameBalance) {
+                            const changeDirection = Math.random() > 0.5 ? 1 : -1;
+                            const changePercent = 0.005 + Math.random() * 0.015; // 0.5% to 2%
+                            return currentBalance * (1 + (changeDirection * changePercent));
+                        }
+                    }
+                    
+                    return currentBalance;
+                };
+                
+                // Record with realistic rounding - only add entries if we're under the limit of 3 per month per account
+                if (entriesPerMonth[monthKey].checking < 3) {
+                    // Ensure this entry is different from previous entries
+                    checkingBalance = checkPreviousEntryDifferent('checking', checkingBalance);
+                    testBalances.checking[dateKey] = Math.round(checkingBalance);
+                    entriesPerMonth[monthKey].checking++;
+                }
+                
+                if (entriesPerMonth[monthKey].savings < 3) {
+                    // Ensure this entry is different from previous entries
+                    savingsBalance = checkPreviousEntryDifferent('savings', savingsBalance);
+                    testBalances.savings[dateKey] = Math.round(savingsBalance);
+                    entriesPerMonth[monthKey].savings++;
+                }
+                
+                if (entriesPerMonth[monthKey].emergency < 3) {
+                    // Ensure this entry is different from previous entries
+                    emergencyBalance = checkPreviousEntryDifferent('emergency', emergencyBalance);
+                    testBalances.emergency[dateKey] = Math.round(emergencyBalance);
+                    entriesPerMonth[monthKey].emergency++;
+                }
+                
+                if (entriesPerMonth[monthKey].investment < 3) {
+                    // Ensure this entry is different from previous entries
+                    investmentBalance = checkPreviousEntryDifferent('investment', investmentBalance);
+                    testBalances.investment[dateKey] = Math.round(investmentBalance * 100) / 100;
+                    entriesPerMonth[monthKey].investment++;
+                }
+                
+                if (entriesPerMonth[monthKey].retirement < 3) {
+                    // Ensure this entry is different from previous entries
+                    retirementBalance = checkPreviousEntryDifferent('retirement', retirementBalance);
+                    testBalances.retirement[dateKey] = Math.round(retirementBalance * 100) / 100;
+                    entriesPerMonth[monthKey].retirement++;
+                }
+                
+                if (entriesPerMonth[monthKey].crypto < 3) {
+                    // Ensure this entry is different from previous entries
+                    cryptoBalance = checkPreviousEntryDifferent('crypto', cryptoBalance);
+                    testBalances.crypto[dateKey] = Math.round(cryptoBalance * 100) / 100;
+                    entriesPerMonth[monthKey].crypto++;
+                }
                 
                 // Generate expense data (not every day)
                 if (Math.random() < 0.7) { // 70% chance of expenses
@@ -8279,34 +8568,84 @@ margin-right: 0.5rem;
                     }
                 }
                 
-                // Move to next day
-                currentDate.setDate(currentDate.getDate() + 1);
+                // Count how many accounts have reached their maximum entries
+                const accountsWithMaxEntries = Object.values(entriesPerMonth[monthKey]).filter(count => count >= 3).length;
+                const totalAccounts = Object.keys(entriesPerMonth[monthKey]).length;
+                
+                // Skip ahead if we're close to the end of the month and have most accounts filled
+                // This balances between optimizing performance and ensuring good data distribution
+                const isLateInMonth = dayOfMonth > 20; // Later part of month
+                const mostAccountsFilled = accountsWithMaxEntries >= totalAccounts - 1; // All but one account filled
+                const shouldSkipToNextMonth = isLateInMonth && mostAccountsFilled;
+                
+                // If we're about to start a new month, apply monthly growth to all accounts
+                // This ensures consistent month-to-month growth for the "Saved this month" calculation
+                if (dayOfMonth === 1 || shouldSkipToNextMonth) {
+                    // Apply monthly growth rates to simulate consistent saving and investment returns
+                    checkingBalance *= (1 + growthRates.checking / 30); // Daily equivalent of monthly rate
+                    savingsBalance *= (1 + growthRates.savings / 30);
+                    emergencyBalance *= (1 + growthRates.emergency / 30);
+                    investmentBalance *= (1 + growthRates.investment / 30);
+                    retirementBalance *= (1 + growthRates.retirement / 30);
+                    cryptoBalance *= (1 + growthRates.crypto / 30);
+                }
+                
+                if (shouldSkipToNextMonth) {
+                    // Move to first day of next month
+                    currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+                } else {
+                    // Move to next day
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
             }
             
             // Save test data to localStorage
             localStorage.setItem('accountBalances', JSON.stringify(testBalances));
             localStorage.setItem('dailyExpenses', JSON.stringify(testExpenses));
             
-            // Initialize savings accounts if not already set
-            const existingAccounts = localStorage.getItem('savingsAccounts');
-            if (!existingAccounts) {
-                const defaultAccounts = [
-                    { id: 'checking', name: 'Checking', type: 'checking' },
-                    { id: 'savings', name: 'Savings', type: 'savings' },
-                    { id: 'emergency', name: 'Emergency Fund', type: 'emergency' }
-                ];
-                localStorage.setItem('savingsAccounts', JSON.stringify(defaultAccounts));
-            }
+            // Initialize or update savings accounts
+            const defaultAccounts = [
+                { id: 'checking', name: 'Checking', type: 'checking' },
+                { id: 'savings', name: 'Savings', type: 'savings' },
+                { id: 'emergency', name: 'Emergency Fund', type: 'emergency' },
+                { id: 'investment', name: 'Brokerage Account', type: 'investment' },
+                { id: 'retirement', name: '401(k)', type: 'retirement' },
+                { id: 'crypto', name: 'Crypto Portfolio', type: 'crypto' }
+            ];
+            
+            // Always update savings accounts when loading test data
+            localStorage.setItem('savingsAccounts', JSON.stringify(defaultAccounts));
+            // Update the global savingsAccounts variable to match
+            savingsAccounts = [...defaultAccounts];
             
             console.log('Test data loaded successfully!');
             console.log('Balance data:', testBalances);
+            console.log('Entries per month:', entriesPerMonth);
             console.log('Expense data sample:', Object.keys(testExpenses).slice(0, 5).map(date => ({ date, expenses: testExpenses[date] })));
             
-            // Refresh the display
-            updatePeriodView();
+            // Ensure all required functions are called to update the UI
+            updatePeriodView(); // This will call updateSaveScreen() internally
+            // Force update of all relevant UI components
+            updateSaveBalanceHistory();
+            updateSaveTotalSavingsDisplay(); // Make sure the total savings display is updated
+            updateSaveTargetDisplay(); // Update the saving target display
+            updateAccountList();
+            updateSlideOutAccountDropdown();
+            
             if (currentScreen === 1) {
                 updateChart();
             }
+            
+            // Log some useful information
+            console.log('Final account totals:');
+            Object.keys(testBalances).forEach(account => {
+                const dates = Object.keys(testBalances[account]).sort();
+                if (dates.length > 0) {
+                    const firstDate = dates[0];
+                    const lastDate = dates[dates.length - 1];
+                    console.log(`${account}: ${testBalances[account][firstDate]} → ${testBalances[account][lastDate]}`);
+                }
+            });
             
             // Show success message
             alert('Test data loaded successfully! Check the Reports screen to see the chart with comprehensive data from January to today.');
@@ -8388,22 +8727,36 @@ margin-right: 0.5rem;
                     progressLabel.textContent = 'Progress Today';
                 }
             } else {
-                // Monthly saving target
+                // Monthly saving target - use the value from settings
                 targetAmount = getMonthlySavingsTarget();
                 periodLabel = `${selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} Saving Target`;
                 description = 'monthly saving target';
                 
                 const progressLabel = document.getElementById('saveProgressLabel');
                 if (progressLabel) {
-                    progressLabel.textContent = 'Progress This Month';
+                    progressLabel.textContent = 'Saved this month';
                 }
             }
             
             // Calculate progress based on balance differences
             const { currentTotal, previousTotal, lastDate } = getSaveBalanceComparison();
+            // Calculate the amount saved - ensure it's never negative for display purposes
+            // For monthly view, this should show the amount saved since the previous month
             progressAmount = currentTotal - previousTotal;
-            // We don't need the percentage calculation anymore
+            
+            // For testing/debugging - log the values
+            console.log('Save comparison:', {
+                currentTotal,
+                previousTotal,
+                progressAmount,
+                targetAmount
+            });
+            
+            // Store the last balance date for reference
             lastBalanceDate = lastDate;
+            
+            // Calculate progress percentage against the target
+            progressPercentage = targetAmount > 0 ? (progressAmount / targetAmount) * 100 : 0;
             
             // Update display elements
             const saveTargetDescription = document.getElementById('saveTargetDescription');
@@ -8426,23 +8779,23 @@ margin-right: 0.5rem;
             
             // Update save status
             if (document.getElementById('saveStatusText')) {
-                const percentProgress = targetAmount > 0 ? (progressAmount / targetAmount) * 100 : 0;
+                // Use the calculated progressPercentage
                 let statusText = '';
                 let statusColor = '';
                 let cardBackgroundColor = '';
                 let amountColor = '';
                 
-                if (percentProgress >= 100) {
+                if (progressPercentage >= 100) {
                     statusText = 'Target Met!';
                     statusColor = 'hsl(156.06deg 40% 40%)'; // Green
                     cardBackgroundColor = 'hsl(156.06deg 40% 96%)'; // Light green background
                     amountColor = 'hsl(156.06deg 40% 20%)'; // Dark green text
-                } else if (percentProgress >= 75) {
+                } else if (progressPercentage >= 75) {
                     statusText = 'On Track';
                     statusColor = 'hsl(156.06deg 40% 40%)'; // Green
                     cardBackgroundColor = 'hsl(156.06deg 40% 96%)'; // Light green background
                     amountColor = 'hsl(156.06deg 40% 20%)'; // Dark green text
-                } else if (percentProgress >= 50) {
+                } else if (progressPercentage >= 50) {
                     statusText = 'Good Progress';
                     statusColor = 'hsl(38deg 92% 50%)'; // Orange
                     cardBackgroundColor = 'hsl(38deg 92% 96%)'; // Light orange background
@@ -8467,7 +8820,7 @@ margin-right: 0.5rem;
                 }
             }
             
-            // Update progress label to simply say "Saved this month"
+            // Update progress label to show appropriate context
             const progressLabel = document.getElementById('saveProgressLabel');
             if (progressLabel) {
                 if (currentSavePeriodMode === 'today') {
@@ -8475,7 +8828,18 @@ margin-right: 0.5rem;
                     const lastDateFormatted = lastDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                     progressLabel.textContent = `Today vs ${lastDateFormatted}`;
                 } else {
+                    // For monthly mode, show "Saved this month"
                     progressLabel.textContent = `Saved this month`;
+                    
+                    // Also update the comparison text to show which month we're comparing with
+                    const previousMonth = new Date(selectedSaveMonthDate);
+                    previousMonth.setMonth(previousMonth.getMonth() - 1);
+                    const previousMonthName = previousMonth.toLocaleDateString('en-US', { month: 'long' });
+                    
+                    const saveComparisonLabel = document.getElementById('saveComparisonLabel');
+                    if (saveComparisonLabel) {
+                        saveComparisonLabel.textContent = `since ${previousMonthName}`;
+                    }
                 }
             }
         }
@@ -8533,67 +8897,116 @@ margin-right: 0.5rem;
                 // For daily mode, use the same logic as regular comparison
                 return getBalanceComparison();
             } else {
-                // For monthly mode, get the latest balance for the selected month
+                // For monthly mode, calculate the total amount saved during the selected month
                 const selectedMonthKey = getSelectedSaveMonthKey();
                 let currentTotal = 0;
                 let lastDate = '';
                 
-                // Get the latest balance for the selected month
+                // Calculate total balance at the end of the selected month
+                let totalEndOfMonth = 0;
+                let totalStartOfMonth = 0;
+                
+                // Process each account
                 Object.keys(balances).forEach(accountId => {
                     const accountBalances = balances[accountId] || {};
+                    
+                    // Get all balances for the selected month
                     const monthBalances = Object.keys(accountBalances)
                         .filter(date => date.startsWith(selectedMonthKey))
-                        .sort()
-                        .reverse();
+                        .sort();
                     
+                    // Get the last balance for the current month
                     if (monthBalances.length > 0) {
-                        const latestBalance = accountBalances[monthBalances[0]];
+                        const latestDate = monthBalances[monthBalances.length - 1];
+                        const latestBalance = accountBalances[latestDate];
+                        
                         // Handle both old format (direct number) and new format (object with amount)
                         const amount = latestBalance && typeof latestBalance === 'object' ? 
                             latestBalance.amount : latestBalance;
                             
                         if (typeof amount === 'number' && !isNaN(amount)) {
-                            currentTotal += amount;
+                            totalEndOfMonth += amount;
                         }
                         
-                        if (!lastDate || monthBalances[0] > lastDate) {
-                            lastDate = monthBalances[0];
+                        if (!lastDate || latestDate > lastDate) {
+                            lastDate = latestDate;
+                        }
+                    }
+                    
+                    // Get the first balance of the month or last balance of previous month
+                    // First try to find the earliest balance of the current month
+                    if (monthBalances.length > 0) {
+                        const earliestDate = monthBalances[0];
+                        const earliestBalance = accountBalances[earliestDate];
+                        
+                        const amount = earliestBalance && typeof earliestBalance === 'object' ? 
+                            earliestBalance.amount : earliestBalance;
+                            
+                        if (typeof amount === 'number' && !isNaN(amount)) {
+                            totalStartOfMonth += amount;
+                        }
+                    } else {
+                        // If no balances for current month, try to find the latest balance from previous month
+                        const previousMonth = new Date(selectedSaveMonthDate);
+                        previousMonth.setMonth(previousMonth.getMonth() - 1);
+                        const previousMonthKey = `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, '0')}`;
+                        
+                        const previousMonthBalances = Object.keys(accountBalances)
+                            .filter(date => date.startsWith(previousMonthKey))
+                            .sort()
+                            .reverse();
+                            
+                        if (previousMonthBalances.length > 0) {
+                            const latestPrevBalance = accountBalances[previousMonthBalances[0]];
+                            const amount = latestPrevBalance && typeof latestPrevBalance === 'object' ? 
+                                latestPrevBalance.amount : latestPrevBalance;
+                                
+                            if (typeof amount === 'number' && !isNaN(amount)) {
+                                totalStartOfMonth += amount;
+                            }
                         }
                     }
                 });
                 
-                // Get the previous month's balance for comparison
+                // Calculate the amount saved during the current month
+                currentTotal = totalEndOfMonth;
+                
+                // Get the previous month's total for comparison
                 const previousMonth = new Date(selectedSaveMonthDate);
                 previousMonth.setMonth(previousMonth.getMonth() - 1);
                 const previousMonthKey = `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, '0')}`;
                 
                 let previousTotal = 0;
-                let previousLastDate = '';
                 
+                // Calculate the total at the end of the previous month
                 Object.keys(balances).forEach(accountId => {
                     const accountBalances = balances[accountId] || {};
                     const previousMonthBalances = Object.keys(accountBalances)
                         .filter(date => date.startsWith(previousMonthKey))
-                        .sort()
-                        .reverse();
-                    
+                        .sort();
+                        
                     if (previousMonthBalances.length > 0) {
-                        const latestBalance = accountBalances[previousMonthBalances[0]];
-                        // Handle both old format (direct number) and new format (object with amount)
+                        const latestDate = previousMonthBalances[previousMonthBalances.length - 1];
+                        const latestBalance = accountBalances[latestDate];
+                        
                         const amount = latestBalance && typeof latestBalance === 'object' ? 
                             latestBalance.amount : latestBalance;
                             
                         if (typeof amount === 'number' && !isNaN(amount)) {
                             previousTotal += amount;
                         }
-                        
-                        if (!previousLastDate || previousMonthBalances[0] > previousLastDate) {
-                            previousLastDate = previousMonthBalances[0];
-                        }
                     }
                 });
                 
-                // Make sure we're returning the latest date from the current month, not previous month
+                // Log for debugging
+                console.log('Month comparison:', { 
+                    selectedMonth: selectedMonthKey, 
+                    previousMonth: previousMonthKey,
+                    currentTotal, 
+                    previousTotal,
+                    change: currentTotal - previousTotal
+                });
+                
                 return { currentTotal, previousTotal, lastDate };
             }
         }
@@ -8640,29 +9053,154 @@ margin-right: 0.5rem;
             
             return date.toISOString().split('T')[0];
         }
+        
+        // Get the most recent balance date for the selected month
+        function getMostRecentBalanceDate() {
+            try {
+                const balances = loadAccountBalances();
+                
+                // For the current/selected month
+                let year, month;
+                if (currentSavePeriodMode === 'today') {
+                    const today = new Date();
+                    year = today.getFullYear();
+                    month = today.getMonth();
+                } else {
+                    year = selectedSaveMonthDate.getFullYear();
+                    month = selectedSaveMonthDate.getMonth();
+                }
+                
+                // Get the start and end of the month
+                const startDate = new Date(year, month, 1);
+                const endDate = new Date(year, month + 1, 0);
+                
+                console.log('getMostRecentBalanceDate', { 
+                    mode: currentSavePeriodMode,
+                    year: year,
+                    month: month,
+                    startDate: startDate.toISOString().split('T')[0], 
+                    endDate: endDate.toISOString().split('T')[0] 
+                });
+                
+                // Find all balance dates within this month across all accounts
+                let allDatesInMonth = [];
+                
+                if (balances && typeof balances === 'object') {
+                    Object.keys(balances).forEach(accountId => {
+                        const accountBalances = balances[accountId] || {};
+                        
+                        Object.keys(accountBalances).forEach(dateStr => {
+                            try {
+                                const balanceDate = new Date(dateStr);
+                                if (balanceDate >= startDate && balanceDate <= endDate) {
+                                    allDatesInMonth.push(dateStr);
+                                }
+                            } catch (e) {
+                                console.error('Error processing date:', dateStr, e);
+                            }
+                        });
+                    });
+                }
+                
+                console.log('All dates with balance data this month:', allDatesInMonth);
+                
+                // If there are no dates, return 'No data'
+                if (allDatesInMonth.length === 0) {
+                    console.log('No balance dates found for this month');
+                    return 'No data';
+                }
+                
+                // Sort dates to find the most recent
+                allDatesInMonth.sort((a, b) => new Date(b) - new Date(a));
+                
+                // Format the most recent date nicely
+                const mostRecentDate = new Date(allDatesInMonth[0]);
+                const formattedDate = mostRecentDate.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                });
+                
+                console.log('Most recent balance date:', formattedDate);
+                return formattedDate;
+            } catch (error) {
+                console.error('Error in getMostRecentBalanceDate:', error);
+                return 'No data';
+            }
+        }
 
         // Update save screen total savings display
         function updateSaveTotalSavingsDisplay() {
             const balances = loadAccountBalances();
             
+            // Update the "Last updated" note with the most recent balance date for the selected month
+            const lastUpdatedNote = document.getElementById('lastUpdatedNote');
+            if (lastUpdatedNote) {
+                console.log('Updating last updated note...');
+                try {
+                    // Check if the function is defined first
+                    if (typeof getMostRecentBalanceDate === 'function') {
+                        const mostRecentDate = getMostRecentBalanceDate();
+                        console.log('Got most recent date for display:', mostRecentDate);
+                        // Only show the note if there is actual data for the selected month
+                        if (mostRecentDate !== 'No data') {
+                            lastUpdatedNote.textContent = `Last updated: ${mostRecentDate}`;
+                            lastUpdatedNote.style.display = 'block'; // Show the note
+                            console.log('Showing last updated note:', lastUpdatedNote.textContent);
+                        } else {
+                            lastUpdatedNote.style.display = 'none'; // Hide the note
+                            console.log('Hiding last updated note - no data for this month');
+                        }
+                    } else {
+                        console.error('getMostRecentBalanceDate function not defined');
+                        lastUpdatedNote.style.display = 'none'; // Hide the note if function not available
+                    }
+                } catch (error) {
+                    console.error('Error getting most recent balance date:', error);
+                    lastUpdatedNote.style.display = 'none'; // Hide the note on error
+                }
+            }
+            
+            // Calculate the actual current total of all accounts
+            // This gets the latest balance for each account regardless of date
+            let actualTotalBalance = 0;
+            Object.keys(balances).forEach(accountId => {
+                const latestBalance = getLastBalanceForAccount(accountId);
+                if (latestBalance && typeof latestBalance.amount === 'number') {
+                    actualTotalBalance += latestBalance.amount;
+                }
+            });
+            
+            // Log individual account balances for verification
+            console.log('Individual latest account balances:');
+            Object.keys(balances).forEach(accountId => {
+                const latestBalance = getLastBalanceForAccount(accountId);
+                const accountInfo = savingsAccounts.find(acc => acc.id === accountId) || { name: 'Unknown Account' };
+                if (latestBalance && typeof latestBalance.amount === 'number') {
+                    console.log(`- ${accountInfo.name} (${accountId}): ${formatCurrency(latestBalance.amount)}`);
+                }
+            });
+            
+            // Always display the actual total balance (sum of latest account balances)
+            const saveTotalAccountBalance = document.getElementById('saveTotalAccountBalance');
+            if (saveTotalAccountBalance) {
+                saveTotalAccountBalance.textContent = formatCurrency(actualTotalBalance);
+            }
+            
+            // For comparison and change calculation
+            const saveTotalBalanceChange = document.getElementById('saveTotalBalanceChange');
+            
             if (currentSavePeriodMode === 'today') {
                 // For today mode, use current date
-                const today = getCurrentDate();
-                const currentTotal = getTotalBalanceForDate(balances, today);
                 const { previousTotal, lastDate } = getBalanceComparison();
-                const balanceChange = currentTotal - previousTotal;
-                const balanceChangePercentage = previousTotal > 0 ? (balanceChange / previousTotal) * 100 : 0;
+                const balanceChange = actualTotalBalance - previousTotal;
                 
-                // Update save screen balance display
-                const saveTotalAccountBalance = document.getElementById('saveTotalAccountBalance');
-                const saveTotalBalanceChange = document.getElementById('saveTotalBalanceChange');
-                
-                if (saveTotalAccountBalance) {
-                    saveTotalAccountBalance.textContent = formatCurrency(currentTotal);
-                }
                 if (saveTotalBalanceChange) {
-                    saveTotalBalanceChange.textContent = 'Total Balance';
-                    saveTotalBalanceChange.className = 'balance-change-modern';
+                    // Show the change since yesterday with a plus/minus sign
+                    const sign = balanceChange >= 0 ? '+' : '';
+                    saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)} since yesterday`;
+                    saveTotalBalanceChange.className = balanceChange >= 0 ? 
+                        'balance-change-modern positive' : 'balance-change-modern negative';
                 }
                 
                 // Update the date display
@@ -8671,32 +9209,23 @@ margin-right: 0.5rem;
                     const today = new Date();
                     saveBalanceDate.textContent = today.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                 }
+                
+                console.log('Today total:', { actualTotalBalance, previousTotal, balanceChange });
             } else {
                 // For monthly mode, use selected month data
                 const { currentTotal, previousTotal, lastDate } = getSaveBalanceComparison();
-                const balanceChange = currentTotal - previousTotal;
-                
-                // Only calculate percentage if we have valid previous data
-                let balanceChangePercentage = 0;
-                let percentageText = '';
-                
-                if (previousTotal > 0 && !isNaN(previousTotal)) {
-                    balanceChangePercentage = (balanceChange / previousTotal) * 100;
-                    const sign = balanceChange >= 0 ? '+' : '';
-                    percentageText = ` (${sign}${balanceChangePercentage.toFixed(1)}%)`;
-                }
-                
-                // Update save screen balance display
-                const saveTotalAccountBalance = document.getElementById('saveTotalAccountBalance');
-                const saveTotalBalanceChange = document.getElementById('saveTotalBalanceChange');
-                
-                if (saveTotalAccountBalance) {
-                    saveTotalAccountBalance.textContent = formatCurrency(currentTotal);
-                }
+                const balanceChange = actualTotalBalance - previousTotal;
                 
                 if (saveTotalBalanceChange) {
-                    saveTotalBalanceChange.textContent = 'Total Balance';
-                    saveTotalBalanceChange.className = 'balance-change-modern';
+                    // Show the change since previous month with a plus/minus sign
+                    const sign = balanceChange >= 0 ? '+' : '';
+                    // Get the previous month name for display
+                    const prevMonth = new Date(selectedSaveMonthDate);
+                    prevMonth.setMonth(prevMonth.getMonth() - 1);
+                    const prevMonthName = prevMonth.toLocaleDateString('en-US', { month: 'long' });
+                    saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)} since ${prevMonthName}`;
+                    saveTotalBalanceChange.className = balanceChange >= 0 ? 
+                        'balance-change-modern positive' : 'balance-change-modern negative';
                 }
                 
                 // Update the date display
@@ -8705,6 +9234,8 @@ margin-right: 0.5rem;
                     const selectedMonthName = selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long' });
                     saveBalanceDate.textContent = selectedMonthName;
                 }
+                
+                console.log('Month total:', { actualTotalBalance, currentTotal, previousTotal, balanceChange });
             }
             
             // Update save screen balance history
@@ -8724,11 +9255,22 @@ margin-right: 0.5rem;
             previousMonth.setMonth(previousMonth.getMonth() - 1);
             const previousMonthKey = `${previousMonth.getFullYear()}-${String(previousMonth.getMonth() + 1).padStart(2, '0')}`;
 
+            // Ensure savingsAccounts is initialized
+            if (!savingsAccounts || savingsAccounts.length === 0) {
+                const savedAccounts = localStorage.getItem('savingsAccounts');
+                if (savedAccounts) {
+                    savingsAccounts = JSON.parse(savedAccounts);
+                }
+            }
+            
+            console.log('savingsAccounts:', savingsAccounts);
+            console.log('balances:', balances);
+
             // Prepare grouped data
             const grouped = {};
             savingsAccounts.forEach(account => {
                 const accountBalances = balances[account.id] || {};
-                // Get all updates for the selected month, sort by created
+                // Get all updates for the selected month, sort by date (chronologically, not alphabetically)
                 const monthUpdates = Object.keys(accountBalances)
                     .filter(date => date.startsWith(selectedMonthKey))
                     .map(date => {
@@ -8741,13 +9283,8 @@ margin-right: 0.5rem;
                         };
                     })
                     .sort((a, b) => {
-                        const createdA = a.created || new Date(a.date).getTime();
-                        const createdB = b.created || new Date(b.date).getTime();
-                        if (createdA !== createdB) {
-                            return createdB - createdA; // Most recent first
-                        }
-                        // If created timestamps are the same, use date for stable ordering (descending)
-                        return b.date.localeCompare(a.date);
+                        // Sort by date (most recent first)
+                        return new Date(b.date) - new Date(a.date);
                     });
                 // Get last value from previous month
                 const prevMonthDates = Object.keys(accountBalances)
@@ -8769,12 +9306,15 @@ margin-right: 0.5rem;
                 const { name, monthUpdates, prevMonthLastValue } = grouped[accountId];
                 if (monthUpdates.length === 0) return; // Only show accounts with data
                 anyData = true;
-                // Latest value for the selected month
-                const latest = monthUpdates[monthUpdates.length - 1];
+                // Latest value for the selected month (should be first in the array since we sorted by date descending)
+                const latest = monthUpdates[0];
+                console.log(`Latest balance for ${name} (${accountId}): ${formatCurrency(latest.amount)} on ${latest.date}`);
                 // Calculate all-time percent (from first ever value)
                 const accountBalances = balances[accountId] || {};
-                const allDates = Object.keys(accountBalances).sort();
-                const firstValue = allDates.length > 0 ? accountBalances[allDates[0]] : 0;
+                const allDates = Object.keys(accountBalances).sort(); // Sort chronologically
+                const firstValue = allDates.length > 0 ? 
+                    (accountBalances[allDates[0]].amount !== undefined ? 
+                        accountBalances[allDates[0]].amount : accountBalances[allDates[0]]) : 0;
                 const allTimePercent = firstValue && latest.amount ? ((latest.amount - firstValue) / firstValue) * 100 : 0;
                 // Accordion header: account name, latest value
                 html += `<div class="modern-account-accordion" data-account-id="${accountId}">
@@ -8911,9 +9451,17 @@ margin-right: 0.5rem;
                 return { amount: 0 }; // No balance records for this account
             }
             
-            // Get all dates for this account and sort them (newest first)
-            const dates = Object.keys(accountBalances).sort().reverse();
+            // Get all dates for this account and sort them chronologically (newest first)
+            const dates = Object.keys(accountBalances).sort((a, b) => {
+                // Sort dates in descending order (newest first)
+                return new Date(b) - new Date(a);
+            });
+            
+            // Get the latest balance (first in the sorted array)
             const lastBalance = accountBalances[dates[0]];
+            
+            // Log for debugging
+            console.log(`Latest balance for account ${accountId}: ${JSON.stringify(lastBalance)} on date ${dates[0]}`);
             
             // Handle both old format (direct number) and new format (object with amount)
             if (lastBalance === null || lastBalance === undefined) {
@@ -9664,6 +10212,10 @@ margin-right: 0.5rem;
         }
         
         function saveBudgetSettings() {
+            // Calculate monthly savings target first
+            const annualSavingsGoal = parseFloat(document.getElementById('budgetAnnualSavingsGoal').value) || 0;
+            const monthlySavingsTarget = annualSavingsGoal / 12;
+            
             const settings = {
                 grossYearlyIncome: parseFloat(document.getElementById('budgetGrossYearlyIncome').value) || 0,
                 province: document.getElementById('budgetProvinceValue').textContent,
@@ -9672,13 +10224,17 @@ margin-right: 0.5rem;
                 provincialTax: parseFloat(document.getElementById('budgetProvincialTax').value) || 0,
                 cppEi: parseFloat(document.getElementById('budgetCppEi').value) || 0,
                 netIncome: parseFloat(document.getElementById('budgetNetIncome').value) || 0,
-                annualSavingsGoal: parseFloat(document.getElementById('budgetAnnualSavingsGoal').value) || 0,
+                annualSavingsGoal: annualSavingsGoal,
+                monthlySavingsTarget: monthlySavingsTarget, // Save monthly savings target
                 fixedExpenses: parseFloat(document.getElementById('budgetFixedExpenses').value) || 0,
                 essentialExpenses: parseFloat(document.getElementById('budgetEssentialExpenses').value) || 0,
                 discretionaryExpenses: parseFloat(document.getElementById('budgetDiscretionaryExpenses').value) || 0
             };
             
             localStorage.setItem('simpleBudgetSettings', JSON.stringify(settings));
+            
+            // Update the save target display after saving
+            updateSaveTargetDisplay();
             
             // Update the main app's budget display
             updateBudgetDisplay();
