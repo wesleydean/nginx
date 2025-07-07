@@ -4160,7 +4160,7 @@ margin-right: 0.5rem;
             margin-top: 0; 
             margin-bottom: 10px; 
             text-align: left;  
-            display: none;
+            display: block; /* Always visible */
         }
 
     
@@ -4394,7 +4394,7 @@ margin-right: 0.5rem;
                             <h3 class="card-title">
                                 Account Balances
                                  <div class="last-updated-note" id="lastUpdatedNote">
-                            Last updated: loading...
+                            Loading...
                         </div>
                             </h3>
                             <button class="btn btn-outline btn-sm" onclick="showAccountManagementModal()" style="border-radius: 20px;">
@@ -9114,11 +9114,13 @@ margin-right: 0.5rem;
                 allDatesInMonth.sort((a, b) => new Date(b) - new Date(a));
                 
                 // Format the most recent date nicely
-                const mostRecentDate = new Date(allDatesInMonth[0]);
+                // Parse the date in UTC to prevent timezone issues
+                const mostRecentDate = new Date(allDatesInMonth[0] + 'T00:00:00Z');
                 const formattedDate = mostRecentDate.toLocaleDateString('en-US', { 
                     month: 'short', 
                     day: 'numeric', 
-                    year: 'numeric' 
+                    year: 'numeric',
+                    timeZone: 'UTC' // Ensure consistent date display regardless of local timezone
                 });
                 
                 console.log('Most recent balance date:', formattedDate);
@@ -9133,31 +9135,26 @@ margin-right: 0.5rem;
         function updateSaveTotalSavingsDisplay() {
             const balances = loadAccountBalances();
             
-            // Update the "Last updated" note with the most recent balance date for the selected month
+            // Update the "Last updated" note with the actual last balance date
             const lastUpdatedNote = document.getElementById('lastUpdatedNote');
             if (lastUpdatedNote) {
-                console.log('Updating last updated note...');
-                try {
-                    // Check if the function is defined first
-                    if (typeof getMostRecentBalanceDate === 'function') {
-                        const mostRecentDate = getMostRecentBalanceDate();
-                        console.log('Got most recent date for display:', mostRecentDate);
-                        // Only show the note if there is actual data for the selected month
-                        if (mostRecentDate !== 'No data') {
-                            lastUpdatedNote.textContent = `Last updated: ${mostRecentDate}`;
-                            lastUpdatedNote.style.display = 'block'; // Show the note
-                            console.log('Showing last updated note:', lastUpdatedNote.textContent);
-                        } else {
-                            lastUpdatedNote.style.display = 'none'; // Hide the note
-                            console.log('Hiding last updated note - no data for this month');
-                        }
+                console.log('Updating last updated note with actual date...');
+                // Check if the function is defined first
+                if (typeof getMostRecentBalanceDate === 'function') {
+                    const mostRecentDate = getMostRecentBalanceDate();
+                    console.log('Got most recent date for display:', mostRecentDate);
+                    // Only show the note if there is actual data
+                    if (mostRecentDate !== 'No data') {
+                        lastUpdatedNote.textContent = `Last updated: ${mostRecentDate}`;
+                        lastUpdatedNote.style.display = 'block'; // Show the note
+                        console.log('Showing last updated note:', lastUpdatedNote.textContent);
                     } else {
-                        console.error('getMostRecentBalanceDate function not defined');
-                        lastUpdatedNote.style.display = 'none'; // Hide the note if function not available
+                        lastUpdatedNote.style.display = 'none'; // Hide the note if no data
+                        console.log('Hiding last updated note - no data available');
                     }
-                } catch (error) {
-                    console.error('Error getting most recent balance date:', error);
-                    lastUpdatedNote.style.display = 'none'; // Hide the note on error
+                } else {
+                    console.error('getMostRecentBalanceDate function not defined');
+                    lastUpdatedNote.style.display = 'none'; // Hide the note if function not available
                 }
             }
             
