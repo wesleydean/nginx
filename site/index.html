@@ -3803,12 +3803,14 @@
 
 /* Modern Wealthsimple-style Account Accordion Styles */
 .modern-account-accordion {
-    border: none;
-    border-radius: 18px;
     background: #fff;
     box-shadow: none;
     transition: none;
     margin-bottom: 0.8rem;
+    border-bottom: 1px solid #eeeeee;
+}
+.modern-account-accordion.expanded {
+    border-bottom: none;
 }
 .modern-account-accordion-header {
   display: flex;
@@ -8856,12 +8858,16 @@ margin-right: 0.5rem;
         function toggleAccountAccordion(accountId) {
             const body = document.getElementById(`accordion-body-${accountId}`);
             const chevron = document.getElementById(`chevron-${accountId}`);
+            const accordion = document.querySelector(`.modern-account-accordion[data-account-id='${accountId}']`);
             const header = document.querySelector(`.modern-account-accordion[data-account-id='${accountId}'] .modern-account-accordion-header`);
             // Remove any inline styles that might have been set
             if (body) {
                 body.style.display = '';
                 body.style.maxHeight = '';
                 body.style.opacity = '';
+            }
+            if(accordion) {
+                accordion.classList.toggle('expanded');
             }
             if (body.classList.contains('expanded')) {
                 body.classList.remove('expanded');
