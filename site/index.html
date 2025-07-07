@@ -1716,14 +1716,26 @@
         
         /* Enhanced Wealthsimple-style chart header */
         .chart-container-wrapper {
-            margin-top: 20px;
-            padding-top: 10px;
             position: relative;
             overflow: hidden; /* Prevent wrapper overflow */
         }
         
+        /* Chart date display - visible when interacted with */
+        .chart-date-display {
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 1rem;
+            color: hsl(var(--foreground));
+            height: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+        
+        .chart-date-display.visible {
+            opacity: 1;
+        }
+        
         .chart-header {
-            margin-bottom: 24px;
             padding: 0 6px;
         }
         
@@ -1734,6 +1746,13 @@
         
         .chart-row:last-child {
             margin-bottom: 0;
+        }
+
+        .chart-date-display {
+            display: flex;
+            font-weight: 600;
+            color: #6B7280; 
+            margin-bottom: 15px;
         }
         
         /* Savings row styling (black) */
@@ -1747,14 +1766,16 @@
         }
         
         .savings-row .chart-subtitle {
-            font-size: 1rem;
-            color: hsl(var(--muted-foreground));
+            color: black; /* Gray color for spending */
+           letter-spacing: 0.07rem;
+            text-transform: uppercase;
+            font-size: 0.9rem;
             margin-bottom: 8px;
-            font-weight: 500;
+            font-weight: 600;
         }
         
         .savings-row .chart-growth {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
             padding: 4px 0;
             margin-bottom: 8px;
@@ -1762,7 +1783,7 @@
         
         /* Spending row styling (gray) */
         .spending-row .chart-main-value {
-            font-size: 2rem;
+            font-size: 1.7rem;
             font-weight: 600;
             color: #6B7280; /* Gray color for spending */
             margin-bottom: 4px;
@@ -1771,10 +1792,12 @@
         }
         
         .spending-row .chart-subtitle {
+            color: black; /* Gray color for spending */
+            letter-spacing: 0.07rem;
+            text-transform: uppercase;
             font-size: 0.9rem;
-            color: #9CA3AF; /* Lighter gray for subtitle */
             margin-bottom: 8px;
-            font-weight: 500;
+            font-weight: 600;
         }
         
         .spending-row .chart-growth {
@@ -4421,18 +4444,21 @@ margin-right: 0.5rem;
                     <div class="chart-container-wrapper">
                         <!-- Chart Header with Two Rows: Savings and Spending -->
                         <div class="chart-header">
+                             <!-- Date display that shows when chart is interacted with -->
+                            <div class="chart-date-display" id="chartDateDisplay">
+                                <span class="chart-selected-date">July 6, 2025</span>
+                            </div>
                             <!-- Savings Row (Black) -->
                             <div class="chart-row savings-row">
-                                <div class="chart-subtitle" id="chartSubtitle">Total Savings</div>
+                                <div class="chart-subtitle" id="chartSubtitle">Saved</div>
                                 <div class="chart-main-value" id="chartMainValue">$0.00</div>
                                 <div class="chart-growth" id="chartGrowth">+$0.00 (+0%)</div>
                             </div>
                             
                             <!-- Spending Row (Gray) -->
                             <div class="chart-row spending-row">
-                                <div class="chart-subtitle spending" id="chartSpendingSubtitle">Total Spending</div>
+                                <div class="chart-subtitle spending" id="chartSpendingSubtitle">Spent</div>
                                 <div class="chart-main-value spending" id="chartSpendingValue">$0.00</div>
-                                <div class="chart-growth spending" id="chartSpendingGrowth">+$0.00 (+0%)</div>
                             </div>
                         </div>
                         
@@ -5726,7 +5752,7 @@ margin-right: 0.5rem;
             
             // Format dates for labels and lookup
             const labels = dates.map(date => {
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             });
             
             const dateKeys = dates.map(date => {
@@ -5830,7 +5856,8 @@ margin-right: 0.5rem;
             const chartGrowth = document.getElementById('chartGrowth');
             const chartSpendingValue = document.getElementById('chartSpendingValue');
             const chartSpendingSubtitle = document.getElementById('chartSpendingSubtitle');
-            const chartSpendingGrowth = document.getElementById('chartSpendingGrowth');
+            // chartSpendingGrowth removed - no longer displaying spending growth
+            const chartDateDisplay = document.getElementById('chartDateDisplay');
 
             /**
              * Updates chart header for a given index showing both savings and spending values.
@@ -5838,33 +5865,45 @@ margin-right: 0.5rem;
              */
             function updateChartHeader(index) {
                 if (!chartMainValue || !chartSubtitle || !chartGrowth || 
-                    !chartSpendingValue || !chartSpendingSubtitle || !chartSpendingGrowth) return;
+                    !chartSpendingValue || !chartSpendingSubtitle) return;
                 
                 const saved = savingsData[index];
                 const spent = spendingData[index];
                 const dateLabel = labels[index];
                 
+                // Update date display at the top
+                if (chartDateDisplay) {
+                    chartDateDisplay.innerHTML = `<span class="chart-selected-date">${dateLabel}</span>`;
+                    chartDateDisplay.classList.add('visible');
+                }
+                
                 // Update savings row
                 chartMainValue.textContent = formatCurrency(saved);
-                chartSubtitle.textContent = `${dateLabel} • Total Savings`;
+                chartSubtitle.textContent = `Saved`;
                 
                 // Calculate savings growth from start to this point
                 const savingsGrowthToDate = saved - initialSavings;
                 const savingsGrowthPercentToDate = initialSavings > 0 ? (savingsGrowthToDate / initialSavings) * 100 : 0;
                 const savingsGrowthPrefix = savingsGrowthToDate >= 0 ? '+' : '';
-                chartGrowth.textContent = `${savingsGrowthPrefix}${formatCurrency(savingsGrowthToDate)} (${savingsGrowthPrefix}${savingsGrowthPercentToDate.toFixed(1)}%)`;
+                
+                // Add period context for interactive view as well
+                let periodText = '';
+                switch (currentChartPeriod) {
+                    case '1M': periodText = 'since last month'; break;
+                    case '3M': periodText = 'past 3 months'; break;
+                    case '6M': periodText = 'past 6 months'; break;
+                    case 'YTD': periodText = 'year to date'; break;
+                    case '1Y': periodText = 'past year'; break;
+                    case 'ALL': periodText = 'all time'; break;
+                    default: periodText = 'all time';
+                }
+                
+                chartGrowth.textContent = `${savingsGrowthPrefix}${formatCurrency(savingsGrowthToDate)} (${savingsGrowthPrefix}${savingsGrowthPercentToDate.toFixed(1)}%) ${periodText}`;
                 chartGrowth.className = 'chart-growth ' + (savingsGrowthToDate >= 0 ? 'positive' : 'negative');
                 
-                // Update spending row
+                // Update spending row - just show current value
                 chartSpendingValue.textContent = formatCurrency(spent);
-                chartSpendingSubtitle.textContent = `${dateLabel} • Total Spending`;
-                
-                // Calculate spending growth from start to this point
-                const spendingGrowthToDate = spent - initialSpending;
-                const spendingGrowthPercentToDate = initialSpending > 0 ? (spendingGrowthToDate / initialSpending) * 100 : 0;
-                const spendingGrowthPrefix = spendingGrowthToDate >= 0 ? '+' : '';
-                chartSpendingGrowth.textContent = `${spendingGrowthPrefix}${formatCurrency(spendingGrowthToDate)} (${spendingGrowthPrefix}${spendingGrowthPercentToDate.toFixed(1)}%)`;
-                chartSpendingGrowth.className = 'chart-growth spending ' + (spendingGrowthToDate >= 0 ? 'positive' : 'negative');
+                chartSpendingSubtitle.textContent = `Spent`;
             }
 
             /**
@@ -5872,21 +5911,36 @@ margin-right: 0.5rem;
              */
             function resetChartHeader() {
                 if (!chartMainValue || !chartSubtitle || !chartGrowth || 
-                    !chartSpendingValue || !chartSpendingSubtitle || !chartSpendingGrowth) return;
+                    !chartSpendingValue || !chartSpendingSubtitle) return;
+                
+                // Hide date display
+                if (chartDateDisplay) {
+                    chartDateDisplay.classList.remove('visible');
+                }
                 
                 // Update savings row with final values
                 chartMainValue.textContent = formatCurrency(finalSavings);
-                chartSubtitle.textContent = 'Total Savings';
+                chartSubtitle.textContent = 'Saved';
                 const savingsGrowthPrefix = savingsGrowth >= 0 ? '+' : '';
-                chartGrowth.textContent = `${savingsGrowthPrefix}${formatCurrency(savingsGrowth)} (${savingsGrowthPrefix}${savingsGrowthPercent.toFixed(1)}%)`;
+                
+                // Add period context to the savings growth text
+                let savingsPeriodText = '';
+                switch (currentChartPeriod) {
+                    case '1M': savingsPeriodText = 'past month'; break;
+                    case '3M': savingsPeriodText = 'past 3 months'; break;
+                    case '6M': savingsPeriodText = 'past 6 months'; break;
+                    case 'YTD': savingsPeriodText = 'year to date'; break;
+                    case '1Y': savingsPeriodText = 'past year'; break;
+                    case 'ALL': savingsPeriodText = 'all time'; break;
+                    default: savingsPeriodText = 'all time';
+                }
+                
+                chartGrowth.textContent = `${savingsGrowthPrefix}${formatCurrency(savingsGrowth)} (${savingsGrowthPrefix}${savingsGrowthPercent.toFixed(1)}%) ${savingsPeriodText}`;
                 chartGrowth.className = 'chart-growth ' + (savingsGrowth >= 0 ? 'positive' : 'negative');
                 
-                // Update spending row with final values
+                // Update spending row with final values - only showing the amount
                 chartSpendingValue.textContent = formatCurrency(finalSpending);
-                chartSpendingSubtitle.textContent = 'Total Spending';
-                const spendingGrowthPrefix = spendingGrowth >= 0 ? '+' : '';
-                chartSpendingGrowth.textContent = `${spendingGrowthPrefix}${formatCurrency(spendingGrowth)} (${spendingGrowthPrefix}${spendingGrowthPercent.toFixed(1)}%)`;
-                chartSpendingGrowth.className = 'chart-growth spending ' + (spendingGrowth >= 0 ? 'positive' : 'negative');
+                chartSpendingSubtitle.textContent = 'Spent';
             }
 
             // Set default header
@@ -5912,7 +5966,7 @@ margin-right: 0.5rem;
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Total Savings',
+                            label: 'Saved',
                             data: savingsData,
                             borderColor: 'rgb(16, 185, 129)',
                             backgroundColor: savingsGradient,
@@ -5927,7 +5981,7 @@ margin-right: 0.5rem;
                             pointBorderWidth: 0
                         },
                         {
-                            label: 'Cumulative Spending',
+                            label: 'Spent',
                             data: spendingData,
                             borderColor: 'rgb(107, 114, 128)', // Gray
                             backgroundColor: 'transparent', // No fill
@@ -6196,6 +6250,11 @@ margin-right: 0.5rem;
              */
             function hideChartInteraction() {
                 if (!spendingChart || !spendingChart.data || !spendingChart.data.datasets) return;
+                
+                // Hide date display
+                if (chartDateDisplay) {
+                    chartDateDisplay.classList.remove('visible');
+                }
                 
                 // Completely reset all data points to ensure no sticky dots
                 spendingChart.data.datasets.forEach((dataset, datasetIndex) => {
