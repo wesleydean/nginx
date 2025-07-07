@@ -341,19 +341,7 @@
             background-color: transparent;
         }
         
-        /* Keep borders for specific cards that need them */
-        .expense-item {
-            display: flex;
-            flex: 1;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background-color: hsl(var(--card));
-            border: 1px solid hsl(var(--border));
-            border-radius: var(--radius);
-            transition: transform 0.12s, background-color 0.16s;
-            cursor: pointer;
-        }
+       
         
         .expense-item:active {
             transform: scale(0.98);
@@ -1334,7 +1322,7 @@
             overflow-y: auto;
         }
         
-        .expense-item {
+        /* .expense-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1342,22 +1330,43 @@
             background-color: hsl(var(--card));
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
+        } */
+
+         /* Keep borders for specific cards that need them */
+        .expense-item {
+            display: flex;
+            flex: 1;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            background-color: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            transition: transform 0.12s, background-color 0.16s;
+            cursor: pointer;
         }
         
         .expense-details {
-            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: .19rem;
         }
         
         .expense-description {
+            text-transform: capitalize;
+            font-size: 1.01rem;
+            color: #444;
             font-weight: 600;
-            color: hsl(var(--foreground));
-            margin-bottom: 2px;
+            flex: 1 1 40%;
+            align-self: center;
         }
         
         .expense-category {
             font-size: 0.8rem;
-            color: hsl(var(--muted-foreground));
-            text-transform: capitalize;
+            color: rgba(124, 128, 138, 0.74);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: .01rem;
         }
         
         .expense-amount {
@@ -3914,7 +3923,7 @@ margin-right: 0.5rem;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 1rem 0;
   margin-bottom: 0.2rem;
   background: #fff;
   border-radius: 0;
@@ -4031,17 +4040,18 @@ margin-right: 0.5rem;
             justify-content: space-between;
             display: flex;
             background-color: hsl(var(--card));
-            border: 1px solid hsl(var(--border));
+            /* border: 1px solid hsl(var(--border)); */
             box-shadow: none;
             transform: translateX(0);
             transition: transform 0.2s ease;
             z-index: 2;
-            border-radius: var(--radius);
+            /* border-radius: var(--radius); */
             width: 100%;
             /* will-change: transform; */
-            overflow: hidden; /* Add overflow hidden to prevent content from showing outside the border radius */
+            overflow: hidden;
             position: relative;
             width: 100%;
+            border-bottom: 1px solid hsl(var(--border));
         }
         
        
@@ -5397,7 +5407,7 @@ margin-right: 0.5rem;
                             <div class="swipe-content">
                                 <div class="expense-item">
                                     <div class="expense-details">
-                                        ${expense.description ? `<div class="expense-description">${expense.description}</div>` : ''}
+                                        <div class="expense-description">${expense.description ? expense.description : `${expense.category} expense`}</div>
                                         <div class="expense-category">${displayDate}${expense.category}</div>
                                     </div>
                                     <div class="expense-amount">${formatCurrency(expense.amount)}</div>
@@ -8392,7 +8402,7 @@ margin-right: 0.5rem;
             // Calculate progress based on balance differences
             const { currentTotal, previousTotal, lastDate } = getSaveBalanceComparison();
             progressAmount = currentTotal - previousTotal;
-            progressPercentage = previousTotal > 0 ? ((currentTotal - previousTotal) / previousTotal) * 100 : 0;
+            // We don't need the percentage calculation anymore
             lastBalanceDate = lastDate;
             
             // Update display elements
@@ -8410,8 +8420,8 @@ margin-right: 0.5rem;
             }
             if (saveProgressAmount) {
                 const sign = progressAmount >= 0 ? '+' : '';
-                const percentageText = progressPercentage !== 0 ? ` (${sign}${progressPercentage.toFixed(1)}%)` : '';
-                saveProgressAmount.textContent = `${sign}${formatCurrency(progressAmount)}${percentageText}`;
+                // Format without percentage and without "since [month name]"
+                saveProgressAmount.textContent = `${sign}${formatCurrency(progressAmount)}`;
             }
             
             // Update save status
@@ -8457,16 +8467,15 @@ margin-right: 0.5rem;
                 }
             }
             
-            // Update progress label with last balance date context
+            // Update progress label to simply say "Saved this month"
             const progressLabel = document.getElementById('saveProgressLabel');
-            if (progressLabel && lastBalanceDate) {
+            if (progressLabel) {
                 if (currentSavePeriodMode === 'today') {
                     const lastDateObj = new Date(lastBalanceDate);
                     const lastDateFormatted = lastDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                     progressLabel.textContent = `Today vs ${lastDateFormatted}`;
                 } else {
-                    const selectedMonthName = selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-                    progressLabel.textContent = `${selectedMonthName} vs previous month`;
+                    progressLabel.textContent = `Saved this month`;
                 }
             }
         }
@@ -8584,7 +8593,8 @@ margin-right: 0.5rem;
                     }
                 });
                 
-                return { currentTotal, previousTotal, lastDate: previousLastDate };
+                // Make sure we're returning the latest date from the current month, not previous month
+                return { currentTotal, previousTotal, lastDate };
             }
         }
         
