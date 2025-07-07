@@ -6328,7 +6328,12 @@ margin-right: 0.5rem;
         }
         
         function getSelectedSaveMonthKey() {
-            return `${selectedSaveMonthDate.getFullYear()}-${String(selectedSaveMonthDate.getMonth() + 1).padStart(2, '0')}`;
+            // Ensure the month is zero-padded (e.g., "01" for January, not "1")
+            const month = String(selectedSaveMonthDate.getMonth() + 1).padStart(2, '0');
+            const year = selectedSaveMonthDate.getFullYear();
+            const key = `${year}-${month}`;
+            console.log(`Generated month key: ${key} for date: ${selectedSaveMonthDate.toISOString()}`);
+            return key;
         }
         
         function isCurrentMonth() {
@@ -7394,8 +7399,6 @@ margin-right: 0.5rem;
                 screen.classList.add('today-view');
             }
             
-            // Add test data button for development/testing
-            addTestDataButton();
         });
         
         function setupDropdownEventListeners() {
@@ -7885,7 +7888,10 @@ margin-right: 0.5rem;
             // Use the temp variables directly
             if (typeof tempSelectedMonth === 'number' && typeof tempSelectedYear === 'number' && !isNaN(tempSelectedMonth) && !isNaN(tempSelectedYear)) {
                 if (isSaveScreenSelection) {
+                    console.log(`Setting selectedSaveMonthDate: Year=${tempSelectedYear}, Month=${tempSelectedMonth}`);
                     selectedSaveMonthDate = new Date(tempSelectedYear, tempSelectedMonth, 1);
+                    console.log(`New selectedSaveMonthDate: ${selectedSaveMonthDate.toISOString()}`);
+                    // Force a clean rebuild of the savings display with the new month
                     updateSaveScreen();
                 } else {
                     selectedMonthDate = new Date(tempSelectedYear, tempSelectedMonth, 1);
@@ -8650,29 +8656,7 @@ margin-right: 0.5rem;
             // Show success message
             alert('Test data loaded successfully! Check the Reports screen to see the chart with comprehensive data from January to today.');
         }
-        
-        // Add button to load test data (for development/testing purposes)
-        function addTestDataButton() {
-            const button = document.createElement('button');
-            button.textContent = 'Load Test Data';
-            button.style.cssText = `
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                z-index: 9999;
-                background: hsl(var(--success));
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 6px;
-                font-size: 12px;
-                cursor: pointer;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            `;
-            button.onclick = loadTestData;
-            document.body.appendChild(button);
-        }
-
+    
         /**
          * Formats a number as a currency string with proper commas and 2 decimal places.
          * @param {number} amount - The amount to format.
@@ -9158,30 +9142,160 @@ margin-right: 0.5rem;
                 }
             }
             
-            // Calculate the actual current total of all accounts
-            // This gets the latest balance for each account regardless of date
+            // Calculate total balance based on current view mode
             let actualTotalBalance = 0;
-            Object.keys(balances).forEach(accountId => {
-                const latestBalance = getLastBalanceForAccount(accountId);
-                if (latestBalance && typeof latestBalance.amount === 'number') {
-                    actualTotalBalance += latestBalance.amount;
-                }
-            });
+            
+            if (currentSavePeriodMode === 'month') {
+                // For month mode, use the balances from the selected month
+                const selectedMonthKey = getSelectedSaveMonthKey();
+                console.log('Calculating total for selected month:', selectedMonthKey);
+                
+                Object.keys(balances).forEach(accountId => {
+                    // Get all balance entries for this account in the selected month
+                    const monthEntries = Object.keys(balances[accountId] || {})
+                        .filter(date => date.startsWith(selectedMonthKey))
+                        .sort();  // Sort dates chronologically
+                    
+                    if (monthEntries.length > 0) {
+                        // Get the last entry for the month
+                        const lastDateInMonth = monthEntries[monthEntries.length - 1];
+                        const lastBalanceInMonth = balances[accountId][lastDateInMonth];
+                        
+                        console.log(`Account ${accountId} last balance for ${lastDateInMonth}:`, lastBalanceInMonth);
+                        
+                        // Handle both object format and direct number format
+                        if (lastBalanceInMonth !== null && lastBalanceInMonth !== undefined) {
+                            if (typeof lastBalanceInMonth === 'object' && typeof lastBalanceInMonth.amount === 'number') {
+                                actualTotalBalance += lastBalanceInMonth.amount;
+                                console.log(`Added ${formatCurrency(lastBalanceInMonth.amount)} from account ${accountId} (object format)`);
+                            } else if (typeof lastBalanceInMonth === 'number') {
+                                actualTotalBalance += lastBalanceInMonth;
+                                console.log(`Added ${formatCurrency(lastBalanceInMonth)} from account ${accountId} (number format)`);
+                            } else {
+                                console.warn(`Invalid balance format for account ${accountId}:`, lastBalanceInMonth);
+                            }
+                        }
+                    }
+                });
+            } else {
+                // For 'today' mode, use the latest balance regardless of date
+                Object.keys(balances).forEach(accountId => {
+                    const latestBalance = getLastBalanceForAccount(accountId);
+                    console.log(`Latest balance for account ${accountId}:`, latestBalance);
+                    
+                    // Handle both object format and direct number format
+                    if (latestBalance !== null && latestBalance !== undefined) {
+                        if (typeof latestBalance === 'object' && typeof latestBalance.amount === 'number') {
+                            actualTotalBalance += latestBalance.amount;
+                            console.log(`Added ${formatCurrency(latestBalance.amount)} from account ${accountId} (object format)`);
+                        } else if (typeof latestBalance === 'number') {
+                            actualTotalBalance += latestBalance;
+                            console.log(`Added ${formatCurrency(latestBalance)} from account ${accountId} (number format)`);
+                        } else {
+                            console.warn(`Invalid balance format for account ${accountId}:`, latestBalance);
+                        }
+                    }
+                });
+            }
             
             // Log individual account balances for verification
-            console.log('Individual latest account balances:');
-            Object.keys(balances).forEach(accountId => {
-                const latestBalance = getLastBalanceForAccount(accountId);
-                const accountInfo = savingsAccounts.find(acc => acc.id === accountId) || { name: 'Unknown Account' };
-                if (latestBalance && typeof latestBalance.amount === 'number') {
-                    console.log(`- ${accountInfo.name} (${accountId}): ${formatCurrency(latestBalance.amount)}`);
-                }
-            });
+            console.log(`Individual account balances for ${currentSavePeriodMode} mode:`);
+            console.log('Raw balance data from localStorage:', balances);
             
-            // Always display the actual total balance (sum of latest account balances)
+            if (currentSavePeriodMode === 'month') {
+                const selectedMonthKey = getSelectedSaveMonthKey();
+                console.log('Selected month key:', selectedMonthKey);
+                
+                Object.keys(balances).forEach(accountId => {
+                    const accountBalances = balances[accountId] || {};
+                    console.log(`All dates for account ${accountId}:`, Object.keys(accountBalances));
+                    
+                    const monthEntries = Object.keys(accountBalances)
+                        .filter(date => date.startsWith(selectedMonthKey))
+                        .sort();
+                    
+                    console.log(`Filtered dates for account ${accountId} in month ${selectedMonthKey}:`, monthEntries);
+                    
+                    const accountInfo = savingsAccounts.find(acc => acc.id === accountId) || { name: 'Unknown Account' };
+                    
+                    if (monthEntries.length > 0) {
+                        const lastDateInMonth = monthEntries[monthEntries.length - 1];
+                        const lastBalanceInMonth = accountBalances[lastDateInMonth];
+                        
+                        // Handle both object format and direct number format for display
+                        let displayAmount = 0;
+                        if (lastBalanceInMonth !== null && lastBalanceInMonth !== undefined) {
+                            if (typeof lastBalanceInMonth === 'object' && 'amount' in lastBalanceInMonth) {
+                                displayAmount = lastBalanceInMonth.amount;
+                            } else if (typeof lastBalanceInMonth === 'number') {
+                                displayAmount = lastBalanceInMonth;
+                            }
+                        }
+                        
+                        console.log(`- ${accountInfo.name} (${accountId}): ${formatCurrency(displayAmount)} (last entry in month: ${lastDateInMonth})`);
+                        console.log(`  Raw balance data:`, lastBalanceInMonth);
+                    } else {
+                        console.log(`- ${accountInfo.name} (${accountId}): No data for selected month ${selectedMonthKey}`);
+                    }
+                });
+            } else {
+                Object.keys(balances).forEach(accountId => {
+                    const latestBalance = getLastBalanceForAccount(accountId);
+                    const accountInfo = savingsAccounts.find(acc => acc.id === accountId) || { name: 'Unknown Account' };
+                    
+                    console.log(`- ${accountInfo.name} (${accountId}): Raw latest balance:`, latestBalance);
+                    
+                    // Handle both object format and direct number format for display
+                    let displayAmount = 0;
+                    if (latestBalance !== null && latestBalance !== undefined) {
+                        if (typeof latestBalance === 'object' && 'amount' in latestBalance) {
+                            displayAmount = latestBalance.amount;
+                        } else if (typeof latestBalance === 'number') {
+                            displayAmount = latestBalance;
+                        }
+                    }
+                    
+                    console.log(`  Formatted amount: ${formatCurrency(displayAmount)}`);
+                });
+            }
+            
+            // Display the calculated total balance based on period mode
             const saveTotalAccountBalance = document.getElementById('saveTotalAccountBalance');
             if (saveTotalAccountBalance) {
+                console.log(`FINAL TOTAL: ${formatCurrency(actualTotalBalance)}`);
+                // Ensure we're working with a proper number
+                if (isNaN(actualTotalBalance)) {
+                    console.error('actualTotalBalance is NaN, setting to 0');
+                    actualTotalBalance = 0;
+                }
+                
                 saveTotalAccountBalance.textContent = formatCurrency(actualTotalBalance);
+                console.log(`Updating total balance display to: ${formatCurrency(actualTotalBalance)}`);
+                
+                // Force proper display by directly setting total
+                // This is a fallback to ensure something is shown
+                if (actualTotalBalance === 0) {
+                    // Check if we can derive a total from the individual account balances shown in the UI
+                    let derivedTotal = 0;
+                    // Get the account balances from the specific section
+                    Object.keys(balances).forEach(accountId => {
+                        const accountInfo = savingsAccounts.find(acc => acc.id === accountId);
+                        if (accountInfo) {
+                            console.log(`Checking UI balance for ${accountInfo.name}`);
+                            // Add any available balance
+                            const latestBalance = getLastBalanceForAccount(accountId);
+                            if (latestBalance && 'amount' in latestBalance && typeof latestBalance.amount === 'number') {
+                                derivedTotal += latestBalance.amount;
+                                console.log(`Added ${formatCurrency(latestBalance.amount)} from ${accountInfo.name}`);
+                            }
+                        }
+                    });
+                    
+                    if (derivedTotal > 0) {
+                        console.log(`Using derived total: ${formatCurrency(derivedTotal)}`);
+                        saveTotalAccountBalance.textContent = formatCurrency(derivedTotal);
+                    }
+                }
             }
             
             // For comparison and change calculation
@@ -9223,6 +9337,8 @@ margin-right: 0.5rem;
                     saveTotalBalanceChange.textContent = `${sign}${formatCurrency(balanceChange)} since ${prevMonthName}`;
                     saveTotalBalanceChange.className = balanceChange >= 0 ? 
                         'balance-change-modern positive' : 'balance-change-modern negative';
+                    
+                    console.log(`Monthly comparison: ${formatCurrency(actualTotalBalance)} vs ${formatCurrency(previousTotal)} from ${prevMonthName}`);
                 }
                 
                 // Update the date display
@@ -9445,6 +9561,7 @@ margin-right: 0.5rem;
             const accountBalances = balances[accountId] || {};
             
             if (Object.keys(accountBalances).length === 0) {
+                console.log(`No balance records found for account ${accountId}`);
                 return { amount: 0 }; // No balance records for this account
             }
             
@@ -9454,6 +9571,8 @@ margin-right: 0.5rem;
                 return new Date(b) - new Date(a);
             });
             
+            console.log(`Sorted dates for account ${accountId}:`, dates);
+            
             // Get the latest balance (first in the sorted array)
             const lastBalance = accountBalances[dates[0]];
             
@@ -9462,11 +9581,17 @@ margin-right: 0.5rem;
             
             // Handle both old format (direct number) and new format (object with amount)
             if (lastBalance === null || lastBalance === undefined) {
+                console.log(`Null or undefined balance for account ${accountId}`);
                 return { amount: 0 };
-            } else if (typeof lastBalance === 'object') {
+            } else if (typeof lastBalance === 'object' && 'amount' in lastBalance) {
+                console.log(`Object format balance for account ${accountId}: ${lastBalance.amount}`);
                 return lastBalance;
-            } else {
+            } else if (typeof lastBalance === 'number') {
+                console.log(`Number format balance for account ${accountId}: ${lastBalance}`);
                 return { amount: lastBalance };
+            } else {
+                console.warn(`Unknown balance format for account ${accountId}:`, lastBalance);
+                return { amount: 0 };
             }
         }
 
