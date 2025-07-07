@@ -1576,7 +1576,7 @@
         .period-icon-toggle {
             display: flex;
             align-items: center;
-            background: hsl(var(--muted));
+            background: hsl(210deg 28.54% 92.28%);
             border-radius: calc(var(--radius) * 2.5);
             padding: 4px;
             margin-left: auto;
@@ -2067,7 +2067,13 @@
         @media (hover: none) and (pointer: coarse) {
             .chart-crosshair {
                 width: 3px;
-                background: #222;
+                background: repeating-linear-gradient(
+                    to bottom,
+                    rgba(107, 114, 128, 0.8) 0px, /* Slightly more opaque for better visibility */
+                    rgba(107, 114, 128, 0.8) 8px,  /* Larger segments for mobile visibility */
+                    transparent 8px,
+                    transparent 16px
+                );
             }
         }
         
