@@ -4217,36 +4217,14 @@ margin-right: 0.5rem;
                         </div>
                     </div>
                     
-                    <!-- Floating Action Button (FAB) -->
-                    <div class="fab-container">
-                        <button class="fab-primary" onclick="toggleFabMenu()" id="fabMain">
-                            <i data-lucide="plus" class="w-6 h-6"></i>
-                        </button>
-                        
-                        <div class="fab-menu" id="fabMenu">
-                            <div class="fab-option" onclick="showExpenseSlideOut(); hideFabMenu();">
-                                <div class="fab-option-icon">
-                                    <i data-lucide="minus" class="w-4 h-4"></i>
-                                </div>
-                                <span>Add Expense</span>
-                            </div>
-                            
-                            <div class="fab-option" onclick="showBalanceSlideOut(); hideFabMenu();" id="fabBalanceOption" style="display: none;">
-                                <div class="fab-option-icon">
-                                    <i data-lucide="hand-coins" class="w-6 h-6"></i>
-                                </div>
-                                <span>Add Balance</span>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Quick Action Cards -->
                     <div class="quick-actions">
                         <div class="quick-action-card" onclick="showExpenseSlideOut()">
-                            <div class="quick-action-icon">
-                                <i data-lucide="dollar-sign" class="w-6 h-6"></i>
-                            </div>
                             <div class="quick-action-title">Add Expense</div>
+                            <div class="quick-action-icon">
+                                <i data-lucide="arrow-right" class="w-6 h-6"></i>
+                            </div>
                         </div>
                     </div>
                     
@@ -4381,10 +4359,10 @@ margin-right: 0.5rem;
                     <!-- Quick Action Cards for Save Screen -->
                     <div class="quick-actions">
                         <div class="quick-action-card" onclick="showBalanceSlideOut()" id="saveBalanceActionCard">
-                            <div class="quick-action-icon">
-                                <i data-lucide="hand-coins" class="w-6 h-6"></i>
-                            </div>
                             <div class="quick-action-title">Add Balance</div>
+                            <div class="quick-action-icon">
+                                <i data-lucide="arrow-right" class="w-6 h-6"></i>
+                            </div>
                         </div>
                     </div>
                     
@@ -4515,7 +4493,7 @@ margin-right: 0.5rem;
         <div class="bottom-nav">
             <div class="nav-item active" onclick="goToScreen(0)">
                 <div class="icon">
-                    <i data-lucide="hand-coins" class="w-6 h-6"></i>
+                    <i data-lucide="coins" class="w-6 h-6"></i>
                 </div>
                 <div class="label">Spend</div>
             </div>
@@ -9181,121 +9159,47 @@ margin-right: 0.5rem;
                 // For 'today' mode, use the latest balance regardless of date
                 Object.keys(balances).forEach(accountId => {
                     const latestBalance = getLastBalanceForAccount(accountId);
-                    console.log(`Latest balance for account ${accountId}:`, latestBalance);
-                    
-                    // Handle both object format and direct number format
-                    if (latestBalance !== null && latestBalance !== undefined) {
-                        if (typeof latestBalance === 'object' && typeof latestBalance.amount === 'number') {
-                            actualTotalBalance += latestBalance.amount;
-                            console.log(`Added ${formatCurrency(latestBalance.amount)} from account ${accountId} (object format)`);
-                        } else if (typeof latestBalance === 'number') {
-                            actualTotalBalance += latestBalance;
-                            console.log(`Added ${formatCurrency(latestBalance)} from account ${accountId} (number format)`);
-                        } else {
-                            console.warn(`Invalid balance format for account ${accountId}:`, latestBalance);
-                        }
+                    if (latestBalance && typeof latestBalance.amount === 'number') {
+                        actualTotalBalance += latestBalance.amount;
                     }
                 });
             }
             
             // Log individual account balances for verification
             console.log(`Individual account balances for ${currentSavePeriodMode} mode:`);
-            console.log('Raw balance data from localStorage:', balances);
-            
             if (currentSavePeriodMode === 'month') {
                 const selectedMonthKey = getSelectedSaveMonthKey();
-                console.log('Selected month key:', selectedMonthKey);
-                
                 Object.keys(balances).forEach(accountId => {
-                    const accountBalances = balances[accountId] || {};
-                    console.log(`All dates for account ${accountId}:`, Object.keys(accountBalances));
-                    
-                    const monthEntries = Object.keys(accountBalances)
+                    const monthEntries = Object.keys(balances[accountId] || {})
                         .filter(date => date.startsWith(selectedMonthKey))
                         .sort();
-                    
-                    console.log(`Filtered dates for account ${accountId} in month ${selectedMonthKey}:`, monthEntries);
                     
                     const accountInfo = savingsAccounts.find(acc => acc.id === accountId) || { name: 'Unknown Account' };
                     
                     if (monthEntries.length > 0) {
                         const lastDateInMonth = monthEntries[monthEntries.length - 1];
-                        const lastBalanceInMonth = accountBalances[lastDateInMonth];
+                        const lastBalanceInMonth = balances[accountId][lastDateInMonth];
                         
-                        // Handle both object format and direct number format for display
-                        let displayAmount = 0;
-                        if (lastBalanceInMonth !== null && lastBalanceInMonth !== undefined) {
-                            if (typeof lastBalanceInMonth === 'object' && 'amount' in lastBalanceInMonth) {
-                                displayAmount = lastBalanceInMonth.amount;
-                            } else if (typeof lastBalanceInMonth === 'number') {
-                                displayAmount = lastBalanceInMonth;
-                            }
-                        }
-                        
-                        console.log(`- ${accountInfo.name} (${accountId}): ${formatCurrency(displayAmount)} (last entry in month: ${lastDateInMonth})`);
-                        console.log(`  Raw balance data:`, lastBalanceInMonth);
+                        console.log(`- ${accountInfo.name} (${accountId}): ${formatCurrency(lastBalanceInMonth?.amount || 0)} (last entry in month: ${lastDateInMonth})`);
                     } else {
-                        console.log(`- ${accountInfo.name} (${accountId}): No data for selected month ${selectedMonthKey}`);
+                        console.log(`- ${accountInfo.name} (${accountId}): No data for selected month`);
                     }
                 });
             } else {
                 Object.keys(balances).forEach(accountId => {
                     const latestBalance = getLastBalanceForAccount(accountId);
                     const accountInfo = savingsAccounts.find(acc => acc.id === accountId) || { name: 'Unknown Account' };
-                    
-                    console.log(`- ${accountInfo.name} (${accountId}): Raw latest balance:`, latestBalance);
-                    
-                    // Handle both object format and direct number format for display
-                    let displayAmount = 0;
-                    if (latestBalance !== null && latestBalance !== undefined) {
-                        if (typeof latestBalance === 'object' && 'amount' in latestBalance) {
-                            displayAmount = latestBalance.amount;
-                        } else if (typeof latestBalance === 'number') {
-                            displayAmount = latestBalance;
-                        }
+                    if (latestBalance && typeof latestBalance.amount === 'number') {
+                        console.log(`- ${accountInfo.name} (${accountId}): ${formatCurrency(latestBalance.amount)}`);
                     }
-                    
-                    console.log(`  Formatted amount: ${formatCurrency(displayAmount)}`);
                 });
             }
             
             // Display the calculated total balance based on period mode
             const saveTotalAccountBalance = document.getElementById('saveTotalAccountBalance');
             if (saveTotalAccountBalance) {
-                console.log(`FINAL TOTAL: ${formatCurrency(actualTotalBalance)}`);
-                // Ensure we're working with a proper number
-                if (isNaN(actualTotalBalance)) {
-                    console.error('actualTotalBalance is NaN, setting to 0');
-                    actualTotalBalance = 0;
-                }
-                
                 saveTotalAccountBalance.textContent = formatCurrency(actualTotalBalance);
                 console.log(`Updating total balance display to: ${formatCurrency(actualTotalBalance)}`);
-                
-                // Force proper display by directly setting total
-                // This is a fallback to ensure something is shown
-                if (actualTotalBalance === 0) {
-                    // Check if we can derive a total from the individual account balances shown in the UI
-                    let derivedTotal = 0;
-                    // Get the account balances from the specific section
-                    Object.keys(balances).forEach(accountId => {
-                        const accountInfo = savingsAccounts.find(acc => acc.id === accountId);
-                        if (accountInfo) {
-                            console.log(`Checking UI balance for ${accountInfo.name}`);
-                            // Add any available balance
-                            const latestBalance = getLastBalanceForAccount(accountId);
-                            if (latestBalance && 'amount' in latestBalance && typeof latestBalance.amount === 'number') {
-                                derivedTotal += latestBalance.amount;
-                                console.log(`Added ${formatCurrency(latestBalance.amount)} from ${accountInfo.name}`);
-                            }
-                        }
-                    });
-                    
-                    if (derivedTotal > 0) {
-                        console.log(`Using derived total: ${formatCurrency(derivedTotal)}`);
-                        saveTotalAccountBalance.textContent = formatCurrency(derivedTotal);
-                    }
-                }
             }
             
             // For comparison and change calculation
@@ -9561,7 +9465,6 @@ margin-right: 0.5rem;
             const accountBalances = balances[accountId] || {};
             
             if (Object.keys(accountBalances).length === 0) {
-                console.log(`No balance records found for account ${accountId}`);
                 return { amount: 0 }; // No balance records for this account
             }
             
@@ -9571,8 +9474,6 @@ margin-right: 0.5rem;
                 return new Date(b) - new Date(a);
             });
             
-            console.log(`Sorted dates for account ${accountId}:`, dates);
-            
             // Get the latest balance (first in the sorted array)
             const lastBalance = accountBalances[dates[0]];
             
@@ -9581,17 +9482,11 @@ margin-right: 0.5rem;
             
             // Handle both old format (direct number) and new format (object with amount)
             if (lastBalance === null || lastBalance === undefined) {
-                console.log(`Null or undefined balance for account ${accountId}`);
                 return { amount: 0 };
-            } else if (typeof lastBalance === 'object' && 'amount' in lastBalance) {
-                console.log(`Object format balance for account ${accountId}: ${lastBalance.amount}`);
+            } else if (typeof lastBalance === 'object') {
                 return lastBalance;
-            } else if (typeof lastBalance === 'number') {
-                console.log(`Number format balance for account ${accountId}: ${lastBalance}`);
-                return { amount: lastBalance };
             } else {
-                console.warn(`Unknown balance format for account ${accountId}:`, lastBalance);
-                return { amount: 0 };
+                return { amount: lastBalance };
             }
         }
 
