@@ -1177,8 +1177,9 @@
             width: 100vw;
             flex-shrink: 0;
             overflow-y: auto;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
             padding: 1rem;
-            padding-top: 0;;
+            padding-top: 0;
             background-color: hsl(var(--background));
         }
         
@@ -1718,6 +1719,7 @@
             margin-top: 20px;
             padding-top: 10px;
             position: relative;
+            overflow: hidden; /* Prevent wrapper overflow */
         }
         
         .chart-header {
@@ -1807,7 +1809,7 @@
         }
         
         .chart-growth.positive {
-            color: #10B981; /* Green for positive growth */
+            color: hsl(var(--success)); /* Green for positive growth */
         }
         
         .chart-growth.negative {
@@ -1816,9 +1818,12 @@
         
         .chart-container {
             position: relative;
-            height: 300px;
+            /* Removed fixed height to allow flexible canvas sizing */
             margin-top: 20px;
             transition: opacity 0.2s ease;
+            /* Added gradient fade to transparent/white */
+            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
         }
         
         .chart-container.loading::after {
@@ -1842,7 +1847,7 @@
             height: 30px;
             border: 3px solid rgba(16, 185, 129, 0.2);
             border-radius: 50%;
-            border-top-color: #10B981;
+            border-top-color: hsl(var(--success));
             animation: spin 0.8s linear infinite;
             z-index: 6;
             top: 50%;
@@ -2013,25 +2018,34 @@
         
         .chart-container {
             position: relative;
-            height: 300px;
-            margin-top: 20px;
+            height: 250px; /* Minimum height instead of fixed height */
+            margin-top: 10px;
             border-radius: var(--radius);
-            overflow: hidden;
+            border-bottom: none; /* Remove bottom border */
+            overflow: hidden; /* Prevent any overflow */
             touch-action: pan-y; /* Allow vertical scrolling */
+            box-sizing: border-box; /* Include padding and border in element's width */
+            /* Remove fade from container - we'll apply it just to the green area */
         }
         
         /* Full width styling for specific chart */
         .chart-container.full-width-chart {
-            margin-left: -1.6rem;
+            margin-left: -1rem;
             margin-right: -1rem;
-            width: calc(100% + 2.8rem);
+            width: calc(100% + 2rem);
             border-radius: 0;
+            border-bottom: none; /* Remove bottom border */
+            overflow-x: hidden; /* Prevent horizontal overflow */
+            max-width: 100vw; /* Ensure it doesn't exceed viewport width */
         }
         
         #spendingChart {
             touch-action: pan-y; /* Allow vertical scrolling */
             cursor: crosshair;
             padding: 10px 0;
+            min-height: 250px; /* Minimum height instead of fixed height */
+            height: auto; /* Allow the canvas to grow as needed */
+            width: 100%; /* Ensure full width */
         }
         
         /* Make chart more responsive to touch on mobile devices */
@@ -2040,6 +2054,7 @@
                 cursor: default;
                 padding: 15px 0; /* More padding on mobile for better touch area */
                 touch-action: pan-y; /* Ensure vertical scrolling works on mobile */
+                min-height: 280px; /* Slightly larger on mobile for better touch targets */
             }
         }
         
@@ -2111,7 +2126,7 @@
         }
         
         .tooltip-dot.savings {
-            background: #10B981; /* Match the green line color */
+            background: hsl(var(--success)); /* Match the green line color */
             box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
         }
         
@@ -2127,7 +2142,7 @@
         }
         
         .tooltip-value:first-child .tooltip-amount {
-            color: #10B981; /* Green for savings */
+            color: hsl(var(--success)); /* Green for savings */
             font-weight: 600;
         }
         
@@ -3960,7 +3975,7 @@ margin-right: 0.5rem;
         }
         
         .balance-change-modern.positive {
-            color: #27ae60;
+            color: hsl(var(--success));
         }
         
         .balance-change-modern.negative {
@@ -4090,7 +4105,7 @@ margin-right: 0.5rem;
         }
 
         .balance-history-percent.positive {
-            color: #27ae60;
+            color: hsl(var(--success));
         }
 
         .balance-history-percent.negative {
@@ -5884,10 +5899,11 @@ margin-right: 0.5rem;
                 spendingChart.destroy();
             }
             
-            // Create enhanced gradient for savings (Wealthsimple style)
+            // Create enhanced gradient for savings (Wealthsimple style) with fade to transparent
             const savingsGradient = ctx.createLinearGradient(0, 0, 0, 400);
             savingsGradient.addColorStop(0, 'rgba(16, 185, 129, 0.25)'); // Green with transparency
             savingsGradient.addColorStop(0.6, 'rgba(16, 185, 129, 0.05)');
+            savingsGradient.addColorStop(0.8, 'rgba(16, 185, 129, 0.02)');
             savingsGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
             
             spendingChart = new Chart(ctx, {
@@ -8234,7 +8250,7 @@ margin-right: 0.5rem;
                 top: 10px;
                 right: 10px;
                 z-index: 9999;
-                background: #10B981;
+                background: hsl(var(--success));
                 color: white;
                 border: none;
                 padding: 8px 16px;
@@ -8738,7 +8754,7 @@ margin-right: 0.5rem;
                     
                     const [year, month, day] = update.date.split('-').map(Number);
                     const dateObj = new Date(year, month - 1, day);
-                    const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                     
                     return {
                         ...update,
