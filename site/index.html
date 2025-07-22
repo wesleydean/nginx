@@ -643,6 +643,7 @@
         .home-section {
             margin-bottom: 1.5rem;
             cursor: pointer;
+            position: relative;
         }
         
         .home-section .card-header {
@@ -652,6 +653,8 @@
             align-items: flex-start;
             gap: 0.5rem;
             text-align: left;
+            position: relative;
+            width: 100%;
         }
         
         .home-section .card-header > .home-section-header {
@@ -689,6 +692,7 @@
         .cashflow-menu-container {
             position: relative;
             z-index: 100;
+            display: inline-block;
         }
         
         .dot-menu-btn {
@@ -708,21 +712,26 @@
         
         .dropdown-menu {
             position: absolute;
-            top: 100%;
-            right: 0;
+            top: calc(100% + 0.25rem) !important;
+            right: 0 !important;
+            left: auto !important;
+            max-height: 80vh;
+            overflow-y: auto;
             background: hsl(var(--background));
             border: 1px solid hsl(var(--border));
             border-radius: 0.5rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             min-width: 220px;
-            z-index: 99999;
+            z-index: 100;
             display: none;
             margin-top: 0.25rem;
             pointer-events: auto;
+            transform: none !important;
         }
         
         .dropdown-menu.show {
             display: block;
+            position: absolute !important;
         }
         
         .dropdown-header {
@@ -767,6 +776,7 @@
             display: flex;
             gap: 0.5rem;
             margin: 0;
+            width: 100%;
         }
         
         .range-btn {
@@ -9700,28 +9710,163 @@ margin-right: 0.5rem;
             const currentYear = today.getFullYear();
             const currentMonth = today.getMonth();
             
-            let currentPeriodData, lastPeriodData;
+            let currentPeriodData = [];
+            let lastPeriodData = [];
             
             switch (range) {
+                case 'week':
+                    // This week vs last week
+                    // Get current week's dates (Monday to Sunday)
+                    const thisWeek = [];
+                    const lastWeek = [];
+                    
+                    // Calculate days to Monday (0 = Sunday, 1 = Monday, etc.)
+                    const dayOfWeek = today.getDay();
+                    const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                    
+                    // Get this week's dates
+                    for (let i = 0; i < 7; i++) {
+                        const date = new Date(today);
+                        date.setDate(today.getDate() - daysFromMonday + i);
+                        thisWeek.push(date.toISOString().split('T')[0]);
+                    }
+                    
+                    // Get last week's dates
+                    for (let i = 0; i < 7; i++) {
+                        const date = new Date(today);
+                        date.setDate(today.getDate() - daysFromMonday - 7 + i);
+                        lastWeek.push(date.toISOString().split('T')[0]);
+                    }
+                    
+                    // Calculate cumulative spending for this week and last week
+                    let thisWeekCumulative = 0;
+                    let lastWeekCumulative = 0;
+                    
+                    for (let i = 0; i < 7; i++) {
+                        const thisDate = thisWeek[i];
+                        if (expenses[thisDate]) {
+                            const dailyTotal = expenses[thisDate].reduce((sum, exp) => sum + exp.amount, 0);
+                            thisWeekCumulative += dailyTotal;
+                            currentPeriodData.push({ day: i + 1, cumulative: thisWeekCumulative });
+                        } else {
+                            currentPeriodData.push({ day: i + 1, cumulative: thisWeekCumulative });
+                        }
+                        
+                        const lastDate = lastWeek[i];
+                        if (expenses[lastDate]) {
+                            const dailyTotal = expenses[lastDate].reduce((sum, exp) => sum + exp.amount, 0);
+                            lastWeekCumulative += dailyTotal;
+                            lastPeriodData.push({ day: i + 1, cumulative: lastWeekCumulative });
+                        } else {
+                            lastPeriodData.push({ day: i + 1, cumulative: lastWeekCumulative });
+                        }
+                    }
+                    break;
+                    
                 case '1m':
+                case 'month':
                     // Current month vs last month
                     const currentMonthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-                    const lastMonthKey = `${currentMonth === 0 ? currentYear - 1 : currentYear}-${String(currentMonth === 0 ? 12 : currentMonth).padStart(2, '0')}`;
+                    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+                    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+                    const lastMonthKey = `${lastMonthYear}-${String(lastMonth + 1).padStart(2, '0')}`;
                     
                     currentPeriodData = calculateCumulativeSpending(expenses, currentMonthKey, true);
                     lastPeriodData = calculateCumulativeSpending(expenses, lastMonthKey, false);
                     break;
+                
+                case 'year':
+                    // This month vs. same month last year
+                    const thisMonthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+                    const sameMonthLastYearKey = `${currentYear - 1}-${String(currentMonth + 1).padStart(2, '0')}`;
                     
-                case '3m':
-                    // Current 3 months vs previous 3 months
-                    currentPeriodData = calculateCumulativeSpendingForMonths(expenses, 3, 0);
-                    lastPeriodData = calculateCumulativeSpendingForMonths(expenses, 3, 3);
+                    currentPeriodData = calculateCumulativeSpending(expenses, thisMonthKey, true);
+                    lastPeriodData = calculateCumulativeSpending(expenses, sameMonthLastYearKey, false);
                     break;
                     
-                case '6m':
-                    // Current 6 months vs previous 6 months
-                    currentPeriodData = calculateCumulativeSpendingForMonths(expenses, 6, 0);
-                    lastPeriodData = calculateCumulativeSpendingForMonths(expenses, 6, 6);
+                case 'average':
+                    // This month vs average month over past year
+                    const monthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+                    currentPeriodData = calculateCumulativeSpending(expenses, monthKey, true);
+                    
+                    // Calculate average spending for each day of the month over past year
+                    const dailyAverages = {};
+                    let daysCounted = {};
+                    
+                    // Loop through past 12 months
+                    for (let i = 1; i <= 12; i++) {
+                        const m = (currentMonth - i + 12) % 12;
+                        const y = currentYear - Math.floor((currentMonth - i + 12) / 12);
+                        const mk = `${y}-${String(m + 1).padStart(2, '0')}`;
+                        
+                        // For each day in this month, add to average
+                        Object.keys(expenses).forEach(date => {
+                            if (date.startsWith(mk)) {
+                                const day = parseInt(date.split('-')[2]);
+                                const dailyTotal = expenses[date].reduce((sum, exp) => sum + exp.amount, 0);
+                                
+                                if (!dailyAverages[day]) dailyAverages[day] = 0;
+                                if (!daysCounted[day]) daysCounted[day] = 0;
+                                
+                                dailyAverages[day] += dailyTotal;
+                                daysCounted[day]++;
+                            }
+                        });
+                    }
+                    
+                    // Calculate cumulative average spending
+                    let cumulativeAvg = 0;
+                    for (let day = 1; day <= 31; day++) {
+                        if (daysCounted[day] && daysCounted[day] > 0) {
+                            const avgForDay = dailyAverages[day] / daysCounted[day];
+                            cumulativeAvg += avgForDay;
+                            lastPeriodData.push({ day: day, cumulative: cumulativeAvg });
+                        } else if (day <= today.getDate()) {
+                            // For days with no data, keep the cumulative total the same
+                            lastPeriodData.push({ day: day, cumulative: cumulativeAvg });
+                        }
+                    }
+                    break;
+                    
+                case 'ytd':
+                    // This year vs last year (YTD)
+                    let thisYearCumulative = 0;
+                    let lastYearCumulative = 0;
+                    let dayCount = 0;
+                    
+                    // Calculate days from Jan 1 to today
+                    const startOfYear = new Date(currentYear, 0, 1);
+                    const msPerDay = 1000 * 60 * 60 * 24;
+                    const daysInYear = Math.floor((today - startOfYear) / msPerDay) + 1;
+                    
+                    // Loop through each day of the year so far
+                    for (let i = 0; i < daysInYear; i++) {
+                        const thisYearDate = new Date(currentYear, 0, 1 + i);
+                        const lastYearDate = new Date(currentYear - 1, 0, 1 + i);
+                        
+                        const thisYearKey = `${thisYearDate.getFullYear()}-${String(thisYearDate.getMonth() + 1).padStart(2, '0')}-${String(thisYearDate.getDate()).padStart(2, '0')}`;
+                        const lastYearKey = `${lastYearDate.getFullYear()}-${String(lastYearDate.getMonth() + 1).padStart(2, '0')}-${String(lastYearDate.getDate()).padStart(2, '0')}`;
+                        
+                        // Add this year's expenses
+                        if (expenses[thisYearKey]) {
+                            const dailyTotal = expenses[thisYearKey].reduce((sum, exp) => sum + exp.amount, 0);
+                            thisYearCumulative += dailyTotal;
+                        }
+                        currentPeriodData.push({ day: i + 1, cumulative: thisYearCumulative });
+                        
+                        // Add last year's expenses
+                        if (expenses[lastYearKey]) {
+                            const dailyTotal = expenses[lastYearKey].reduce((sum, exp) => sum + exp.amount, 0);
+                            lastYearCumulative += dailyTotal;
+                        }
+                        lastPeriodData.push({ day: i + 1, cumulative: lastYearCumulative });
+                    }
+                    break;
+                    
+                default:
+                    console.log(`Unhandled range type: ${range}, falling back to 'month'`);
+                    // Default to this month vs. last month
+                    return updateHomeCashflowWithRange('month');
                     break;
             }
             
@@ -9747,17 +9892,30 @@ margin-right: 0.5rem;
             let currentLabel, previousLabel;
             
             switch (range) {
+                case 'week':
+                    currentLabel = 'This week';
+                    previousLabel = 'Last week';
+                    break;
                 case '1m':
+                case 'month':
                     currentLabel = 'This month';
                     previousLabel = 'Last month';
                     break;
-                case '3m':
-                    currentLabel = 'Last 3 months';
-                    previousLabel = 'Previous 3 months';
+                case 'year':
+                    currentLabel = 'This month';
+                    previousLabel = 'Same month last year';
                     break;
-                case '6m':
-                    currentLabel = 'Last 6 months';
-                    previousLabel = 'Previous 6 months';
+                case 'average':
+                    currentLabel = 'This month';
+                    previousLabel = 'Monthly average';
+                    break;
+                case 'ytd':
+                    currentLabel = 'This year';
+                    previousLabel = 'Last year (YTD)';
+                    break;
+                default:
+                    currentLabel = 'This month';
+                    previousLabel = 'Last month';
                     break;
             }
             
@@ -9776,10 +9934,8 @@ margin-right: 0.5rem;
                 dropdown.classList.toggle('show');
                 
                 if (dropdown.classList.contains('show')) {
-                    // Position the dropdown relative to the button
-                    const rect = menuBtn.getBoundingClientRect();
-                    dropdown.style.top = (rect.bottom + 4) + 'px';
-                    dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+                    // Don't position with inline styles - use CSS instead
+                    // This ensures the dropdown scrolls with the section
                     
                     // Close dropdown when clicking outside
                     document.addEventListener('click', closeCashflowDropdownOutside);
@@ -9808,18 +9964,25 @@ margin-right: 0.5rem;
             }
             
             // Update active state
-            const dropdownItems = dropdown.querySelectorAll('.dropdown-item');
+            const dropdownItems = document.querySelectorAll('.dropdown-item');
             dropdownItems.forEach(item => item.classList.remove('active'));
-            event.target.classList.add('active');
+            event.currentTarget.classList.add('active');
             
             // Update subtitle
             const subtitle = document.getElementById('cashflowSubtitle');
             if (subtitle) {
-                subtitle.textContent = event.target.textContent;
+                subtitle.textContent = event.currentTarget.textContent;
             }
             
-            // For now, use existing logic with default average comparison
-            updateHomeCashflowWithRange('1m');
+            // Pass the range type directly - no need to map to different values
+            // since we've updated updateHomeCashflowWithRange to handle these directly
+            const chartRange = rangeType;
+            
+            // Log for debugging
+            console.log(`Selected range: ${rangeType}`);
+            
+            // Update the chart with the mapped range
+            updateHomeCashflowWithRange(chartRange);
         }
         
         function calculateCumulativeSpendingForMonths(expenses, monthCount, offsetMonths) {
@@ -9879,10 +10042,21 @@ margin-right: 0.5rem;
             const chartHeight = height - margin.top - margin.bottom;
             
             // Calculate max days based on range
-            let maxDays = 31;
+            let maxDays;
             switch (range) {
-                case '3m': maxDays = 93; break;
-                case '6m': maxDays = 186; break;
+                case 'week': maxDays = 7; break;
+                case 'month':
+                case '1m': maxDays = 31; break;
+                case 'year': maxDays = 31; break; // Month comparison
+                case 'average': maxDays = 31; break; // Month comparison
+                case 'ytd': 
+                    // Calculate days elapsed in the year so far
+                    const now = new Date();
+                    const startOfYear = new Date(now.getFullYear(), 0, 1);
+                    const msPerDay = 1000 * 60 * 60 * 24;
+                    maxDays = Math.floor((now - startOfYear) / msPerDay) + 1;
+                    break;
+                default: maxDays = 31; break;
             }
             
             // Helper functions
