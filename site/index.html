@@ -644,6 +644,11 @@
             margin-bottom: 1.5rem;
             cursor: pointer;
             position: relative;
+            background-color: hsl(var(--card)) !important;
+            border: 2px solid hsl(var(--border) / 0.5) !important;
+            border-radius: 12px;
+            box-shadow: none !important;
+            padding: 1rem;
         }
         
         .home-section .card-header {
@@ -668,10 +673,27 @@
         
         .home-section-header {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
+            justify-content: space-between;
             gap: 1rem;
             cursor: pointer;
             width: 100%;
+        }
+        
+        .section-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            align-items: flex-start;
+            text-align: left;
+            flex: 1;
+        }
+        
+        .section-header-right {
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+            flex-shrink: 0;
         }
         
         .section-title {
@@ -1471,6 +1493,11 @@
             padding: 1rem;
             padding-top: 0;
             background-color: hsl(var(--background));
+        }
+        
+        /* Subtle background for home screen (Screen 0) to make sections stand out */
+        .screen:first-child {
+            background-color: hsl(var(--muted) / 0.2);
         }
         
         /* Remove old daily-budget styles - now using card classes */
@@ -4542,12 +4569,31 @@ margin-right: 0.5rem;
                     </div>
                     
                     <!-- Net Worth Section -->
-                    <div class="card home-section" onclick="goToScreen(2)">
+                    <div class="card home-section" onclick="handleNetWorthCardClick(event)">
                         <div class="card-header home-section-header">
-                            <h3 class="section-title" id="netWorthTitle">$0 Net Worth</h3>
-                            <div class="section-subtitle" id="netWorthChange">
-                                <i data-lucide="arrow-up" class="w-4 h-4 inline"></i>
-                                <span>0% (1 month)</span>
+                            <div class="section-header-left">
+                                <h3 class="section-title" id="netWorthTitle">$68,502 net worth</h3>
+                                <div class="section-change" id="netWorthChange">
+                                    <i data-lucide="arrow-up" class="w-4 h-4 inline"></i>
+                                    <span>$210.32 (0.3%)</span>
+                                </div>
+                                <div class="section-subtitle" id="netWorthSubtitle">All time</div>
+                            </div>
+                            <div class="section-header-right">
+                                <div class="cashflow-menu-container">
+                                    <button class="dot-menu-btn" onclick="toggleNetWorthDropdown()" id="netWorthMenuBtn">
+                                        <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                                    </button>
+                                    <div class="dropdown-menu" id="netWorthDropdown">
+                                        <div class="dropdown-header">Select date range</div>
+                                        <div class="dropdown-item" onclick="updateNetWorthRange('1m')">1 month</div>
+                                        <div class="dropdown-item" onclick="updateNetWorthRange('3m')">3 months</div>
+                                        <div class="dropdown-item" onclick="updateNetWorthRange('6m')">6 months</div>
+                                        <div class="dropdown-item" onclick="updateNetWorthRange('ytd')">Year to date</div>
+                                        <div class="dropdown-item" onclick="updateNetWorthRange('1y')">1 year</div>
+                                        <div class="dropdown-item active" onclick="updateNetWorthRange('all')">All time</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="card-content">
@@ -4556,12 +4602,6 @@ margin-right: 0.5rem;
                                 <div class="chart-overlay" id="homeNetWorthOverlay">
                                     <div class="chart-crosshair" id="homeNetWorthCrosshair"></div>
                                 </div>
-                            </div>
-                            
-                            <div class="chart-period-selector-bottom" id="netWorthRangePicker">
-                                <button class="chart-period-btn-wealthsimple active" data-range="1m">1M</button>
-                                <button class="chart-period-btn-wealthsimple" data-range="3m">3M</button>
-                                <button class="chart-period-btn-wealthsimple" data-range="6m">6M</button>
                             </div>
                         </div>
                     </div>
@@ -9512,32 +9552,64 @@ margin-right: 0.5rem;
             
             const totalNetWorth = totalAssets - totalLiabilities;
             
+            // Use demo value if no actual balance data
+            const displayNetWorth = totalNetWorth > 0 ? totalNetWorth : 68502;
+            
             // Generate sample net worth history for chart
-            const netWorthHistory = generateNetWorthHistory(totalNetWorth, range);
+            const netWorthHistory = generateNetWorthHistory(displayNetWorth, range);
             
             // Draw the net worth chart
             drawHomeNetWorthChart(netWorthHistory);
             
             // Update the title and change indicator
-            updateHomeNetWorthDisplay(totalNetWorth, range);
+            updateHomeNetWorthDisplay(displayNetWorth, range);
         }
         
         function generateNetWorthHistory(currentValue, range) {
             const history = [];
-            let days = 30;
+            let totalDays = 30;
+            let sampleEveryNDays = 1; // Sample every day by default
             
             switch (range) {
-                case '3m': days = 90; break;
-                case '6m': days = 180; break;
+                case '1m': 
+                    totalDays = 30; 
+                    sampleEveryNDays = 1;
+                    break;
+                case '3m': 
+                    totalDays = 90; 
+                    sampleEveryNDays = 2; // Sample every 2 days
+                    break;
+                case '6m': 
+                    totalDays = 180; 
+                    sampleEveryNDays = 3; // Sample every 3 days
+                    break;
+                case 'ytd': 
+                    const now = new Date();
+                    const startOfYear = new Date(now.getFullYear(), 0, 1);
+                    totalDays = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+                    sampleEveryNDays = totalDays > 180 ? 7 : 3; // Weekly for long YTD periods
+                    break;
+                case '1y': 
+                    totalDays = 365; 
+                    sampleEveryNDays = 7; // Sample weekly
+                    break;
+                case 'all': 
+                    totalDays = 1095; // 3 years
+                    sampleEveryNDays = 14; // Sample bi-weekly
+                    break;
             }
             
-            for (let i = days; i >= 0; i--) {
+            // If currentValue is 0 (no data), use sample data for demo
+            const baseValue = currentValue > 0 ? currentValue : 68502;
+            
+            for (let i = totalDays; i >= 0; i -= sampleEveryNDays) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
                 
-                // Generate realistic fluctuation
-                const fluctuation = (Math.random() - 0.5) * 0.1; // ±5% daily change
-                const dayValue = currentValue * (1 + fluctuation * (i / days));
+                // Generate realistic fluctuation with overall upward trend
+                const trendFactor = 0.9 + (0.1 * (totalDays - i) / totalDays); // Gradual upward trend
+                const fluctuation = (Math.random() - 0.5) * 0.005; // ±0.25% change for smoother curve
+                const dayValue = baseValue * trendFactor * (1 + fluctuation);
                 
                 history.push({
                     date: date.toISOString().split('T')[0],
@@ -9549,30 +9621,36 @@ margin-right: 0.5rem;
         }
         
         function drawHomeNetWorthChart(data) {
+            console.log('Drawing net worth chart with data:', data);
             const canvas = document.getElementById('homeNetWorthCanvas');
-            if (!canvas) return;
+            if (!canvas) {
+                console.log('Net worth canvas not found');
+                return;
+            }
             
-            // Set canvas size to match container
+            // Set canvas size to match container (same height as cashflow chart)
             const container = canvas.parentElement;
             const rect = container.getBoundingClientRect();
+            const containerHeight = Math.max(rect.height, 250); // Minimum 250px height like cashflow
+            
             canvas.width = rect.width * window.devicePixelRatio;
-            canvas.height = 150 * window.devicePixelRatio;
+            canvas.height = containerHeight * window.devicePixelRatio;
             canvas.style.width = rect.width + 'px';
-            canvas.style.height = '150px';
+            canvas.style.height = containerHeight + 'px';
             
             const ctx = canvas.getContext('2d');
             ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
             
             const width = rect.width;
-            const height = 150;
+            const height = containerHeight;
             
             // Clear canvas
             ctx.clearRect(0, 0, width, height);
             
             if (!data.length) return;
             
-            // Chart dimensions
-            const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+            // Chart dimensions (increased left margin for Y-axis labels)
+            const margin = { top: 20, right: 20, bottom: 20, left: 60 };
             const chartWidth = width - margin.left - margin.right;
             const chartHeight = height - margin.top - margin.bottom;
             
@@ -9582,9 +9660,44 @@ margin-right: 0.5rem;
             const maxValue = Math.max(...values);
             const valueRange = maxValue - minValue;
             
+            // Round maxValue to nearest appropriate value for cleaner labels
+            const roundedMax = Math.ceil(maxValue / 10000) * 10000;
+            const adjustedRange = roundedMax - minValue;
+            
             // Helper functions
             const xScale = (index) => margin.left + (index / (data.length - 1)) * chartWidth;
-            const yScale = (value) => margin.top + chartHeight - ((value - minValue) / valueRange) * chartHeight;
+            const yScale = (value) => margin.top + chartHeight - ((value - minValue) / adjustedRange) * chartHeight;
+            
+            // Draw Y-axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            ctx.textAlign = 'right';
+            
+            const yTicks = 4;
+            for (let i = 0; i <= yTicks; i++) {
+                const value = minValue + (adjustedRange / yTicks) * i;
+                const y = yScale(value);
+                
+                // Format as $68.5K style
+                let label;
+                if (value >= 1000) {
+                    label = `$${(value / 1000).toFixed(1)}K`;
+                } else {
+                    label = `$${Math.round(value)}`;
+                }
+                
+                ctx.fillText(label, margin.left - 10, y + 4);
+                
+                // Draw subtle grid line
+                if (i > 0) {
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(margin.left, y);
+                    ctx.lineTo(margin.left + chartWidth, y);
+                    ctx.stroke();
+                }
+            }
             
             // Create gradient
             const gradient = ctx.createLinearGradient(0, 0, 0, height);
@@ -9605,23 +9718,34 @@ margin-right: 0.5rem;
             ctx.fill();
             ctx.globalAlpha = 1;
             
-            // Draw line
+            // Draw smooth line using bezier curves
             ctx.strokeStyle = gradient;
             ctx.lineWidth = 2;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.beginPath();
             
-            data.forEach((point, index) => {
-                const x = xScale(index);
-                const y = yScale(point.value);
+            if (data.length > 1) {
+                ctx.moveTo(xScale(0), yScale(data[0].value));
                 
-                if (index === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
+                for (let i = 1; i < data.length; i++) {
+                    const prevX = xScale(i-1);
+                    const prevY = yScale(data[i-1].value);
+                    const currX = xScale(i);
+                    const currY = yScale(data[i].value);
+                    
+                    if (i === 1) {
+                        // First curve point
+                        const cpx = prevX + (currX - prevX) * 0.5;
+                        ctx.quadraticCurveTo(cpx, prevY, currX, currY);
+                    } else {
+                        // Smooth curve through points
+                        const cpx1 = prevX + (currX - prevX) * 0.3;
+                        const cpx2 = currX - (currX - prevX) * 0.3;
+                        ctx.bezierCurveTo(cpx1, prevY, cpx2, currY, currX, currY);
+                    }
                 }
-            });
+            }
             
             ctx.stroke();
         }
@@ -9644,6 +9768,18 @@ margin-right: 0.5rem;
                     changePercent = 18.5;
                     rangeLabel = '6 months';
                     break;
+                case 'ytd':
+                    changePercent = 15.3;
+                    rangeLabel = 'year to date';
+                    break;
+                case '1y':
+                    changePercent = 22.1;
+                    rangeLabel = '1 year';
+                    break;
+                case 'all':
+                    changePercent = 0.3;
+                    rangeLabel = 'all time';
+                    break;
             }
             
             const netWorthTitle = document.getElementById('netWorthTitle');
@@ -9657,9 +9793,10 @@ margin-right: 0.5rem;
                 const isPositive = changePercent > 0;
                 const arrow = isPositive ? 'arrow-up' : 'arrow-down';
                 const color = isPositive ? '#22c55e' : '#ef4444';
+                const changeAmount = (totalNetWorth * changePercent / 100).toFixed(2);
                 netWorthChange.innerHTML = `
                     <i data-lucide="${arrow}" class="w-4 h-4 inline" style="color: ${color}"></i>
-                    <span style="color: ${color}">${Math.abs(changePercent).toFixed(1)}% (${rangeLabel})</span>
+                    <span style="color: ${color}">$${Math.abs(changeAmount)} (${Math.abs(changePercent).toFixed(1)}%)</span>
                 `;
                 
                 // Reinitialize lucide icons
@@ -9670,7 +9807,7 @@ margin-right: 0.5rem;
         }
         
         function updateHomeNetWorth() {
-            updateHomeNetWorthWithChart('1m'); // Default to 1 month view
+            updateHomeNetWorthWithChart('all'); // Default to all time view to match active button
         }
         
         function scrollToTransactions() {
@@ -9683,25 +9820,24 @@ margin-right: 0.5rem;
             }, 300);
         }
         
-        // Home screen range picker functionality
+        function handleNetWorthCardClick(event) {
+            // Prevent navigation if clicking on dropdown menu or menu button
+            const dropdown = document.getElementById('netWorthDropdown');
+            const menuBtn = document.getElementById('netWorthMenuBtn');
+            
+            if (dropdown && (dropdown.contains(event.target) || menuBtn.contains(event.target))) {
+                event.stopPropagation();
+                return;
+            }
+            
+            // Otherwise navigate to screen 2
+            goToScreen(2);
+        }
+
+        // Home screen range picker functionality  
         function initializeHomeRangePickers() {
             // Cashflow dropdown is initialized with onclick handlers in HTML
-            
-            // Net Worth range picker
-            const netWorthPicker = document.getElementById('netWorthRangePicker');
-            if (netWorthPicker) {
-                netWorthPicker.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('chart-period-btn-wealthsimple')) {
-                        // Update active state
-                        netWorthPicker.querySelectorAll('.chart-period-btn-wealthsimple').forEach(btn => btn.classList.remove('active'));
-                        e.target.classList.add('active');
-                        
-                        // Update net worth calculation based on range
-                        const range = e.target.dataset.range;
-                        updateHomeNetWorthWithRange(range);
-                    }
-                });
-            }
+            // Net Worth now uses dropdown menu instead of bottom picker
         }
         
         function updateHomeCashflowWithRange(range) {
@@ -9984,6 +10120,54 @@ margin-right: 0.5rem;
             // Update the chart with the mapped range
             updateHomeCashflowWithRange(chartRange);
         }
+
+        function toggleNetWorthDropdown() {
+            const dropdown = document.getElementById('netWorthDropdown');
+            const menuBtn = document.getElementById('netWorthMenuBtn');
+            
+            if (dropdown && menuBtn) {
+                dropdown.classList.toggle('show');
+                
+                if (dropdown.classList.contains('show')) {
+                    setTimeout(() => {
+                        document.addEventListener('click', closeNetWorthDropdownOutside);
+                    }, 0);
+                }
+            }
+        }
+        
+        function closeNetWorthDropdownOutside(event) {
+            const dropdown = document.getElementById('netWorthDropdown');
+            const menuBtn = document.getElementById('netWorthMenuBtn');
+            
+            if (dropdown && !dropdown.contains(event.target) && !menuBtn.contains(event.target)) {
+                dropdown.classList.remove('show');
+                document.removeEventListener('click', closeNetWorthDropdownOutside);
+            }
+        }
+        
+        function updateNetWorthRange(rangeType) {
+            // Close dropdown
+            const dropdown = document.getElementById('netWorthDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+                document.removeEventListener('click', closeNetWorthDropdownOutside);
+            }
+            
+            // Update active state in dropdown
+            const dropdownItems = document.querySelectorAll('#netWorthDropdown .dropdown-item');
+            dropdownItems.forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            // Update subtitle
+            const subtitle = document.getElementById('netWorthSubtitle');
+            if (subtitle) {
+                subtitle.textContent = event.currentTarget.textContent;
+            }
+            
+            // Update the net worth chart with new range
+            updateHomeNetWorthWithChart(rangeType);
+        }
         
         function calculateCumulativeSpendingForMonths(expenses, monthCount, offsetMonths) {
             const today = new Date();
@@ -10094,27 +10278,38 @@ margin-right: 0.5rem;
                 }
             }
             
-            // Draw last period data (gray, thinner)
+            // Draw last period data (gray, thinner) with smooth curves
             if (lastPeriodData.length > 0) {
                 ctx.strokeStyle = '#d1d5db';
                 ctx.lineWidth = 1.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
                 ctx.beginPath();
                 
-                lastPeriodData.forEach((point, index) => {
-                    const x = xScale(point.day);
-                    const y = yScale(point.cumulative);
+                if (lastPeriodData.length > 1) {
+                    ctx.moveTo(xScale(lastPeriodData[0].day), yScale(lastPeriodData[0].cumulative));
                     
-                    if (index === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
+                    for (let i = 1; i < lastPeriodData.length; i++) {
+                        const prevX = xScale(lastPeriodData[i-1].day);
+                        const prevY = yScale(lastPeriodData[i-1].cumulative);
+                        const currX = xScale(lastPeriodData[i].day);
+                        const currY = yScale(lastPeriodData[i].cumulative);
+                        
+                        if (i === 1) {
+                            const cpx = prevX + (currX - prevX) * 0.5;
+                            ctx.quadraticCurveTo(cpx, prevY, currX, currY);
+                        } else {
+                            const cpx1 = prevX + (currX - prevX) * 0.3;
+                            const cpx2 = currX - (currX - prevX) * 0.3;
+                            ctx.bezierCurveTo(cpx1, prevY, cpx2, currY, currX, currY);
+                        }
                     }
-                });
+                }
                 
                 ctx.stroke();
             }
             
-            // Draw current period data (primary color, thicker)
+            // Draw current period data (primary color, thicker) with smooth curves
             if (currentPeriodData.length > 0) {
                 const gradient = ctx.createLinearGradient(0, 0, 0, height);
                 gradient.addColorStop(0, '#3b82f6');
@@ -10126,16 +10321,25 @@ margin-right: 0.5rem;
                 ctx.lineJoin = 'round';
                 ctx.beginPath();
                 
-                currentPeriodData.forEach((point, index) => {
-                    const x = xScale(point.day);
-                    const y = yScale(point.cumulative);
+                if (currentPeriodData.length > 1) {
+                    ctx.moveTo(xScale(currentPeriodData[0].day), yScale(currentPeriodData[0].cumulative));
                     
-                    if (index === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
+                    for (let i = 1; i < currentPeriodData.length; i++) {
+                        const prevX = xScale(currentPeriodData[i-1].day);
+                        const prevY = yScale(currentPeriodData[i-1].cumulative);
+                        const currX = xScale(currentPeriodData[i].day);
+                        const currY = yScale(currentPeriodData[i].cumulative);
+                        
+                        if (i === 1) {
+                            const cpx = prevX + (currX - prevX) * 0.5;
+                            ctx.quadraticCurveTo(cpx, prevY, currX, currY);
+                        } else {
+                            const cpx1 = prevX + (currX - prevX) * 0.3;
+                            const cpx2 = currX - (currX - prevX) * 0.3;
+                            ctx.bezierCurveTo(cpx1, prevY, cpx2, currY, currX, currY);
+                        }
                     }
-                });
+                }
                 
                 ctx.stroke();
                 
@@ -10152,9 +10356,6 @@ margin-right: 0.5rem;
             }
         }
         
-        function updateHomeNetWorthWithRange(range) {
-            updateHomeNetWorthWithChart(range);
-        }
 
         // Update save target display
         function updateSaveTargetDisplay() {
