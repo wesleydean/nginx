@@ -560,6 +560,298 @@
             padding: 0;
         }
         
+        /* Side-by-side squares layout for budget display */
+        #budgetDisplay .card-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            padding: 0;
+        }
+        
+        #budgetDisplay .stat-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 0;
+            position: relative;
+            min-height: 120px;
+            height: auto;
+        }
+        
+        /* Change indicator styling */
+        .change-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+        
+        .change-arrow {
+            font-size: 1rem;
+        }
+        
+        .spending-card .change-indicator {
+            color: #ef4444; /* red for spending */
+        }
+        
+        .remaining-card .change-indicator {
+            color: #22c55e; /* green for remaining/positive */
+        }
+        
+        .remaining-card .change-indicator.over-budget {
+            color: #ef4444; /* red when over budget */
+        }
+        
+        /* Side-by-side squares layout for save screen */
+        #saveTargetDisplay .card-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            padding: 0;
+        }
+        
+        #saveTargetDisplay .stat-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 0;
+            position: relative;
+            min-height: 120px;
+            height: auto;
+        }
+        
+        /* Save screen change indicators */
+        .saving-target-card .change-indicator {
+            color: #3b82f6; /* blue for target */
+        }
+        
+        .save-progress-card .change-indicator {
+            color: #22c55e; /* green for progress */
+        }
+        
+        .save-progress-card .change-indicator.behind-target {
+            color: #ef4444; /* red when behind target */
+        }
+        
+        /* Home Screen Styles */
+        .home-section {
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .home-section .card-header {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+            text-align: left;
+        }
+        
+        .home-section .card-header > .home-section-header {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            align-items: flex-start;
+            text-align: left;
+        }
+        
+        .home-section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .section-subtitle {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin: 0;
+        }
+        
+        .cashflow-menu-container {
+            position: relative;
+            z-index: 100;
+        }
+        
+        .dot-menu-btn {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            color: hsl(var(--muted-foreground));
+            transition: color 0.2s ease, background-color 0.2s ease;
+        }
+        
+        .dot-menu-btn:hover {
+            color: hsl(var(--foreground));
+            background-color: hsl(var(--muted));
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: hsl(var(--background));
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            min-width: 220px;
+            z-index: 99999;
+            display: none;
+            margin-top: 0.25rem;
+            pointer-events: auto;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .dropdown-header {
+            padding: 0.75rem 1rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .dropdown-item:hover {
+            background-color: hsl(var(--muted));
+        }
+        
+        .dropdown-item.active {
+            background-color: hsl(var(--primary) / 0.1);
+            border-left-color: hsl(var(--primary));
+            color: hsl(var(--primary));
+            font-weight: 500;
+        }
+        
+        .dropdown-item:first-of-type {
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+        }
+        
+        .dropdown-item:last-of-type {
+            border-bottom-left-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+        }
+        
+        .range-picker {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0;
+        }
+        
+        .range-btn {
+            padding: 0.25rem 0.75rem;
+            background: hsl(var(--muted));
+            border: none;
+            border-radius: 0.375rem;
+            color: hsl(var(--muted-foreground));
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        
+        .range-btn.active {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+        
+        .range-btn:hover:not(.active) {
+            background: hsl(var(--muted) / 0.8);
+        }
+        
+        #homeTransactionsList {
+            padding: 0;
+        }
+        
+        .home-transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+        
+        .home-transaction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .transaction-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.125rem;
+        }
+        
+        .transaction-description {
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .transaction-date {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.75rem;
+        }
+        
+        .transaction-amount {
+            font-weight: 600;
+            color: hsl(var(--destructive));
+        }
+        
+        /* Chart Legend */
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 3px;
+            border-radius: 2px;
+        }
+        
+        .legend-label {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+            font-weight: 500;
+        }
+        
         /* Form Components */
         .form-group {
             display: flex;
@@ -4173,7 +4465,7 @@ margin-right: 0.5rem;
         <!-- Add this just above the screens wrapper -->
         <div class="app-header">
             <div id="user-avatar"></div>
-            <div class="header-title" id="headerTitle">Spend</div>
+            <div class="header-title" id="headerTitle">Home</div>
             <div class="header-actions">
                 <button class="icon-btn" id="settingsButton" onclick="openSettings()" aria-label="Settings">
                     <i data-lucide="settings" class="w-6 h-6"></i>
@@ -4183,7 +4475,89 @@ margin-right: 0.5rem;
         
         <div class="content-container">
             <div class="screens-wrapper" id="screensWrapper">
-                <!-- Screen 1: Tracking -->
+                <!-- Screen 0: Home -->
+                <div class="screen">
+                    <!-- Transactions Section -->
+                    <div class="card home-section" onclick="goToScreen(1); scrollToTransactions()">
+                        <div class="card-header home-section-header">
+                            <h3 class="section-title">Transactions</h3>
+                            <div class="section-subtitle">Most recent <i data-lucide="chevron-right" class="w-4 h-4 inline"></i></div>
+                        </div>
+                        <div class="card-content">
+                            <div id="homeTransactionsList">Loading...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cashflow Section -->
+                    <div class="card home-section">
+                        <div class="card-header">
+                            <div class="home-section-header">
+                                <h3 class="section-title">Cashflow</h3>
+                                <div class="section-subtitle" id="cashflowSubtitle">This month vs. average month</div>
+                            </div>
+                            <div class="cashflow-menu-container">
+                                <button class="dot-menu-btn" onclick="toggleCashflowDropdown()" id="cashflowMenuBtn">
+                                    <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                                </button>
+                                <div class="dropdown-menu" id="cashflowDropdown">
+                                    <div class="dropdown-header">Select date range</div>
+                                    <div class="dropdown-item" onclick="updateCashflowRange('week')">This week vs. last week</div>
+                                    <div class="dropdown-item" onclick="updateCashflowRange('month')">This month vs. last month</div>
+                                    <div class="dropdown-item" onclick="updateCashflowRange('year')">This month vs. last year</div>
+                                    <div class="dropdown-item active" onclick="updateCashflowRange('average')">This month vs. average month</div>
+                                    <div class="dropdown-item" onclick="updateCashflowRange('ytd')">This year vs. last year</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="card chart-container full-width-chart">
+                                <canvas id="homeCashflowCanvas"></canvas>
+                                <div class="chart-overlay" id="homeCashflowOverlay">
+                                    <div class="chart-crosshair" id="homeCashflowCrosshair"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Chart Legend -->
+                            <div class="chart-legend" id="cashflowLegend">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: linear-gradient(to bottom, #3b82f6, #1d4ed8);"></div>
+                                    <span class="legend-label">This month</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: #d1d5db;"></div>
+                                    <span class="legend-label">Last month</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Net Worth Section -->
+                    <div class="card home-section" onclick="goToScreen(2)">
+                        <div class="card-header home-section-header">
+                            <h3 class="section-title" id="netWorthTitle">$0 Net Worth</h3>
+                            <div class="section-subtitle" id="netWorthChange">
+                                <i data-lucide="arrow-up" class="w-4 h-4 inline"></i>
+                                <span>0% (1 month)</span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="card chart-container full-width-chart">
+                                <canvas id="homeNetWorthCanvas"></canvas>
+                                <div class="chart-overlay" id="homeNetWorthOverlay">
+                                    <div class="chart-crosshair" id="homeNetWorthCrosshair"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-period-selector-bottom" id="netWorthRangePicker">
+                                <button class="chart-period-btn-wealthsimple active" data-range="1m">1M</button>
+                                <button class="chart-period-btn-wealthsimple" data-range="3m">3M</button>
+                                <button class="chart-period-btn-wealthsimple" data-range="6m">6M</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Screen 1: Cashflow (formerly Tracking) -->
                 <div class="screen">
                     <!-- Daily Budget Display -->
                     <div class="card" id="budgetDisplay">
@@ -4200,19 +4574,26 @@ margin-right: 0.5rem;
                             </div>
                         </div>
                         <div class="card-content">
-                            <div class="flex items-center justify-between p-4 rounded-lg mb-2 stat-card">
+                            <div class="stat-card spending-card">
                                 <div>
-                                    <div class="text-sm text-muted-foreground">Discretionary Budget</div>
-                                    <div class="text-2xl font-semibold" id="budgetAmount">$41.30</div>
+                                    <div class="text-sm text-muted-foreground">Spent This Month</div>
+                                    <div class="text-2xl font-semibold" id="spentAmount">$0.00</div>
+                                    <div class="change-indicator" id="spentChange">
+                                        <span class="change-arrow">↓</span>
+                                        <span class="change-amount">$0</span>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="flex items-center justify-between p-4 rounded-lg remaining-budget-section" style="background-color: hsl(var(--muted)); position: relative;">
+                            <div class="stat-card remaining-card">
                                 <div>
-                                    <div class="text-sm text-muted-foreground" id="remainingLabel">Remaining Today</div>
+                                    <div class="text-sm text-muted-foreground">Remaining This Month</div>
                                     <div class="text-2xl font-semibold" id="remainingBudget">$41.30</div>
+                                    <div class="change-indicator" id="remainingChange">
+                                        <span class="change-arrow">↑</span>
+                                        <span class="change-amount">On Track</span>
+                                    </div>
                                 </div>
-                                <div class="status-label" id="budgetStatusText" style="position: absolute; bottom: 8px; right: 8px; padding: 4px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 500; color: white; background-color: hsl(156.06deg 40% 40%);">On Track</div>
                             </div>
                         </div>
                     </div>
@@ -4268,10 +4649,10 @@ margin-right: 0.5rem;
                     
                     <!-- Period Expenses -->
                     <div class="card">
-                        <h3 class="card-title mb-4" id="expensesListTitle">Today's Expenses</h3>
+                        <h3 class="card-title mb-4" id="expensesListTitle">Transactions</h3>
                         <div class="expenses-list" id="expensesList">
                             <div style="text-align: center; color: #7f8c8d; padding: 20px;">
-                                No expenses recorded today
+                                No transactions recorded this week
                             </div>
                         </div>
                     </div>
@@ -4299,7 +4680,7 @@ margin-right: 0.5rem;
                     </div> -->
                 </div>
                 
-                <!-- Screen 2: Save -->
+                <!-- Screen 2: Accounts (formerly Save) -->
                 <div class="screen">
                     <!-- Sticky Period Selector for Save Screen -->
                     <div class="period-selector-sticky" id="savePeriodSelectorSticky" style="display: none;">
@@ -4339,19 +4720,26 @@ margin-right: 0.5rem;
                             <div id="saveTargetTitleContainer" style="text-align:left;"></div>
                         </div>
                         <div class="card-content">
-                            <div class="flex items-center justify-between p-4 rounded-lg mb-2 stat-card">
+                            <div class="stat-card saving-target-card">
                                 <div>
                                     <div class="text-sm text-muted-foreground">Saving Target</div>
                                     <div class="text-2xl font-semibold" id="saveTargetAmount">$144.43</div>
+                                    <div class="change-indicator" id="saveTargetChange">
+                                        <span class="change-arrow">↑</span>
+                                        <span class="change-amount">Monthly</span>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="flex items-center justify-between p-4 rounded-lg remaining-budget-section" style="background-color: hsl(var(--muted)); position: relative;">
+                            <div class="stat-card save-progress-card">
                                 <div>
                                     <div class="text-sm text-muted-foreground" id="saveProgressLabel">Progress This Month</div>
                                     <div class="text-2xl font-semibold" id="saveProgressAmount">$0.00</div>
+                                    <div class="change-indicator" id="saveProgressChange">
+                                        <span class="change-arrow">↑</span>
+                                        <span class="change-amount">On Track</span>
+                                    </div>
                                 </div>
-                                <div class="status-label" id="saveStatusText" style="position: absolute; bottom: 8px; right: 8px; padding: 4px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 500; color: white; background-color: hsl(156.06deg 40% 40%);">On Track</div>
                             </div>
                         </div>
                     </div>
@@ -4399,7 +4787,7 @@ margin-right: 0.5rem;
                     </div>
                 </div>
                 
-                <!-- Screen 3: Reports -->
+                <!-- Screen 3: Dashboard (formerly Reports) -->
                 <div class="screen">
                     <!-- Weekly Summary -->
                     <div class="card weekly-summary">
@@ -4493,21 +4881,27 @@ margin-right: 0.5rem;
         <div class="bottom-nav">
             <div class="nav-item active" onclick="goToScreen(0)">
                 <div class="icon">
-                    <i data-lucide="coins" class="w-6 h-6"></i>
+                    <i data-lucide="home" class="w-6 h-6"></i>
                 </div>
-                <div class="label">Spend</div>
+                <div class="label">Home</div>
             </div>
             <div class="nav-item" onclick="goToScreen(1)">
                 <div class="icon">
-                    <i data-lucide="wallet" class="w-6 h-6"></i>
+                    <i data-lucide="trending-up" class="w-6 h-6"></i>
                 </div>
-                <div class="label">Save</div>
+                <div class="label">Cashflow</div>
             </div>
             <div class="nav-item" onclick="goToScreen(2)">
                 <div class="icon">
+                    <i data-lucide="wallet" class="w-6 h-6"></i>
+                </div>
+                <div class="label">Accounts</div>
+            </div>
+            <div class="nav-item" onclick="goToScreen(3)">
+                <div class="icon">
                     <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
                 </div>
-                <div class="label">Reports</div>
+                <div class="label">Dashboard</div>
             </div>
         </div>
     </div>
@@ -5212,8 +5606,7 @@ margin-right: 0.5rem;
         
         
         function getCurrentDate() {
-            // Hard-coded date for consistency: July 7, 2025
-            const now = new Date(2025, 6, 7); // Month is 0-indexed (6 = July)
+            const now = new Date();
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
@@ -5239,22 +5632,26 @@ margin-right: 0.5rem;
         function updateBudgetDisplay() {
             const expenses = loadExpenses();
             let totalSpent = 0;
-            let periodLabel = '';
-            let description = '';
+            let remainingAmount = 0;
+            let budget = 0;
             
             if (currentPeriodMode === 'today') {
-                const today = getCurrentDate();
-                const todayExpenses = expenses[today] || [];
-                totalSpent = todayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
-                periodLabel = 'Daily Budget';
-                description = 'for all variable expenses';
+                // Calculate this week's spending
+                const weekDates = getCurrentWeekDates();
+                console.log('Week dates:', weekDates);
+                weekDates.forEach(date => {
+                    const dayExpenses = expenses[date] || [];
+                    console.log(`Date ${date}: ${dayExpenses.length} expenses, total: $${dayExpenses.reduce((sum, expense) => sum + expense.amount, 0)}`);
+                    totalSpent += dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+                });
                 
-                const remainingLabel = document.getElementById('remainingLabel');
-                if (remainingLabel) {
-                    remainingLabel.textContent = 'Remaining Today';
-                }
+                // Calculate weekly budget (monthly budget / ~4.33 weeks)
+                const monthlyBudget = getMonthlyBudget();
+                budget = monthlyBudget / 4.33; // Average weeks per month
+                remainingAmount = budget - totalSpent;
+                console.log(`Weekly: spent $${totalSpent}, budget $${budget.toFixed(2)}, remaining $${remainingAmount.toFixed(2)}`);
             } else {
-                // Month mode
+                // Monthly calculation
                 const monthKey = getCurrentPeriodKey();
                 Object.keys(expenses).forEach(date => {
                     if (date.startsWith(monthKey)) {
@@ -5263,69 +5660,158 @@ margin-right: 0.5rem;
                     }
                 });
                 
-                const monthName = selectedMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-                periodLabel = `${monthName} Budget`;
-                description = 'monthly spending budget';
-                
-                const remainingLabel = document.getElementById('remainingLabel');
-                if (remainingLabel) {
-                    remainingLabel.textContent = 'Remaining This Month';
-                }
+                budget = getMonthlyBudget();
+                remainingAmount = budget - totalSpent;
             }
             
-            const budget = currentPeriodMode === 'today' ? getDailyBudget() : getMonthlyBudget();
-            const remaining = budget - totalSpent;
+            // Update spent amount
+            const spentAmount = document.getElementById('spentAmount');
+            if (spentAmount) {
+                spentAmount.textContent = formatCurrency(totalSpent);
+            }
             
-            // Update display elements if they exist
-            const budgetPeriodLabel = document.getElementById('budgetPeriodLabel');
-            const budgetAmount = document.getElementById('budgetAmount');
+            // Update remaining amount
             const remainingBudget = document.getElementById('remainingBudget');
-            
-            if (budgetPeriodLabel) {
-                budgetPeriodLabel.textContent = periodLabel;
-            }
-            if (budgetAmount) {
-                budgetAmount.textContent = formatCurrency(budget);
-            }
             if (remainingBudget) {
-                remainingBudget.textContent = formatCurrency(remaining);
+                remainingBudget.textContent = formatCurrency(remainingAmount);
             }
             
-            // Update budget status
-            if (document.getElementById('budgetStatusText')) {
-                const percentUsed = (totalSpent / budget) * 100;
-                let statusText = '';
-                let statusColor = '';
-                let cardBackgroundColor = '';
-                let amountColor = '';
-                
-                if (percentUsed >= 90) {
-                    statusText = 'Over Budget';
-                    statusColor = 'hsl(0deg 84% 60%)'; // Red
-                    cardBackgroundColor = 'hsl(0deg 84% 96%)'; // Light red background
-                    amountColor = 'hsl(0deg 84% 20%)'; // Dark red text
-                } else if (percentUsed >= 75) {
-                    statusText = 'Warning';
-                    statusColor = 'hsl(38deg 92% 50%)'; // Orange
-                    cardBackgroundColor = 'hsl(38deg 92% 96%)'; // Light orange background
-                    amountColor = 'hsl(38deg 92% 20%)'; // Dark orange text
-                } else {
-                    statusText = 'On Track';
-                    statusColor = 'hsl(156.06deg 40% 40%)'; // Green
-                    cardBackgroundColor = 'hsl(156.06deg 40% 96%)'; // Light green background
-                    amountColor = 'hsl(156.06deg 40% 20%)'; // Dark green text
+            // Update labels based on mode
+            updateBudgetLabels();
+            
+            // Update change indicators (calculate monthly status once)
+            updateMonthlyStatus();
+        }
+        
+        let lastMonthlyStatusUpdate = null;
+        
+        function updateMonthlyStatus() {
+            const expenses = loadExpenses();
+            const monthlyBudget = getMonthlyBudget();
+            let monthlySpent = 0;
+            const monthKey = getCurrentPeriodKey();
+            
+            Object.keys(expenses).forEach(date => {
+                if (date.startsWith(monthKey)) {
+                    const dayExpenses = expenses[date] || [];
+                    monthlySpent += dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
                 }
+            });
+            
+            // Only update if values actually changed
+            const currentValues = { monthlySpent, monthlyBudget, monthKey };
+            if (!lastMonthlyStatusUpdate || JSON.stringify(lastMonthlyStatusUpdate) !== JSON.stringify(currentValues)) {
+                lastMonthlyStatusUpdate = currentValues;
+                updateChangeIndicators(monthlySpent, monthlyBudget - monthlySpent, monthlyBudget);
+            }
+        }
+        
+        function getCurrentWeekDates() {
+            const today = new Date();
+            const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Calculate days to Monday
+            
+            const weekDates = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + mondayOffset + i);
+                weekDates.push(date.toISOString().split('T')[0]); // YYYY-MM-DD format
+            }
+            return weekDates;
+        }
+        
+        function updateBudgetLabels() {
+            const spentLabel = document.querySelector('.spending-card .text-muted-foreground');
+            const remainingLabel = document.querySelector('.remaining-card .text-muted-foreground');
+            
+            if (currentPeriodMode === 'today') {
+                if (spentLabel) spentLabel.textContent = 'Spent This Week';
+                if (remainingLabel) remainingLabel.textContent = 'Remaining This Week';
+            } else {
+                if (spentLabel) spentLabel.textContent = 'Spent This Month';
+                if (remainingLabel) remainingLabel.textContent = 'Remaining This Month';
+            }
+        }
+        
+        function calculateMonthOverMonthChange(currentMonthSpent) {
+            const expenses = loadExpenses();
+            const currentDate = new Date(selectedMonthDate);
+            
+            // Get previous month
+            const previousMonth = new Date(currentDate);
+            previousMonth.setMonth(previousMonth.getMonth() - 1);
+            const previousMonthKey = previousMonth.toISOString().substring(0, 7); // YYYY-MM format
+            
+            // Calculate previous month spending
+            let previousMonthSpent = 0;
+            Object.keys(expenses).forEach(date => {
+                if (date.startsWith(previousMonthKey)) {
+                    const dayExpenses = expenses[date] || [];
+                    previousMonthSpent += dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+                }
+            });
+            
+            // Calculate percentage change
+            if (previousMonthSpent === 0) {
+                return currentMonthSpent > 0 ? 100 : null; // 100% increase from 0, or null if both are 0
+            }
+            
+            return ((currentMonthSpent - previousMonthSpent) / previousMonthSpent) * 100;
+        }
+        
+        function updateChangeIndicators(monthlySpent, monthlyRemaining, monthlyBudget) {
+            console.log('updateChangeIndicators called with:', { monthlySpent, monthlyRemaining, monthlyBudget });
+            const spentChange = document.getElementById('spentChange');
+            const remainingChange = document.getElementById('remainingChange');
+            
+            // Calculate monthly percentage used
+            const monthlyPercentUsed = (monthlySpent / monthlyBudget) * 100;
+            
+            // Calculate month-over-month change for spending
+            const monthOverMonthChange = calculateMonthOverMonthChange(monthlySpent);
+            
+            // Update spent change indicator with month-over-month percentage
+            if (spentChange) {
+                const spentArrow = spentChange.querySelector('.change-arrow');
+                const spentAmount = spentChange.querySelector('.change-amount');
                 
-                document.getElementById('budgetStatusText').textContent = statusText;
-                document.getElementById('budgetStatusText').style.backgroundColor = statusColor;
+                if (monthOverMonthChange === null) {
+                    if (spentArrow) spentArrow.textContent = '';
+                    if (spentAmount) spentAmount.textContent = 'No data';
+                } else {
+                    const isIncrease = monthOverMonthChange > 0;
+                    if (spentArrow) spentArrow.textContent = isIncrease ? '↑' : '↓';
+                    if (spentAmount) spentAmount.textContent = `${Math.abs(monthOverMonthChange).toFixed(1)}%`;
+                    
+                    // Update color based on increase/decrease
+                    const changeIndicator = spentChange;
+                    if (changeIndicator) {
+                        changeIndicator.style.color = isIncrease ? '#ef4444' : '#22c55e'; // red for increase, green for decrease
+                    }
+                }
+            }
+            
+            // Update remaining change indicator based on MONTHLY budget status
+            if (remainingChange) {
+                const remainingArrow = remainingChange.querySelector('.change-arrow');
+                const remainingStatus = remainingChange.querySelector('.change-amount');
+                const remainingCard = document.querySelector('.remaining-card .change-indicator');
                 
-                // Update remaining budget card background and text color
-                const remainingBudgetContainer = document.querySelector('.remaining-budget-section');
-                const remainingBudgetAmount = document.getElementById('remainingBudget');
+                // Debug log
+                console.log(`Monthly spent: ${monthlySpent}, Monthly budget: ${monthlyBudget}, Percent used: ${monthlyPercentUsed.toFixed(1)}%`);
                 
-                if (remainingBudgetContainer && remainingBudgetAmount) {
-                    remainingBudgetContainer.style.backgroundColor = cardBackgroundColor;
-                    remainingBudgetAmount.style.color = amountColor;
+                if (monthlyPercentUsed >= 100) {
+                    if (remainingArrow) remainingArrow.textContent = '↓';
+                    if (remainingStatus) remainingStatus.textContent = 'Over Budget';
+                    if (remainingCard) remainingCard.classList.add('over-budget');
+                } else if (monthlyPercentUsed >= 75) {
+                    if (remainingArrow) remainingArrow.textContent = '⚠';
+                    if (remainingStatus) remainingStatus.textContent = 'Warning';
+                    if (remainingCard) remainingCard.classList.remove('over-budget');
+                } else {
+                    if (remainingArrow) remainingArrow.textContent = '↑';
+                    if (remainingStatus) remainingStatus.textContent = 'On Track';
+                    if (remainingCard) remainingCard.classList.remove('over-budget');
                 }
             }
         }
@@ -5340,14 +5826,24 @@ margin-right: 0.5rem;
             let periodExpenses = [];
             
             if (currentPeriodMode === 'today') {
-                const today = getCurrentDate();
-                periodExpenses = expenses[today] || [];
-                // Add the date to each expense for consistent handling
-                periodExpenses = periodExpenses.map(expense => ({
-                    ...expense,
-                    date: today
-                }));
-                if (titleElement) titleElement.textContent = "Today's Expenses";
+                // Show this week's transactions
+                const weekDates = getCurrentWeekDates();
+                weekDates.forEach(date => {
+                    const dayExpenses = expenses[date] || [];
+                    dayExpenses.forEach(expense => {
+                        periodExpenses.push({
+                            ...expense,
+                            date: date
+                        });
+                    });
+                });
+                
+                // Sort by timestamp, newest first
+                periodExpenses.sort((a, b) => {
+                    return b.timestamp - a.timestamp;
+                });
+                
+                if (titleElement) titleElement.textContent = "Transactions";
             } else {
                 // Month mode: gather all expenses for the selected month
                 const monthKey = getCurrentPeriodKey();
@@ -5379,11 +5875,11 @@ margin-right: 0.5rem;
                 });
                 
                 const monthName = selectedMonthDate.toLocaleDateString('en-US', { month: 'long' });
-                if (titleElement) titleElement.textContent = `${monthName} Expenses`;
+                if (titleElement) titleElement.textContent = "Transactions";
             }
             
             if (periodExpenses.length === 0) {
-                const noExpensesText = currentPeriodMode === 'today' ? 'No expenses recorded today' : 'No expenses recorded this month';
+                const noExpensesText = currentPeriodMode === 'today' ? 'No transactions recorded this week' : 'No transactions recorded this month';
                 listContainer.innerHTML = `<div style="text-align: center; color: #7f8c8d; padding: 20px;">${noExpensesText}</div>`;
             } else {
                 listContainer.innerHTML = periodExpenses.map((expense, index) => {
@@ -8186,7 +8682,10 @@ margin-right: 0.5rem;
                 emergency: {},
                 investment: {},
                 retirement: {},
-                crypto: {}
+                crypto: {},
+                credit_card: {},
+                student_loan: {},
+                mortgage: {}
             };
             
             const testExpenses = {};
@@ -8203,6 +8702,11 @@ margin-right: 0.5rem;
             let retirementBalance = 30000 + Math.random() * 15000; // $30000-45000
             let cryptoBalance = 1000 + Math.random() * 1000; // $1000-2000
             
+            // Liability balances (these are debts, so they're negative values for net worth calculation)
+            let creditCardBalance = 2500 + Math.random() * 2000; // $2500-4500 debt
+            let studentLoanBalance = 15000 + Math.random() * 10000; // $15000-25000 debt
+            let mortgageBalance = 180000 + Math.random() * 50000; // $180000-230000 debt
+            
             // Set a steady growth rate for each account (monthly)
             const growthRates = {
                 checking: 0.02 + Math.random() * 0.03, // 2-5% monthly growth
@@ -8210,7 +8714,10 @@ margin-right: 0.5rem;
                 emergency: 0.01 + Math.random() * 0.01, // 1-2% monthly growth
                 investment: 0.04 + Math.random() * 0.04, // 4-8% monthly growth
                 retirement: 0.03 + Math.random() * 0.03, // 3-6% monthly growth
-                crypto: 0.05 + Math.random() * 0.1  // 5-15% monthly growth (more volatile)
+                crypto: 0.05 + Math.random() * 0.1,  // 5-15% monthly growth (more volatile)
+                credit_card: -0.05 - Math.random() * 0.05, // -5% to -10% monthly (paying down debt)
+                student_loan: -0.01 - Math.random() * 0.01, // -1% to -2% monthly (standard loan payments)
+                mortgage: -0.005 - Math.random() * 0.005 // -0.5% to -1% monthly (30-year mortgage)
             };
             
             // Market trend simulation - creates more realistic patterns
@@ -8257,7 +8764,10 @@ margin-right: 0.5rem;
                         emergency: 0,
                         investment: 0,
                         retirement: 0,
-                        crypto: 0
+                        crypto: 0,
+                        credit_card: 0,
+                        student_loan: 0,
+                        mortgage: 0
                     };
                 }
                 
@@ -8499,6 +9009,27 @@ margin-right: 0.5rem;
                     entriesPerMonth[monthKey].crypto++;
                 }
                 
+                if (entriesPerMonth[monthKey].credit_card < 3) {
+                    // Ensure this entry is different from previous entries
+                    creditCardBalance = checkPreviousEntryDifferent('credit_card', creditCardBalance);
+                    testBalances.credit_card[dateKey] = Math.round(creditCardBalance);
+                    entriesPerMonth[monthKey].credit_card++;
+                }
+                
+                if (entriesPerMonth[monthKey].student_loan < 3) {
+                    // Ensure this entry is different from previous entries
+                    studentLoanBalance = checkPreviousEntryDifferent('student_loan', studentLoanBalance);
+                    testBalances.student_loan[dateKey] = Math.round(studentLoanBalance);
+                    entriesPerMonth[monthKey].student_loan++;
+                }
+                
+                if (entriesPerMonth[monthKey].mortgage < 3) {
+                    // Ensure this entry is different from previous entries
+                    mortgageBalance = checkPreviousEntryDifferent('mortgage', mortgageBalance);
+                    testBalances.mortgage[dateKey] = Math.round(mortgageBalance);
+                    entriesPerMonth[monthKey].mortgage++;
+                }
+                
                 // Generate expense data (not every day)
                 if (Math.random() < 0.7) { // 70% chance of expenses
                     const expenseCategories = ['groceries', 'transportation', 'dining', 'entertainment', 'personal', 'clothing', 'health', 'subscriptions', 'other'];
@@ -8572,6 +9103,11 @@ margin-right: 0.5rem;
                     investmentBalance *= (1 + growthRates.investment / 30);
                     retirementBalance *= (1 + growthRates.retirement / 30);
                     cryptoBalance *= (1 + growthRates.crypto / 30);
+                    
+                    // Apply debt paydown rates (negative growth means reducing debt)
+                    creditCardBalance *= (1 + growthRates.credit_card / 30);
+                    studentLoanBalance *= (1 + growthRates.student_loan / 30);
+                    mortgageBalance *= (1 + growthRates.mortgage / 30);
                 }
                 
                 if (shouldSkipToNextMonth) {
@@ -8594,7 +9130,10 @@ margin-right: 0.5rem;
                 { id: 'emergency', name: 'Emergency Fund', type: 'emergency' },
                 { id: 'investment', name: 'Brokerage Account', type: 'investment' },
                 { id: 'retirement', name: '401(k)', type: 'retirement' },
-                { id: 'crypto', name: 'Crypto Portfolio', type: 'crypto' }
+                { id: 'crypto', name: 'Crypto Portfolio', type: 'crypto' },
+                { id: 'credit_card', name: 'Credit Card', type: 'liability' },
+                { id: 'student_loan', name: 'Student Loan', type: 'liability' },
+                { id: 'mortgage', name: 'Mortgage', type: 'liability' }
             ];
             
             // Always update savings accounts when loading test data
@@ -8663,6 +9202,784 @@ margin-right: 0.5rem;
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             });
+        }
+        
+        function updateSaveChangeIndicators(targetAmount, progressAmount, progressPercentage) {
+            const saveTargetChange = document.getElementById('saveTargetChange');
+            const saveProgressChange = document.getElementById('saveProgressChange');
+            
+            // Update target indicator (always show monthly target)
+            if (saveTargetChange) {
+                const targetArrow = saveTargetChange.querySelector('.change-arrow');
+                const targetText = saveTargetChange.querySelector('.change-amount');
+                if (targetArrow) targetArrow.textContent = '';
+                if (targetText) targetText.textContent = 'Monthly';
+            }
+            
+            // Update progress indicator based on target progress
+            if (saveProgressChange) {
+                const progressArrow = saveProgressChange.querySelector('.change-arrow');
+                const progressText = saveProgressChange.querySelector('.change-amount');
+                const progressCard = document.querySelector('.save-progress-card .change-indicator');
+                
+                if (progressPercentage >= 100) {
+                    if (progressArrow) progressArrow.textContent = '✓'; // checkmark
+                    if (progressText) progressText.textContent = 'Target Met';
+                    if (progressCard) progressCard.classList.remove('behind-target');
+                } else if (progressPercentage >= 75) {
+                    if (progressArrow) progressArrow.textContent = '↑';
+                    if (progressText) progressText.textContent = 'On Track';
+                    if (progressCard) progressCard.classList.remove('behind-target');
+                } else if (progressPercentage >= 50) {
+                    if (progressArrow) progressArrow.textContent = '⚠';
+                    if (progressText) progressText.textContent = 'Slow Progress';
+                    if (progressCard) progressCard.classList.remove('behind-target');
+                } else {
+                    if (progressArrow) progressArrow.textContent = '↓';
+                    if (progressText) progressText.textContent = 'Behind Target';
+                    if (progressCard) progressCard.classList.add('behind-target');
+                }
+            }
+        }
+        
+        function updateHomeScreen() {
+            updateHomeTransactions();
+            updateHomeCashflow();
+            updateHomeNetWorth();
+            initializeHomeRangePickers();
+        }
+        
+        function updateHomeTransactions() {
+            const expenses = loadExpenses();
+            let monthlyTransactions = [];
+            
+            // Always get current month's transactions regardless of toggle state
+            const today = new Date();
+            const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            
+            Object.keys(expenses).forEach(date => {
+                if (date.startsWith(currentMonthKey)) {
+                    const dayExpenses = expenses[date] || [];
+                    dayExpenses.forEach(expense => {
+                        monthlyTransactions.push({
+                            ...expense,
+                            date: date
+                        });
+                    });
+                }
+            });
+            
+            // Sort: by date (desc), then by created (asc), then by timestamp for stability (same as cashflow page)
+            monthlyTransactions.sort((a, b) => {
+                if (a.date !== b.date) {
+                    return new Date(b.date) - new Date(a.date); // latest date first
+                }
+                // If same date, sort by created descending (newest first)
+                const createdA = a.created || a.timestamp;
+                const createdB = b.created || b.timestamp;
+                if (createdA !== createdB) {
+                    return createdB - createdA; // Reversed order
+                }
+                // If created timestamps are the same, use timestamp for stable ordering
+                return b.timestamp - a.timestamp;
+            });
+            
+            // Take last 4 transactions from current month
+            const recentTransactions = monthlyTransactions.slice(0, 4);
+            
+            const listContainer = document.getElementById('homeTransactionsList');
+            if (!listContainer) return;
+            
+            if (recentTransactions.length === 0) {
+                listContainer.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 20px;">No recent transactions</div>';
+                return;
+            }
+            
+            listContainer.innerHTML = recentTransactions.map(transaction => {
+                // Parse date manually to avoid timezone issues (same as cashflow page)
+                const dateParts = transaction.date.split('-').map(Number);
+                const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                return `
+                    <div class="home-transaction-item">
+                        <div class="transaction-info">
+                            <div class="transaction-description">${transaction.description ? transaction.description : `${transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1)} expense`}</div>
+                            <div class="transaction-date">${displayDate}</div>
+                        </div>
+                        <div class="transaction-amount">-${formatCurrency(transaction.amount)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateHomeCashflow() {
+            // Initialize with 1M view by default
+            updateHomeCashflowWithRange('1m');
+        }
+        
+        function calculateCumulativeSpending(expenses, monthKey, isCurrentMonth) {
+            const monthExpenses = [];
+            const today = new Date();
+            const currentDay = today.getDate();
+            
+            // Gather all expenses for the month
+            Object.keys(expenses).forEach(date => {
+                if (date.startsWith(monthKey)) {
+                    const dayExpenses = expenses[date] || [];
+                    const totalForDay = dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+                    if (totalForDay > 0) {
+                        const dayOfMonth = parseInt(date.split('-')[2]);
+                        monthExpenses.push({ day: dayOfMonth, amount: totalForDay });
+                    }
+                }
+            });
+            
+            // Sort by day
+            monthExpenses.sort((a, b) => a.day - b.day);
+            
+            // Calculate cumulative amounts
+            const cumulativeData = [];
+            let cumulative = 0;
+            
+            monthExpenses.forEach(expense => {
+                cumulative += expense.amount;
+                cumulativeData.push({ day: expense.day, cumulative });
+            });
+            
+            // For current month, only show up to current day
+            if (isCurrentMonth) {
+                return cumulativeData.filter(d => d.day <= currentDay);
+            }
+            
+            return cumulativeData;
+        }
+        
+        function drawHomeCashflowChart(currentMonthData, lastMonthData, yAxisMax) {
+            const canvas = document.getElementById('homeCashflowCanvas');
+            if (!canvas) return;
+            
+            // Set canvas size to match container
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            const containerHeight = Math.max(rect.height, 250); // Minimum 250px height
+            
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = containerHeight * window.devicePixelRatio;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = containerHeight + 'px';
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            const width = rect.width;
+            const height = containerHeight;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Chart dimensions
+            const margin = { top: 20, right: 20, bottom: 30, left: 60 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            // Helper functions
+            const xScale = (day) => margin.left + (day / 31) * chartWidth;
+            const yScale = (amount) => margin.top + chartHeight - (amount / yAxisMax) * chartHeight;
+            
+            // Draw Y-axis labels (same as reports page style)
+            ctx.fillStyle = '#666';
+            ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            ctx.textAlign = 'right';
+            
+            const yTicks = 4;
+            for (let i = 0; i <= yTicks; i++) {
+                const value = (yAxisMax / yTicks) * i;
+                const y = yScale(value);
+                
+                // Format as $1.5K style
+                let label;
+                if (value >= 1000) {
+                    label = `$${(value / 1000).toFixed(1)}K`;
+                } else {
+                    label = `$${Math.round(value)}`;
+                }
+                
+                ctx.fillText(label, margin.left - 10, y + 4);
+                
+                // Draw subtle grid line
+                if (i > 0) {
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(margin.left, y);
+                    ctx.lineTo(margin.left + chartWidth, y);
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw last month data (gray, thinner)
+            if (lastMonthData.length > 0) {
+                ctx.strokeStyle = '#d1d5db';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                
+                lastMonthData.forEach((point, index) => {
+                    const x = xScale(point.day);
+                    const y = yScale(point.cumulative);
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                
+                ctx.stroke();
+            }
+            
+            // Draw current month data (primary color, thicker)
+            if (currentMonthData.length > 0) {
+                const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                gradient.addColorStop(0, '#3b82f6');
+                gradient.addColorStop(1, '#1d4ed8');
+                
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                
+                currentMonthData.forEach((point, index) => {
+                    const x = xScale(point.day);
+                    const y = yScale(point.cumulative);
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                
+                ctx.stroke();
+                
+                // Add subtle area fill
+                ctx.globalAlpha = 0.1;
+                ctx.fillStyle = gradient;
+                ctx.lineTo(xScale(currentMonthData[currentMonthData.length - 1].day), yScale(0));
+                ctx.lineTo(xScale(currentMonthData[0].day), yScale(0));
+                ctx.closePath();
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        function updateHomeNetWorthWithChart(range) {
+            const balances = loadAccountBalances();
+            const today = getCurrentDate();
+            
+            // Calculate current net worth (assets - liabilities)
+            let totalAssets = 0;
+            let totalLiabilities = 0;
+            
+            // Load account types to distinguish between assets and liabilities
+            const savingsAccounts = JSON.parse(localStorage.getItem('savingsAccounts')) || [];
+            
+            Object.keys(balances).forEach(accountName => {
+                const accountBalances = balances[accountName];
+                const currentBalance = getTotalBalanceForDate(accountBalances, today);
+                
+                // Check if this account is a liability
+                const accountInfo = savingsAccounts.find(acc => acc.id === accountName);
+                const isLiability = accountInfo && accountInfo.type === 'liability';
+                
+                if (isLiability) {
+                    totalLiabilities += currentBalance;
+                } else {
+                    totalAssets += currentBalance;
+                }
+            });
+            
+            const totalNetWorth = totalAssets - totalLiabilities;
+            
+            // Generate sample net worth history for chart
+            const netWorthHistory = generateNetWorthHistory(totalNetWorth, range);
+            
+            // Draw the net worth chart
+            drawHomeNetWorthChart(netWorthHistory);
+            
+            // Update the title and change indicator
+            updateHomeNetWorthDisplay(totalNetWorth, range);
+        }
+        
+        function generateNetWorthHistory(currentValue, range) {
+            const history = [];
+            let days = 30;
+            
+            switch (range) {
+                case '3m': days = 90; break;
+                case '6m': days = 180; break;
+            }
+            
+            for (let i = days; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                
+                // Generate realistic fluctuation
+                const fluctuation = (Math.random() - 0.5) * 0.1; // ±5% daily change
+                const dayValue = currentValue * (1 + fluctuation * (i / days));
+                
+                history.push({
+                    date: date.toISOString().split('T')[0],
+                    value: Math.max(0, dayValue)
+                });
+            }
+            
+            return history;
+        }
+        
+        function drawHomeNetWorthChart(data) {
+            const canvas = document.getElementById('homeNetWorthCanvas');
+            if (!canvas) return;
+            
+            // Set canvas size to match container
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = 150 * window.devicePixelRatio;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = '150px';
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            const width = rect.width;
+            const height = 150;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            if (!data.length) return;
+            
+            // Chart dimensions
+            const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            // Find min/max values
+            const values = data.map(d => d.value);
+            const minValue = Math.min(...values);
+            const maxValue = Math.max(...values);
+            const valueRange = maxValue - minValue;
+            
+            // Helper functions
+            const xScale = (index) => margin.left + (index / (data.length - 1)) * chartWidth;
+            const yScale = (value) => margin.top + chartHeight - ((value - minValue) / valueRange) * chartHeight;
+            
+            // Create gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#22c55e');
+            gradient.addColorStop(1, '#16a34a');
+            
+            // Draw area fill
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(xScale(0), yScale(data[0].value));
+            data.forEach((point, index) => {
+                ctx.lineTo(xScale(index), yScale(point.value));
+            });
+            ctx.lineTo(xScale(data.length - 1), margin.top + chartHeight);
+            ctx.lineTo(xScale(0), margin.top + chartHeight);
+            ctx.closePath();
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            
+            // Draw line
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            
+            data.forEach((point, index) => {
+                const x = xScale(index);
+                const y = yScale(point.value);
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+        }
+        
+        function updateHomeNetWorthDisplay(totalNetWorth, range) {
+            // Calculate change percentage based on range (mock data for now)
+            let changePercent = 0;
+            let rangeLabel = '';
+            
+            switch (range) {
+                case '1m':
+                    changePercent = 5.2;
+                    rangeLabel = '1 month';
+                    break;
+                case '3m':
+                    changePercent = 12.8;
+                    rangeLabel = '3 months';
+                    break;
+                case '6m':
+                    changePercent = 18.5;
+                    rangeLabel = '6 months';
+                    break;
+            }
+            
+            const netWorthTitle = document.getElementById('netWorthTitle');
+            const netWorthChange = document.getElementById('netWorthChange');
+            
+            if (netWorthTitle) {
+                netWorthTitle.textContent = `${formatCurrency(totalNetWorth)} Net Worth`;
+            }
+            
+            if (netWorthChange) {
+                const isPositive = changePercent > 0;
+                const arrow = isPositive ? 'arrow-up' : 'arrow-down';
+                const color = isPositive ? '#22c55e' : '#ef4444';
+                netWorthChange.innerHTML = `
+                    <i data-lucide="${arrow}" class="w-4 h-4 inline" style="color: ${color}"></i>
+                    <span style="color: ${color}">${Math.abs(changePercent).toFixed(1)}% (${rangeLabel})</span>
+                `;
+                
+                // Reinitialize lucide icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+        }
+        
+        function updateHomeNetWorth() {
+            updateHomeNetWorthWithChart('1m'); // Default to 1 month view
+        }
+        
+        function scrollToTransactions() {
+            // Scroll to transactions section on cashflow page
+            setTimeout(() => {
+                const transactionsCard = document.querySelector('#expensesListTitle');
+                if (transactionsCard) {
+                    transactionsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300);
+        }
+        
+        // Home screen range picker functionality
+        function initializeHomeRangePickers() {
+            // Cashflow dropdown is initialized with onclick handlers in HTML
+            
+            // Net Worth range picker
+            const netWorthPicker = document.getElementById('netWorthRangePicker');
+            if (netWorthPicker) {
+                netWorthPicker.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('chart-period-btn-wealthsimple')) {
+                        // Update active state
+                        netWorthPicker.querySelectorAll('.chart-period-btn-wealthsimple').forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+                        
+                        // Update net worth calculation based on range
+                        const range = e.target.dataset.range;
+                        updateHomeNetWorthWithRange(range);
+                    }
+                });
+            }
+        }
+        
+        function updateHomeCashflowWithRange(range) {
+            const expenses = loadExpenses();
+            const today = new Date();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
+            
+            let currentPeriodData, lastPeriodData;
+            
+            switch (range) {
+                case '1m':
+                    // Current month vs last month
+                    const currentMonthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+                    const lastMonthKey = `${currentMonth === 0 ? currentYear - 1 : currentYear}-${String(currentMonth === 0 ? 12 : currentMonth).padStart(2, '0')}`;
+                    
+                    currentPeriodData = calculateCumulativeSpending(expenses, currentMonthKey, true);
+                    lastPeriodData = calculateCumulativeSpending(expenses, lastMonthKey, false);
+                    break;
+                    
+                case '3m':
+                    // Current 3 months vs previous 3 months
+                    currentPeriodData = calculateCumulativeSpendingForMonths(expenses, 3, 0);
+                    lastPeriodData = calculateCumulativeSpendingForMonths(expenses, 3, 3);
+                    break;
+                    
+                case '6m':
+                    // Current 6 months vs previous 6 months
+                    currentPeriodData = calculateCumulativeSpendingForMonths(expenses, 6, 0);
+                    lastPeriodData = calculateCumulativeSpendingForMonths(expenses, 6, 6);
+                    break;
+            }
+            
+            // Find the maximum value for y-axis scaling
+            const maxCurrent = currentPeriodData.length ? Math.max(...currentPeriodData.map(d => d.cumulative)) : 0;
+            const maxLast = lastPeriodData.length ? Math.max(...lastPeriodData.map(d => d.cumulative)) : 0;
+            const maxValue = Math.max(maxCurrent, maxLast);
+            
+            // Round to nearest $100
+            const yAxisMax = Math.ceil(maxValue / 100) * 100;
+            
+            // Update legend labels based on range
+            updateCashflowLegend(range);
+            
+            // Draw the chart with updated data
+            drawHomeCashflowChartWithRange(currentPeriodData, lastPeriodData, yAxisMax, range);
+        }
+        
+        function updateCashflowLegend(range) {
+            const legend = document.getElementById('cashflowLegend');
+            if (!legend) return;
+            
+            let currentLabel, previousLabel;
+            
+            switch (range) {
+                case '1m':
+                    currentLabel = 'This month';
+                    previousLabel = 'Last month';
+                    break;
+                case '3m':
+                    currentLabel = 'Last 3 months';
+                    previousLabel = 'Previous 3 months';
+                    break;
+                case '6m':
+                    currentLabel = 'Last 6 months';
+                    previousLabel = 'Previous 6 months';
+                    break;
+            }
+            
+            const legendLabels = legend.querySelectorAll('.legend-label');
+            if (legendLabels.length >= 2) {
+                legendLabels[0].textContent = currentLabel;
+                legendLabels[1].textContent = previousLabel;
+            }
+        }
+        
+        function toggleCashflowDropdown() {
+            const dropdown = document.getElementById('cashflowDropdown');
+            const menuBtn = document.getElementById('cashflowMenuBtn');
+            
+            if (dropdown && menuBtn) {
+                dropdown.classList.toggle('show');
+                
+                if (dropdown.classList.contains('show')) {
+                    // Position the dropdown relative to the button
+                    const rect = menuBtn.getBoundingClientRect();
+                    dropdown.style.top = (rect.bottom + 4) + 'px';
+                    dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+                    
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', closeCashflowDropdownOutside);
+                } else {
+                    document.removeEventListener('click', closeCashflowDropdownOutside);
+                }
+            }
+        }
+        
+        function closeCashflowDropdownOutside(event) {
+            const dropdown = document.getElementById('cashflowDropdown');
+            const menuBtn = document.getElementById('cashflowMenuBtn');
+            
+            if (dropdown && !dropdown.contains(event.target) && !menuBtn.contains(event.target)) {
+                dropdown.classList.remove('show');
+                document.removeEventListener('click', closeCashflowDropdownOutside);
+            }
+        }
+        
+        function updateCashflowRange(rangeType) {
+            // Close dropdown
+            const dropdown = document.getElementById('cashflowDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+                document.removeEventListener('click', closeCashflowDropdownOutside);
+            }
+            
+            // Update active state
+            const dropdownItems = dropdown.querySelectorAll('.dropdown-item');
+            dropdownItems.forEach(item => item.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update subtitle
+            const subtitle = document.getElementById('cashflowSubtitle');
+            if (subtitle) {
+                subtitle.textContent = event.target.textContent;
+            }
+            
+            // For now, use existing logic with default average comparison
+            updateHomeCashflowWithRange('1m');
+        }
+        
+        function calculateCumulativeSpendingForMonths(expenses, monthCount, offsetMonths) {
+            const today = new Date();
+            let cumulativeData = [];
+            let cumulative = 0;
+            
+            // Generate data for each day across all months in the period
+            for (let monthOffset = offsetMonths + monthCount - 1; monthOffset >= offsetMonths; monthOffset--) {
+                const targetDate = new Date(today);
+                targetDate.setMonth(today.getMonth() - monthOffset);
+                const monthKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}`;
+                
+                // Get expenses for this month
+                Object.keys(expenses).forEach(date => {
+                    if (date.startsWith(monthKey)) {
+                        const dayExpenses = expenses[date] || [];
+                        const totalForDay = dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+                        if (totalForDay > 0) {
+                            cumulative += totalForDay;
+                            const dayOfPeriod = Math.floor((new Date(date) - new Date(targetDate.getFullYear(), targetDate.getMonth(), 1)) / (1000 * 60 * 60 * 24)) + 1;
+                            cumulativeData.push({ day: dayOfPeriod + (monthCount - monthOffset - 1) * 31, cumulative });
+                        }
+                    }
+                });
+            }
+            
+            return cumulativeData.sort((a, b) => a.day - b.day);
+        }
+        
+        function drawHomeCashflowChartWithRange(currentPeriodData, lastPeriodData, yAxisMax, range) {
+            const canvas = document.getElementById('homeCashflowCanvas');
+            if (!canvas) return;
+            
+            // Set canvas size to match container
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            const containerHeight = Math.max(rect.height, 250); // Minimum 250px height
+            
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = containerHeight * window.devicePixelRatio;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = containerHeight + 'px';
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            const width = rect.width;
+            const height = containerHeight;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Chart dimensions
+            const margin = { top: 20, right: 20, bottom: 30, left: 60 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            // Calculate max days based on range
+            let maxDays = 31;
+            switch (range) {
+                case '3m': maxDays = 93; break;
+                case '6m': maxDays = 186; break;
+            }
+            
+            // Helper functions
+            const xScale = (day) => margin.left + (day / maxDays) * chartWidth;
+            const yScale = (amount) => margin.top + chartHeight - (amount / yAxisMax) * chartHeight;
+            
+            // Draw Y-axis labels
+            ctx.fillStyle = '#666';
+            ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+            ctx.textAlign = 'right';
+            
+            const yTicks = 4;
+            for (let i = 0; i <= yTicks; i++) {
+                const value = (yAxisMax / yTicks) * i;
+                const y = yScale(value);
+                
+                // Format as $1.5K style
+                let label;
+                if (value >= 1000) {
+                    label = `$${(value / 1000).toFixed(1)}K`;
+                } else {
+                    label = `$${Math.round(value)}`;
+                }
+                
+                ctx.fillText(label, margin.left - 10, y + 4);
+                
+                // Draw subtle grid line
+                if (i > 0) {
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(margin.left, y);
+                    ctx.lineTo(margin.left + chartWidth, y);
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw last period data (gray, thinner)
+            if (lastPeriodData.length > 0) {
+                ctx.strokeStyle = '#d1d5db';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                
+                lastPeriodData.forEach((point, index) => {
+                    const x = xScale(point.day);
+                    const y = yScale(point.cumulative);
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                
+                ctx.stroke();
+            }
+            
+            // Draw current period data (primary color, thicker)
+            if (currentPeriodData.length > 0) {
+                const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                gradient.addColorStop(0, '#3b82f6');
+                gradient.addColorStop(1, '#1d4ed8');
+                
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                
+                currentPeriodData.forEach((point, index) => {
+                    const x = xScale(point.day);
+                    const y = yScale(point.cumulative);
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                
+                ctx.stroke();
+                
+                // Add subtle area fill
+                if (currentPeriodData.length > 1) {
+                    ctx.globalAlpha = 0.1;
+                    ctx.fillStyle = gradient;
+                    ctx.lineTo(xScale(currentPeriodData[currentPeriodData.length - 1].day), yScale(0));
+                    ctx.lineTo(xScale(currentPeriodData[0].day), yScale(0));
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            }
+        }
+        
+        function updateHomeNetWorthWithRange(range) {
+            updateHomeNetWorthWithChart(range);
         }
 
         // Update save target display
@@ -8739,48 +10056,8 @@ margin-right: 0.5rem;
                 saveProgressAmount.textContent = `${sign}${formatCurrency(progressAmount)}`;
             }
             
-            // Update save status
-            if (document.getElementById('saveStatusText')) {
-                // Use the calculated progressPercentage
-                let statusText = '';
-                let statusColor = '';
-                let cardBackgroundColor = '';
-                let amountColor = '';
-                
-                if (progressPercentage >= 100) {
-                    statusText = 'Target Met!';
-                    statusColor = 'hsl(156.06deg 40% 40%)'; // Green
-                    cardBackgroundColor = 'hsl(156.06deg 40% 96%)'; // Light green background
-                    amountColor = 'hsl(156.06deg 40% 20%)'; // Dark green text
-                } else if (progressPercentage >= 75) {
-                    statusText = 'On Track';
-                    statusColor = 'hsl(156.06deg 40% 40%)'; // Green
-                    cardBackgroundColor = 'hsl(156.06deg 40% 96%)'; // Light green background
-                    amountColor = 'hsl(156.06deg 40% 20%)'; // Dark green text
-                } else if (progressPercentage >= 50) {
-                    statusText = 'Good Progress';
-                    statusColor = 'hsl(38deg 92% 50%)'; // Orange
-                    cardBackgroundColor = 'hsl(38deg 92% 96%)'; // Light orange background
-                    amountColor = 'hsl(38deg 92% 20%)'; // Dark orange text
-                } else {
-                    statusText = 'Behind Target';
-                    statusColor = 'hsl(0deg 84% 60%)'; // Red
-                    cardBackgroundColor = 'hsl(0deg 84% 96%)'; // Light red background
-                    amountColor = 'hsl(0deg 84% 20%)'; // Dark red text
-                }
-                
-                document.getElementById('saveStatusText').textContent = statusText;
-                document.getElementById('saveStatusText').style.backgroundColor = statusColor;
-                
-                // Update progress card background and text color
-                const progressContainer = document.querySelector('#saveTargetDisplay .remaining-budget-section');
-                const progressAmountEl = document.getElementById('saveProgressAmount');
-                
-                if (progressContainer && progressAmountEl) {
-                    progressContainer.style.backgroundColor = cardBackgroundColor;
-                    progressAmountEl.style.color = amountColor;
-                }
-            }
+            // Update save change indicators
+            updateSaveChangeIndicators(targetAmount, progressAmount, progressPercentage);
             
             // Update progress label to show appropriate context
             const progressLabel = document.getElementById('saveProgressLabel');
@@ -9637,15 +10914,19 @@ margin-right: 0.5rem;
             
             switch (currentScreen) {
                 case 0:
-                    headerTitle.textContent = 'Spend';
+                    headerTitle.textContent = 'Home';
                     settingsButton.style.display = 'block';
                     break;
                 case 1:
-                    headerTitle.textContent = 'Save';
+                    headerTitle.textContent = 'Cashflow';
                     settingsButton.style.display = 'block';
                     break;
                 case 2:
-                    headerTitle.textContent = 'Reports';
+                    headerTitle.textContent = 'Accounts';
+                    settingsButton.style.display = 'block';
+                    break;
+                case 3:
+                    headerTitle.textContent = 'Dashboard';
                     settingsButton.style.display = 'block';
                     break;
                 default:
@@ -9665,15 +10946,20 @@ margin-right: 0.5rem;
             });
             updateHeaderTitle();
             // ... existing code for updating screens ...
-            if (screenIndex === 2) {
-                updateReports();
-                setTimeout(updateChart, 300);
-            } else if (screenIndex === 0) {
-                setPeriodMode('today');
+            if (screenIndex === 0) {
+                // Home screen
+                updateHomeScreen();
             } else if (screenIndex === 1) {
-                // Set month mode as default for save screen
+                // Cashflow screen (formerly Spend)
+                setPeriodMode('today');
+            } else if (screenIndex === 2) {
+                // Accounts screen (formerly Save)
                 setSavePeriodMode('month');
                 updateSaveScreen();
+            } else if (screenIndex === 3) {
+                // Dashboard screen (formerly Reports)
+                updateReports();
+                setTimeout(updateChart, 300);
             }
         };
 
