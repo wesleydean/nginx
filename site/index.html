@@ -209,7 +209,7 @@
         
         /* Card Components */
         .stat-card, .home-section, .modern-balance-card {
-            background-color: hsl(var(--card)) !important;
+            background-color: hsl(var(--card));
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
         }
@@ -1778,7 +1778,6 @@
         .expense-item {
             display: flex;
             flex: 1;
-            justify-content: space-between;
             align-items: center;
             padding: 1rem;
             background-color: hsl(var(--card));
@@ -1786,19 +1785,26 @@
             border-radius: var(--radius);
             transition: transform 0.12s, background-color 0.16s;
             cursor: pointer;
+            gap: 0.75rem;
+        }
+        
+        .expense-icon {
+            font-size: 1.1rem;
+            flex-shrink: 0;
         }
         
         .expense-details {
             display: flex;
             flex-direction: column;
             gap: .19rem;
+            flex: 1;
         }
         
         .expense-description {
             text-transform: capitalize;
-            font-size: 1.01rem;
+            font-size: 0.95rem;
             color: #444;
-            font-weight: 600;
+            font-weight: 500;
             flex: 1 1 40%;
         }
         
@@ -1811,9 +1817,43 @@
         }
         
         .expense-amount {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
-            color: hsl(var(--destructive));
+            color: hsl(var(--foreground));
+            text-align: right;
+            flex-shrink: 0;
+        }
+        
+        .date-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .date-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            margin-bottom: 0;
+            background: hsl(var(--muted) / 0.3);
+            border-radius: var(--radius);
+            font-weight: 600;
+        }
+        
+        .date-title {
+            font-size: 0.9rem;
+            color: hsl(var(--foreground));
+        }
+        
+        .date-total {
+            font-size: 0.9rem;
+            color: hsl(var(--muted-foreground));
+            font-weight: 700;
+        }
+        
+        .date-transactions {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
         }
         
         .delete-btn {
@@ -2005,6 +2045,37 @@
         .weekly-stat-label {
             font-size: 0.8rem;
             opacity: 0.8;
+        }
+        
+        /* Combined spent/remaining card styles */
+        .combined-stats {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        
+        .combined-stat {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .combined-stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .combined-stat-label {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+        
+        .stat-separator {
+            width: 1px;
+            height: 40px;
+            background: hsla(var(--primary-foreground) / 0.3);
+            margin: 0 1rem;
         }
         
         /* period-selector uses .card class for styling */
@@ -5028,15 +5099,18 @@ margin-right: 0.5rem;
                     <!-- Weekly Summary -->
                     <div class="card weekly-summary">
                         <h3>This Week's Financial Health</h3>
-                        <div class="weekly-stats">
-                            <div class="weekly-stat">
-                                <div class="weekly-stat-value" id="weeklySpent">$0</div>
-                                <div class="weekly-stat-label">Spent</div>
+                        <div class="combined-stats">
+                            <div class="combined-stat">
+                                <div class="combined-stat-value" id="weeklySpent">$0</div>
+                                <div class="combined-stat-label">Spent</div>
                             </div>
-                            <div class="weekly-stat">
-                                <div class="weekly-stat-value" id="weeklyRemaining">$286</div>
-                                <div class="weekly-stat-label">Remaining</div>
+                            <div class="stat-separator"></div>
+                            <div class="combined-stat">
+                                <div class="combined-stat-value" id="weeklyRemaining">$286</div>
+                                <div class="combined-stat-label">Remaining</div>
                             </div>
+                        </div>
+                        <div class="weekly-stats" style="margin-top: 20px;">
                             <div class="weekly-stat">
                                 <div class="weekly-stat-value" id="projectedMonthlySavings">$0</div>
                                 <div class="weekly-stat-label">Projected Savings</div>
@@ -6137,30 +6211,63 @@ margin-right: 0.5rem;
                 const noExpensesText = currentPeriodMode === 'today' ? 'No transactions recorded this week' : 'No transactions recorded this month';
                 listContainer.innerHTML = `<div style="text-align: center; color: #7f8c8d; padding: 20px;">${noExpensesText}</div>`;
             } else {
-                listContainer.innerHTML = periodExpenses.map((expense, index) => {
-                    let displayDate = '';
-                    if (currentPeriodMode === 'month') {
-                        // Parse date manually to avoid timezone issues
-                        const dateParts = expense.date.split('-').map(Number);
-                        const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-                        displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' • ';
+                // Group expenses by date
+                const expensesByDate = {};
+                periodExpenses.forEach(expense => {
+                    if (!expensesByDate[expense.date]) {
+                        expensesByDate[expense.date] = [];
                     }
+                    expensesByDate[expense.date].push(expense);
+                });
+                
+                // Generate HTML with date grouping
+                let html = '';
+                Object.keys(expensesByDate).sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
+                    const expenses = expensesByDate[date];
+                    const dateParts = date.split('-').map(Number);
+                    const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                    const dateTitle = dateObj.toLocaleDateString('en-US', { 
+                        month: 'long', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                    });
                     
-                    return `
-                        <div class="swipe-container" data-type="expense" data-date="${expense.date}" data-timestamp="${expense.timestamp}">
-                            <div class="swipe-content">
-                                <div class="expense-item">
-                                    <div class="expense-details">
-                                        <div class="expense-description">${getCategoryEmoji(expense.category)} ${expense.description ? expense.description : `${expense.category} expense`}</div>
-                                        <div class="expense-category">${displayDate}${expense.category}</div>
-                                    </div>
-                                    <div class="expense-amount">${formatCurrency(expense.amount)}</div>
-                                </div>
+                    // Calculate daily total
+                    const dayTotal = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+                    
+                    html += `
+                        <div class="date-group">
+                            <div class="date-header">
+                                <span class="date-title">${dateTitle}</span>
+                                <span class="date-total">$${dayTotal.toFixed(2)}</span>
                             </div>
-                            <div class="swipe-action" onclick="handleExpenseDelete(this); event.stopPropagation(); return false;"><i data-lucide="x" class="w-5 h-5"></i></div>
+                            <div class="date-transactions">
+                    `;
+                    
+                    expenses.forEach(expense => {
+                        html += `
+                            <div class="swipe-container" data-type="expense" data-date="${expense.date}" data-timestamp="${expense.timestamp}">
+                                <div class="swipe-content">
+                                    <div class="expense-item">
+                                        <div class="expense-icon">${getCategoryEmoji(expense.category)}</div>
+                                        <div class="expense-details">
+                                            <div class="expense-description">${expense.description ? expense.description : `${expense.category} expense`}</div>
+                                        </div>
+                                        <div class="expense-amount">$${parseFloat(expense.amount).toFixed(2)}</div>
+                                    </div>
+                                </div>
+                                <div class="swipe-action" onclick="handleExpenseDelete(this); event.stopPropagation(); return false;"><i data-lucide="x" class="w-5 h-5"></i></div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
                         </div>
                     `;
-                }).join('');
+                });
+                
+                listContainer.innerHTML = html;
             }
         }
         
@@ -8743,6 +8850,7 @@ margin-right: 0.5rem;
         document.addEventListener('DOMContentLoaded', function() {
             renderBudgetTitle();
             renderSaveTitle();
+            updateHomeScreen(); // Load home page data by default
         });
 
         // Swipe to Delete Functionality
