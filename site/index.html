@@ -1539,9 +1539,39 @@
             align-items: center;
             justify-content: space-between;
             padding: 20px;
-            background: #fff;
-            position: relative;
+            background: linear-gradient(to bottom, 
+                hsl(var(--background)) 0%, 
+                hsla(var(--background) / 0.7) 70%, 
+                transparent 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 10;
+        }
+        
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 30%;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            pointer-events: none;
+        }
+        
+        .app-header::after {
+            content: '';
+            position: absolute;
+            top: 30%;
+            left: 0;
+            right: 0;
+            height: 40%;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            pointer-events: none;
         }
         
         .app-header h1 {
@@ -1576,7 +1606,7 @@
             overflow-y: auto;
             overflow-x: hidden; /* Prevent horizontal scrolling */
             padding: 1rem;
-            padding-top: 0;
+            padding-top: 86px; /* Account for fixed header height */
             background-color: hsl(var(--background));
         }
         
