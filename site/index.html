@@ -380,12 +380,12 @@
 
         .swipe-container {
             position: relative;
-            border-radius: var(--radius);
+            border-radius: 0;
             background-color: hsl(var(--background)); /* Changed from destructive to background */
             position: relative;
             overflow: hidden;
             width: 100%;
-            border-radius: var(--radius);
+            border-radius: 0;
             /* margin-bottom: 8px; */
             touch-action: pan-y; /* Change to pan-y to enable horizontal swiping */
             user-select: none;
@@ -409,7 +409,7 @@
             font-weight: bold;
             cursor: pointer;
             z-index: 0;
-            border-radius: 0 var(--radius) var(--radius) 0;
+            border-radius: 0;
             -webkit-tap-highlight-color: rgba(255,255,255,0.3);
             touch-action: manipulation;
         } */
@@ -428,7 +428,6 @@
             font-weight: bold;
             cursor: pointer;
             z-index: 1;
-            border-radius: 0 var(--radius) var(--radius) 0;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
             align-items: center;
@@ -437,14 +436,12 @@
             font-weight: bold;
             cursor: pointer;
             z-index: 0;
-            border-radius: 0 var(--radius) var(--radius) 0;
             -webkit-tap-highlight-color: rgba(255,255,255,0.3);
             touch-action: manipulation;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             z-index: 0; /* Higher z-index to ensure it's above other elements */
-            border-radius: 0 8px 8px 0;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
             touch-action: none; /* Disable browser handling of all panning and zooming gestures */
@@ -509,7 +506,7 @@
             width: 100%;
             margin: 0;
             height: 100%;
-            border-radius: var(--radius); /* This matches parent container's radius */
+            border-radius: 0; /* This matches parent container's radius */
             display: flex;
             align-items: center;
         }
@@ -782,14 +779,17 @@
         }
         
         .section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 1.2rem;
+            font-weight: 400;
             margin: 0;
+            color: hsl(220, 13%, 28%);
         }
         
-        /* Smaller transactions title on cashflow page */
+        /* Transactions title on cashflow page - match other section headers */
         #expensesListTitle {
-            font-size: 1rem !important;
+            font-size: 1.2rem !important;
+            font-weight: 400 !important;
+            color: hsl(220, 13%, 28%) !important;
         }
         
         /* Add margin-bottom to card-header on cashflow screen */
@@ -1615,11 +1615,6 @@
             overflow-x: hidden; /* Prevent horizontal scrolling */
             padding: 1rem;
             padding-top: 86px; /* Account for fixed header height */
-            background-color: hsl(var(--background));
-        }
-        
-        /* Subtle background for all screens to make sections stand out */
-        .screen {
             background-color: rgba(200, 160, 61, 0.04);
         }
         
@@ -1772,6 +1767,7 @@
         .expenses-list {
             /* max-height: 300px; */
             overflow-y: auto;
+            margin: 0 -1rem;
         }
         
         /* .expense-item {
@@ -1792,7 +1788,7 @@
             padding: 1rem;
             background-color: hsl(var(--card));
             border: 1px solid hsl(var(--border));
-            border-radius: var(--radius);
+            border-radius: 0;
             transition: transform 0.12s, background-color 0.16s;
             cursor: pointer;
             gap: 0.75rem;
@@ -1835,7 +1831,7 @@
         }
         
         .date-group {
-            margin-bottom: 1.5rem;
+            /*  */
         }
         
         .date-header {
@@ -1844,8 +1840,8 @@
             align-items: center;
             padding: 0.5rem 1rem;
             margin-bottom: 0;
-            background: hsl(var(--muted) / 0.3);
-            border-radius: var(--radius);
+            background: hsl(0deg 0% 0% / 2%);
+            /* border-radius: var(--radius); */
             font-weight: 600;
         }
         
@@ -2098,6 +2094,33 @@
             text-align: center;
         }
         
+        .budget-header-section {
+            border-top: 1px solid hsl(var(--border));
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+        }
+        
+        .budget-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 38px;
+        }
+        
+        #monthYearSelectorBtn {
+            height: 38px !important;
+            box-sizing: border-box !important;
+            line-height: 1 !important;
+            min-height: 38px !important;
+            max-height: 38px !important;
+        }
+        
+        #monthYearSelectorBtn:hover {
+            background: hsl(var(--accent)) !important;
+            transition: background 0.2s ease;
+        }
+        
+        
         .combined-budget-stats {
             display: flex;
             align-items: stretch;
@@ -2142,10 +2165,15 @@
         .period-icon-toggle {
             display: flex;
             align-items: center;
-            background: hsl(210deg 28.54% 92.28%);
-            border-radius: calc(var(--radius) * 2.5);
+            background: hsl(var(--secondary));
+            border: 1px solid hsl(var(--border));
+            border-radius: 8px;
             padding: 4px;
-            margin-left: auto;
+            height: 38px;
+            box-sizing: border-box;
+            min-height: 38px;
+            max-height: 38px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         
         .period-icon-btn {
@@ -2156,29 +2184,35 @@
             height: 30px;
             border: none;
             background: transparent;
-            border-radius: calc(var(--radius) * 2);
+            border-radius: 4px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             color: hsl(var(--muted-foreground));
             padding: 0;
+            transform: scale(1);
         }
         button.period-icon-btn {
             min-height: 0;
         }
         
         .period-icon-btn.active {
-            background-color: hsl(var(--background));
+            background: hsl(var(--background));
             color: hsl(var(--foreground));
-            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transform: scale(1.1);
+            opacity: 1;
         }
         
         .period-icon-btn:hover:not(.active) {
             color: hsl(var(--foreground));
+            transform: scale(1.05);
+        }
+        
+        .period-icon-btn:active {
+            transform: scale(0.95);
         }
         
         .period-icon-btn:focus {
             outline: none;
-            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
         }
 
         /* Original period switch (to be hidden/replaced) */
@@ -4819,8 +4853,13 @@ margin-right: 0.5rem;
                     <!-- Transactions Section -->
                     <div class="card home-section" onclick="goToScreen(1); scrollToTransactions()">
                         <div class="card-header home-section-header">
-                            <h3 class="section-title">Transactions</h3>
-                            <div class="section-subtitle">Most recent <i data-lucide="chevron-right" class="w-4 h-4 inline"></i></div>
+                            <div class="section-header-left">
+                                <h3 class="section-title">Transactions</h3>
+                                <div class="section-subtitle">Most recent</div>
+                            </div>
+                            <div class="section-header-right">
+                                <div class="section-subtitle">View all <i data-lucide="chevron-right" class="w-4 h-4 inline"></i></div>
+                            </div>
                         </div>
                         <div class="card-content">
                             <div id="homeTransactionsList">Loading...</div>
@@ -4913,18 +4952,6 @@ margin-right: 0.5rem;
                 <div class="screen">
                     <!-- Daily Budget Display -->
                     <div class="card" id="budgetDisplay">
-                        <div class="card-header" style="text-align:center;">
-                            <div id="budgetTitleContainer" style="text-align:left;"></div>
-                            <!-- Icon-only Today/Month Toggle - Only this is included -->
-                            <div class="period-icon-toggle">
-                                <button onclick="setPeriodMode('today')" class="period-icon-btn active" id="todayBtnIcon" title="Today View">
-                                    <i data-lucide="sun" class="w-4 h-4"></i>
-                                </button>
-                                <button onclick="setPeriodMode('month')" class="period-icon-btn" id="monthBtnIcon" title="Month View">
-                                    <i data-lucide="calendar" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
                         <div class="card-content">
                             <div class="combined-budget-card">
                                 <div class="combined-budget-stats">
@@ -4943,6 +4970,21 @@ margin-right: 0.5rem;
                                         <div class="change-indicator" id="remainingChange">
                                             <span class="change-arrow">↑</span>
                                             <span class="change-amount">On Track</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Header section moved below the stats -->
+                                <div class="budget-header-section">
+                                    <div class="budget-header-content">
+                                        <div id="budgetTitleContainer" style="text-align:left;"></div>
+                                        <div class="period-icon-toggle">
+                                            <button onclick="setPeriodMode('today')" class="period-icon-btn active" id="todayBtnIcon" title="Today View">
+                                                <i data-lucide="sun" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="setPeriodMode('month')" class="period-icon-btn" id="monthBtnIcon" title="Month View">
+                                                <i data-lucide="calendar" class="w-4 h-4"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -7801,6 +7843,7 @@ margin-right: 0.5rem;
             if (todayBtnIcon) todayBtnIcon.classList.toggle('active', mode === 'today');
             if (monthBtnIcon) monthBtnIcon.classList.toggle('active', mode === 'month');
             
+            
             // Add/remove today-view class for styling
             const screen = document.querySelector('.screen');
             if (screen) {
@@ -8678,7 +8721,7 @@ margin-right: 0.5rem;
         // Add new month/year slide-out logic
         function showMonthYearSlideOut() {
             // Determine if this is for save screen based on current screen
-            isSaveScreenSelection = (currentScreen === 1);
+            isSaveScreenSelection = (currentScreen === 2);
             
             // Set temp values based on which screen we're on
             if (isSaveScreenSelection) {
@@ -8776,7 +8819,9 @@ margin-right: 0.5rem;
                 } else {
                     selectedMonthDate = new Date(tempSelectedYear, tempSelectedMonth, 1);
                     updatePeriodDropdownValues();
-                    updatePeriodView();
+                    updateBudgetDisplay();
+                    updateExpensesList();
+                    renderBudgetTitle();
                 }
             }
             hideMonthYearSlideOut();
@@ -8824,18 +8869,20 @@ margin-right: 0.5rem;
                 // Month view: clickable, large, left-aligned, Lucide chevron to the right
                 const btn = document.createElement('button');
                 btn.id = 'monthYearSelectorBtn';
+                btn.className = 'section-title';
                 btn.onclick = showMonthYearSlideOut;
-                btn.style.background = 'none';
-                btn.style.border = 'none'; // Remove border
-                btn.style.borderRadius = '14px';
+                btn.style.background = 'transparent';
+                btn.style.border = '1px solid hsl(var(--border))';
+                btn.style.borderRadius = '8px';
                 btn.style.display = 'inline-flex';
                 btn.style.alignItems = 'center';
                 btn.style.justifyContent = 'flex-start';
-                btn.style.fontSize = '1.5rem';
-                btn.style.fontWeight = '700';
-                btn.style.color = 'inherit';
                 btn.style.cursor = 'pointer';
-                btn.style.padding = '0'; // Remove padding
+                btn.style.fontSize = '1.1rem';
+                btn.style.color = 'hsl(var(--muted-foreground))';
+                btn.style.padding = '9px 12px';
+                btn.style.height = '38px';
+                btn.style.boxSizing = 'border-box';
                 btn.style.outline = 'none';
                 btn.style.width = 'auto';
                 // Month/year text
@@ -8862,16 +8909,42 @@ margin-right: 0.5rem;
                     }, 100);
                 }
             } else {
-                // Today view: static, left-aligned title
+                // Today view: show actual date with sun rising icon
                 const h3 = document.createElement('h3');
-                h3.className = 'card-title';
+                h3.className = 'section-title';
                 h3.id = 'budgetPeriodLabel';
-                h3.style.fontSize = '1.5rem';
-                h3.style.fontWeight = '700';
                 h3.style.margin = '0';
                 h3.style.textAlign = 'left';
-                h3.textContent = 'Today';
+                h3.style.display = 'flex';
+                h3.style.alignItems = 'center';
+                h3.style.gap = '8px';
+                h3.style.fontSize = '1.1rem';
+                h3.style.color = 'hsl(var(--muted-foreground))';
+                
+                // Create sun rising icon
+                const sunIcon = document.createElement('i');
+                sunIcon.setAttribute('data-lucide', 'sunrise');
+                sunIcon.className = 'w-4 h-4';
+                sunIcon.style.color = 'hsl(var(--muted-foreground))';
+                
+                // Get today's date
+                const today = new Date();
+                const monthDay = today.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                const todayText = `Today, ${monthDay}`;
+                
+                h3.appendChild(sunIcon);
+                h3.appendChild(document.createTextNode(todayText));
                 container.appendChild(h3);
+                
+                // Re-initialize Lucide icons for the new icon
+                setTimeout(() => {
+                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                        window.lucide.createIcons();
+                    }
+                }, 10);
             }
         }
         function getMonthYearString(date) {
@@ -9736,8 +9809,8 @@ margin-right: 0.5rem;
                 return `
                     <div class="home-transaction-item">
                         <div class="transaction-info">
-                            <div class="transaction-description">${getCategoryEmoji(transaction.category)} ${transaction.description ? transaction.description : `${transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1)} expense`}</div>
                             <div class="transaction-date">${displayDate}</div>
+                            <div class="transaction-description">${getCategoryEmoji(transaction.category)} ${transaction.description ? transaction.description : `${transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1)} expense`}</div>
                         </div>
                         <div class="transaction-amount">-${formatCurrency(transaction.amount)}</div>
                     </div>
