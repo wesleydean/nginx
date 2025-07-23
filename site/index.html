@@ -1826,7 +1826,6 @@
         
         .expense-amount {
             font-size: 1rem;
-            font-weight: 700;
             color: hsl(var(--foreground));
             text-align: right;
             flex-shrink: 0;
@@ -3812,7 +3811,17 @@
         
         /* Quick actions spacing */
         .quick-actions {
+            position: sticky;
+            z-index: 100000;
+            /* width: max-content; */
+            /* right: auto; */
+            bottom: 0;
+            border: 32px;
             margin-bottom: 32px;
+            display: flex
+        ;
+            align-items: center;
+            justify-content: center;
         }
         
         /* Savings section spacing */
@@ -3824,20 +3833,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            padding: 0.7em 1.6em;
-            background: hsl(85, 13%, 18%);
+            gap: 6px;
+            padding: 0.5em 1.4em;
+            background: hsl(260.85deg 37.78% 53.99%);
             color: #ffffff;
             border: none;
-            border-radius: 12px;
+            border-radius: 11rem;
             font-size: 1.08rem;
             font-weight: 500;
             cursor: pointer;
-            transition: 
-                box-shadow 0.16s,
-                background 0.16s,
-                transform 0.12s;
-            box-shadow: 0 2px 6px 0 rgba(0,0,0,0.2);
+            transition: box-shadow 0.16s, background 0.16s, transform 0.12s;
+            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.2);
             margin: 0;
             min-height: 44px;
             outline: none;
