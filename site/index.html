@@ -207,6 +207,24 @@
             font-feature-settings: "rlig" 1, "calt" 1;
         }
         
+        /* Card Components */
+        .stat-card, .home-section, .modern-balance-card {
+            background-color: hsl(var(--card)) !important;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+        }
+        
+        /* Account Section Headers */
+        .account-section-header {
+                font-size: 1.2rem;
+                font-weight: 400;
+                margin: 1.5rem 0 0.75rem 0.4rem;
+                color: hsl(220, 13%, 28%);
+        }
+
+        .stat-card, .home-section, .account-type-section, .modern-balance-card {
+            background-color: hsl(var(--card));
+        }
         /* Button Components */
         .btn {
             display: inline-flex;
@@ -290,6 +308,13 @@
             font-size: 0.8rem;
         }
         
+        .btn-xs {
+            height: 1.5rem;
+            padding: 0.8rem;
+            font-size: 0.75rem;
+            min-height: 0;
+        }
+        
         .btn-md {
             height: 2.5rem;
             padding: 0 1rem;
@@ -308,7 +333,6 @@
         
         /* Card Components */
         .card {
-            background-color: hsl(var(--card));
             color: hsl(var(--card-foreground));
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
@@ -362,7 +386,7 @@
             overflow: hidden;
             width: 100%;
             border-radius: var(--radius);
-            margin-bottom: 8px;
+            /* margin-bottom: 8px; */
             touch-action: pan-y; /* Change to pan-y to enable horizontal swiping */
             user-select: none;
             -webkit-user-select: none;
@@ -539,7 +563,6 @@
             display: flex;
             flex-direction: row;
             align-items: center;
-            padding-bottom: 1rem;
         }
         
         .card-title {
@@ -694,6 +717,68 @@
             align-items: flex-start;
             justify-content: flex-end;
             flex-shrink: 0;
+        }
+        
+        /* Account Balance Summary in Net Worth Section */
+        .account-balance-summary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .balance-label {
+            color: hsl(var(--muted-foreground));
+            font-weight: 500;
+        }
+        
+        .balance-amount {
+            color: hsl(var(--foreground));
+            font-weight: 600;
+        }
+        
+        .manage-accounts-btn {
+            background: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .manage-accounts-btn:hover {
+            background: hsl(var(--secondary) / 0.8);
+        }
+        
+        /* Account Balance Display Layout */
+        .balance-header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .balance-left-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+        
+        .balance-info-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        
+        .balance-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            color: hsl(var(--foreground));
         }
         
         .section-title {
@@ -1495,9 +1580,9 @@
             background-color: hsl(var(--background));
         }
         
-        /* Subtle background for home screen (Screen 0) to make sections stand out */
-        .screen:first-child {
-            background-color: hsl(var(--muted) / 0.2);
+        /* Subtle background for all screens to make sections stand out */
+        .screen {
+            background-color: rgba(200, 160, 61, 0.04);
         }
         
         /* Remove old daily-budget styles - now using card classes */
@@ -1667,7 +1752,7 @@
             flex: 1;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
+            padding: 1rem;
             background-color: hsl(var(--card));
             border: 1px solid hsl(var(--border));
             border-radius: var(--radius);
@@ -4140,25 +4225,33 @@
 
 /* Modern Wealthsimple-style Account Accordion Styles */
 .modern-account-accordion {
-    background: #fff;
+    background: transparent;
     box-shadow: none;
     transition: none;
-    margin-bottom: 0.8rem;
     border-bottom: 1px solid #eeeeee;
+    margin: 0 -1rem;
+    padding: 0;
+    width: calc(100% + 2rem);
 }
 .modern-account-accordion.expanded {
     border-bottom: none;
+}
+.account-type-section .modern-account-accordion:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
 }
 .modern-account-accordion-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 0;
+  padding: 1rem;
   cursor: pointer;
   border-radius: 18px 18px 0 0;
-  background: #fff;
+  background: transparent;
   transition: none;
   box-shadow: none;
+  margin: 0 -1rem;
+  width: calc(100% + 2rem);
 }
 
 .modern-account-header-left {
@@ -4187,10 +4280,16 @@ margin-right: 0.5rem;
   display: none;
 }
 .modern-account-balance {
-  font-size: 1.2rem;
-  font-weight: 800;
+  font-size: 1rem;
+  font-weight: 700;
   color: #222;
   line-height: 1.1;
+}
+.modern-account-balance.debt {
+  color: #dc3545;
+}
+.modern-update-diff.debt {
+  color: #dc3545;
 }
 .modern-account-percent {
   font-size: 1.02rem;
@@ -4205,16 +4304,15 @@ margin-right: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 20px;
     width: 30px;
     height: 30px;
+    background: none;
     box-shadow: none;
-    background-color: hsl(var(--muted) / 0.5);
 }
 .modern-account-chevron {
     font-size: 1.45rem;
     display: flex;
-    color: #bbb;
+    color: #666;
     align-self: center;
     align-items: center;
     justify-content: center;
@@ -4227,6 +4325,56 @@ margin-right: 0.5rem;
 .modern-account-accordion-header.expanded .modern-account-chevron {
   transform: rotate(180deg);
   background: none;
+}
+
+/* Account sections by type - using same styling as home sections */
+.account-type-section {
+  margin-bottom: 1rem;
+  cursor: pointer;
+  position: relative;
+  background-color: hsl(var(--card)) !important;
+  border: 2px solid hsl(var(--border) / 0.5) !important;
+  border-radius: 12px;
+  box-shadow: none !important;
+  padding: 0rem 2rem;
+  overflow: hidden;
+}
+
+.account-type-section.expanded {
+  border-color: hsl(var(--primary) / 0.3) !important;
+  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.1) !important;
+}
+.account-type-section .card-header {
+  background-color: transparent;
+  border-bottom: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  margin: 0 -1rem;
+  /* padding: 1rem; */
+  width: calc(100% + 2rem);
+}
+.account-type-section .section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: hsl(var(--foreground));
+}
+.account-type-section .card-body {
+  padding: 0;
+  display: block;
+  margin-top: 0.5rem;
+}
+.account-type-section.collapsed .card-body {
+  display: none;
+}
+.account-type-section .account-chevron {
+  transition: transform 0.2s ease;
+}
+.account-type-section .modern-account-chevron {
+  width: 18px;
+  height: 18px;
 }
 .modern-account-accordion-body {
   padding: 0;
@@ -4249,23 +4397,33 @@ margin-right: 0.5rem;
 }
 .modern-account-update-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  padding: 1rem 0;
-  margin-bottom: 0.2rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0;
   background: #fff;
   border-radius: 0;
   box-shadow: none;
-  font-size: 1.08rem;
   width: 100%;
+  font-size: 0.875rem;
+  width: 100%;
+  border-bottom: none;
 }
-.modern-account-update-row:last-child {
+.modern-account-updates .swipe-container {
+  margin: 0 -1rem 0 -1rem;
+  border-radius: 0;
+  width: calc(100% + 2rem);
+}
+.modern-account-updates .swipe-container:last-child {
   margin-bottom: 0;
 }
+.modern-account-updates .swipe-container:last-child .swipe-content {
+  border-bottom: none !important;
+}
 .modern-update-date {
-  font-size: 1.01rem;
+  font-size: 0.875rem;
   color: #444;
-  font-weight: 600;
+  font-weight: 500;
   flex: 1 1 40%;
   align-self: center;
 }
@@ -4273,20 +4431,22 @@ margin-right: 0.5rem;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  flex: 1 1 60%;
+  flex: 0 0 auto;
   min-width: 0;
+  gap: 0.125rem;
+  text-align: right;
 }
 .modern-update-diff {
-  font-size: 1.08rem;
-  font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 600;
   color: #222;
   margin-left: 0;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0;
 }
 .modern-update-percent {
-  font-size: 1.01rem;
+  font-size: 0.75rem;
   color: #27ae60;
-  font-weight: 600;
+  font-weight: 500;
   margin-left: 0;
 }
 .modern-update-percent.negative {
@@ -4301,7 +4461,6 @@ margin-right: 0.5rem;
     
         /* Modern Balance Card Styling */
         .modern-balance-card {
-            display: flex;
             flex-direction: row;
             justify-content: space-between;
             /* align-items: center; */
@@ -4327,7 +4486,7 @@ margin-right: 0.5rem;
             font-size: 1.8rem;
             font-weight: 700;
             color: hsl(var(--foreground));
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         
         .balance-change-modern {
@@ -4368,7 +4527,7 @@ margin-right: 0.5rem;
             justify-content: space-between;
             display: flex;
             background-color: hsl(var(--card));
-            /* border: 1px solid hsl(var(--border)); */
+            border-bottom: 1px solid hsl(var(--border));
             box-shadow: none;
             transform: translateX(0);
             transition: transform 0.2s ease;
@@ -4649,15 +4808,6 @@ margin-right: 0.5rem;
                     </div>
                     
 
-                    <!-- Quick Action Cards -->
-                    <div class="quick-actions">
-                        <div class="quick-action-card" onclick="showExpenseSlideOut()">
-                            <div class="quick-action-title">Add Expense</div>
-                            <div class="quick-action-icon">
-                                <i data-lucide="arrow-right" class="w-6 h-6"></i>
-                            </div>
-                        </div>
-                    </div>
                     
                     <!-- Add Expense -->
                     <div class="card expense-input" id="expenseInput" style="display: none;">
@@ -4728,6 +4878,16 @@ margin-right: 0.5rem;
                             </div>
                         </div>
                     </div> -->
+                    
+                    <!-- Quick Action Cards -->
+                    <div class="quick-actions">
+                        <div class="quick-action-card" onclick="showExpenseSlideOut()">
+                            <div class="quick-action-title">Add Expense</div>
+                            <div class="quick-action-icon">
+                                <i data-lucide="arrow-right" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Screen 2: Accounts (formerly Save) -->
@@ -4794,37 +4954,25 @@ margin-right: 0.5rem;
                         </div>
                     </div>
 
-                    <!-- Quick Action Cards for Save Screen -->
-                    <div class="quick-actions">
-                        <div class="quick-action-card" onclick="showBalanceSlideOut()" id="saveBalanceActionCard">
-                            <div class="quick-action-title">Add Balance</div>
-                            <div class="quick-action-icon">
-                                <i data-lucide="arrow-right" class="w-6 h-6"></i>
-                            </div>
-                        </div>
-                    </div>
                     
                     <!-- Savings Accounts Section -->
                     <div class="card savings-accounts-section" id="saveSavingsSection">
-                        <div class="section-header">
-                            <h3 class="card-title">
-                                Account Balances
-                                 <div class="last-updated-note" id="lastUpdatedNote">
-                            Loading...
-                        </div>
-                            </h3>
-                            <button class="btn btn-outline btn-sm" onclick="showAccountManagementModal()" style="border-radius: 20px;">
-                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
-                                Manage
-                            </button>
-                        </div>
-                       
-                        
-                        <!-- Total Balance Display -->
+                        <!-- Total Balance Display with Header -->
                         <div class="account-balance-display stat-card modern-balance-card">
-                            <div class="balance-right-stack">
-                                <div class="current-balance-modern" id="saveTotalAccountBalance">$0.00</div>
-                                <div class="balance-change-modern" id="saveTotalBalanceChange">Total Balance</div>
+                            <div class="balance-header-section">
+                                <div class="balance-left-stack">
+                                    <h3 class="balance-section-title">Account Balances</h3>
+                                    <div class="balance-info-group">
+                                        <div class="current-balance-modern" id="saveTotalAccountBalance">$0.00</div>
+                                        <div class="balance-change-modern" id="saveTotalBalanceChange">
+                                            <span>Total Balance</span>
+                                            <div class="last-updated-note" id="lastUpdatedNote">Loading...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline btn-xs" onclick="showAccountManagementModal()" style="border-radius: 20px;">
+                                    Manage
+                                </button>
                             </div>
                         </div>
                         
@@ -4832,6 +4980,16 @@ margin-right: 0.5rem;
                         <div class="balance-history" id="saveBalanceHistory">
                             <div style="text-align: center; color: #7f8c8d; padding: 20px;">
                                 No balance records this month
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Action Cards for Save Screen -->
+                    <div class="quick-actions">
+                        <div class="quick-action-card" onclick="showBalanceSlideOut()" id="saveBalanceActionCard">
+                            <div class="quick-action-title">Add Balance</div>
+                            <div class="quick-action-icon">
+                                <i data-lucide="arrow-right" class="w-6 h-6"></i>
                             </div>
                         </div>
                     </div>
@@ -4927,6 +5085,7 @@ margin-right: 0.5rem;
 
             </div>
         </div>
+        
         
         <div class="bottom-nav">
             <div class="nav-item active" onclick="goToScreen(0)">
@@ -5279,32 +5438,50 @@ margin-right: 0.5rem;
                     <label class="form-label" for="slideOutExpenseCategory">Category</label>
                     <div class="select-container">
                       <div class="select-trigger" onclick="toggleSlideOutSelect('expenseCategory')" id="expenseCategoryTrigger">
-                        <span id="expenseCategoryValue">Groceries</span>
+                        <span id="expenseCategoryValue">🛒 Groceries</span>
                         <i data-lucide="chevron-down" class="w-4 h-4"></i>
                       </div>
                       <div class="select-content" id="expenseCategoryContent">
-                        <div class="select-item selected" data-value="groceries">Groceries</div>
-                        <div class="select-item" data-value="transportation">Transportation</div>
-                        <div class="select-item" data-value="dining">Dining Out</div>
-                        <div class="select-item" data-value="entertainment">Entertainment</div>
-                        <div class="select-item" data-value="personal">Personal Care</div>
-                        <div class="select-item" data-value="clothing">Clothing</div>
-                        <div class="select-item" data-value="health">Health/Fitness</div>
-                        <div class="select-item" data-value="subscriptions">Subscriptions</div>
-                        <div class="select-item" data-value="other">Other</div>
+                        <div class="select-item selected" data-value="groceries">🛒 Groceries</div>
+                        <div class="select-item" data-value="transportation">🚗 Transportation</div>
+                        <div class="select-item" data-value="dining">🍽️ Dining Out</div>
+                        <div class="select-item" data-value="entertainment">🎬 Entertainment</div>
+                        <div class="select-item" data-value="personal">🧴 Personal Care</div>
+                        <div class="select-item" data-value="clothing">👕 Clothing</div>
+                        <div class="select-item" data-value="health">⚕️ Health/Fitness</div>
+                        <div class="select-item" data-value="subscriptions">📺 Subscriptions</div>
+                        <div class="select-item" data-value="mortgage">🏠 Mortgage</div>
+                        <div class="select-item" data-value="loan">💰 Loan Repayment</div>
+                        <div class="select-item" data-value="garbage">🗂️ Garbage</div>
+                        <div class="select-item" data-value="home improvement">🔨 Home Improvement</div>
+                        <div class="select-item" data-value="insurance">☂️ Insurance</div>
+                        <div class="select-item" data-value="pets">🐕 Pets</div>
+                        <div class="select-item" data-value="phone">📱 Phone</div>
+                        <div class="select-item" data-value="internet">🌐 Internet & Cable</div>
+                        <div class="select-item" data-value="utilities">⚡ Utilities</div>
+                        <div class="select-item" data-value="other">💸 Other</div>
                       </div>
                     </div>
                     <!-- Hidden native select for compatibility -->
                     <select id="slideOutExpenseCategory" style="display: none;">
-                      <option value="groceries">Groceries</option>
-                      <option value="transportation">Transportation</option>
-                      <option value="dining">Dining Out</option>
-                      <option value="entertainment">Entertainment</option>
-                      <option value="personal">Personal Care</option>
-                      <option value="clothing">Clothing</option>
-                      <option value="health">Health/Fitness</option>
-                      <option value="subscriptions">Subscriptions</option>
-                      <option value="other">Other</option>
+                      <option value="groceries">🛒 Groceries</option>
+                      <option value="transportation">🚗 Transportation</option>
+                      <option value="dining">🍽️ Dining Out</option>
+                      <option value="entertainment">🎬 Entertainment</option>
+                      <option value="personal">🧴 Personal Care</option>
+                      <option value="clothing">👕 Clothing</option>
+                      <option value="health">⚕️ Health/Fitness</option>
+                      <option value="subscriptions">📺 Subscriptions</option>
+                      <option value="mortgage">🏠 Mortgage</option>
+                      <option value="loan">💰 Loan Repayment</option>
+                      <option value="garbage">🗂️ Garbage</option>
+                      <option value="home improvement">🔨 Home Improvement</option>
+                      <option value="insurance">☂️ Insurance</option>
+                      <option value="pets">🐕 Pets</option>
+                      <option value="phone">📱 Phone</option>
+                      <option value="internet">🌐 Internet & Cable</option>
+                      <option value="utilities">⚡ Utilities</option>
+                      <option value="other">💸 Other</option>
                     </select>
                   </div>
                 </div>
@@ -5624,8 +5801,8 @@ margin-right: 0.5rem;
         
         // Default accounts
         const defaultAccounts = [
-            { id: 'checking', name: 'Checking', type: 'checking' },
-            { id: 'savings', name: 'Savings', type: 'savings' },
+            { id: 'checking', name: 'Checking', type: 'cash' },
+            { id: 'savings', name: 'Savings', type: 'cash' },
             { id: 'investment', name: 'Investment', type: 'investment' }
         ];
         
@@ -5946,7 +6123,7 @@ margin-right: 0.5rem;
                             <div class="swipe-content">
                                 <div class="expense-item">
                                     <div class="expense-details">
-                                        <div class="expense-description">${expense.description ? expense.description : `${expense.category} expense`}</div>
+                                        <div class="expense-description">${getCategoryEmoji(expense.category)} ${expense.description ? expense.description : `${expense.category} expense`}</div>
                                         <div class="expense-category">${displayDate}${expense.category}</div>
                                     </div>
                                     <div class="expense-amount">${formatCurrency(expense.amount)}</div>
@@ -6972,9 +7149,9 @@ margin-right: 0.5rem;
                 // Ensure we have at least one account
                 if (savingsAccounts.length === 0) {
                     savingsAccounts = [
-                        { id: 'checking', name: 'Checking' },
-                        { id: 'savings', name: 'Savings' },
-                        { id: 'emergency', name: 'Emergency Fund' }
+                        { id: 'checking', name: 'Checking', type: 'cash' },
+                        { id: 'savings', name: 'Savings', type: 'cash' },
+                        { id: 'emergency', name: 'Emergency Fund', type: 'cash' }
                     ];
                     saveSavingsAccounts(savingsAccounts);
                 }
@@ -9175,12 +9352,12 @@ margin-right: 0.5rem;
             
             // Initialize or update savings accounts
             const defaultAccounts = [
-                { id: 'checking', name: 'Checking', type: 'checking' },
-                { id: 'savings', name: 'Savings', type: 'savings' },
-                { id: 'emergency', name: 'Emergency Fund', type: 'emergency' },
+                { id: 'checking', name: 'Checking', type: 'cash' },
+                { id: 'savings', name: 'Savings', type: 'cash' },
+                { id: 'emergency', name: 'Emergency Fund', type: 'cash' },
                 { id: 'investment', name: 'Brokerage Account', type: 'investment' },
-                { id: 'retirement', name: '401(k)', type: 'retirement' },
-                { id: 'crypto', name: 'Crypto Portfolio', type: 'crypto' },
+                { id: 'retirement', name: '401(k)', type: 'investment' },
+                { id: 'crypto', name: 'Crypto Portfolio', type: 'investment' },
                 { id: 'credit_card', name: 'Credit Card', type: 'liability' },
                 { id: 'student_loan', name: 'Student Loan', type: 'liability' },
                 { id: 'mortgage', name: 'Mortgage', type: 'liability' }
@@ -9252,6 +9429,31 @@ margin-right: 0.5rem;
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             });
+        }
+
+        function getCategoryEmoji(category) {
+            const emojiMap = {
+                'groceries': '🛒',
+                'transportation': '🚗',
+                'dining': '🍽️',
+                'entertainment': '🎬',
+                'personal': '🧴',
+                'clothing': '👕',
+                'health': '⚕️',
+                'subscriptions': '📺',
+                'mortgage': '🏠',
+                'loan': '💰',
+                'garbage': '🗂️',
+                'home improvement': '🔨',
+                'insurance': '☂️',
+                'pets': '🐕',
+                'phone': '📱',
+                'internet': '🌐',
+                'utilities': '⚡',
+                'other': '💸'
+            };
+            
+            return emojiMap[category.toLowerCase()] || '💸';
         }
         
         function updateSaveChangeIndicators(targetAmount, progressAmount, progressPercentage) {
@@ -9354,7 +9556,7 @@ margin-right: 0.5rem;
                 return `
                     <div class="home-transaction-item">
                         <div class="transaction-info">
-                            <div class="transaction-description">${transaction.description ? transaction.description : `${transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1)} expense`}</div>
+                            <div class="transaction-description">${getCategoryEmoji(transaction.category)} ${transaction.description ? transaction.description : `${transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1)} expense`}</div>
                             <div class="transaction-date">${displayDate}</div>
                         </div>
                         <div class="transaction-amount">-${formatCurrency(transaction.amount)}</div>
@@ -10932,12 +11134,23 @@ margin-right: 0.5rem;
                 }
             }
             
+            // Group accounts by type
+            const accountTypes = {
+                'cash': { title: 'Cash Accounts', accounts: [] },
+                'investment': { title: 'Investments', accounts: [] },
+                'liability': { title: 'Debt', accounts: [] },
+                'other': { title: 'Other Accounts', accounts: [] }
+            };
+            
             console.log('savingsAccounts:', savingsAccounts);
             console.log('balances:', balances);
 
             // Prepare grouped data
             const grouped = {};
             savingsAccounts.forEach(account => {
+                // Determine account type - default to 'other' if not specified
+                const accountType = account.type || 'other';
+                
                 const accountBalances = balances[account.id] || {};
                 // Get all updates for the selected month, sort by date (chronologically, not alphabetically)
                 const monthUpdates = Object.keys(accountBalances)
@@ -10961,38 +11174,73 @@ margin-right: 0.5rem;
                     .sort();
                 const prevMonthLastDate = prevMonthDates.length > 0 ? prevMonthDates[prevMonthDates.length - 1] : null;
                 const prevMonthLastValue = prevMonthLastDate ? (accountBalances[prevMonthLastDate].amount !== undefined ? accountBalances[prevMonthLastDate].amount : accountBalances[prevMonthLastDate]) : 0;
+                
                 grouped[account.id] = {
                     name: account.name,
+                    type: accountType,
                     monthUpdates,
                     prevMonthLastValue
                 };
+                
+                // Only add to type group if it has updates this month
+                if (monthUpdates.length > 0) {
+                    // Add to the appropriate type group
+                    if (accountTypes[accountType]) {
+                        accountTypes[accountType].accounts.push(account.id);
+                    } else {
+                        accountTypes.other.accounts.push(account.id);
+                    }
+                }
             });
 
-            // Render modern accordions
+            // Render account sections by type
             let html = '';
             let anyData = false;
-            Object.keys(grouped).forEach(accountId => {
-                const { name, monthUpdates, prevMonthLastValue } = grouped[accountId];
-                if (monthUpdates.length === 0) return; // Only show accounts with data
+            
+            // Process each account type section
+            Object.keys(accountTypes).forEach(type => {
+                const { title, accounts } = accountTypes[type];
+                
+                // Skip types with no accounts
+                if (accounts.length === 0) return;
+                
                 anyData = true;
-                // Latest value for the selected month (should be first in the array since we sorted by date descending)
-                const latest = monthUpdates[0];
-                console.log(`Latest balance for ${name} (${accountId}): ${formatCurrency(latest.amount)} on ${latest.date}`);
-                // Calculate all-time percent (from first ever value)
-                const accountBalances = balances[accountId] || {};
-                const allDates = Object.keys(accountBalances).sort(); // Sort chronologically
-                const firstValue = allDates.length > 0 ? 
-                    (accountBalances[allDates[0]].amount !== undefined ? 
-                        accountBalances[allDates[0]].amount : accountBalances[allDates[0]]) : 0;
-                const allTimePercent = firstValue && latest.amount ? ((latest.amount - firstValue) / firstValue) * 100 : 0;
-                // Accordion header: account name, latest value
+                // Create section header outside the card
+                html += `
+                <h2 class="account-section-header">${title}</h2>
+                <div class="account-type-section">
+                `;
+                
+                // Add accounts for this section
+                accounts.forEach(accountId => {
+                    const { name, monthUpdates, type: accountType } = grouped[accountId];
+                    if (monthUpdates.length === 0) return; // Only show accounts with data
+                    
+                    // Latest value for the selected month (should be first in the array since we sorted by date descending)
+                    const latest = monthUpdates[0];
+                    console.log(`Latest balance for ${name} (${accountId}): ${formatCurrency(latest.amount)} on ${latest.date}`);
+                    
+                    // Calculate all-time percent (from first ever value)
+                    const accountBalances = balances[accountId] || {};
+                    const allDates = Object.keys(accountBalances).sort(); // Sort chronologically
+                    const firstValue = allDates.length > 0 ? 
+                        (accountBalances[allDates[0]].amount !== undefined ? 
+                            accountBalances[allDates[0]].amount : accountBalances[allDates[0]]) : 0;
+                    const allTimePercent = firstValue && latest.amount ? ((latest.amount - firstValue) / firstValue) * 100 : 0;
+                    
+                    // Check if this is a debt account
+                    const isDebt = accountType === 'liability';
+                    const debtClass = isDebt ? ' debt' : '';
+                    const formatAmount = (amount) => isDebt ? `(${formatCurrency(amount)})` : formatCurrency(amount);
+                    console.log(`Account ${name} - Type: ${accountType}, IsDebt: ${isDebt}, Class: '${debtClass}'`);
+                // Account header: account name, latest value
                 html += `<div class="modern-account-accordion" data-account-id="${accountId}">
                     <div class="modern-account-accordion-header" onclick="toggleAccountAccordion('${accountId}')">
                         <div class="modern-account-header-left">
                             <div class="modern-account-title">${name}</div>
                         </div>
                         <div class="modern-account-header-right">
-                            <div class="modern-account-balance">${formatCurrency(latest.amount)}</div>
+                            <div class="modern-account-balance${debtClass}">${formatAmount(latest.amount)}</div>
                         </div>
                         <div class="account-chevron"><i data-lucide="chevron-down" class="modern-account-chevron" id="chevron-${accountId}"></i></div>
                     </div>
@@ -11052,7 +11300,7 @@ margin-right: 0.5rem;
                             <div class="modern-account-update-row">
                                 <div class="modern-update-date">${update.displayDate}</div>
                                 <div class="modern-update-amount-stack">
-                                <div class="modern-update-diff">${formatCurrency(update.amount)}</div>
+                                <div class="modern-update-diff${debtClass}">${formatAmount(update.amount)}</div>
                                 <div class="modern-update-percent ${update.percentClass}">${update.percent !== null ? `${update.arrow}${update.percent >= 0 ? '+' : ''}${update.percent.toFixed(2)}%` : '--'}</div>
                                 </div>
                             </div>
@@ -11060,7 +11308,11 @@ margin-right: 0.5rem;
                         <div class="swipe-action" onclick="handleBalanceDelete(this); event.stopPropagation(); return false;"><i data-lucide="x" class="w-4 h-4"></i></div>
                     </div>`;
                 });
-                html += `</div></div></div>`;
+                
+                html += `</div></div></div>`; // Close modern-account-updates, modern-account-accordion-body, modern-account-accordion
+                });
+                
+                html += `</div>`; // Close account-type-section
             });
             if (!anyData) {
                 const selectedMonthName = selectedSaveMonthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -11094,6 +11346,30 @@ margin-right: 0.5rem;
             } else {
                 body.classList.add('expanded');
                 if (header) header.classList.add('expanded');
+            }
+        }
+
+        // Account type section toggle function
+        function toggleAccountTypeSection(typeKey) {
+            const section = document.querySelector(`.account-type-section[onclick*="${typeKey}"]`);
+            const body = document.getElementById(`type-body-${typeKey}`);
+            const chevron = document.getElementById(`type-chevron-${typeKey}`);
+            
+            if (section && body) {
+                // Toggle collapsed class on section
+                section.classList.toggle('collapsed');
+                
+                // Toggle chevron rotation
+                if (chevron) {
+                    chevron.style.transform = section.classList.contains('collapsed') ? 'rotate(0deg)' : 'rotate(180deg)';
+                }
+                
+                // Add expanded class for border styling when not collapsed
+                if (section.classList.contains('collapsed')) {
+                    section.classList.remove('expanded');
+                } else {
+                    section.classList.add('expanded');
+                }
             }
         }
 
@@ -12202,6 +12478,5 @@ margin-right: 0.5rem;
 
 
     </script>
-</body>
-</html>
+    </body>
 </html>
