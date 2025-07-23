@@ -1553,6 +1553,8 @@
                 hsl(var(--background)) 0%, 
                 hsla(var(--background) / 0.7) 70%, 
                 transparent 100%);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             position: fixed;
             top: 0;
             left: 0;
@@ -2094,18 +2096,41 @@
             text-align: center;
         }
         
-        .budget-header-section {
-            border-top: 1px solid hsl(var(--border));
-            margin-top: 1.5rem;
-            padding-top: 1rem;
+        .sticky-controls-section {
+            position: sticky;
+            top: -2px;
+            z-index: 100;
+            background: hsl(var(--card));
+            border-bottom: 1px solid hsl(var(--border));
+            padding: 1rem;
+            margin: 0 -1rem 0 -1rem;
+            width: calc(100% + 2rem);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         
-        .budget-header-content {
+        .sticky-controls-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
             min-height: 38px;
         }
+        
+        .sticky-title-section {
+            position: sticky;
+            top: 69px;
+            z-index: 99;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 0.6rem 1rem;
+            margin: 0 -1rem;
+        }
+        
+        /* Give white backgrounds only to interactive elements */
+        #budgetTitleContainer button {
+            background: hsl(var(--card)) !important;
+        }
+        
         
         #monthYearSelectorBtn {
             height: 38px !important;
@@ -2165,7 +2190,7 @@
         .period-icon-toggle {
             display: flex;
             align-items: center;
-            background: hsl(var(--secondary));
+            background: hsl(var(--card));
             border: 1px solid hsl(var(--border));
             border-radius: 8px;
             padding: 4px;
@@ -2196,19 +2221,15 @@
         }
         
         .period-icon-btn.active {
-            background: hsl(var(--background));
+            background: hsl(89.33deg 55.56% 68.24% / 52.16%);
             color: hsl(var(--foreground));
-            transform: scale(1.1);
+            transform: scale(1);
             opacity: 1;
         }
         
         .period-icon-btn:hover:not(.active) {
             color: hsl(var(--foreground));
-            transform: scale(1.05);
-        }
-        
-        .period-icon-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.8);
         }
         
         .period-icon-btn:focus {
@@ -4973,21 +4994,6 @@ margin-right: 0.5rem;
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <!-- Header section moved below the stats -->
-                                <div class="budget-header-section">
-                                    <div class="budget-header-content">
-                                        <div id="budgetTitleContainer" style="text-align:left;"></div>
-                                        <div class="period-icon-toggle">
-                                            <button onclick="setPeriodMode('today')" class="period-icon-btn active" id="todayBtnIcon" title="Today View">
-                                                <i data-lucide="sun" class="w-4 h-4"></i>
-                                            </button>
-                                            <button onclick="setPeriodMode('month')" class="period-icon-btn" id="monthBtnIcon" title="Month View">
-                                                <i data-lucide="calendar" class="w-4 h-4"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -5032,9 +5038,28 @@ margin-right: 0.5rem;
                         <button class="add-btn" onclick="addExpense()">Add Expense</button>
                     </div>
                     
+                    <!-- Sticky Controls Section (White Background) -->
+                    <div class="sticky-controls-section" id="stickyControlsSection">
+                        <div class="sticky-controls-content">
+                            <div id="budgetTitleContainer" style="text-align:left;"></div>
+                            <div class="period-icon-toggle">
+                                <button onclick="setPeriodMode('today')" class="period-icon-btn active" id="todayBtnIcon" title="Today View">
+                                    <i data-lucide="sun" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="setPeriodMode('month')" class="period-icon-btn" id="monthBtnIcon" title="Month View">
+                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sticky Title Section (Transparent Background) -->
+                    <div class="sticky-title-section" id="stickyTitleSection">
+                        <h3 class="section-title" id="expensesListTitle">Transactions</h3>
+                    </div>
+                    
                     <!-- Period Expenses -->
                     <div class="card">
-                        <h3 class="card-title mb-4" id="expensesListTitle">Transactions</h3>
                         <div class="expenses-list" id="expensesList">
                             <div style="text-align: center; color: #7f8c8d; padding: 20px;">
                                 No transactions recorded this week
