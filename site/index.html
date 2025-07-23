@@ -2105,6 +2105,12 @@
             margin: 0 -1rem 0 -1rem;
             width: calc(100% + 2rem);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transform: translateY(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sticky-controls-section.hidden {
+            transform: translateY(-100%);
         }
         
         .sticky-controls-content {
@@ -2123,6 +2129,11 @@
             -webkit-backdrop-filter: blur(10px);
             padding: 0.6rem 1rem;
             margin: 0 -1rem;
+            transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sticky-controls-section.hidden ~ .sticky-title-section {
+            top: 0;
         }
         
         /* Give white backgrounds only to interactive elements */
@@ -3813,15 +3824,17 @@
         .quick-actions {
             position: sticky;
             z-index: 100000;
+            display: flex;
+            justify-content: center;
             /* width: max-content; */
             /* right: auto; */
             bottom: 0;
-            border: 32px;
-            margin-bottom: 32px;
-            display: flex
-        ;
-            align-items: center;
-            justify-content: center;
+            transform: translateY(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .quick-actions.hidden {
+            transform: translateY(100%);
         }
         
         /* Savings section spacing */
@@ -3843,7 +3856,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: box-shadow 0.16s, background 0.16s, transform 0.12s;
-            box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 19px 11px rgb(100 48 141 / 12%);
             margin: 0;
             min-height: 44px;
             outline: none;
@@ -8885,7 +8898,81 @@ margin-right: 0.5rem;
             const oldDropdowns = document.getElementById('periodDropdowns');
             if (oldDropdowns) oldDropdowns.remove();
             updatePeriodDropdownValues();
+            
+            // Initialize scroll detection for quick actions
+            initQuickActionsScroll();
         });
+        
+        // Scroll detection for hiding/showing quick actions
+        function initQuickActionsScroll() {
+            const screens = document.querySelectorAll('.screen');
+            const cashflowScreen = screens[1]; // Screen 1 is cashflow (expenses)
+            const accountsScreen = screens[2]; // Screen 2 is accounts
+            
+            // Set up scroll behavior for cashflow screen
+            if (cashflowScreen) {
+                const cashflowQuickActions = cashflowScreen.querySelector('.quick-actions');
+                if (cashflowQuickActions) {
+                    setupScreenScroll(cashflowScreen, cashflowQuickActions);
+                }
+            }
+            
+            // Set up scroll behavior for accounts screen
+            if (accountsScreen) {
+                const accountsQuickActions = accountsScreen.querySelector('.quick-actions');
+                if (accountsQuickActions) {
+                    setupScreenScroll(accountsScreen, accountsQuickActions);
+                }
+            }
+        }
+        
+        function setupScreenScroll(screen, quickActions) {
+            let lastScrollY = 0;
+            let isScrolling = false;
+            
+            function handleScroll() {
+                const currentScrollY = screen.scrollTop;
+                const scrollDifference = currentScrollY - lastScrollY;
+                
+                // Calculate if quick actions are at their natural position (bottom of screen)
+                const screenHeight = screen.clientHeight;
+                const screenScrollHeight = screen.scrollHeight;
+                const distanceFromBottom = screenScrollHeight - (currentScrollY + screenHeight);
+                
+                // Get the height of the quick actions to determine when they're at natural position
+                const quickActionsHeight = quickActions.offsetHeight;
+                const isAtNaturalPosition = distanceFromBottom <= quickActionsHeight + 20; // 20px buffer
+                
+                // If at natural position, ensure buttons are visible and stop reacting
+                if (isAtNaturalPosition) {
+                    quickActions.classList.remove('hidden');
+                    isScrolling = false;
+                    return;
+                }
+                
+                // Only trigger if we've scrolled a significant amount (reduces sensitivity)
+                if (Math.abs(scrollDifference) > 5) {
+                    if (scrollDifference > 0 && currentScrollY > 50) {
+                        // Scrolling down - hide quick actions
+                        quickActions.classList.add('hidden');
+                    } else if (scrollDifference < 0) {
+                        // Scrolling up - show quick actions
+                        quickActions.classList.remove('hidden');
+                    }
+                    
+                    lastScrollY = currentScrollY;
+                }
+                
+                isScrolling = false;
+            }
+            
+            screen.addEventListener('scroll', function() {
+                if (!isScrolling) {
+                    requestAnimationFrame(handleScroll);
+                    isScrolling = true;
+                }
+            }, { passive: true });
+        }
 
         /**
          * Renders the budget card title area depending on period mode.
