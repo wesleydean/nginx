@@ -585,8 +585,8 @@
         
         /* Side-by-side squares layout for budget display */
         #budgetDisplay .card-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 1rem;
             padding: 0;
         }
@@ -785,6 +785,16 @@
             font-size: 1.25rem;
             font-weight: 600;
             margin: 0;
+        }
+        
+        /* Smaller transactions title on cashflow page */
+        #expensesListTitle {
+            font-size: 1rem !important;
+        }
+        
+        /* Add margin-bottom to card-header on cashflow screen */
+        #budgetDisplay .card-header {
+            margin-bottom: 1rem;
         }
         
         .section-subtitle {
@@ -2076,6 +2086,40 @@
             height: 40px;
             background: hsla(var(--primary-foreground) / 0.3);
             margin: 0 1rem;
+        }
+        
+        /* Combined budget stats for cashflow screen */
+        .combined-budget-card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .combined-budget-stats {
+            display: flex;
+            align-items: stretch;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+        
+        .combined-budget-stat {
+            flex: 1;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .budget-separator {
+            width: 1px;
+            background: hsl(var(--border));
+            opacity: 0.5;
+            align-self: stretch;
+            margin: 0;
         }
         
         /* period-selector uses .card class for styling */
@@ -4882,24 +4926,24 @@ margin-right: 0.5rem;
                             </div>
                         </div>
                         <div class="card-content">
-                            <div class="stat-card spending-card">
-                                <div>
-                                    <div class="text-sm text-muted-foreground">Spent This Month</div>
-                                    <div class="text-2xl font-semibold" id="spentAmount">$0.00</div>
-                                    <div class="change-indicator" id="spentChange">
-                                        <span class="change-arrow">↓</span>
-                                        <span class="change-amount">$0</span>
+                            <div class="combined-budget-card">
+                                <div class="combined-budget-stats">
+                                    <div class="combined-budget-stat">
+                                        <div class="text-sm text-muted-foreground">Spent</div>
+                                        <div class="text-2xl font-semibold" id="spentAmount">$0.00</div>
+                                        <div class="change-indicator" id="spentChange">
+                                            <span class="change-arrow">↓</span>
+                                            <span class="change-amount">$0</span>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            
-                            <div class="stat-card remaining-card">
-                                <div>
-                                    <div class="text-sm text-muted-foreground">Remaining This Month</div>
-                                    <div class="text-2xl font-semibold" id="remainingBudget">$41.30</div>
-                                    <div class="change-indicator" id="remainingChange">
-                                        <span class="change-arrow">↑</span>
-                                        <span class="change-amount">On Track</span>
+                                    <div class="budget-separator"></div>
+                                    <div class="combined-budget-stat">
+                                        <div class="text-sm text-muted-foreground">Remaining</div>
+                                        <div class="text-2xl font-semibold" id="remainingBudget">$41.30</div>
+                                        <div class="change-indicator" id="remainingChange">
+                                            <span class="change-arrow">↑</span>
+                                            <span class="change-amount">On Track</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
