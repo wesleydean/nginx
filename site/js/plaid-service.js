@@ -13,7 +13,7 @@ class PlaidService {
     }
     
     // For production - assuming your API is hosted at api.yourdomain.com
-    return 'https://plaid-api-yourapp.up.railway.app';
+    return 'https://plaid-api-production.up.railway.app';
   }
   
   // Load saved institution info from localStorage (not tokens in production)
