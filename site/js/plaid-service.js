@@ -63,7 +63,7 @@ class PlaidService {
         console.log('Username: user_good');
         console.log('Password: pass_good');
         console.log('For MFA prompt, use any 4-digit code, like: 1234');
-        console.log('For phone verification, use: 1-123-456-7890');
+        console.log('For phone verification, use: 1234567890');
         console.log('=================================================');
       }
       
@@ -244,7 +244,7 @@ class PlaidService {
     return {
       username: 'user_good',
       password: 'pass_good',
-      phoneNumber: '1-123-456-7890',
+      phoneNumber: '1234567890',
       mfaCode: '1234'
     };
   }
@@ -255,7 +255,7 @@ class PlaidService {
     console.log('1. For any institution, use these credentials:');
     console.log('   Username: user_good');
     console.log('   Password: pass_good');
-    console.log('2. For phone verification, enter: 1-123-456-7890');
+    console.log('2. For phone verification, enter: 1234567890');
     console.log('3. For any MFA code prompt, enter: 1234');
     console.log('4. To test specific error cases, use usernames like:');
     console.log('   - user_login_required');
@@ -515,7 +515,7 @@ window.getPlaidSandboxCredentials = function() {
     return {
         username: 'user_good',
         password: 'pass_good',
-        phoneNumber: '1-123-456-7890',
+        phoneNumber: '1234567890',
         mfaCode: '1234'
     };
 };
