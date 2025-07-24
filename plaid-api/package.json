@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node bin/www",
+    "start:direct": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -13,7 +15,7 @@
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
-    "express": "^5.1.0",
+    "express": "^4.18.2",
     "helmet": "^8.1.0",
     "plaid": "^37.0.0"
   }

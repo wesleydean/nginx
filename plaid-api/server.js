@@ -3,12 +3,13 @@ const cors = require('cors');
 const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
 require('dotenv').config();
 
+// Create Express app and explicitly use path-to-regexp options for stable path handling
 const app = express();
 
 // Middleware order is important - json parsing first
 app.use(express.json());
 
-// Then CORS configuration
+// Then CORS configuration with proper options
 console.log('Setting up CORS configuration');
 app.use(cors({
   origin: '*', // Allow all origins for development
@@ -18,8 +19,14 @@ app.use(cors({
   preflightContinue: false // Explicitly prevent preflight continuation issues
 }));
 
-// Handle preflight requests
-app.options('*', cors());
+// Handle preflight requests - more specific handling to avoid path-to-regexp issues
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', true);
+  res.status(200).end();
+});
 
 // Configure Plaid client
 console.log('PLAID_ENV:', process.env.PLAID_ENV);
@@ -158,12 +165,18 @@ app.use((err, req, res, next) => {
   
   // Special handling for path-to-regexp errors
   if (err.message && err.message.includes('Missing parameter name')) {
-    console.warn('Detected path-to-regexp error with URL parsing. This might be caused by a URL containing a colon that\'s not a route parameter.');
+    console.warn('Detected path-to-regexp error with URL parsing.');
     
-    // Check if this is a CORS preflight request that might be malformed
+    // Check if this is a CORS preflight request
     if (req.method === 'OPTIONS') {
       return res.status(200).end();
     }
+    
+    // For regular requests with path-to-regexp errors, provide more helpful error
+    return res.status(400).json({
+      error: 'Invalid URL format',
+      message: 'The request contains a URL that cannot be processed. This might be caused by a URL with a colon that is not properly escaped.'
+    });
   }
   
   res.status(500).json({ 
@@ -171,8 +184,6 @@ app.use((err, req, res, next) => {
     message: err.message
   });
 });
-
-const PORT = process.env.PORT || 5000;
 
 // Print all registered routes for debugging
 console.log('Registered routes:');
@@ -182,7 +193,14 @@ app._router.stack.forEach(function(r){
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+// For direct execution
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
+
+// Export app for use with bin/www or testing
+module.exports = app;
