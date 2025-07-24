@@ -73,6 +73,10 @@ app.post('/api/create_link_token', async (req, res) => {
     // Log the request data for debugging
     console.log('Creating link token with user ID:', req.body.userId);
     
+    // Determine the current environment
+    const environment = process.env.PLAID_ENV === 'production' ? 'production' : 'sandbox';
+    console.log('Using Plaid environment:', environment);
+    
     const createTokenResponse = await plaidClient.linkTokenCreate({
       user: { client_user_id: req.body.userId },
       client_name: 'Expense Tracker',
@@ -82,7 +86,14 @@ app.post('/api/create_link_token', async (req, res) => {
     });
     
     console.log('Link token created successfully');
-    res.json(createTokenResponse.data);
+    
+    // Add environment info to the response
+    const responseData = {
+      ...createTokenResponse.data,
+      environment: environment
+    };
+    
+    res.json(responseData);
   } catch (error) {
     console.error('Error creating link token:', error);
     console.error('Error details:', error.stack);

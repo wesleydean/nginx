@@ -51,10 +51,30 @@ class PlaidService {
       const data = await response.json();
       const linkToken = data.link_token;
       
+      // Determine if we're using sandbox mode
+      const isSandbox = this.baseUrl.includes('localhost') || 
+                       (data.environment && data.environment === 'sandbox');
+      console.log(`Using Plaid in ${isSandbox ? 'sandbox' : 'production'} mode`);
+      
       // 2. Initialize Plaid Link with the token
       return new Promise((resolve, reject) => {
         const handler = Plaid.create({
           token: linkToken,
+          // Add test credentials for sandbox mode
+          ...(isSandbox && {
+            receivedRedirectUri: null,
+            // Prefill sandbox test credentials
+            options: {
+              selectAccount: true,
+              override: {
+                institution: null,
+                credentials: {
+                  username: 'user_good',
+                  password: 'pass_good',
+                }
+              }
+            }
+          }),
           onSuccess: async (public_token, metadata) => {
             try {
               // 3. Exchange the public token for an access token via your backend
@@ -198,6 +218,25 @@ class PlaidService {
       return false;
     }
   }
+  
+  // Helper function to determine if we're using sandbox mode
+  isSandboxMode() {
+    return this.baseUrl.includes('localhost') || 
+           this.baseUrl.includes('127.0.0.1') || 
+           localStorage.getItem('plaid_force_sandbox') === 'true';
+  }
+  
+  // Enable sandbox mode for testing
+  enableSandboxMode() {
+    localStorage.setItem('plaid_force_sandbox', 'true');
+    console.log('Plaid sandbox mode enabled for testing');
+  }
+  
+  // Disable sandbox mode
+  disableSandboxMode() {
+    localStorage.removeItem('plaid_force_sandbox');
+    console.log('Plaid sandbox mode disabled');
+  }
 }
 
 // Helper function to map Plaid categories to your app's categories
@@ -258,7 +297,20 @@ async function connectPlaidAccount() {
         // Generate a unique user ID - in production, use your actual user ID system
         const userId = `user_${Date.now()}`;
         
+        // First check if server is available
+        const serverAvailable = await plaidService.checkServerStatus();
+        if (!serverAvailable) {
+            if (confirm('Cannot connect to Plaid API server. Would you like to use sandbox test mode?')) {
+                plaidService.enableSandboxMode();
+                console.log('Sandbox mode enabled for testing');
+            } else {
+                alert('Please try again when the server is available.');
+                return;
+            }
+        }
+        
         // Start Plaid Link flow
+        console.log('Initiating Plaid Link flow...');
         const result = await plaidService.openPlaidLink(userId);
         
         if (result && result.success) {
@@ -288,10 +340,28 @@ async function connectPlaidAccount() {
             fetchPlaidTransactions();
         } else {
             console.log('Plaid connection cancelled or failed', result);
+            
+            // Check if we should offer sandbox mode
+            if (result && result.error && !plaidService.isSandboxMode()) {
+                if (confirm('Would you like to try again in sandbox test mode?')) {
+                    plaidService.enableSandboxMode();
+                    // Try again
+                    return connectPlaidAccount();
+                }
+            }
         }
     } catch (error) {
         console.error('Error connecting to Plaid:', error);
-        alert('There was a problem connecting to your bank. Please try again.');
+        
+        // Offer sandbox mode if there's an error
+        if (!plaidService.isSandboxMode() && 
+            confirm('There was a problem connecting to your bank. Would you like to try sandbox test mode instead?')) {
+            plaidService.enableSandboxMode();
+            // Try again
+            return connectPlaidAccount();
+        } else {
+            alert('There was a problem connecting to your bank. Please try again.');
+        }
     }
 }
 
@@ -384,3 +454,21 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // Add this to your updateSaveScreen function or similar function that updates the accounts screen
+
+// Utility function to test Plaid in sandbox mode (can be called from console for testing)
+function testPlaidSandboxMode() {
+    // Enable sandbox mode
+    plaidService.enableSandboxMode();
+    
+    // Generate a unique user ID
+    const userId = `sandbox_test_${Date.now()}`;
+    
+    // Trigger the connection flow
+    connectPlaidAccount();
+    
+    console.log('Initiated Plaid sandbox test mode. Use these credentials:');
+    console.log('Username: user_good');
+    console.log('Password: pass_good');
+    
+    return 'Sandbox test initiated. Check console for status updates.';
+}
