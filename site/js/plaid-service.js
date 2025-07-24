@@ -53,28 +53,29 @@ class PlaidService {
       
       // Determine if we're using sandbox mode
       const isSandbox = this.baseUrl.includes('localhost') || 
-                       (data.environment && data.environment === 'sandbox');
+                       (data.environment && data.environment === 'sandbox') ||
+                       this.isSandboxMode();
       console.log(`Using Plaid in ${isSandbox ? 'sandbox' : 'production'} mode`);
+      
+      // If we're in sandbox mode, log test credentials
+      if (isSandbox) {
+        console.log('========= PLAID SANDBOX TEST CREDENTIALS =========');
+        console.log('Username: user_good');
+        console.log('Password: pass_good');
+        console.log('For MFA prompt, use any 4-digit code, like: 1234');
+        console.log('For phone verification, use: 1-123-456-7890');
+        console.log('=================================================');
+      }
       
       // 2. Initialize Plaid Link with the token
       return new Promise((resolve, reject) => {
+        // Create Plaid handler
         const handler = Plaid.create({
           token: linkToken,
-          // Add test credentials for sandbox mode
-          ...(isSandbox && {
-            receivedRedirectUri: null,
-            // Prefill sandbox test credentials
-            options: {
-              selectAccount: true,
-              override: {
-                institution: null,
-                credentials: {
-                  username: 'user_good',
-                  password: 'pass_good',
-                }
-              }
-            }
-          }),
+          receivedRedirectUri: null,
+          onLoad: () => {
+            console.log('Plaid Link loaded');
+          },
           onSuccess: async (public_token, metadata) => {
             try {
               // 3. Exchange the public token for an access token via your backend
@@ -237,6 +238,30 @@ class PlaidService {
     localStorage.removeItem('plaid_force_sandbox');
     console.log('Plaid sandbox mode disabled');
   }
+  
+  // Get sandbox test credentials (for reference)
+  getSandboxCredentials() {
+    return {
+      username: 'user_good',
+      password: 'pass_good',
+      phoneNumber: '1-123-456-7890',
+      mfaCode: '1234'
+    };
+  }
+  
+  // Log sandbox testing instructions to console
+  logSandboxInstructions() {
+    console.log('=== PLAID SANDBOX TESTING INSTRUCTIONS ===');
+    console.log('1. For any institution, use these credentials:');
+    console.log('   Username: user_good');
+    console.log('   Password: pass_good');
+    console.log('2. For phone verification, enter: 1-123-456-7890');
+    console.log('3. For any MFA code prompt, enter: 1234');
+    console.log('4. To test specific error cases, use usernames like:');
+    console.log('   - user_login_required');
+    console.log('   - user_password_reset_required');
+    console.log('==========================================');
+  }
 }
 
 // Helper function to map Plaid categories to your app's categories
@@ -303,10 +328,17 @@ async function connectPlaidAccount() {
             if (confirm('Cannot connect to Plaid API server. Would you like to use sandbox test mode?')) {
                 plaidService.enableSandboxMode();
                 console.log('Sandbox mode enabled for testing');
+                // Display sandbox credentials
+                plaidService.logSandboxInstructions();
             } else {
                 alert('Please try again when the server is available.');
                 return;
             }
+        }
+        
+        // If in sandbox mode, show instructions
+        if (plaidService.isSandboxMode()) {
+            plaidService.logSandboxInstructions();
         }
         
         // Start Plaid Link flow
@@ -342,9 +374,11 @@ async function connectPlaidAccount() {
             console.log('Plaid connection cancelled or failed', result);
             
             // Check if we should offer sandbox mode
-            if (result && result.error && !plaidService.isSandboxMode()) {
-                if (confirm('Would you like to try again in sandbox test mode?')) {
+            if ((result && result.error && !plaidService.isSandboxMode()) || 
+                (!result && !plaidService.isSandboxMode())) {
+                if (confirm('Would you like to try again in sandbox test mode? This will use test credentials that are guaranteed to work.')) {
                     plaidService.enableSandboxMode();
+                    plaidService.logSandboxInstructions();
                     // Try again
                     return connectPlaidAccount();
                 }
@@ -355,8 +389,9 @@ async function connectPlaidAccount() {
         
         // Offer sandbox mode if there's an error
         if (!plaidService.isSandboxMode() && 
-            confirm('There was a problem connecting to your bank. Would you like to try sandbox test mode instead?')) {
+            confirm('There was a problem connecting to your bank. Would you like to try sandbox test mode instead? This will use test credentials that are guaranteed to work.')) {
             plaidService.enableSandboxMode();
+            plaidService.logSandboxInstructions();
             // Try again
             return connectPlaidAccount();
         } else {
@@ -455,7 +490,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 // Add this to your updateSaveScreen function or similar function that updates the accounts screen
 
-// Utility function to test Plaid in sandbox mode (can be called from console for testing)
+// Enhanced utility function to test Plaid in sandbox mode (can be called from console for testing)
 function testPlaidSandboxMode() {
     // Enable sandbox mode
     plaidService.enableSandboxMode();
@@ -463,12 +498,24 @@ function testPlaidSandboxMode() {
     // Generate a unique user ID
     const userId = `sandbox_test_${Date.now()}`;
     
+    // Display sandbox instructions
+    plaidService.logSandboxInstructions();
+    
     // Trigger the connection flow
     connectPlaidAccount();
     
-    console.log('Initiated Plaid sandbox test mode. Use these credentials:');
-    console.log('Username: user_good');
-    console.log('Password: pass_good');
-    
-    return 'Sandbox test initiated. Check console for status updates.';
+    return 'Sandbox test initiated. Check console for instructions and status updates.';
 }
+
+// Make the test function available globally
+window.testPlaidSandbox = testPlaidSandboxMode;
+
+// Direct sandbox credential testing function
+window.getPlaidSandboxCredentials = function() {
+    return {
+        username: 'user_good',
+        password: 'pass_good',
+        phoneNumber: '1-123-456-7890',
+        mfaCode: '1234'
+    };
+};

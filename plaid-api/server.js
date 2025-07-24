@@ -77,13 +77,26 @@ app.post('/api/create_link_token', async (req, res) => {
     const environment = process.env.PLAID_ENV === 'production' ? 'production' : 'sandbox';
     console.log('Using Plaid environment:', environment);
     
-    const createTokenResponse = await plaidClient.linkTokenCreate({
+    // Configure link token creation with options
+    const config = {
       user: { client_user_id: req.body.userId },
       client_name: 'Expense Tracker',
       products: ['transactions'],
       country_codes: ['US', 'CA'],
       language: 'en'
-    });
+    };
+    
+    // Add sandbox-specific configurations if in sandbox mode
+    if (environment === 'sandbox') {
+      console.log('Adding sandbox-specific configurations');
+      config.account_filters = {
+        depository: {
+          account_subtypes: ['checking', 'savings']
+        }
+      };
+    }
+    
+    const createTokenResponse = await plaidClient.linkTokenCreate(config);
     
     console.log('Link token created successfully');
     
