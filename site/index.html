@@ -580,12 +580,59 @@
             padding: 0;
         }
         
-        /* Side-by-side squares layout for budget display */
+        /* Income/Spending Bar Chart Layout */
+
+        #budgetDisplay {
+            border-bottom: 2px solid hsl(var(--border) / 0.5);
+            border-radius: 0;
+            margin: 0 -1rem;
+            margin-bottom: 1rem;
+        }
+
         #budgetDisplay .card-content {
+            padding: 0;
+        }
+        
+        .income-spending-chart {
+            display: flex;
+            align-items: end;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        
+        .chart-bar {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            padding: 0;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            max-width: 40%;
+        }
+        
+        .bar-amount {
+            font-size: 1.1rem;
+            /* font-weight: 600; */
+            color: hsl(215.4deg 57.13% 25.24%);
+            text-align: center;
+        }
+        
+        .bar-visual {
+            width: 100%;
+            border-radius: 6px 6px 0 0;
+            transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 24px;
+        }
+        
+        .income-visual {
+            background: linear-gradient(to bottom, #cb82f273, #ffffff00);
+            border: 2px solid #853dc7;
+            border-bottom: 0;
+        }
+        
+        .spending-visual {
+            background: linear-gradient(to bottom, #ff6a2461, #ffffff00);
+            border: 2px solid #ff7474;
+            border-bottom: 0;  
         }
         
         #budgetDisplay .stat-card {
@@ -1600,7 +1647,6 @@
             flex: 1;
             position: relative;
             overflow: hidden;
-            background-color: #7de97517;
         }
         
         .screens-wrapper {
@@ -2096,17 +2142,19 @@
         }
         
         .sticky-controls-section {
-            position: sticky;
-            top: -2px;
-            z-index: 100;
-            background: hsl(var(--card));
-            border-bottom: 1px solid hsl(var(--border));
-            padding: 1rem;
-            margin: 0 -1rem 0 -1rem;
-            width: calc(100% + 2rem);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transform: translateY(0);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                position: sticky;
+                top: -2px;
+                z-index: 100;
+                background: hsl(var(--card));
+                border: 1px solid hsl(var(--border));
+                padding: 0.6rem;
+                /* margin: 0 -1rem 0 -1rem; */
+                /* width: calc(100% + 2rem); */
+                /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); */
+                transform: translateY(0);
+                /* transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); */
+                margin: 0.7rem 0;
+                border-radius: 1rem;
         }
         
         .sticky-controls-section.hidden {
@@ -2140,6 +2188,8 @@
         #budgetTitleContainer button {
             background: hsl(var(--card)) !important;
         }
+       
+        
         
         
         #monthYearSelectorBtn {
@@ -2208,7 +2258,6 @@
             box-sizing: border-box;
             min-height: 38px;
             max-height: 38px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         
         .period-icon-btn {
@@ -4993,25 +5042,26 @@ margin-right: 0.5rem;
                     <!-- Daily Budget Display -->
                     <div class="card" id="budgetDisplay">
                         <div class="card-content">
-                            <div class="combined-budget-card">
-                                <div class="combined-budget-stats">
-                                    <div class="combined-budget-stat">
-                                        <div class="text-sm text-muted-foreground">Spent</div>
-                                        <div class="text-2xl font-semibold" id="spentAmount">$0.00</div>
-                                        <div class="change-indicator" id="spentChange">
-                                            <span class="change-arrow">↓</span>
-                                            <span class="change-amount">$0</span>
-                                        </div>
-                                    </div>
-                                    <div class="budget-separator"></div>
-                                    <div class="combined-budget-stat">
-                                        <div class="text-sm text-muted-foreground">Remaining</div>
-                                        <div class="text-2xl font-semibold" id="remainingBudget">$41.30</div>
-                                        <div class="change-indicator" id="remainingChange">
-                                            <span class="change-arrow">↑</span>
-                                            <span class="change-amount">On Track</span>
-                                        </div>
-                                    </div>
+                            <div class="income-spending-chart">
+                                <div class="chart-bar income-bar">
+                                    <div class="bar-amount" id="incomeAmount">$6,000</div>
+                                    <div class="bar-visual income-visual" id="incomeBar" style="height: 70px;"></div>
+                                </div>
+                                <div class="chart-bar spending-bar">
+                                    <div class="bar-amount" id="spendingAmount">$1,500</div>
+                                    <div class="bar-visual spending-visual" id="spendingBar" style="height: 35px;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Chart Legend -->
+                            <div class="chart-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: #853dc7;"></div>
+                                    <span class="legend-label">Income</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: #ea580c"></div>
+                                    <span class="legend-label">Spending</span>
                                 </div>
                             </div>
                         </div>
@@ -5057,6 +5107,9 @@ margin-right: 0.5rem;
                         <button class="add-btn" onclick="addExpense()">Add Expense</button>
                     </div>
                     
+                    <!-- Transactions Title -->
+                    <h3 class="section-title" id="expensesListTitle" style="margin-bottom: 1rem;">Transactions</h3>
+                    
                     <!-- Sticky Controls Section (White Background) -->
                     <div class="sticky-controls-section" id="stickyControlsSection">
                         <div class="sticky-controls-content">
@@ -5070,11 +5123,6 @@ margin-right: 0.5rem;
                                 </button>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Sticky Title Section (Transparent Background) -->
-                    <div class="sticky-title-section" id="stickyTitleSection">
-                        <h3 class="section-title" id="expensesListTitle">Transactions</h3>
                     </div>
                     
                     <!-- Period Expenses -->
@@ -6090,9 +6138,9 @@ margin-right: 0.5rem;
         
         function updateBudgetDisplay() {
             const expenses = loadExpenses();
+            const settings = getSimpleBudgetSettings();
             let totalSpent = 0;
-            let remainingAmount = 0;
-            let budget = 0;
+            let monthlyIncome = settings.netIncome || 8084;
             
             if (currentPeriodMode === 'today') {
                 // Calculate this week's spending
@@ -6104,11 +6152,9 @@ margin-right: 0.5rem;
                     totalSpent += dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
                 });
                 
-                // Calculate weekly budget (monthly budget / ~4.33 weeks)
-                const monthlyBudget = getMonthlyBudget();
-                budget = monthlyBudget / 4.33; // Average weeks per month
-                remainingAmount = budget - totalSpent;
-                console.log(`Weekly: spent $${totalSpent}, budget $${budget.toFixed(2)}, remaining $${remainingAmount.toFixed(2)}`);
+                // Calculate weekly income (monthly income / ~4.33 weeks)
+                monthlyIncome = monthlyIncome / 4.33;
+                console.log(`Weekly: spent $${totalSpent}, income $${monthlyIncome.toFixed(2)}`);
             } else {
                 // Monthly calculation
                 const monthKey = getCurrentPeriodKey();
@@ -6119,24 +6165,33 @@ margin-right: 0.5rem;
                     }
                 });
                 
-                budget = getMonthlyBudget();
-                remainingAmount = budget - totalSpent;
+                console.log(`Monthly: spent $${totalSpent}, income $${monthlyIncome.toFixed(2)}`);
             }
             
-            // Update spent amount
-            const spentAmount = document.getElementById('spentAmount');
-            if (spentAmount) {
-                spentAmount.textContent = formatCurrency(totalSpent);
-            }
+            // Update income and spending amounts
+            const incomeAmountEl = document.getElementById('incomeAmount');
+            const spendingAmountEl = document.getElementById('spendingAmount');
+            const incomeBarEl = document.getElementById('incomeBar');
+            const spendingBarEl = document.getElementById('spendingBar');
             
-            // Update remaining amount
-            const remainingBudget = document.getElementById('remainingBudget');
-            if (remainingBudget) {
-                remainingBudget.textContent = formatCurrency(remainingAmount);
-            }
+            if (incomeAmountEl) incomeAmountEl.textContent = formatCurrency(monthlyIncome);
+            if (spendingAmountEl) spendingAmountEl.textContent = formatCurrency(totalSpent);
             
-            // Update labels based on mode
-            updateBudgetLabels();
+            // Calculate proportional heights (max height 70px)
+            const maxAmount = Math.max(monthlyIncome, totalSpent);
+            const incomeHeight = maxAmount > 0 ? Math.max(24, (monthlyIncome / maxAmount) * 70) : 24;
+            const spendingHeight = maxAmount > 0 ? Math.max(24, (totalSpent / maxAmount) * 70) : 24;
+            
+            console.log(`Bar heights: income=${incomeHeight}px, spending=${spendingHeight}px, maxAmount=${maxAmount}`);
+            
+            if (incomeBarEl) {
+                incomeBarEl.style.height = `${incomeHeight}px`;
+                console.log('Income bar updated:', incomeBarEl.style.height);
+            }
+            if (spendingBarEl) {
+                spendingBarEl.style.height = `${spendingHeight}px`;
+                console.log('Spending bar updated:', spendingBarEl.style.height);
+            }
             
             // Update change indicators (calculate monthly status once)
             updateMonthlyStatus();
@@ -9032,6 +9087,8 @@ margin-right: 0.5rem;
                 h3.className = 'section-title';
                 h3.id = 'budgetPeriodLabel';
                 h3.style.margin = '0';
+                // margin-left: 0.5rem;
+                h3.style.padding = '0.5rem 0';
                 h3.style.textAlign = 'left';
                 h3.style.display = 'flex';
                 h3.style.alignItems = 'center';
