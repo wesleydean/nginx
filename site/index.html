@@ -291,7 +291,6 @@
         
         .account-balance {
             font-size: 1rem;
-            font-weight: 600;
             color: hsl(var(--foreground));
             text-align: right;
         }
@@ -559,31 +558,12 @@
             overflow: hidden;
         }
        
-        /* .swipe-action {
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 80px;
-            background-color: hsl(var(--destructive));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: hsl(var(--destructive-foreground));
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 0;
-            border-radius: 0;
-            -webkit-tap-highlight-color: rgba(255,255,255,0.3);
-            touch-action: manipulation;
-        } */
          .swipe-action {
             position: absolute;
             right: 0;
             top: 0;
             bottom: 0;
-            background: linear-gradient(135deg, hsl(260deg 58.02% 57.98%), hsl(260deg 54.55% 69.74%));
+            background: hsl(260deg 54.55% 69.74%);
             color: hsl(var(--destructive-foreground));
             width: 80px;
             display: flex;
@@ -763,7 +743,7 @@
             align-items: end;
             justify-content: center;
             gap: 1.5rem;
-            padding: 2rem 0 1rem 0;
+            padding: 2rem 1rem 1rem 1rem;
             height: 140px;
             position: relative;
         }
@@ -1177,7 +1157,7 @@
         
         .transaction-amount {
             font-weight: 600;
-            color: hsl(var(--destructive));
+            color: hsl(var(--foreground));
         }
         
         /* Chart Legend */
@@ -4079,7 +4059,7 @@
             padding: 0.5em 1.4em;
             background: linear-gradient(135deg, hsl(260deg 58.02% 57.98%), hsl(260deg 54.55% 69.74%));
             color: #ffffff;
-            border: 2px solid hsl(260deg 35% 35%);
+            border: 2px solid hsl(260deg 15.51% 46.37%);
             border-radius: 11rem;
             font-size: 1.08rem;
             font-weight: 500;
@@ -7228,7 +7208,7 @@ margin-right: 0.5rem;
                             data: savingsData,
                             borderColor: 'rgb(16, 185, 129)',
                             backgroundColor: savingsGradient,
-                            tension: 0.4,
+                            tension: 0.6,
                             fill: true,
                             pointRadius: 0,
                             borderWidth: 3,
@@ -7243,7 +7223,7 @@ margin-right: 0.5rem;
                             data: spendingData,
                             borderColor: 'rgb(107, 114, 128)', // Gray
                             backgroundColor: 'transparent', // No fill
-                            tension: 0.4,
+                            tension: 0.6,
                             fill: false, // No fill for spending
                             borderDash: [4, 4], // Dotted line
                             pointRadius: 0,
@@ -7290,7 +7270,7 @@ margin-right: 0.5rem;
                             hoverBorderColor: 'transparent',
                             hoverBorderWidth: 0
                         },
-                        line: { tension: 0.4 }
+                        line: { tension: 0.6 }
                     }
                 }
             });
@@ -10190,13 +10170,16 @@ margin-right: 0.5rem;
                 const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
                 const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 
+                // Format amounts same as cashflow page - just the amount with dark color
                 return `
                     <div class="home-transaction-item">
                         <div class="transaction-info">
-                            <div class="transaction-date">${displayDate}</div>
                             <div class="transaction-description">${getCategoryEmoji(transaction.category)} ${transaction.description ? transaction.description : `${transaction.category.charAt(0).toUpperCase() + transaction.category.slice(1)} expense`}</div>
+                            <div class="transaction-date">${displayDate}</div>
                         </div>
-                        <div class="transaction-amount">-${formatCurrency(transaction.amount)}</div>
+                        <div class="transaction-amount">
+                            $${parseFloat(transaction.amount).toFixed(2)}
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -10447,7 +10430,7 @@ margin-right: 0.5rem;
                 
                 // Generate realistic fluctuation with overall upward trend
                 const trendFactor = 0.9 + (0.1 * (totalDays - i) / totalDays); // Gradual upward trend
-                const fluctuation = (Math.random() - 0.5) * 0.005; // ±0.25% change for smoother curve
+                const fluctuation = (Math.random() - 0.5) * 0.002; // ±0.1% change for ultra-smooth curve
                 const dayValue = baseValue * trendFactor * (1 + fluctuation);
                 
                 history.push({
@@ -10574,13 +10557,13 @@ margin-right: 0.5rem;
                     const currY = yScale(data[i].value);
                     
                     if (i === 1) {
-                        // First curve point
-                        const cpx = prevX + (currX - prevX) * 0.5;
+                        // First curve point - smoother transition
+                        const cpx = prevX + (currX - prevX) * 0.4;
                         ctx.quadraticCurveTo(cpx, prevY, currX, currY);
                     } else {
-                        // Smooth curve through points
-                        const cpx1 = prevX + (currX - prevX) * 0.3;
-                        const cpx2 = currX - (currX - prevX) * 0.3;
+                        // Much smoother curve through points
+                        const cpx1 = prevX + (currX - prevX) * 0.2;
+                        const cpx2 = currX - (currX - prevX) * 0.2;
                         ctx.bezierCurveTo(cpx1, prevY, cpx2, currY, currX, currY);
                     }
                 }
@@ -11135,11 +11118,11 @@ margin-right: 0.5rem;
                         const currY = yScale(lastPeriodData[i].cumulative);
                         
                         if (i === 1) {
-                            const cpx = prevX + (currX - prevX) * 0.5;
+                            const cpx = prevX + (currX - prevX) * 0.4;
                             ctx.quadraticCurveTo(cpx, prevY, currX, currY);
                         } else {
-                            const cpx1 = prevX + (currX - prevX) * 0.3;
-                            const cpx2 = currX - (currX - prevX) * 0.3;
+                            const cpx1 = prevX + (currX - prevX) * 0.2;
+                            const cpx2 = currX - (currX - prevX) * 0.2;
                             ctx.bezierCurveTo(cpx1, prevY, cpx2, currY, currX, currY);
                         }
                     }
@@ -11170,11 +11153,11 @@ margin-right: 0.5rem;
                         const currY = yScale(currentPeriodData[i].cumulative);
                         
                         if (i === 1) {
-                            const cpx = prevX + (currX - prevX) * 0.5;
+                            const cpx = prevX + (currX - prevX) * 0.4;
                             ctx.quadraticCurveTo(cpx, prevY, currX, currY);
                         } else {
-                            const cpx1 = prevX + (currX - prevX) * 0.3;
-                            const cpx2 = currX - (currX - prevX) * 0.3;
+                            const cpx1 = prevX + (currX - prevX) * 0.2;
+                            const cpx2 = currX - (currX - prevX) * 0.2;
                             ctx.bezierCurveTo(cpx1, prevY, cpx2, currY, currX, currY);
                         }
                     }
@@ -11834,7 +11817,7 @@ margin-right: 0.5rem;
             
             if (investmentAmountEl) investmentAmountEl.textContent = formatCurrency(investmentTotal);
             if (cashAmountEl) cashAmountEl.textContent = formatCurrency(cashTotal);
-            if (debtAmountEl) debtAmountEl.textContent = `-${formatCurrency(debtTotal)}`;
+            if (debtAmountEl) debtAmountEl.textContent = `(${formatCurrency(debtTotal)})`;
 
             // Calculate chart heights (max 70px)
             const maxAmount = Math.max(investmentTotal, cashTotal, debtTotal);
@@ -11949,7 +11932,7 @@ margin-right: 0.5rem;
             let html = '';
             transactions.slice(0, 5).forEach(transaction => {
                 const isPositive = transaction.amount > 0;
-                const amountColor = isPositive ? '#22c55e' : 'hsl(var(--foreground))';
+                const amountColor = isPositive ? '#5fa42e' : 'hsl(var(--foreground))';
                 const formattedAmount = isPositive ? 
                     formatCurrency(transaction.amount) : 
                     `(${formatCurrency(Math.abs(transaction.amount))})`;
