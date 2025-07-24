@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <!-- Content Security Policy for local development -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://balanced-shiner-88.clerk.accounts.dev https://clerk.com https://*.clerk.com https://clerk-telemetry.com https://*.clerk-telemetry.com https://api.stripe.com https://*.js.stripe.com https://js.stripe.com https://maps.googleapis.com https://*.sentry-cdn.com https://*.sentry.io https://challenges.cloudflare.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://www.gstatic.com; media-src 'self' data:; worker-src 'self' blob:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://balanced-shiner-88.clerk.accounts.dev https://clerk.com https://*.clerk.com https://clerk-telemetry.com https://*.clerk-telemetry.com https://api.stripe.com https://*.js.stripe.com https://js.stripe.com https://maps.googleapis.com https://*.sentry-cdn.com https://*.sentry.io https://challenges.cloudflare.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://www.gstatic.com https://cdn.plaid.com; worker-src 'self' blob:;">
     <title>Expense Tracker</title>
     
     <!-- Web App Manifest -->
@@ -12277,11 +12277,48 @@ margin-right: 0.5rem;
             }
         }
 
+
+        function updateAccountsView() {
+            // Your existing code to update accounts
+            
+            // Add Plaid connection button at the bottom
+            const accountsList = document.getElementById('accountsList');
+            if (accountsList) {
+                const connectButton = document.createElement('div');
+                connectButton.className = 'quick-action-card';
+                connectButton.style.margin = '20px auto';
+                connectButton.style.width = 'auto';
+                connectButton.style.display = 'inline-flex';
+                connectButton.innerHTML = `
+                    <div class="quick-action-icon">
+                        <i data-lucide="link" class="w-5 h-5"></i>
+                    </div>
+                    <div class="quick-action-title">Connect Bank Account</div>
+                `;
+                connectButton.onclick = connectPlaidAccount;
+                
+                // Append to accountsList or another container
+                accountsList.appendChild(connectButton);
+            }
+        }
+
+        // Function to get the default account ID
+        function getDefaultAccountId() {
+            // If there are savings accounts, use the first one as default
+            if (savingsAccounts && savingsAccounts.length > 0) {
+                return savingsAccounts[0].id;
+            }
+            
+            // If no accounts exist, return null
+            return null;
+        }
+
         // Update save screen display
         function updateSaveScreen() {
             renderSaveTitle();
             updateSaveTargetDisplay();
             updateSaveTotalSavingsDisplay();
+            updateAccountsView();
         }
 
         /**

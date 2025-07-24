@@ -201,3 +201,196 @@ const plaidService = new PlaidService();
 
 // Export the service
 window.plaidService = plaidService;
+
+// Add at the end of your updateAccountManagementList() function
+
+function updateAccountManagementList() {
+    const listContainer = document.getElementById('accountManagementList');
+    if (!listContainer) return;
+    
+    let accountsHtml = savingsAccounts.map(account => `
+        <div class="account-management-list-item">
+            <span class="account-management-name">${account.name}</span>
+            ${savingsAccounts.length > 1 ? `<button class="account-management-delete-btn" onclick="deleteAccountFromSlideOut('${account.id}')">Delete</button>` : ''}
+        </div>
+    `).join('');
+    
+    // Add Plaid connect button at the top
+    accountsHtml = `
+        <div class="account-management-list-item">
+            <span class="account-management-name">Connect Bank Account</span>
+            <button class="account-management-add-btn" style="background-color: #5d59af; min-width: 100px;" onclick="connectPlaidAccount()">Connect</button>
+        </div>
+    ` + accountsHtml;
+    
+    listContainer.innerHTML = accountsHtml;
+}
+
+// Add this function to handle the Plaid integration
+
+async function connectPlaidAccount() {
+    try {
+        // Generate a unique user ID - in production, use your actual user ID system
+        const userId = `user_${Date.now()}`;
+        
+        // Start Plaid Link flow
+        const result = await plaidService.openPlaidLink(userId);
+        
+        if (result && result.success) {
+            // Add the connected institution to our account system
+            const institution = result.institution;
+            
+            // Create a new account entry
+            const newAccount = {
+                id: `plaid_${institution.id}`,
+                name: institution.name,
+                type: 'plaid',
+                institutionId: institution.id
+            };
+            
+            // Add to accounts list
+            savingsAccounts.push(newAccount);
+            saveSavingsAccounts(savingsAccounts);
+            
+            // Update UI
+            updateAccountManagementList();
+            updateAccountSelector();
+            
+            // Show success message
+            alert(`Successfully connected ${institution.name}!`);
+            
+            // Fetch transactions if available
+            fetchPlaidTransactions();
+        } else {
+            console.log('Plaid connection cancelled or failed', result);
+        }
+    } catch (error) {
+        console.error('Error connecting to Plaid:', error);
+        alert('There was a problem connecting to your bank. Please try again.');
+    }
+}
+
+// Add function to fetch transactions from Plaid
+async function fetchPlaidTransactions() {
+    try {
+        const transactions = await plaidService.fetchTransactions();
+        if (transactions && transactions.length > 0) {
+            console.log(`Fetched ${transactions.length} transactions from Plaid`);
+            
+            // Convert Plaid transactions to your app's format and add them
+            const expenses = loadExpenses();
+            
+            // Group by date
+            const transactionsByDate = {};
+            transactions.forEach(transaction => {
+                const date = transaction.date;
+                if (!transactionsByDate[date]) {
+                    transactionsByDate[date] = [];
+                }
+                
+                // Convert to your app's expense format
+                const expense = {
+                    amount: transaction.amount,
+                    category: transaction.category,
+                    description: transaction.description,
+                    timestamp: transaction.timestamp,
+                    created: transaction.created,
+                    plaidId: transaction.plaidId,  // Store Plaid ID to avoid duplicates
+                    institution: transaction.institution
+                };
+                
+                transactionsByDate[date].push(expense);
+            });
+            
+            // Add to expenses object
+            Object.keys(transactionsByDate).forEach(date => {
+                if (!expenses[date]) {
+                    expenses[date] = [];
+                }
+                
+                // Filter out any expenses that already have a plaidId (avoid duplicates)
+                const existingPlaidIds = expenses[date]
+                    .filter(e => e.plaidId)
+                    .map(e => e.plaidId);
+                
+                // Add only new transactions
+                const newTransactions = transactionsByDate[date]
+                    .filter(t => !existingPlaidIds.includes(t.plaidId));
+                
+                expenses[date] = expenses[date].concat(newTransactions);
+            });
+            
+            saveExpenses(expenses);
+            
+            // Update UI
+            updatePeriodView();
+            
+            alert(`Successfully imported ${transactions.length} transactions from your bank!`);
+        } else {
+            console.log('No transactions found or available');
+        }
+    } catch (error) {
+        console.error('Error fetching Plaid transactions:', error);
+    }
+}
+
+// Add this to your document.addEventListener('DOMContentLoaded') function
+
+document.addEventListener('DOMContentLoaded', async function() {
+    // Your existing initialization code
+    
+    // Initialize Plaid service
+    if (window.plaidService) {
+        try {
+            await window.plaidService.initialize();
+            console.log('Plaid service initialized');
+            
+            // Check if server is running
+            const serverStatus = await window.plaidService.checkServerStatus();
+            if (serverStatus) {
+                console.log('Plaid API server is running');
+            } else {
+                console.warn('Plaid API server is not reachable');
+            }
+        } catch (error) {
+            console.error('Failed to initialize Plaid service:', error);
+        }
+    }
+});
+
+// Add this to your updateSaveScreen function or similar function that updates the accounts screen
+
+function updateAccountsView() {
+    // Your existing code to update accounts
+    
+    // Add Plaid connection button at the bottom
+    const accountsList = document.getElementById('accountsList');
+    if (accountsList) {
+        const connectButton = document.createElement('div');
+        connectButton.className = 'quick-action-card';
+        connectButton.style.margin = '20px auto';
+        connectButton.style.width = 'auto';
+        connectButton.style.display = 'inline-flex';
+        connectButton.innerHTML = `
+            <div class="quick-action-icon">
+                <i data-lucide="link" class="w-5 h-5"></i>
+            </div>
+            <div class="quick-action-title">Connect Bank Account</div>
+        `;
+        connectButton.onclick = connectPlaidAccount;
+        
+        // Append to accountsList or another container
+        accountsList.appendChild(connectButton);
+    }
+}
+
+// Function to get the default account ID
+function getDefaultAccountId() {
+    // If there are savings accounts, use the first one as default
+    if (savingsAccounts && savingsAccounts.length > 0) {
+        return savingsAccounts[0].id;
+    }
+    
+    // If no accounts exist, return null
+    return null;
+}
