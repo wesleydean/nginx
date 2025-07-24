@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <!-- Content Security Policy for local development -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://balanced-shiner-88.clerk.accounts.dev https://clerk.com https://*.clerk.com https://clerk-telemetry.com https://*.clerk-telemetry.com https://api.stripe.com https://*.js.stripe.com https://js.stripe.com https://maps.googleapis.com https://*.sentry-cdn.com https://*.sentry.io https://challenges.cloudflare.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://www.gstatic.com https://cdn.plaid.com; worker-src 'self' blob:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https://balanced-shiner-88.clerk.accounts.dev https://clerk.com https://*.clerk.com https://clerk-telemetry.com https://*.clerk-telemetry.com https://api.stripe.com https://*.js.stripe.com https://js.stripe.com https://maps.googleapis.com https://*.sentry-cdn.com https://*.sentry.io https://challenges.cloudflare.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://www.gstatic.com https://cdn.plaid.com http://localhost:5000 http://127.0.0.1:5000; connect-src 'self' https://balanced-shiner-88.clerk.accounts.dev https://clerk.com https://*.clerk.com https://clerk-telemetry.com https://*.clerk-telemetry.com https://api.stripe.com https://*.js.stripe.com https://js.stripe.com https://maps.googleapis.com https://*.sentry-cdn.com https://*.sentry.io https://challenges.cloudflare.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com https://www.gstatic.com https://cdn.plaid.com http://localhost:5000 http://127.0.0.1:5000; worker-src 'self' blob:;">
     <title>Expense Tracker</title>
     
     <!-- Web App Manifest -->
@@ -2039,9 +2039,6 @@
             flex-shrink: 0;
         }
         
-        .date-group {
-            /*  */
-        }
         
         .date-header {
             display: flex;

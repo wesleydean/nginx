@@ -173,6 +173,31 @@ class PlaidService {
       name: institution.name
     }));
   }
+  
+  // Check if the server is running
+  async checkServerStatus() {
+    try {
+      const response = await fetch(`${this.baseUrl}/health`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (response.ok) {
+        console.log('✅ Plaid API server is running!');
+        const data = await response.json();
+        console.log('Server time:', data.timestamp);
+        return true;
+      } else {
+        console.error('❌ Plaid API server returned an error:', response.status);
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Cannot connect to Plaid API server:', error.message);
+      return false;
+    }
+  }
 }
 
 // Helper function to map Plaid categories to your app's categories
@@ -359,38 +384,3 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // Add this to your updateSaveScreen function or similar function that updates the accounts screen
-
-function updateAccountsView() {
-    // Your existing code to update accounts
-    
-    // Add Plaid connection button at the bottom
-    const accountsList = document.getElementById('accountsList');
-    if (accountsList) {
-        const connectButton = document.createElement('div');
-        connectButton.className = 'quick-action-card';
-        connectButton.style.margin = '20px auto';
-        connectButton.style.width = 'auto';
-        connectButton.style.display = 'inline-flex';
-        connectButton.innerHTML = `
-            <div class="quick-action-icon">
-                <i data-lucide="link" class="w-5 h-5"></i>
-            </div>
-            <div class="quick-action-title">Connect Bank Account</div>
-        `;
-        connectButton.onclick = connectPlaidAccount;
-        
-        // Append to accountsList or another container
-        accountsList.appendChild(connectButton);
-    }
-}
-
-// Function to get the default account ID
-function getDefaultAccountId() {
-    // If there are savings accounts, use the first one as default
-    if (savingsAccounts && savingsAccounts.length > 0) {
-        return savingsAccounts[0].id;
-    }
-    
-    // If no accounts exist, return null
-    return null;
-}

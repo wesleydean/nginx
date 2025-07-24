@@ -1,22 +1,20 @@
 const express = require('express');
 const cors = require('cors');
-const helmet = require('helmet');
-const compression = require('compression');
 const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
 require('dotenv').config();
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
-app.use(compression());
-
-// Configure CORS to only allow requests from your frontend domain
+// CORS configuration for development
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'https://your-pwa-domain.com',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: '*', // Allow all origins for development
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 app.use(express.json());
 
