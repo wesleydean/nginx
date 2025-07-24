@@ -827,7 +827,7 @@
         }
         
         .remaining-card .change-indicator {
-            color: #22c55e; /* green for remaining/positive */
+            color: #5fa42e; /* green for remaining/positive */
         }
         
         .remaining-card .change-indicator.over-budget {
@@ -860,7 +860,7 @@
         }
         
         .save-progress-card .change-indicator {
-            color: #22c55e; /* green for progress */
+            color: #5fa42e; /* green for progress */
         }
         
         .save-progress-card .change-indicator.behind-target {
@@ -2881,7 +2881,8 @@
         .chart-container {
             position: relative;
             height: 250px; /* Minimum height instead of fixed height */
-            margin-top: 10px;
+            margin: 0; /* Remove all margins */
+            padding: 0; /* Remove all padding */
             border-radius: var(--radius);
             border-bottom: none; /* Remove bottom border */
             overflow: hidden; /* Prevent any overflow */
@@ -2892,11 +2893,11 @@
         
         /* Full width styling for specific chart */
         .chart-container.full-width-chart {
-            margin-left: -1rem;
-            margin-right: -1rem;
+            margin: 0 -1rem; /* Only horizontal negative margins */
+            padding: 0; /* Remove all padding */
             width: calc(100% + 2rem);
             border-radius: 0;
-            border-bottom: none; /* Remove bottom border */
+            border: none; /* Remove all borders */
             overflow-x: hidden; /* Prevent horizontal overflow */
             max-width: 100vw; /* Ensure it doesn't exceed viewport width */
         }
@@ -2904,10 +2905,20 @@
         #spendingChart {
             touch-action: pan-y; /* Allow vertical scrolling */
             cursor: crosshair;
-            padding: 10px 0;
+            padding: 0; /* Remove padding */
+            margin: 0; /* Remove margin */
             min-height: 250px; /* Minimum height instead of fixed height */
             height: auto; /* Allow the canvas to grow as needed */
             width: 100%; /* Ensure full width */
+            display: block; /* Remove any inline spacing */
+        }
+        
+        #homeCashflowCanvas, #homeNetWorthCanvas {
+            padding: 0;
+            margin: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
         }
         
         /* Make chart more responsive to touch on mobile devices */
@@ -5137,7 +5148,7 @@ margin-right: 0.5rem;
                             </div>
                         </div>
                         <div class="card-content">
-                            <div class="card chart-container full-width-chart">
+                            <div class="chart-container full-width-chart">
                                 <canvas id="homeCashflowCanvas"></canvas>
                                 <div class="chart-overlay" id="homeCashflowOverlay">
                                     <div class="chart-crosshair" id="homeCashflowCrosshair"></div>
@@ -5147,7 +5158,7 @@ margin-right: 0.5rem;
                             <!-- Chart Legend -->
                             <div class="chart-legend" id="cashflowLegend">
                                 <div class="legend-item">
-                                    <div class="legend-color" style="background: linear-gradient(to bottom, #3b82f6, #1d4ed8);"></div>
+                                    <div class="legend-color" style="background: linear-gradient(to bottom, #8b5cf6, #7c3aed);"></div>
                                     <span class="legend-label">This month</span>
                                 </div>
                                 <div class="legend-item">
@@ -5187,7 +5198,7 @@ margin-right: 0.5rem;
                             </div>
                         </div>
                         <div class="card-content">
-                            <div class="card chart-container full-width-chart">
+                            <div class="chart-container full-width-chart">
                                 <canvas id="homeNetWorthCanvas"></canvas>
                                 <div class="chart-overlay" id="homeNetWorthOverlay">
                                     <div class="chart-crosshair" id="homeNetWorthCrosshair"></div>
@@ -6489,7 +6500,7 @@ margin-right: 0.5rem;
                     // Update color based on increase/decrease
                     const changeIndicator = spentChange;
                     if (changeIndicator) {
-                        changeIndicator.style.color = isIncrease ? '#ef4444' : '#22c55e'; // red for increase, green for decrease
+                        changeIndicator.style.color = isIncrease ? '#ef4444' : '#5fa42e'; // red for increase, green for decrease
                     }
                 }
             }
@@ -10250,8 +10261,8 @@ margin-right: 0.5rem;
             // Clear canvas
             ctx.clearRect(0, 0, width, height);
             
-            // Chart dimensions
-            const margin = { top: 20, right: 20, bottom: 30, left: 60 };
+            // Chart dimensions - minimal margins for edge-to-edge appearance
+            const margin = { top: 25, right: 5, bottom: 10, left: 5 };
             const chartWidth = width - margin.left - margin.right;
             const chartHeight = height - margin.top - margin.bottom;
             
@@ -10259,36 +10270,26 @@ margin-right: 0.5rem;
             const xScale = (day) => margin.left + (day / 31) * chartWidth;
             const yScale = (amount) => margin.top + chartHeight - (amount / yAxisMax) * chartHeight;
             
-            // Draw Y-axis labels (same as reports page style)
-            ctx.fillStyle = '#666';
-            ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-            ctx.textAlign = 'right';
+            // Draw reference line at current month's latest value
+            const currentValue = currentMonthData.length > 0 ? currentMonthData[currentMonthData.length - 1].cumulative : 0;
+            const currentY = yScale(currentValue);
             
-            const yTicks = 4;
-            for (let i = 0; i <= yTicks; i++) {
-                const value = (yAxisMax / yTicks) * i;
-                const y = yScale(value);
-                
-                // Format as $1.5K style
-                let label;
-                if (value >= 1000) {
-                    label = `$${(value / 1000).toFixed(1)}K`;
-                } else {
-                    label = `$${Math.round(value)}`;
-                }
-                
-                ctx.fillText(label, margin.left - 10, y + 4);
-                
-                // Draw subtle grid line
-                if (i > 0) {
-                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(margin.left, y);
-                    ctx.lineTo(margin.left + chartWidth, y);
-                    ctx.stroke();
-                }
-            }
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]); // Dashed line
+            ctx.beginPath();
+            ctx.moveTo(margin.left, currentY);
+            ctx.lineTo(margin.left + chartWidth, currentY);
+            ctx.stroke();
+            
+            // Current amount label
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`$${(currentValue / 1000).toFixed(1)}k`, 10, currentY - 8);
+            
+            // Reset line dash for chart lines
+            ctx.setLineDash([]);
             
             // Draw last month data (gray, thinner)
             if (lastMonthData.length > 0) {
@@ -10310,11 +10311,11 @@ margin-right: 0.5rem;
                 ctx.stroke();
             }
             
-            // Draw current month data (primary color, thicker)
+            // Draw current month data (purple color, thicker)
             if (currentMonthData.length > 0) {
                 const gradient = ctx.createLinearGradient(0, 0, 0, height);
-                gradient.addColorStop(0, '#3b82f6');
-                gradient.addColorStop(1, '#1d4ed8');
+                gradient.addColorStop(0, '#8b5cf6');
+                gradient.addColorStop(1, '#7c3aed');
                 
                 ctx.strokeStyle = gradient;
                 ctx.lineWidth = 2.5;
@@ -10429,8 +10430,8 @@ margin-right: 0.5rem;
                 date.setDate(date.getDate() - i);
                 
                 // Generate realistic fluctuation with overall upward trend
-                const trendFactor = 0.9 + (0.1 * (totalDays - i) / totalDays); // Gradual upward trend
-                const fluctuation = (Math.random() - 0.5) * 0.002; // ±0.1% change for ultra-smooth curve
+                const trendFactor = 0.85 + (0.3 * (totalDays - i) / totalDays); // Enhanced upward trend with more variation
+                const fluctuation = (Math.random() - 0.5) * 0.001; // ±0.05% change for ultra-smooth curve
                 const dayValue = baseValue * trendFactor * (1 + fluctuation);
                 
                 history.push({
@@ -10490,41 +10491,31 @@ margin-right: 0.5rem;
             const xScale = (index) => margin.left + (index / (data.length - 1)) * chartWidth;
             const yScale = (value) => margin.top + chartHeight - ((value - minValue) / adjustedRange) * chartHeight;
             
-            // Draw Y-axis labels
-            ctx.fillStyle = '#666';
-            ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-            ctx.textAlign = 'right';
+            // Draw reference line at current (latest) value
+            const currentValue = data.length > 0 ? data[data.length - 1].value : 0;
+            const currentY = yScale(currentValue);
             
-            const yTicks = 4;
-            for (let i = 0; i <= yTicks; i++) {
-                const value = minValue + (adjustedRange / yTicks) * i;
-                const y = yScale(value);
-                
-                // Format as $68.5K style
-                let label;
-                if (value >= 1000) {
-                    label = `$${(value / 1000).toFixed(1)}K`;
-                } else {
-                    label = `$${Math.round(value)}`;
-                }
-                
-                ctx.fillText(label, margin.left - 10, y + 4);
-                
-                // Draw subtle grid line
-                if (i > 0) {
-                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(margin.left, y);
-                    ctx.lineTo(margin.left + chartWidth, y);
-                    ctx.stroke();
-                }
-            }
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]); // Dashed line
+            ctx.beginPath();
+            ctx.moveTo(margin.left, currentY);
+            ctx.lineTo(margin.left + chartWidth, currentY);
+            ctx.stroke();
+            
+            // Current amount label
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`$${(currentValue / 1000).toFixed(1)}k`, 10, currentY - 8);
+            
+            // Reset line dash for chart lines
+            ctx.setLineDash([]);
             
             // Create gradient
             const gradient = ctx.createLinearGradient(0, 0, 0, height);
-            gradient.addColorStop(0, '#22c55e');
-            gradient.addColorStop(1, '#16a34a');
+            gradient.addColorStop(0, '#5fa42e');
+            gradient.addColorStop(1, '#4a7c23');
             
             // Draw area fill
             ctx.globalAlpha = 0.1;
@@ -10541,7 +10532,7 @@ margin-right: 0.5rem;
             ctx.globalAlpha = 1;
             
             // Draw smooth line using bezier curves
-            ctx.strokeStyle = gradient;
+            ctx.strokeStyle = '#5fa42e';
             ctx.lineWidth = 2;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
@@ -10558,7 +10549,7 @@ margin-right: 0.5rem;
                     
                     if (i === 1) {
                         // First curve point - smoother transition
-                        const cpx = prevX + (currX - prevX) * 0.4;
+                        const cpx = prevX + (currX - prevX) * 0.3;
                         ctx.quadraticCurveTo(cpx, prevY, currX, currY);
                     } else {
                         // Much smoother curve through points
@@ -10614,7 +10605,7 @@ margin-right: 0.5rem;
             if (netWorthChange) {
                 const isPositive = changePercent > 0;
                 const arrow = isPositive ? 'arrow-up' : 'arrow-down';
-                const color = isPositive ? '#22c55e' : '#ef4444';
+                const color = isPositive ? '#5fa42e' : '#ef4444';
                 const changeAmount = (totalNetWorth * changePercent / 100).toFixed(2);
                 netWorthChange.innerHTML = `
                     <i data-lucide="${arrow}" class="w-4 h-4 inline" style="color: ${color}"></i>
@@ -11042,8 +11033,8 @@ margin-right: 0.5rem;
             // Clear canvas
             ctx.clearRect(0, 0, width, height);
             
-            // Chart dimensions
-            const margin = { top: 20, right: 20, bottom: 30, left: 60 };
+            // Chart dimensions - minimal margins for edge-to-edge appearance
+            const margin = { top: 25, right: 0, bottom: 10, left: 0 };
             const chartWidth = width - margin.left - margin.right;
             const chartHeight = height - margin.top - margin.bottom;
             
@@ -11069,36 +11060,26 @@ margin-right: 0.5rem;
             const xScale = (day) => margin.left + (day / maxDays) * chartWidth;
             const yScale = (amount) => margin.top + chartHeight - (amount / yAxisMax) * chartHeight;
             
-            // Draw Y-axis labels
-            ctx.fillStyle = '#666';
-            ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-            ctx.textAlign = 'right';
+            // Draw reference line at current period's latest value
+            const currentValue = currentPeriodData.length > 0 ? currentPeriodData[currentPeriodData.length - 1].cumulative : 0;
+            const currentY = yScale(currentValue);
             
-            const yTicks = 4;
-            for (let i = 0; i <= yTicks; i++) {
-                const value = (yAxisMax / yTicks) * i;
-                const y = yScale(value);
-                
-                // Format as $1.5K style
-                let label;
-                if (value >= 1000) {
-                    label = `$${(value / 1000).toFixed(1)}K`;
-                } else {
-                    label = `$${Math.round(value)}`;
-                }
-                
-                ctx.fillText(label, margin.left - 10, y + 4);
-                
-                // Draw subtle grid line
-                if (i > 0) {
-                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(margin.left, y);
-                    ctx.lineTo(margin.left + chartWidth, y);
-                    ctx.stroke();
-                }
-            }
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]); // Dashed line
+            ctx.beginPath();
+            ctx.moveTo(margin.left, currentY);
+            ctx.lineTo(margin.left + chartWidth, currentY);
+            ctx.stroke();
+            
+            // Current amount label
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`$${(currentValue / 1000).toFixed(1)}k`, 10, currentY - 8);
+            
+            // Reset line dash for chart lines
+            ctx.setLineDash([]);
             
             // Draw last period data (gray, thinner) with smooth curves
             if (lastPeriodData.length > 0) {
@@ -11118,11 +11099,11 @@ margin-right: 0.5rem;
                         const currY = yScale(lastPeriodData[i].cumulative);
                         
                         if (i === 1) {
-                            const cpx = prevX + (currX - prevX) * 0.4;
+                            const cpx = prevX + (currX - prevX) * 0.3;
                             ctx.quadraticCurveTo(cpx, prevY, currX, currY);
                         } else {
-                            const cpx1 = prevX + (currX - prevX) * 0.2;
-                            const cpx2 = currX - (currX - prevX) * 0.2;
+                            const cpx1 = prevX + (currX - prevX) * 0.15;
+                            const cpx2 = currX - (currX - prevX) * 0.15;
                             ctx.bezierCurveTo(cpx1, prevY, cpx2, currY, currX, currY);
                         }
                     }
@@ -11131,11 +11112,11 @@ margin-right: 0.5rem;
                 ctx.stroke();
             }
             
-            // Draw current period data (primary color, thicker) with smooth curves
+            // Draw current period data (purple color, thicker) with smooth curves
             if (currentPeriodData.length > 0) {
                 const gradient = ctx.createLinearGradient(0, 0, 0, height);
-                gradient.addColorStop(0, '#3b82f6');
-                gradient.addColorStop(1, '#1d4ed8');
+                gradient.addColorStop(0, '#8b5cf6');
+                gradient.addColorStop(1, '#7c3aed');
                 
                 ctx.strokeStyle = gradient;
                 ctx.lineWidth = 2.5;
@@ -11153,11 +11134,11 @@ margin-right: 0.5rem;
                         const currY = yScale(currentPeriodData[i].cumulative);
                         
                         if (i === 1) {
-                            const cpx = prevX + (currX - prevX) * 0.4;
+                            const cpx = prevX + (currX - prevX) * 0.3;
                             ctx.quadraticCurveTo(cpx, prevY, currX, currY);
                         } else {
-                            const cpx1 = prevX + (currX - prevX) * 0.2;
-                            const cpx2 = currX - (currX - prevX) * 0.2;
+                            const cpx1 = prevX + (currX - prevX) * 0.15;
+                            const cpx2 = currX - (currX - prevX) * 0.15;
                             ctx.bezierCurveTo(cpx1, prevY, cpx2, currY, currX, currY);
                         }
                     }
@@ -11797,11 +11778,16 @@ margin-right: 0.5rem;
                     investmentTotal += balance;
                 } else if (account.type === 'liability') {
                     debtTotal += Math.abs(balance); // Show as positive for chart
+                    totalBalance -= Math.abs(balance); // Subtract debt from net worth
                 } else {
                     cashTotal += balance;
+                    totalBalance += balance; // Add assets to net worth
                 }
                 
-                totalBalance += balance;
+                // Investment accounts also add to net worth
+                if (account.type === 'investment') {
+                    totalBalance += balance;
+                }
             });
 
             // Update total balance display
