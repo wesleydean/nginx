@@ -5,20 +5,28 @@ require('dotenv').config();
 
 const app = express();
 
-// CORS configuration for development
+// Middleware order is important - json parsing first
+app.use(express.json());
+
+// Then CORS configuration
+console.log('Setting up CORS configuration');
 app.use(cors({
   origin: '*', // Allow all origins for development
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  credentials: true,
+  preflightContinue: false // Explicitly prevent preflight continuation issues
 }));
 
 // Handle preflight requests
 app.options('*', cors());
 
-app.use(express.json());
-
 // Configure Plaid client
+console.log('PLAID_ENV:', process.env.PLAID_ENV);
+console.log('PLAID environment path:', process.env.PLAID_ENV === 'production' 
+  ? PlaidEnvironments.production 
+  : PlaidEnvironments.sandbox);
+
 const configuration = new Configuration({
   basePath: process.env.PLAID_ENV === 'production' 
     ? PlaidEnvironments.production 
@@ -40,6 +48,15 @@ app.get('/health', (req, res) => {
 // Create a link token and send to client
 app.post('/api/create_link_token', async (req, res) => {
   try {
+    // Check if userId exists to prevent potential errors
+    if (!req.body.userId) {
+      console.warn('Missing userId in request body');
+      req.body.userId = 'default-user-id'; // Provide a fallback
+    }
+    
+    // Log the request data for debugging
+    console.log('Creating link token with user ID:', req.body.userId);
+    
     const createTokenResponse = await plaidClient.linkTokenCreate({
       user: { client_user_id: req.body.userId },
       client_name: 'Expense Tracker',
@@ -47,9 +64,12 @@ app.post('/api/create_link_token', async (req, res) => {
       country_codes: ['US', 'CA'],
       language: 'en'
     });
+    
+    console.log('Link token created successfully');
     res.json(createTokenResponse.data);
   } catch (error) {
     console.error('Error creating link token:', error);
+    console.error('Error details:', error.stack);
     res.status(500).json({ error: error.message });
   }
 });
@@ -122,5 +142,27 @@ app.post('/api/transactions', async (req, res) => {
   }
 });
 
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  console.error('Stack trace:', err.stack);
+  res.status(500).json({ 
+    error: 'Internal Server Error',
+    message: err.message
+  });
+});
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Print all registered routes for debugging
+console.log('Registered routes:');
+app._router.stack.forEach(function(r){
+  if (r.route && r.route.path){
+    console.log(`${Object.keys(r.route.methods)} ${r.route.path}`);
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
