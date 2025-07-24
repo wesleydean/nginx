@@ -23,14 +23,23 @@ app.options('*', cors());
 
 // Configure Plaid client
 console.log('PLAID_ENV:', process.env.PLAID_ENV);
-console.log('PLAID environment path:', process.env.PLAID_ENV === 'production' 
-  ? PlaidEnvironments.production 
-  : PlaidEnvironments.sandbox);
+
+// Safely handle the environment path
+let basePath;
+try {
+  basePath = process.env.PLAID_ENV === 'production' 
+    ? PlaidEnvironments.production 
+    : PlaidEnvironments.sandbox;
+  console.log('PLAID environment path:', basePath);
+} catch (error) {
+  console.error('Error determining Plaid environment:', error);
+  // Default to sandbox in case of error
+  basePath = 'https://sandbox.plaid.com';
+  console.log('Defaulting to:', basePath);
+}
 
 const configuration = new Configuration({
-  basePath: process.env.PLAID_ENV === 'production' 
-    ? PlaidEnvironments.production 
-    : PlaidEnvironments.sandbox,
+  basePath: basePath,
   baseOptions: {
     headers: {
       'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID,
@@ -146,6 +155,17 @@ app.post('/api/transactions', async (req, res) => {
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   console.error('Stack trace:', err.stack);
+  
+  // Special handling for path-to-regexp errors
+  if (err.message && err.message.includes('Missing parameter name')) {
+    console.warn('Detected path-to-regexp error with URL parsing. This might be caused by a URL containing a colon that\'s not a route parameter.');
+    
+    // Check if this is a CORS preflight request that might be malformed
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+  }
+  
   res.status(500).json({ 
     error: 'Internal Server Error',
     message: err.message
