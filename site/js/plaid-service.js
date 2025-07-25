@@ -35,18 +35,55 @@ class PlaidService {
   // Get Clerk session token
   async getClerkSessionToken() {
     try {
+      console.log('=== GETTING CLERK SESSION TOKEN ===');
+      
       // Check if Clerk is available
       if (typeof window.Clerk === 'undefined') {
+        console.error('❌ window.Clerk is undefined');
         throw new Error('Clerk is not loaded. Make sure Clerk is properly initialized.');
       }
       
-      // Get the session token from Clerk
-      const session = window.Clerk.session;
-      if (!session) {
+      console.log('✅ window.Clerk exists:', !!window.Clerk);
+      console.log('Clerk loaded:', window.Clerk.loaded);
+      console.log('Clerk user:', window.Clerk.user);
+      
+      // Wait for Clerk to be loaded if it isn't already
+      if (!window.Clerk.loaded) {
+        console.log('Waiting for Clerk to load...');
+        await window.Clerk.load();
+      }
+      
+      // Check if user is signed in
+      if (!window.Clerk.user) {
+        console.error('❌ No user found in window.Clerk.user');
         throw new Error('User is not signed in. Please sign in to continue.');
       }
       
-      const token = await session.getToken();
+      console.log('✅ User found:', window.Clerk.user.id);
+      
+      // Try different methods to get the token
+      let token = null;
+      
+      // Method 1: Direct session token
+      if (window.Clerk.session) {
+        console.log('Trying session.getToken()...');
+        token = await window.Clerk.session.getToken();
+      }
+      
+      // Method 2: User getToken method
+      if (!token && window.Clerk.user.getToken) {
+        console.log('Trying user.getToken()...');
+        token = await window.Clerk.user.getToken();
+      }
+      
+      // Method 3: Session from user
+      if (!token && window.Clerk.user.session) {
+        console.log('Trying user.session.getToken()...');
+        token = await window.Clerk.user.session.getToken();
+      }
+      
+      console.log('Token result:', token ? 'Got token' : 'No token');
+      
       if (!token) {
         throw new Error('Could not get session token. Please try signing in again.');
       }
