@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
+const store = require('./store');
 require('dotenv').config();
 
 // Create Express app and explicitly use path-to-regexp options for stable path handling
@@ -124,7 +125,7 @@ app.post('/api/exchange_public_token', async (req, res) => {
     const accessToken = exchangeResponse.data.access_token;
     const itemId = exchangeResponse.data.item_id;
     
-    // Get institution information
+    // Get institution and account information
     const itemResponse = await plaidClient.itemGet({
       access_token: accessToken
     });
@@ -139,14 +140,31 @@ app.post('/api/exchange_public_token', async (req, res) => {
       });
       institutionName = institutionResponse.data.institution.name;
     }
+
+    // Get accounts and store them
+    const accountsResponse = await plaidClient.accountsGet({
+      access_token: accessToken
+    });
     
-    // In production you would store these in your database associated with the user
-    // For this example, we'll return them directly (NOT recommended for production)
+    const userId = req.body.userId || 'default-user';
+    
+    // Store accounts in our data store
+    accountsResponse.data.accounts.forEach(account => {
+      store.addAccount(userId, {
+        ...account,
+        access_token: accessToken,
+        item_id: itemId,
+        institution_id: institutionId,
+        institution_name: institutionName
+      });
+    });
+    
     res.json({ 
       access_token: accessToken, 
       item_id: itemId,
       institution_id: institutionId,
-      institution_name: institutionName
+      institution_name: institutionName,
+      accounts: accountsResponse.data.accounts
     });
   } catch (error) {
     console.error('Error exchanging public token:', error);
@@ -157,8 +175,8 @@ app.post('/api/exchange_public_token', async (req, res) => {
 // Fetch transactions endpoint
 app.post('/api/transactions', async (req, res) => {
   try {
-    // Access token should be securely stored and retrieved in a real app
     const accessToken = req.body.access_token;
+    const userId = req.body.userId || 'default-user';
     
     if (!accessToken) {
       return res.status(400).json({ error: 'Access token is required' });
@@ -166,7 +184,7 @@ app.post('/api/transactions', async (req, res) => {
     
     const now = new Date();
     const startDate = new Date(now);
-    startDate.setDate(startDate.getDate() - 30); // Get 30 days of transactions
+    startDate.setDate(startDate.getDate() - 30);
     
     const response = await plaidClient.transactionsGet({
       access_token: accessToken,
@@ -174,10 +192,61 @@ app.post('/api/transactions', async (req, res) => {
       end_date: now.toISOString().split('T')[0],
     });
     
-    const transactions = response.data.transactions;
-    res.json({ transactions });
+    // Store transactions in our data store
+    const addedTransactions = store.addTransactions(userId, response.data.transactions);
+    
+    res.json({ 
+      transactions: response.data.transactions,
+      stored_count: addedTransactions.length 
+    });
   } catch (error) {
     console.error('Error fetching transactions:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get stored transactions for a user
+app.get('/api/user/:userId/transactions', (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const limit = req.query.limit ? parseInt(req.query.limit) : null;
+    
+    const transactions = store.getUserTransactions(userId, limit);
+    const stats = store.getStats(userId);
+    
+    res.json({
+      transactions,
+      stats,
+      count: transactions.length
+    });
+  } catch (error) {
+    console.error('Error getting user transactions:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get transactions by category
+app.get('/api/user/:userId/transactions/categories', (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const categories = store.getTransactionsByCategory(userId);
+    
+    res.json({ categories });
+  } catch (error) {
+    console.error('Error getting transactions by category:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get user accounts
+app.get('/api/user/:userId/accounts', (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const accounts = store.getUserAccounts(userId);
+    
+    res.json({ accounts });
+  } catch (error) {
+    console.error('Error getting user accounts:', error);
     res.status(500).json({ error: error.message });
   }
 });
