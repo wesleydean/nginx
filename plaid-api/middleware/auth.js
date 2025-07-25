@@ -7,24 +7,41 @@ const clerkMiddleware = ClerkExpressWithAuth({
   // Railway-specific configuration
   apiVersion: 'v1',
   skipJwtValidation: false,
-  jwtKey: process.env.CLERK_JWT_KEY || process.env.CLERK_SECRET_KEY
+  jwtKey: process.env.CLERK_JWT_KEY || process.env.CLERK_SECRET_KEY,
+  authorizedParties: ['https://nginx-production-d92e.up.railway.app']
 });
 
 // Auth middleware that requires authentication
 const requireAuth = (req, res, next) => {
-  console.log('Auth check - req.auth:', req.auth);
+  console.log('=== AUTH MIDDLEWARE DEBUG ===');
+  console.log('req.auth:', req.auth);
   console.log('Authorization header:', req.headers.authorization);
+  console.log('All headers:', Object.keys(req.headers));
+  console.log('Origin:', req.headers.origin);
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
   
-  if (!req.auth?.userId) {
+  // Check if we have auth object from Clerk middleware
+  if (!req.auth) {
+    console.log('❌ No req.auth object found');
     return res.status(401).json({ 
-      error: 'Unauthorized',
-      debug: {
-        hasAuth: !!req.auth,
-        userId: req.auth?.userId,
-        hasAuthHeader: !!req.headers.authorization
-      }
+      error: 'Unauthorized - No auth object',
+      message: 'Clerk middleware did not set req.auth. Check your Authorization header format.',
+      expected: 'Authorization: Bearer <clerk-session-token>'
     });
   }
+  
+  // Check if we have userId
+  if (!req.auth.userId) {
+    console.log('❌ No userId in req.auth:', req.auth);
+    return res.status(401).json({ 
+      error: 'Unauthorized - No user ID',
+      message: 'Valid Clerk session token required',
+      auth_debug: req.auth
+    });
+  }
+  
+  console.log('✅ Auth success for user:', req.auth.userId);
   next();
 };
 

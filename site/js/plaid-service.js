@@ -32,14 +32,54 @@ class PlaidService {
     this.institutions = institutions;
   }
   
+  // Get Clerk session token
+  async getClerkSessionToken() {
+    try {
+      // Check if Clerk is available
+      if (typeof window.Clerk === 'undefined') {
+        throw new Error('Clerk is not loaded. Make sure Clerk is properly initialized.');
+      }
+      
+      // Get the session token from Clerk
+      const session = window.Clerk.session;
+      if (!session) {
+        throw new Error('User is not signed in. Please sign in to continue.');
+      }
+      
+      const token = await session.getToken();
+      if (!token) {
+        throw new Error('Could not get session token. Please try signing in again.');
+      }
+      
+      return token;
+    } catch (error) {
+      console.error('Error getting Clerk session token:', error);
+      
+      // Show user-friendly error message
+      if (error.message.includes('not signed in')) {
+        alert('Please sign in to connect your bank account.');
+      } else if (error.message.includes('Clerk is not loaded')) {
+        alert('Authentication service is not available. Please refresh the page and try again.');
+      } else {
+        alert('Authentication error. Please try signing in again.');
+      }
+      
+      throw error;
+    }
+  }
+  
   // Start the Plaid Link flow
   async openPlaidLink(userId) {
     try {
+      // Get Clerk session token
+      const sessionToken = await this.getClerkSessionToken();
+      
       // 1. Request a link token from your backend server
       const response = await fetch(`${this.baseUrl}/api/create_link_token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({ userId }),
       });
@@ -78,11 +118,15 @@ class PlaidService {
           },
           onSuccess: async (public_token, metadata) => {
             try {
+              // Get Clerk session token
+              const sessionToken = await this.getClerkSessionToken();
+              
               // 3. Exchange the public token for an access token via your backend
               const exchangeResponse = await fetch(`${this.baseUrl}/api/exchange_public_token`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${sessionToken}`,
                 },
                 body: JSON.stringify({ public_token }),
               });
@@ -147,10 +191,14 @@ class PlaidService {
     
     for (const institution of this.institutions) {
       try {
+        // Get Clerk session token
+        const sessionToken = await this.getClerkSessionToken();
+        
         const response = await fetch(`${this.baseUrl}/api/transactions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionToken}`,
           },
           body: JSON.stringify({ access_token: institution.accessToken }),
         });
