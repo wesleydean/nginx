@@ -1,15 +1,29 @@
 const { ClerkExpressWithAuth } = require('@clerk/clerk-sdk-node');
 
-// Configure Clerk
+// Configure Clerk for Railway deployment
 const clerkMiddleware = ClerkExpressWithAuth({
   publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
   secretKey: process.env.CLERK_SECRET_KEY,
+  // Railway-specific configuration
+  apiVersion: 'v1',
+  skipJwtValidation: false,
+  jwtKey: process.env.CLERK_JWT_KEY || process.env.CLERK_SECRET_KEY
 });
 
 // Auth middleware that requires authentication
 const requireAuth = (req, res, next) => {
+  console.log('Auth check - req.auth:', req.auth);
+  console.log('Authorization header:', req.headers.authorization);
+  
   if (!req.auth?.userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ 
+      error: 'Unauthorized',
+      debug: {
+        hasAuth: !!req.auth,
+        userId: req.auth?.userId,
+        hasAuthHeader: !!req.headers.authorization
+      }
+    });
   }
   next();
 };

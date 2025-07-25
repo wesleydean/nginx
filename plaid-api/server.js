@@ -66,6 +66,49 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Test endpoint without auth for debugging
+app.post('/api/create_link_token_test', async (req, res) => {
+  try {
+    const testUserId = 'test-user-id';
+    
+    console.log('Creating test link token for user:', testUserId);
+    
+    const environment = process.env.PLAID_ENV === 'production' ? 'production' : 'sandbox';
+    console.log('Using Plaid environment:', environment);
+    
+    const config = {
+      user: { client_user_id: testUserId },
+      client_name: 'Expense Tracker',
+      products: ['transactions'],
+      country_codes: ['US', 'CA'],
+      language: 'en'
+    };
+    
+    if (environment === 'sandbox') {
+      console.log('Adding sandbox-specific configurations');
+      config.account_filters = {
+        depository: {
+          account_subtypes: ['checking', 'savings']
+        }
+      };
+    }
+    
+    const createTokenResponse = await plaidClient.linkTokenCreate(config);
+    
+    console.log('Link token created successfully');
+    
+    const responseData = {
+      ...createTokenResponse.data,
+      environment: environment
+    };
+    
+    res.json(responseData);
+  } catch (error) {
+    console.error('Error creating test link token:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Create a link token and send to client
 app.post('/api/create_link_token', requireAuth, async (req, res) => {
   try {
