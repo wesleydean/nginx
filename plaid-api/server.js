@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
 const database = require('./database');
-const { clerkMiddleware, requireAuth } = require('./middleware/auth');
+const { clerkAuth } = require('./middleware/auth');
 require('dotenv').config();
 
 // Create Express app and explicitly use path-to-regexp options for stable path handling
@@ -21,8 +21,7 @@ app.use(cors({
   preflightContinue: false // Explicitly prevent preflight continuation issues
 }));
 
-// Add Clerk authentication middleware
-app.use(clerkMiddleware);
+// Note: Using direct token verification per endpoint instead of global middleware
 
 // Handle preflight requests - more specific handling to avoid path-to-regexp issues
 app.options('*', (req, res) => {
@@ -110,7 +109,7 @@ app.post('/api/create_link_token_test', async (req, res) => {
 });
 
 // Create a link token and send to client
-app.post('/api/create_link_token', requireAuth, async (req, res) => {
+app.post('/api/create_link_token', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
     
@@ -162,7 +161,7 @@ app.post('/api/create_link_token', requireAuth, async (req, res) => {
 });
 
 // Exchange public token for access token
-app.post('/api/exchange_public_token', requireAuth, async (req, res) => {
+app.post('/api/exchange_public_token', clerkAuth, async (req, res) => {
   try {
     const exchangeResponse = await plaidClient.itemPublicTokenExchange({
       public_token: req.body.public_token
@@ -240,7 +239,7 @@ app.post('/api/exchange_public_token', requireAuth, async (req, res) => {
 });
 
 // Fetch transactions endpoint
-app.post('/api/transactions', requireAuth, async (req, res) => {
+app.post('/api/transactions', clerkAuth, async (req, res) => {
   try {
     const accessToken = req.body.access_token;
     const clerkUserId = req.auth.userId;
@@ -273,7 +272,7 @@ app.post('/api/transactions', requireAuth, async (req, res) => {
 });
 
 // Get stored transactions for authenticated user
-app.get('/api/transactions', requireAuth, async (req, res) => {
+app.get('/api/transactions', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
     const limit = req.query.limit ? parseInt(req.query.limit) : null;
@@ -294,7 +293,7 @@ app.get('/api/transactions', requireAuth, async (req, res) => {
 });
 
 // Get transactions by category
-app.get('/api/transactions/categories', requireAuth, async (req, res) => {
+app.get('/api/transactions/categories', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
     const categories = await database.getTransactionsByCategory(clerkUserId);
@@ -307,7 +306,7 @@ app.get('/api/transactions/categories', requireAuth, async (req, res) => {
 });
 
 // Get user accounts with recent transactions
-app.get('/api/accounts', requireAuth, async (req, res) => {
+app.get('/api/accounts', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
     const accounts = await database.getUserAccounts(clerkUserId);
@@ -337,7 +336,7 @@ app.get('/api/accounts', requireAuth, async (req, res) => {
 });
 
 // Update account name
-app.put('/api/accounts/:accountId', requireAuth, async (req, res) => {
+app.put('/api/accounts/:accountId', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
     const accountId = req.params.accountId;
@@ -357,7 +356,7 @@ app.put('/api/accounts/:accountId', requireAuth, async (req, res) => {
 });
 
 // Refresh account balances
-app.post('/api/accounts/refresh', requireAuth, async (req, res) => {
+app.post('/api/accounts/refresh', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
     const accounts = await database.getUserAccounts(clerkUserId);
@@ -409,7 +408,7 @@ app.post('/api/accounts/refresh', requireAuth, async (req, res) => {
 });
 
 // Update transaction
-app.put('/api/transactions/:transactionId', requireAuth, async (req, res) => {
+app.put('/api/transactions/:transactionId', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
     const transactionId = req.params.transactionId;
