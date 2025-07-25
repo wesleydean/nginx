@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
-const store = require('./store');
+const database = require('./database');
+const { clerkMiddleware, requireAuth } = require('./middleware/auth');
 require('dotenv').config();
 
 // Create Express app and explicitly use path-to-regexp options for stable path handling
@@ -14,11 +15,14 @@ app.use(express.json());
 console.log('Setting up CORS configuration');
 app.use(cors({
   origin: '*', // Allow all origins for development
-  methods: ['GET', 'POST', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   preflightContinue: false // Explicitly prevent preflight continuation issues
 }));
+
+// Add Clerk authentication middleware
+app.use(clerkMiddleware);
 
 // Handle preflight requests - more specific handling to avoid path-to-regexp issues
 app.options('*', (req, res) => {
@@ -63,16 +67,15 @@ app.get('/health', (req, res) => {
 });
 
 // Create a link token and send to client
-app.post('/api/create_link_token', async (req, res) => {
+app.post('/api/create_link_token', requireAuth, async (req, res) => {
   try {
-    // Check if userId exists to prevent potential errors
-    if (!req.body.userId) {
-      console.warn('Missing userId in request body');
-      req.body.userId = 'default-user-id'; // Provide a fallback
-    }
+    const clerkUserId = req.auth.userId;
+    
+    // Ensure user exists in database
+    await database.createUser(clerkUserId);
     
     // Log the request data for debugging
-    console.log('Creating link token with user ID:', req.body.userId);
+    console.log('Creating link token for Clerk user:', clerkUserId);
     
     // Determine the current environment
     const environment = process.env.PLAID_ENV === 'production' ? 'production' : 'sandbox';
@@ -80,7 +83,7 @@ app.post('/api/create_link_token', async (req, res) => {
     
     // Configure link token creation with options
     const config = {
-      user: { client_user_id: req.body.userId },
+      user: { client_user_id: clerkUserId },
       client_name: 'Expense Tracker',
       products: ['transactions'],
       country_codes: ['US', 'CA'],
@@ -116,7 +119,7 @@ app.post('/api/create_link_token', async (req, res) => {
 });
 
 // Exchange public token for access token
-app.post('/api/exchange_public_token', async (req, res) => {
+app.post('/api/exchange_public_token', requireAuth, async (req, res) => {
   try {
     const exchangeResponse = await plaidClient.itemPublicTokenExchange({
       public_token: req.body.public_token
@@ -146,18 +149,39 @@ app.post('/api/exchange_public_token', async (req, res) => {
       access_token: accessToken
     });
     
-    const userId = req.body.userId || 'default-user';
+    const clerkUserId = req.auth.userId;
     
-    // Store accounts in our data store
-    accountsResponse.data.accounts.forEach(account => {
-      store.addAccount(userId, {
+    // Store accounts in our database
+    for (const account of accountsResponse.data.accounts) {
+      await database.addAccount(clerkUserId, {
         ...account,
         access_token: accessToken,
         item_id: itemId,
         institution_id: institutionId,
         institution_name: institutionName
       });
-    });
+    }
+
+    // Automatically fetch recent transactions for the new accounts
+    try {
+      const now = new Date();
+      const startDate = new Date(now);
+      startDate.setDate(startDate.getDate() - 30); // Get 30 days of transactions
+      
+      const transactionsResponse = await plaidClient.transactionsGet({
+        access_token: accessToken,
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: now.toISOString().split('T')[0],
+      });
+      
+      // Store transactions in our database
+      const addedTransactions = await database.addTransactions(clerkUserId, transactionsResponse.data.transactions);
+      
+      console.log(`Automatically stored ${addedTransactions.length} transactions for new accounts`);
+    } catch (transactionError) {
+      console.error('Error fetching transactions for new accounts:', transactionError);
+      // Continue anyway, don't fail the account connection
+    }
     
     res.json({ 
       access_token: accessToken, 
@@ -173,10 +197,10 @@ app.post('/api/exchange_public_token', async (req, res) => {
 });
 
 // Fetch transactions endpoint
-app.post('/api/transactions', async (req, res) => {
+app.post('/api/transactions', requireAuth, async (req, res) => {
   try {
     const accessToken = req.body.access_token;
-    const userId = req.body.userId || 'default-user';
+    const clerkUserId = req.auth.userId;
     
     if (!accessToken) {
       return res.status(400).json({ error: 'Access token is required' });
@@ -192,8 +216,8 @@ app.post('/api/transactions', async (req, res) => {
       end_date: now.toISOString().split('T')[0],
     });
     
-    // Store transactions in our data store
-    const addedTransactions = store.addTransactions(userId, response.data.transactions);
+    // Store transactions in our database
+    const addedTransactions = await database.addTransactions(clerkUserId, response.data.transactions);
     
     res.json({ 
       transactions: response.data.transactions,
@@ -205,14 +229,15 @@ app.post('/api/transactions', async (req, res) => {
   }
 });
 
-// Get stored transactions for a user
-app.get('/api/user/:userId/transactions', (req, res) => {
+// Get stored transactions for authenticated user
+app.get('/api/transactions', requireAuth, async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const clerkUserId = req.auth.userId;
     const limit = req.query.limit ? parseInt(req.query.limit) : null;
+    const offset = req.query.offset ? parseInt(req.query.offset) : 0;
     
-    const transactions = store.getUserTransactions(userId, limit);
-    const stats = store.getStats(userId);
+    const transactions = await database.getUserTransactions(clerkUserId, limit, offset);
+    const stats = await database.getUserStats(clerkUserId);
     
     res.json({
       transactions,
@@ -226,10 +251,10 @@ app.get('/api/user/:userId/transactions', (req, res) => {
 });
 
 // Get transactions by category
-app.get('/api/user/:userId/transactions/categories', (req, res) => {
+app.get('/api/transactions/categories', requireAuth, async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const categories = store.getTransactionsByCategory(userId);
+    const clerkUserId = req.auth.userId;
+    const categories = await database.getTransactionsByCategory(clerkUserId);
     
     res.json({ categories });
   } catch (error) {
@@ -238,15 +263,120 @@ app.get('/api/user/:userId/transactions/categories', (req, res) => {
   }
 });
 
-// Get user accounts
-app.get('/api/user/:userId/accounts', (req, res) => {
+// Get user accounts with recent transactions
+app.get('/api/accounts', requireAuth, async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const accounts = store.getUserAccounts(userId);
+    const clerkUserId = req.auth.userId;
+    const accounts = await database.getUserAccounts(clerkUserId);
     
-    res.json({ accounts });
+    // Get recent transactions for each account
+    const accountsWithTransactions = await Promise.all(
+      accounts.map(async (account) => {
+        const recentTransactions = await database.getAccountTransactions(
+          clerkUserId, 
+          account.account_id, 
+          5 // Get 5 most recent transactions
+        );
+        
+        return {
+          ...account,
+          recent_transactions: recentTransactions,
+          transaction_count: recentTransactions.length
+        };
+      })
+    );
+    
+    res.json({ accounts: accountsWithTransactions });
   } catch (error) {
     console.error('Error getting user accounts:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update account name
+app.put('/api/accounts/:accountId', requireAuth, async (req, res) => {
+  try {
+    const clerkUserId = req.auth.userId;
+    const accountId = req.params.accountId;
+    const { name } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ error: 'Account name is required' });
+    }
+    
+    const result = await database.updateAccountName(clerkUserId, accountId, name);
+    
+    res.json({ success: true, result });
+  } catch (error) {
+    console.error('Error updating account name:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Refresh account balances
+app.post('/api/accounts/refresh', requireAuth, async (req, res) => {
+  try {
+    const clerkUserId = req.auth.userId;
+    const accounts = await database.getUserAccounts(clerkUserId);
+    
+    const refreshedAccounts = [];
+    
+    for (const account of accounts) {
+      try {
+        // Get fresh balance from Plaid
+        const accountsResponse = await plaidClient.accountsGet({
+          access_token: account.access_token
+        });
+        
+        // Find the matching account
+        const freshAccount = accountsResponse.data.accounts.find(
+          acc => acc.account_id === account.account_id
+        );
+        
+        if (freshAccount) {
+          // Update balance in database
+          await database.updateAccountBalance(
+            clerkUserId,
+            account.account_id,
+            freshAccount.balances.current,
+            freshAccount.balances.iso_currency_code
+          );
+          
+          refreshedAccounts.push({
+            account_id: account.account_id,
+            old_balance: account.current_balance,
+            new_balance: freshAccount.balances.current,
+            currency: freshAccount.balances.iso_currency_code
+          });
+        }
+      } catch (accountError) {
+        console.error(`Error refreshing account ${account.account_id}:`, accountError);
+      }
+    }
+    
+    res.json({ 
+      success: true, 
+      refreshed_accounts: refreshedAccounts,
+      count: refreshedAccounts.length 
+    });
+  } catch (error) {
+    console.error('Error refreshing account balances:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update transaction
+app.put('/api/transactions/:transactionId', requireAuth, async (req, res) => {
+  try {
+    const clerkUserId = req.auth.userId;
+    const transactionId = req.params.transactionId;
+    const updates = req.body;
+    
+    const result = await database.updateTransaction(clerkUserId, transactionId, updates);
+    
+    res.json({ success: true, result });
+  } catch (error) {
+    console.error('Error updating transaction:', error);
     res.status(500).json({ error: error.message });
   }
 });

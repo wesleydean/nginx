@@ -1,0 +1,390 @@
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+
+class Database {
+  constructor() {
+    this.db = null;
+    this.init();
+  }
+
+  init() {
+    const dbPath = path.join(__dirname, 'plaid_data.sqlite');
+    this.db = new sqlite3.Database(dbPath, (err) => {
+      if (err) {
+        console.error('Error opening database:', err);
+      } else {
+        console.log('Connected to SQLite database');
+        this.createTables();
+      }
+    });
+  }
+
+  createTables() {
+    const createUsersTable = `
+      CREATE TABLE IF NOT EXISTS users (
+        clerk_user_id TEXT PRIMARY KEY,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    const createAccountsTable = `
+      CREATE TABLE IF NOT EXISTS accounts (
+        account_id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        original_name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        institution_name TEXT NOT NULL,
+        mask TEXT,
+        current_balance REAL,
+        currency TEXT DEFAULT 'USD',
+        access_token TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (clerk_user_id)
+      )
+    `;
+
+    const createTransactionsTable = `
+      CREATE TABLE IF NOT EXISTS transactions (
+        transaction_id TEXT PRIMARY KEY,
+        account_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        amount REAL NOT NULL,
+        currency TEXT DEFAULT 'USD',
+        name TEXT NOT NULL,
+        original_name TEXT NOT NULL,
+        merchant_name TEXT,
+        date DATE NOT NULL,
+        category TEXT,
+        subcategory TEXT,
+        category_icon_url TEXT,
+        pending BOOLEAN DEFAULT 0,
+        location_city TEXT,
+        location_region TEXT,
+        location_country TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (account_id) REFERENCES accounts (account_id),
+        FOREIGN KEY (user_id) REFERENCES users (clerk_user_id)
+      )
+    `;
+
+    const createIndexes = [
+      'CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts (user_id)',
+      'CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions (user_id)',
+      'CREATE INDEX IF NOT EXISTS idx_transactions_account_id ON transactions (account_id)',
+      'CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions (date DESC)',
+      'CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions (category)',
+      'CREATE INDEX IF NOT EXISTS idx_transactions_pending ON transactions (pending)'
+    ];
+
+    this.db.serialize(() => {
+      this.db.run(createUsersTable);
+      this.db.run(createAccountsTable);
+      this.db.run(createTransactionsTable);
+      
+      createIndexes.forEach(indexSQL => {
+        this.db.run(indexSQL);
+      });
+      
+      console.log('Database tables created successfully');
+    });
+  }
+
+  // User operations
+  createUser(clerkUserId) {
+    return new Promise((resolve, reject) => {
+      const stmt = this.db.prepare(`
+        INSERT OR IGNORE INTO users (clerk_user_id) VALUES (?)
+      `);
+      
+      stmt.run([clerkUserId], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ clerkUserId, changes: this.changes });
+        }
+      });
+      
+      stmt.finalize();
+    });
+  }
+
+  // Account operations
+  addAccount(clerkUserId, accountData) {
+    return new Promise((resolve, reject) => {
+      const stmt = this.db.prepare(`
+        INSERT OR REPLACE INTO accounts (
+          account_id, user_id, name, original_name, type, 
+          institution_name, mask, current_balance, currency, access_token
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      const balances = accountData.balances || {};
+      
+      stmt.run([
+        accountData.account_id,
+        clerkUserId,
+        accountData.name, // user can edit this
+        accountData.name, // original from Plaid
+        accountData.type,
+        accountData.institution_name,
+        accountData.mask,
+        balances.current,
+        accountData.iso_currency_code || 'USD',
+        accountData.access_token
+      ], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ accountId: accountData.account_id, changes: this.changes });
+        }
+      });
+      
+      stmt.finalize();
+    });
+  }
+
+  updateAccountName(clerkUserId, accountId, newName) {
+    return new Promise((resolve, reject) => {
+      const stmt = this.db.prepare(`
+        UPDATE accounts SET name = ?, updated_at = CURRENT_TIMESTAMP 
+        WHERE account_id = ? AND user_id = ?
+      `);
+      
+      stmt.run([newName, accountId, clerkUserId], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ accountId, changes: this.changes });
+        }
+      });
+      
+      stmt.finalize();
+    });
+  }
+
+  updateAccountBalance(clerkUserId, accountId, balance, currency) {
+    return new Promise((resolve, reject) => {
+      const stmt = this.db.prepare(`
+        UPDATE accounts SET current_balance = ?, currency = ?, updated_at = CURRENT_TIMESTAMP 
+        WHERE account_id = ? AND user_id = ?
+      `);
+      
+      stmt.run([balance, currency, accountId, clerkUserId], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ accountId, changes: this.changes });
+        }
+      });
+      
+      stmt.finalize();
+    });
+  }
+
+  getUserAccounts(clerkUserId) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        'SELECT * FROM accounts WHERE user_id = ? ORDER BY created_at DESC',
+        [clerkUserId],
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows);
+          }
+        }
+      );
+    });
+  }
+
+  getAccountTransactions(clerkUserId, accountId, limit = 5) {
+    return new Promise((resolve, reject) => {
+      this.db.all(`
+        SELECT * FROM transactions 
+        WHERE user_id = ? AND account_id = ? 
+        ORDER BY date DESC, created_at DESC 
+        LIMIT ?
+      `, [clerkUserId, accountId, limit], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
+  // Transaction operations
+  addTransaction(clerkUserId, transactionData) {
+    return new Promise((resolve, reject) => {
+      const stmt = this.db.prepare(`
+        INSERT OR REPLACE INTO transactions (
+          transaction_id, account_id, user_id, amount, currency,
+          name, original_name, merchant_name, date, category, subcategory,
+          category_icon_url, pending, location_city, location_region, location_country
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      const pfc = transactionData.personal_finance_category || {};
+      const location = transactionData.location || {};
+      
+      stmt.run([
+        transactionData.transaction_id,
+        transactionData.account_id,
+        clerkUserId,
+        transactionData.amount,
+        transactionData.iso_currency_code || 'USD',
+        transactionData.name, // user can edit this
+        transactionData.name, // original from Plaid
+        transactionData.merchant_name,
+        transactionData.date,
+        pfc.primary,
+        pfc.detailed,
+        transactionData.personal_finance_category_icon_url,
+        transactionData.pending ? 1 : 0,
+        location.city,
+        location.region,
+        location.country
+      ], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ transactionId: transactionData.transaction_id, changes: this.changes });
+        }
+      });
+      
+      stmt.finalize();
+    });
+  }
+
+  updateTransaction(clerkUserId, transactionId, updates) {
+    return new Promise((resolve, reject) => {
+      const allowedFields = ['name', 'merchant_name', 'category', 'subcategory'];
+      const setFields = [];
+      const values = [];
+      
+      Object.keys(updates).forEach(field => {
+        if (allowedFields.includes(field)) {
+          setFields.push(`${field} = ?`);
+          values.push(updates[field]);
+        }
+      });
+      
+      if (setFields.length === 0) {
+        return resolve({ transactionId, changes: 0 });
+      }
+      
+      setFields.push('updated_at = CURRENT_TIMESTAMP');
+      values.push(transactionId, clerkUserId);
+      
+      const stmt = this.db.prepare(`
+        UPDATE transactions SET ${setFields.join(', ')} 
+        WHERE transaction_id = ? AND user_id = ?
+      `);
+      
+      stmt.run(values, function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ transactionId, changes: this.changes });
+        }
+      });
+      
+      stmt.finalize();
+    });
+  }
+
+  async addTransactions(clerkUserId, transactions) {
+    const results = [];
+    for (const transaction of transactions) {
+      try {
+        const result = await this.addTransaction(clerkUserId, transaction);
+        results.push(result);
+      } catch (error) {
+        console.error(`Error adding transaction ${transaction.transaction_id}:`, error);
+      }
+    }
+    return results;
+  }
+
+  getUserTransactions(clerkUserId, limit = null, offset = 0) {
+    return new Promise((resolve, reject) => {
+      let query = 'SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC, created_at DESC';
+      const params = [clerkUserId];
+      
+      if (limit) {
+        query += ' LIMIT ? OFFSET ?';
+        params.push(limit, offset);
+      }
+      
+      this.db.all(query, params, (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
+  getTransactionsByCategory(clerkUserId) {
+    return new Promise((resolve, reject) => {
+      this.db.all(`
+        SELECT 
+          category,
+          COUNT(*) as count,
+          SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END) as total_spent,
+          AVG(CASE WHEN amount > 0 THEN amount ELSE NULL END) as avg_amount
+        FROM transactions 
+        WHERE user_id = ? AND amount > 0 AND category IS NOT NULL
+        GROUP BY category 
+        ORDER BY total_spent DESC
+      `, [clerkUserId], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
+  getUserStats(clerkUserId) {
+    return new Promise((resolve, reject) => {
+      this.db.get(`
+        SELECT 
+          COUNT(DISTINCT account_id) as account_count,
+          COUNT(*) as transaction_count,
+          SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END) as total_spent,
+          SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END) as total_income,
+          MAX(date) as last_transaction_date
+        FROM transactions 
+        WHERE user_id = ?
+      `, [clerkUserId], (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row || {});
+        }
+      });
+    });
+  }
+
+  close() {
+    if (this.db) {
+      this.db.close((err) => {
+        if (err) {
+          console.error('Error closing database:', err);
+        } else {
+          console.log('Database connection closed');
+        }
+      });
+    }
+  }
+}
+
+module.exports = new Database();
