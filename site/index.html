@@ -7994,13 +7994,13 @@ margin-right: 0.5rem;
             }
         }
         
-        function showAccountManagementModal() {
-            showAccountManagementSlideOut();
+        async function showAccountManagementModal() {
+            await showAccountManagementSlideOut();
         }
         
-        function showAccountManagementSlideOut() {
+        async function showAccountManagementSlideOut() {
             document.getElementById('accountManagementSlideOut').classList.add('active');
-            updateAccountManagementList();
+            await updateAccountManagementList();
         }
         
         function hideAccountManagementSlideOut() {
@@ -8011,27 +8011,50 @@ margin-right: 0.5rem;
             hideAccountManagementSlideOut();
         }
         
-        function updateAccountList() {
-            updateAccountManagementList();
+        async function updateAccountList() {
+            await updateAccountManagementList();
         }
         
-        function updateAccountManagementList() {
+        async function updateAccountManagementList() {
             const listContainer = document.getElementById('accountManagementList');
             if (!listContainer) return;
             
-            listContainer.innerHTML = savingsAccounts.map(account => `
-                <div class="account-management-list-item">
-                    <span class="account-management-name">${account.name}</span>
-                    ${savingsAccounts.length > 1 ? `<button class="account-management-delete-btn" onclick="deleteAccountFromSlideOut('${account.id}')">Delete</button>` : ''}
-                </div>
-            `).join('');
+            // Load accounts with recent transactions from API
+            await loadAccountsWithTransactions();
+            
+            listContainer.innerHTML = savingsAccounts.map(account => {
+                const recentTransactionsHtml = account.recentTransactions && account.recentTransactions.length > 0 
+                    ? renderAccountTransactions(account.recentTransactions)
+                    : '<div style="text-align: center; color: #7f8c8d; padding: 0.5rem; font-size: 0.8rem;">No recent transactions</div>';
+                
+                const balanceDisplay = account.currentBalance !== undefined 
+                    ? `<div style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">Balance: ${formatCurrency(account.currentBalance)}</div>`
+                    : '';
+                
+                return `
+                    <div class="account-management-list-item" style="flex-direction: column; align-items: flex-start; padding: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 0.5rem;">
+                            <div>
+                                <div class="account-management-name" style="font-weight: 600;">${account.name}</div>
+                                ${account.institutionName ? `<div style="font-size: 0.8rem; color: #666;">${account.institutionName}</div>` : ''}
+                                ${balanceDisplay}
+                            </div>
+                            ${savingsAccounts.length > 1 ? `<button class="account-management-delete-btn" onclick="deleteAccountFromSlideOut('${account.id}')">Delete</button>` : ''}
+                        </div>
+                        <div style="width: 100%; border-top: 1px solid #eee; padding-top: 0.5rem;">
+                            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; font-weight: 500;">Recent Transactions</div>
+                            ${recentTransactionsHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
         
         function addNewAccount() {
             addNewAccountFromSlideOut();
         }
         
-        function addNewAccountFromSlideOut() {
+        async function addNewAccountFromSlideOut() {
             const name = document.getElementById('newAccountNameSlideOut').value.trim();
             
             if (!name) {
@@ -8054,7 +8077,7 @@ margin-right: 0.5rem;
             
             saveSavingsAccounts(savingsAccounts);
             document.getElementById('newAccountNameSlideOut').value = '';
-            updateAccountManagementList();
+            await updateAccountManagementList();
             updateAccountSelector();
             updateSlideOutAccountDropdown();
         }
@@ -8063,7 +8086,7 @@ margin-right: 0.5rem;
             deleteAccountFromSlideOut(accountId);
         }
         
-        function deleteAccountFromSlideOut(accountId) {
+        async function deleteAccountFromSlideOut(accountId) {
             if (savingsAccounts.length <= 1) {
                 alert('You must have at least one account');
                 return;
@@ -8079,7 +8102,7 @@ margin-right: 0.5rem;
                 delete balances[accountId];
                 saveAccountBalances(balances);
                 
-                updateAccountManagementList();
+                await updateAccountManagementList();
                 updateAccountSelector();
                 updateSlideOutAccountDropdown();
             }
@@ -8974,6 +8997,61 @@ margin-right: 0.5rem;
         }
 
         /**
+         * Fetches accounts with recent transactions from the API
+         */
+        async function loadAccountsWithTransactions() {
+            try {
+                // Get Clerk session token
+                const sessionToken = await window.plaidService.getClerkSessionToken();
+                
+                const response = await fetch(`${window.plaidService.baseUrl}/api/accounts`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionToken}`,
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load accounts: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Loaded accounts with transactions:', data);
+                
+                if (data.accounts && Array.isArray(data.accounts)) {
+                    // Update the global savingsAccounts with the API data
+                    // Keep existing localStorage accounts and add API accounts
+                    const apiAccounts = data.accounts.map(account => ({
+                        id: account.account_id,
+                        name: account.name,
+                        type: 'plaid',
+                        institutionName: account.institution_name,
+                        currentBalance: account.current_balance,
+                        currency: account.currency,
+                        recentTransactions: account.recent_transactions || [],
+                        transactionCount: account.transaction_count || 0
+                    }));
+                    
+                    // Merge with existing localStorage accounts
+                    const existingAccounts = savingsAccounts.filter(acc => acc.type !== 'plaid');
+                    savingsAccounts = [...existingAccounts, ...apiAccounts];
+                    
+                    // Update localStorage
+                    saveSavingsAccounts(savingsAccounts);
+                    
+                    console.log('Updated savingsAccounts with API data:', savingsAccounts.length, 'accounts');
+                    return apiAccounts;
+                }
+                
+                return [];
+            } catch (error) {
+                console.error('Error loading accounts with transactions:', error);
+                return [];
+            }
+        }
+
+        /**
          * Saves the current savingsAccounts array to localStorage.
          * @param {Array<{id: string, name: string}>} accounts
          */
@@ -9338,10 +9416,18 @@ margin-right: 0.5rem;
             renderBudgetTitle();
         };
         // Initial render on DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             renderBudgetTitle();
             renderSaveTitle();
             updateHomeScreen(); // Load home page data by default
+            
+            // Load accounts with recent transactions on page load
+            try {
+                await loadAccountsWithTransactions();
+                console.log('Loaded accounts with transactions on page load');
+            } catch (error) {
+                console.error('Error loading accounts on page load:', error);
+            }
         });
 
         // Swipe to Delete Functionality
