@@ -12011,20 +12011,26 @@ margin-right: 0.5rem;
 
             let html = '';
             transactions.slice(0, 5).forEach(transaction => {
-                const isPositive = transaction.amount > 0;
+                // Defensive checks for transaction data
+                const amount = transaction.amount || 0;
+                const description = transaction.description || transaction.name || 'Unknown Transaction';
+                const category = transaction.category || 'other';
+                const transactionType = transaction.type || (amount < 0 ? 'expense' : 'income');
+                
+                const isPositive = amount > 0;
                 const amountColor = isPositive ? '#5fa42e' : 'hsl(var(--foreground))';
                 const formattedAmount = isPositive ? 
-                    formatCurrency(transaction.amount) : 
-                    `(${formatCurrency(Math.abs(transaction.amount))})`;
+                    formatCurrency(amount) : 
+                    `(${formatCurrency(Math.abs(amount))})`;
                 
                 html += `
                     <div class="transaction-item">
                         <div class="transaction-icon">
-                            <i data-lucide="${getTransactionIcon(transaction.type)}" class="w-4 h-4"></i>
+                            <i data-lucide="${getTransactionIcon(transactionType)}" class="w-4 h-4"></i>
                         </div>
                         <div class="transaction-info">
-                            <div class="transaction-description">${transaction.description}</div>
-                            <div class="transaction-category">${transaction.category}</div>
+                            <div class="transaction-description">${description}</div>
+                            <div class="transaction-category">${category}</div>
                         </div>
                         <div class="transaction-amount" style="color: ${amountColor};">
                             ${formattedAmount}

@@ -93,6 +93,54 @@ class Database {
     });
   }
 
+  // Helper method to format Plaid categories to user-friendly names
+  formatPlaidCategory(plaidCategory) {
+    if (!plaidCategory) return 'other';
+    
+    // Convert snake_case to human readable format
+    const categoryMap = {
+      'FOOD_AND_DRINK': 'dining',
+      'RESTAURANTS': 'dining', 
+      'FAST_FOOD': 'dining',
+      'GROCERIES': 'groceries',
+      'TRANSPORTATION': 'transportation',
+      'PUBLIC_TRANSPORTATION': 'transportation',
+      'TAXI': 'transportation',
+      'GAS': 'transportation',
+      'TRAVEL': 'travel',
+      'LODGING': 'travel',
+      'ENTERTAINMENT': 'entertainment',
+      'RECREATION': 'entertainment', 
+      'SHOPPING': 'clothing',
+      'GENERAL_MERCHANDISE': 'clothing',
+      'CLOTHING': 'clothing',
+      'PERSONAL_CARE': 'personal',
+      'HEALTH_AND_MEDICAL': 'health',
+      'MEDICAL': 'health',
+      'PHARMACY': 'health',
+      'SUBSCRIPTION': 'subscriptions',
+      'SOFTWARE': 'subscriptions',
+      'UTILITIES': 'utilities',
+      'RENT': 'housing',
+      'MORTGAGE': 'housing',
+      'HOME_IMPROVEMENT': 'housing',
+      'BANK_FEES': 'fees',
+      'ATM_FEE': 'fees',
+      'TRANSFER': 'transfer',
+      'DEPOSIT': 'income',
+      'PAYROLL': 'income',
+      'INTEREST_EARNED': 'income'
+    };
+    
+    // Try direct match first
+    if (categoryMap[plaidCategory]) {
+      return categoryMap[plaidCategory];
+    }
+    
+    // If no direct match, convert snake_case to lowercase and use as fallback
+    return plaidCategory.toLowerCase().replace(/_/g, ' ');
+  }
+
   // User operations
   createUser(clerkUserId) {
     return new Promise((resolve, reject) => {
@@ -212,7 +260,14 @@ class Database {
         if (err) {
           reject(err);
         } else {
-          resolve(rows);
+          // Format transactions for frontend compatibility
+          const formattedTransactions = rows.map(transaction => ({
+            ...transaction,
+            description: transaction.name, // Map name field to description for frontend
+            category: this.formatPlaidCategory(transaction.category), // Format category
+            type: transaction.amount < 0 ? 'expense' : 'income' // Determine transaction type
+          }));
+          resolve(formattedTransactions);
         }
       });
     });
@@ -325,7 +380,14 @@ class Database {
         if (err) {
           reject(err);
         } else {
-          resolve(rows);
+          // Format transactions for frontend compatibility
+          const formattedTransactions = rows.map(transaction => ({
+            ...transaction,
+            description: transaction.name, // Map name field to description for frontend
+            category: this.formatPlaidCategory(transaction.category), // Format category
+            type: transaction.amount < 0 ? 'expense' : 'income' // Determine transaction type
+          }));
+          resolve(formattedTransactions);
         }
       });
     });
@@ -347,7 +409,12 @@ class Database {
         if (err) {
           reject(err);
         } else {
-          resolve(rows);
+          // Format categories for frontend display
+          const formattedCategories = rows.map(row => ({
+            ...row,
+            category: this.formatPlaidCategory(row.category)
+          }));
+          resolve(formattedCategories);
         }
       });
     });
