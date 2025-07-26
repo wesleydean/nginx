@@ -9608,7 +9608,7 @@ margin-right: 0.5rem;
          * Loads comprehensive test data for both balances and expenses from January to today.
          * This function creates realistic financial data for testing the chart and reports.
          */
-        function loadTestData() {
+        async function loadTestData() {
             console.log('Loading comprehensive test data...');
             
             // Get current date and calculate January 1st of current year
@@ -10089,8 +10089,8 @@ margin-right: 0.5rem;
             // Ensure all required functions are called to update the UI
             updatePeriodView(); // This will call updateSaveScreen() internally
             // Force update of all relevant UI components
-            updateSaveBalanceHistory();
-            updateSaveTotalSavingsDisplay(); // Make sure the total savings display is updated
+            await updateSaveBalanceHistory();
+            await updateSaveTotalSavingsDisplay(); // Make sure the total savings display is updated
             updateSaveTargetDisplay(); // Update the saving target display
             updateAccountList();
             updateSlideOutAccountDropdown();
@@ -11634,7 +11634,7 @@ margin-right: 0.5rem;
         }
 
         // Update save screen total savings display
-        function updateSaveTotalSavingsDisplay() {
+        async function updateSaveTotalSavingsDisplay() {
             const balances = loadAccountBalances();
             
             // Update the "Last updated" note with the actual last balance date
@@ -11796,7 +11796,7 @@ margin-right: 0.5rem;
             }
             
             // Update save screen balance history
-            updateSaveBalanceHistory();
+            await updateSaveBalanceHistory();
         }
         
         // Update save screen balance history
@@ -11907,12 +11907,14 @@ margin-right: 0.5rem;
         }
 
         // Render new accounts layout
-        function renderNewAccountsLayout() {
+        async function renderNewAccountsLayout() {
             const container = document.getElementById('accountsList');
             if (!container) return;
 
+            // Load accounts with recent transactions from API
+            await loadAccountsWithTransactions();
+            
             const balances = loadAccountBalances();
-            const sampleTransactions = generateSampleAccountTransactions();
             
             // Group accounts by type
             const accountTypes = {
@@ -11925,8 +11927,14 @@ margin-right: 0.5rem;
             let html = '';
             savingsAccounts.forEach(account => {
                 const accountType = account.type || 'cash';
-                const currentBalance = getLastBalanceForAccount(account.id);
-                const balance = currentBalance ? currentBalance.amount : 0;
+                // Use API balance for Plaid accounts, otherwise use local balance
+                let balance;
+                if (account.type === 'plaid' && account.currentBalance !== undefined) {
+                    balance = account.currentBalance;
+                } else {
+                    const currentBalance = getLastBalanceForAccount(account.id);
+                    balance = currentBalance ? currentBalance.amount : 0;
+                }
                 
                 if (!accountTypes[accountType]) {
                     accountTypes[accountType] = { title: accountType.charAt(0).toUpperCase() + accountType.slice(1), accounts: [] };
@@ -11961,7 +11969,8 @@ margin-right: 0.5rem;
 
                 group.accounts.forEach(account => {
                     const { icon } = getAccountIcon(account.type, account.id);
-                    const accountTransactions = sampleTransactions[account.id] || [];
+                    // Use real recent transactions from API data or empty array for non-Plaid accounts
+                    const accountTransactions = account.recentTransactions || [];
                     // For liability accounts, show balance as negative with parentheses
                     const isLiability = account.type === 'liability';
                     const displayBalance = isLiability ? -Math.abs(account.balance) : account.balance;
@@ -12056,10 +12065,10 @@ margin-right: 0.5rem;
             console.log('Navigate to account detail page for:', accountId);
         }
 
-        function updateSaveBalanceHistory() {
+        async function updateSaveBalanceHistory() {
             // Use new accounts layout instead of old balance history
             updateAccountSummary();
-            renderNewAccountsLayout();
+            await renderNewAccountsLayout();
             return;
             
             // Group balance records by account for the selected month
@@ -12397,10 +12406,10 @@ margin-right: 0.5rem;
         }
 
         // Update save screen display
-        function updateSaveScreen() {
+        async function updateSaveScreen() {
             renderSaveTitle();
             updateSaveTargetDisplay();
-            updateSaveTotalSavingsDisplay();
+            await updateSaveTotalSavingsDisplay();
             updateAccountsView();
         }
 
