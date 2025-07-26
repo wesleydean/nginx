@@ -12017,10 +12017,11 @@ margin-right: 0.5rem;
                 const category = transaction.category || 'other';
                 const transactionType = transaction.type || (amount < 0 ? 'expense' : 'income');
                 
-                const isPositive = amount > 0;
-                const amountColor = isPositive ? '#5fa42e' : 'hsl(var(--foreground))';
-                const formattedAmount = isPositive ? 
-                    formatCurrency(amount) : 
+                // For display: expenses (negative amounts) should show as red outgoing, income (positive) as green incoming
+                const isIncome = transactionType === 'income' || amount > 0;
+                const amountColor = isIncome ? '#5fa42e' : 'hsl(var(--foreground))';
+                const formattedAmount = isIncome ? 
+                    formatCurrency(Math.abs(amount)) : 
                     `(${formatCurrency(Math.abs(amount))})`;
                 
                 html += `

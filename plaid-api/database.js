@@ -265,7 +265,7 @@ class Database {
             ...transaction,
             description: transaction.name, // Map name field to description for frontend
             category: this.formatPlaidCategory(transaction.category), // Format category
-            type: transaction.amount < 0 ? 'expense' : 'income' // Determine transaction type
+            type: transaction.amount < 0 ? 'expense' : 'income' // Negative amounts are expenses (outgoing)
           }));
           resolve(formattedTransactions);
         }
@@ -385,7 +385,7 @@ class Database {
             ...transaction,
             description: transaction.name, // Map name field to description for frontend
             category: this.formatPlaidCategory(transaction.category), // Format category
-            type: transaction.amount < 0 ? 'expense' : 'income' // Determine transaction type
+            type: transaction.amount < 0 ? 'expense' : 'income' // Negative amounts are expenses (outgoing)
           }));
           resolve(formattedTransactions);
         }
