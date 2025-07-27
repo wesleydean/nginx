@@ -12470,6 +12470,17 @@ margin-right: 0.5rem;
                 
                 // Append to accountsList
                 accountsList.appendChild(connectButton);
+                
+                // Ensure Lucide icons are rendered for the new button
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    window.lucide.createIcons();
+                } else {
+                    setTimeout(() => {
+                        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                            window.lucide.createIcons();
+                        }
+                    }, 100);
+                }
             }
         }
 
