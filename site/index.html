@@ -1036,6 +1036,32 @@
             color: hsl(var(--foreground));
             background-color: hsl(var(--muted));
         }
+
+        .connect-account-btn {
+            margin: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            background: transparent;
+            border: 2px dashed #c8a03d;
+            border-radius: 12px;
+            color: #8b6914;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .connect-account-btn:hover {
+            background-color: #c8a03d0a;
+            border-color: #8b6914;
+        }
+
+        .connect-account-btn i {
+            color: #8b6914;
+        }
         
         .dropdown-menu {
             position: absolute;
@@ -5450,9 +5476,21 @@ margin-right: 0.5rem;
                                     <div class="balance-change-modern" id="accountBalanceChange">Total Balance</div>
                                 </div>
                             </div>
-                            <button class="btn btn-outline btn-xs" onclick="showAccountManagementModal()" style="border-radius: 20px;">
-                                Manage
-                            </button>
+                            <div class="cashflow-menu-container">
+                                <button class="dot-menu-btn" onclick="toggleAccountsDropdown()" id="accountsMenuBtn">
+                                    <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                                </button>
+                                <div class="dropdown-menu" id="accountsDropdown">
+                                    <div class="dropdown-item" onclick="showAccountManagementModal()">
+                                        <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
+                                        Manage Accounts
+                                    </div>
+                                    <div class="dropdown-item" onclick="connectPlaidAccount()">
+                                        <i data-lucide="link" class="w-4 h-4 mr-2"></i>
+                                        Connect Account
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <!-- New Accounts List -->
                         <div class="accounts-list" id="accountsList">
@@ -11019,6 +11057,35 @@ margin-right: 0.5rem;
             updateHomeCashflowWithRange(chartRange);
         }
 
+        function toggleAccountsDropdown() {
+            const dropdown = document.getElementById('accountsDropdown');
+            const menuBtn = document.getElementById('accountsMenuBtn');
+            
+            if (dropdown && menuBtn) {
+                dropdown.classList.toggle('show');
+                
+                if (dropdown.classList.contains('show')) {
+                    setTimeout(() => {
+                        document.addEventListener('click', closeAccountsDropdownOutside);
+                    }, 0);
+                } else {
+                    document.removeEventListener('click', closeAccountsDropdownOutside);
+                }
+            }
+        }
+
+        function closeAccountsDropdownOutside(event) {
+            const dropdown = document.getElementById('accountsDropdown');
+            const menuBtn = document.getElementById('accountsMenuBtn');
+            
+            if (dropdown && menuBtn && 
+                !dropdown.contains(event.target) && 
+                !menuBtn.contains(event.target)) {
+                dropdown.classList.remove('show');
+                document.removeEventListener('click', closeAccountsDropdownOutside);
+            }
+        }
+
         function toggleNetWorthDropdown() {
             const dropdown = document.getElementById('netWorthDropdown');
             const menuBtn = document.getElementById('netWorthMenuBtn');
@@ -12384,36 +12451,12 @@ margin-right: 0.5rem;
             const accountsList = document.getElementById('accountsList');
             if (accountsList) {
                 const connectButton = document.createElement('div');
-                connectButton.style.margin = '20px 0';
-                connectButton.style.width = '100%';
-                connectButton.style.display = 'flex';
-                connectButton.style.justifyContent = 'center';
-                connectButton.style.alignItems = 'center';
-                connectButton.style.gap = '8px';
-                connectButton.style.padding = '16px 20px';
-                connectButton.style.background = 'transparent';
-                connectButton.style.border = '2px dashed #c8a03d';
-                connectButton.style.borderRadius = '12px';
-                connectButton.style.color = '#8b6914'; // Dark version of #c8a03d
-                connectButton.style.cursor = 'pointer';
-                connectButton.style.transition = 'all 0.2s ease';
-                connectButton.style.fontSize = '16px';
-                connectButton.style.fontWeight = '500';
+                connectButton.className = 'connect-account-btn';
                 connectButton.innerHTML = `
-                    <i data-lucide="link" class="w-5 h-5" style="color: #8b6914;"></i>
+                    <i data-lucide="link" class="w-5 h-5"></i>
                     <span>Connect Account</span>
                 `;
                 connectButton.onclick = connectPlaidAccount;
-                
-                // Add hover effect
-                connectButton.addEventListener('mouseenter', () => {
-                    connectButton.style.backgroundColor = '#c8a03d0a';
-                    connectButton.style.borderColor = '#8b6914';
-                });
-                connectButton.addEventListener('mouseleave', () => {
-                    connectButton.style.backgroundColor = 'transparent';
-                    connectButton.style.borderColor = '#c8a03d';
-                });
                 
                 // Append to accountsList
                 accountsList.appendChild(connectButton);
