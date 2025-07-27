@@ -12384,31 +12384,39 @@ margin-right: 0.5rem;
             const accountsList = document.getElementById('accountsList');
             if (accountsList) {
                 const connectButton = document.createElement('div');
-                connectButton.className = 'quick-action-card';
-                connectButton.style.margin = '20px auto';
-                connectButton.style.width = 'auto';
+                connectButton.style.margin = '20px 0';
+                connectButton.style.width = '100%';
                 connectButton.style.display = 'flex';
                 connectButton.style.justifyContent = 'center';
                 connectButton.style.alignItems = 'center';
-                connectButton.style.background = 'linear-gradient(135deg, hsl(200deg 100% 50%), hsl(200deg 80% 60%))'; // Different blue color
-                connectButton.style.color = '#ffffff';
+                connectButton.style.gap = '8px';
+                connectButton.style.padding = '16px 20px';
+                connectButton.style.background = 'transparent';
+                connectButton.style.border = '2px dashed #c8a03d';
+                connectButton.style.borderRadius = '12px';
+                connectButton.style.color = '#8b6914'; // Dark version of #c8a03d
+                connectButton.style.cursor = 'pointer';
+                connectButton.style.transition = 'all 0.2s ease';
+                connectButton.style.fontSize = '16px';
+                connectButton.style.fontWeight = '500';
                 connectButton.innerHTML = `
-                    <div class="quick-action-icon">
-                        <i data-lucide="link" class="w-5 h-5"></i>
-                    </div>
-                    <div class="quick-action-title">Connect Account</div>
+                    <i data-lucide="link" class="w-5 h-5" style="color: #8b6914;"></i>
+                    <span>Connect Account</span>
                 `;
                 connectButton.onclick = connectPlaidAccount;
                 
-                // Center the button container
-                const buttonContainer = document.createElement('div');
-                buttonContainer.style.display = 'flex';
-                buttonContainer.style.justifyContent = 'center';
-                buttonContainer.style.width = '100%';
-                buttonContainer.appendChild(connectButton);
+                // Add hover effect
+                connectButton.addEventListener('mouseenter', () => {
+                    connectButton.style.backgroundColor = '#c8a03d0a';
+                    connectButton.style.borderColor = '#8b6914';
+                });
+                connectButton.addEventListener('mouseleave', () => {
+                    connectButton.style.backgroundColor = 'transparent';
+                    connectButton.style.borderColor = '#c8a03d';
+                });
                 
-                // Append to accountsList or another container
-                accountsList.appendChild(buttonContainer);
+                // Append to accountsList
+                accountsList.appendChild(connectButton);
             }
         }
 
