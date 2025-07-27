@@ -3,6 +3,7 @@ class PlaidService {
     // Dynamically determine API base URL based on environment
     this.baseUrl = this.determineApiUrl();
     this.accessTokens = {}; // In production, don't store sensitive tokens in localStorage
+    this.authTokenPromise = null; // Cache for ongoing auth requests
   }
   
   // Determine the API URL based on environment
@@ -52,6 +53,26 @@ class PlaidService {
 
   // Get Clerk session token
   async getClerkSessionToken() {
+    // Return cached promise if auth is already in progress
+    if (this.authTokenPromise) {
+      console.log('🔄 Using cached auth promise');
+      return this.authTokenPromise;
+    }
+
+    // Create new auth promise
+    this.authTokenPromise = this._performAuthentication();
+    
+    try {
+      const token = await this.authTokenPromise;
+      return token;
+    } finally {
+      // Clear cache after completion (success or failure)
+      this.authTokenPromise = null;
+    }
+  }
+
+  // Internal method to perform actual authentication
+  async _performAuthentication() {
     try {
       console.log('=== GETTING CLERK SESSION TOKEN ===');
       
@@ -420,6 +441,13 @@ function updateAccountManagementList() {
 // Add this function to handle the Plaid integration
 
 async function connectPlaidAccount() {
+    // Disable connect button to prevent multiple clicks
+    const connectButton = document.querySelector('.account-management-add-btn');
+    if (connectButton) {
+        connectButton.disabled = true;
+        connectButton.textContent = 'Connecting...';
+    }
+
     try {
         // Generate a unique user ID - in production, use your actual user ID system
         const userId = `user_${Date.now()}`;
@@ -498,6 +526,13 @@ async function connectPlaidAccount() {
             return connectPlaidAccount();
         } else {
             alert('There was a problem connecting to your bank. Please try again.');
+        }
+    } finally {
+        // Re-enable connect button
+        const connectButton = document.querySelector('.account-management-add-btn');
+        if (connectButton) {
+            connectButton.disabled = false;
+            connectButton.textContent = 'Connect';
         }
     }
 }
