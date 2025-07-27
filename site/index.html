@@ -12387,7 +12387,11 @@ margin-right: 0.5rem;
                 connectButton.className = 'quick-action-card';
                 connectButton.style.margin = '20px auto';
                 connectButton.style.width = 'auto';
-                connectButton.style.display = 'inline-flex';
+                connectButton.style.display = 'flex';
+                connectButton.style.justifyContent = 'center';
+                connectButton.style.alignItems = 'center';
+                connectButton.style.background = 'linear-gradient(135deg, hsl(200deg 100% 50%), hsl(200deg 80% 60%))'; // Different blue color
+                connectButton.style.color = '#ffffff';
                 connectButton.innerHTML = `
                     <div class="quick-action-icon">
                         <i data-lucide="link" class="w-5 h-5"></i>
@@ -12396,8 +12400,15 @@ margin-right: 0.5rem;
                 `;
                 connectButton.onclick = connectPlaidAccount;
                 
+                // Center the button container
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.display = 'flex';
+                buttonContainer.style.justifyContent = 'center';
+                buttonContainer.style.width = '100%';
+                buttonContainer.appendChild(connectButton);
+                
                 // Append to accountsList or another container
-                accountsList.appendChild(connectButton);
+                accountsList.appendChild(buttonContainer);
             }
         }
 
