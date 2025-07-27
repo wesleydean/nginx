@@ -8675,10 +8675,11 @@ margin-right: 0.5rem;
                 });
             }
             
-            // Set initial today-view class
+            // Default to month view (no today-view class needed)
             const screen = document.querySelector('.screen');
             if (screen) {
-                screen.classList.add('today-view');
+                // Month view is the default when today-view class is not present
+                screen.classList.remove('today-view');
             }
             
         });
@@ -10161,10 +10162,15 @@ margin-right: 0.5rem;
             if (typeof amount !== 'number' || isNaN(amount)) {
                 return '$0.00';
             }
-            return '$' + amount.toLocaleString('en-US', {
+            
+            const isNegative = amount < 0;
+            const absoluteAmount = Math.abs(amount);
+            const formatted = '$' + absoluteAmount.toLocaleString('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
+            
+            return isNegative ? `(${formatted})` : formatted;
         }
         
         /**
@@ -11946,7 +11952,11 @@ margin-right: 0.5rem;
             const balanceAmountEl = document.getElementById('accountBalanceAmount');
             const balanceChangeEl = document.getElementById('accountBalanceChange');
             if (balanceAmountEl) balanceAmountEl.textContent = formatCurrency(totalBalance);
-            if (balanceChangeEl) balanceChangeEl.textContent = 'Total Balance';
+            
+            // Determine if this is a net balance (includes debt) or total balance
+            const hasDebtAccounts = savingsAccounts.some(account => account.type === 'liability');
+            const balanceLabel = hasDebtAccounts ? 'Net Balance' : 'Total Balance';
+            if (balanceChangeEl) balanceChangeEl.textContent = balanceLabel;
 
             // Update chart amounts
             const investmentAmountEl = document.getElementById('investmentAmount');
