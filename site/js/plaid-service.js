@@ -421,16 +421,19 @@ function updateAccountManagementList() {
     if (!listContainer) return;
     
     let accountsHtml = savingsAccounts.map(account => `
-        <div class="account-management-list-item">
-            <span class="account-management-name">${account.name}</span>
+        <div class="account-management-list-item" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; flex-direction: column; flex: 1;">
+                <span class="account-management-name">${account.name}</span>
+                ${account.currentBalance !== undefined ? `<span style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">Balance: ${formatCurrency(account.currentBalance)}</span>` : ''}
+            </div>
             ${savingsAccounts.length > 1 ? `<button class="account-management-delete-btn" onclick="deleteAccountFromSlideOut('${account.id}')">Delete</button>` : ''}
         </div>
     `).join('');
     
     // Add Plaid connect button at the top
     accountsHtml = `
-        <div class="account-management-list-item">
-            <span class="account-management-name">Connect Bank Account</span>
+        <div class="account-management-list-item" style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="account-management-name">Connect Account</span>
             <button class="account-management-add-btn" style="background-color: #5d59af; min-width: 100px;" onclick="connectPlaidAccount()">Connect</button>
         </div>
     ` + accountsHtml;
