@@ -32,16 +32,33 @@ class PlaidService {
     this.institutions = institutions;
   }
   
+  // Wait for Clerk to be available
+  async waitForClerk() {
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max wait
+    
+    while (typeof window.Clerk === 'undefined' && attempts < maxAttempts) {
+      console.log(`Waiting for Clerk to load... (attempt ${attempts + 1}/${maxAttempts})`);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      attempts++;
+    }
+    
+    if (typeof window.Clerk === 'undefined') {
+      throw new Error('Clerk failed to load after waiting 5 seconds');
+    }
+    
+    return true;
+  }
+
   // Get Clerk session token
   async getClerkSessionToken() {
     try {
       console.log('=== GETTING CLERK SESSION TOKEN ===');
       
-      // Check if Clerk is available
-      if (typeof window.Clerk === 'undefined') {
-        console.error('❌ window.Clerk is undefined');
-        throw new Error('Clerk is not loaded. Make sure Clerk is properly initialized.');
-      }
+      // Wait for Clerk to be available
+      await this.waitForClerk();
+      
+      console.log('✅ Clerk is now available');
       
       console.log('✅ window.Clerk exists:', !!window.Clerk);
       console.log('Clerk loaded:', window.Clerk.loaded);
