@@ -730,10 +730,9 @@
         /* Income/Spending Bar Chart Layout */
 
         #budgetDisplay {
-            border-bottom: 2px solid hsl(var(--border) / 0.5);
-            border-radius: 0;
-            margin: 0 -1rem;
-            margin-bottom: 0.3rem;
+            /* Now uses home-section styling, remove conflicting styles */
+            margin-bottom: 1.5rem;
+            overflow: hidden;
         }
 
         #budgetDisplay .card-content {
@@ -823,7 +822,7 @@
             font-size: 1.1rem;
             font-weight: 600;
             color: hsl(var(--foreground));
-            margin-top: 0.5rem;
+            margin-top: 0.6rem;
             margin-bottom: 0.5rem;
         }
         
@@ -831,6 +830,7 @@
             flex: 1;
             text-align: left;
             font-weight: 400;
+            font-size: 1rem;
         }
         
         .selected-month-total .month-amount {
@@ -852,7 +852,16 @@
             width: 200%;
             transition: transform 0.3s ease;
             overflow: hidden;
-            margin-bottom: 0;
+            margin-bottom: 0 !important;
+        }
+        
+        .chart-fade-transition {
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+        
+        .chart-fade-in {
+            opacity: 1 !important;
         }
         
         .chart-slide {
@@ -868,7 +877,7 @@
             display: flex;
             justify-content: center;
             gap: 6px;
-            padding: 12px 0 8px 0;
+            padding: 0.5rem;
         }
         
         .chart-dots .dot {
@@ -938,13 +947,10 @@
         }
         
         .bar-amount {
-                font-weight: 500;
-                text-align: center;
-                font-size: 0.7rem;
-                text-transform: uppercase;
-                background: #a9a6be2b;
-                padding: 0.1rem 0.5rem;
-                border-radius: 1rem;
+            font-weight: 500;
+            text-align: center;
+            font-size: 0.7rem;
+            text-transform: uppercase;
         }
 
         .bar-amount span,
@@ -1216,10 +1222,7 @@
             color: hsl(220, 13%, 28%) !important;
         }
         
-        /* Add margin-bottom to card-header on cashflow screen */
-        #budgetDisplay .card-header {
-            margin-bottom: 1rem;
-        }
+        /* Card header styling handled by home-section class */
         
         .section-subtitle {
             color: hsl(var(--muted-foreground));
@@ -2077,8 +2080,6 @@
             justify-content: space-between;
             padding: 20px;
             background: linear-gradient(to bottom, hsl(var(--background)) 0%, hsla(var(--background)) 70%, transparent 100%);
-            /* backdrop-filter: blur(10px); */
-            -webkit-backdrop-filter: blur(10px);
             position: fixed;
             top: 0;
             left: 0;
@@ -2093,8 +2094,6 @@
             left: 0;
             right: 0;
             height: 30%;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
             pointer-events: none;
         }
         
@@ -5577,8 +5576,13 @@ margin-right: 0.5rem;
                 
                 <!-- Screen 1: Cashflow (formerly Tracking) -->
                 <div class="screen">
-                    <!-- Daily Budget Display -->
-                    <div class="card" id="budgetDisplay">
+                    <!-- Budget Display Section -->
+                    <div class="card home-section" id="budgetDisplay">
+                        <div class="card-header">
+                            <div class="home-section-header">
+                                <div class="section-subtitle" style="margin-top: 0.7rem; margin-bottom: 0.7rem; text-align: center;">Monthly Overview</div>
+                            </div>
+                        </div>
                         <div class="card-content">
                             <div class="chart-carousel" id="chartCarousel">
                                 <div class="chart-slide active" id="monthlyChartSlide">
@@ -6313,50 +6317,50 @@ margin-right: 0.5rem;
                     <label class="form-label" for="slideOutExpenseCategory">Category</label>
                     <div class="select-container">
                       <div class="select-trigger" onclick="toggleSlideOutSelect('expenseCategory')" id="expenseCategoryTrigger">
-                        <span id="expenseCategoryValue">🛒 Groceries</span>
+                        <span id="expenseCategoryValue"><i data-lucide="shopping-cart" class="w-4 h-4 inline mr-2"></i>Groceries</span>
                         <i data-lucide="chevron-down" class="w-4 h-4"></i>
                       </div>
                       <div class="select-content" id="expenseCategoryContent">
-                        <div class="select-item selected" data-value="groceries">🛒 Groceries</div>
-                        <div class="select-item" data-value="transportation">🚗 Transportation</div>
-                        <div class="select-item" data-value="dining">🍽️ Dining Out</div>
-                        <div class="select-item" data-value="entertainment">🎬 Entertainment</div>
-                        <div class="select-item" data-value="personal">🧴 Personal Care</div>
-                        <div class="select-item" data-value="clothing">👕 Clothing</div>
-                        <div class="select-item" data-value="health">⚕️ Health/Fitness</div>
-                        <div class="select-item" data-value="subscriptions">📺 Subscriptions</div>
-                        <div class="select-item" data-value="mortgage">🏠 Mortgage</div>
-                        <div class="select-item" data-value="loan">💰 Loan Repayment</div>
-                        <div class="select-item" data-value="garbage">🗂️ Garbage</div>
-                        <div class="select-item" data-value="home improvement">🔨 Home Improvement</div>
-                        <div class="select-item" data-value="insurance">☂️ Insurance</div>
-                        <div class="select-item" data-value="pets">🐕 Pets</div>
-                        <div class="select-item" data-value="phone">📱 Phone</div>
-                        <div class="select-item" data-value="internet">🌐 Internet & Cable</div>
-                        <div class="select-item" data-value="utilities">⚡ Utilities</div>
-                        <div class="select-item" data-value="other">💸 Other</div>
+                        <div class="select-item selected" data-value="groceries"><i data-lucide="shopping-cart" class="w-4 h-4 inline mr-2"></i>Groceries</div>
+                        <div class="select-item" data-value="transportation"><i data-lucide="car" class="w-4 h-4 inline mr-2"></i>Transportation</div>
+                        <div class="select-item" data-value="dining"><i data-lucide="utensils" class="w-4 h-4 inline mr-2"></i>Dining Out</div>
+                        <div class="select-item" data-value="entertainment"><i data-lucide="film" class="w-4 h-4 inline mr-2"></i>Entertainment</div>
+                        <div class="select-item" data-value="personal"><i data-lucide="user" class="w-4 h-4 inline mr-2"></i>Personal Care</div>
+                        <div class="select-item" data-value="clothing"><i data-lucide="shirt" class="w-4 h-4 inline mr-2"></i>Clothing</div>
+                        <div class="select-item" data-value="health"><i data-lucide="heart-pulse" class="w-4 h-4 inline mr-2"></i>Health/Fitness</div>
+                        <div class="select-item" data-value="subscriptions"><i data-lucide="tv" class="w-4 h-4 inline mr-2"></i>Subscriptions</div>
+                        <div class="select-item" data-value="mortgage"><i data-lucide="home" class="w-4 h-4 inline mr-2"></i>Mortgage</div>
+                        <div class="select-item" data-value="loan"><i data-lucide="dollar-sign" class="w-4 h-4 inline mr-2"></i>Loan Repayment</div>
+                        <div class="select-item" data-value="garbage"><i data-lucide="trash-2" class="w-4 h-4 inline mr-2"></i>Garbage</div>
+                        <div class="select-item" data-value="home improvement"><i data-lucide="hammer" class="w-4 h-4 inline mr-2"></i>Home Improvement</div>
+                        <div class="select-item" data-value="insurance"><i data-lucide="umbrella" class="w-4 h-4 inline mr-2"></i>Insurance</div>
+                        <div class="select-item" data-value="pets"><i data-lucide="dog" class="w-4 h-4 inline mr-2"></i>Pets</div>
+                        <div class="select-item" data-value="phone"><i data-lucide="smartphone" class="w-4 h-4 inline mr-2"></i>Phone</div>
+                        <div class="select-item" data-value="internet"><i data-lucide="globe" class="w-4 h-4 inline mr-2"></i>Internet & Cable</div>
+                        <div class="select-item" data-value="utilities"><i data-lucide="zap" class="w-4 h-4 inline mr-2"></i>Utilities</div>
+                        <div class="select-item" data-value="other"><i data-lucide="more-horizontal" class="w-4 h-4 inline mr-2"></i>Other</div>
                       </div>
                     </div>
                     <!-- Hidden native select for compatibility -->
                     <select id="slideOutExpenseCategory" style="display: none;">
-                      <option value="groceries">🛒 Groceries</option>
-                      <option value="transportation">🚗 Transportation</option>
-                      <option value="dining">🍽️ Dining Out</option>
-                      <option value="entertainment">🎬 Entertainment</option>
-                      <option value="personal">🧴 Personal Care</option>
-                      <option value="clothing">👕 Clothing</option>
-                      <option value="health">⚕️ Health/Fitness</option>
-                      <option value="subscriptions">📺 Subscriptions</option>
-                      <option value="mortgage">🏠 Mortgage</option>
-                      <option value="loan">💰 Loan Repayment</option>
-                      <option value="garbage">🗂️ Garbage</option>
-                      <option value="home improvement">🔨 Home Improvement</option>
-                      <option value="insurance">☂️ Insurance</option>
-                      <option value="pets">🐕 Pets</option>
-                      <option value="phone">📱 Phone</option>
-                      <option value="internet">🌐 Internet & Cable</option>
-                      <option value="utilities">⚡ Utilities</option>
-                      <option value="other">💸 Other</option>
+                      <option value="groceries">Groceries</option>
+                      <option value="transportation">Transportation</option>
+                      <option value="dining">Dining Out</option>
+                      <option value="entertainment">Entertainment</option>
+                      <option value="personal">Personal Care</option>
+                      <option value="clothing">Clothing</option>
+                      <option value="health">Health/Fitness</option>
+                      <option value="subscriptions">Subscriptions</option>
+                      <option value="mortgage">Mortgage</option>
+                      <option value="loan">Loan Repayment</option>
+                      <option value="garbage">Garbage</option>
+                      <option value="home improvement">Home Improvement</option>
+                      <option value="insurance">Insurance</option>
+                      <option value="pets">Pets</option>
+                      <option value="phone">Phone</option>
+                      <option value="internet">Internet & Cable</option>
+                      <option value="utilities">Utilities</option>
+                      <option value="other">Other</option>
                     </select>
                   </div>
                 </div>
@@ -7031,7 +7035,7 @@ margin-right: 0.5rem;
         }
         
         function deleteExpense(date, timestamp) {
-            console.log('⚠️ deleteExpense function called with date:', date, 'and timestamp:', timestamp);
+            console.log('deleteExpense function called with date:', date, 'and timestamp:', timestamp);
             timestamp = parseInt(timestamp, 10); // Ensure timestamp is a number
             
             if (!date || isNaN(timestamp)) {
@@ -7062,7 +7066,7 @@ margin-right: 0.5rem;
                     
                     // Check if the expense was actually removed
                     if (expenses[targetDate].length === originalLength) {
-                        console.error('⚠️ Expense not found with timestamp:', timestamp);
+                        console.error('Expense not found with timestamp:', timestamp);
                         alert('Could not find expense to delete. Please refresh and try again.');
                         
                         // Remove the 'deleting' class from the element to restore it
@@ -8441,6 +8445,12 @@ margin-right: 0.5rem;
                 carousel.style.transform = `translateX(${translateX}%)`;
             }
             
+            // Update subtitle based on current chart
+            const subtitle = budgetDisplay ? budgetDisplay.querySelector('.section-subtitle') : null;
+            if (subtitle) {
+                subtitle.textContent = index === 0 ? 'Monthly Overview' : 'Category Spending';
+            }
+            
             // Update dots in budgetDisplay
             const dots = budgetDisplay ? budgetDisplay.querySelectorAll('.chart-dots .dot') : [];
             dots.forEach((dot, i) => {
@@ -8541,8 +8551,57 @@ margin-right: 0.5rem;
             
             // Update category total display
             updateSelectedCategoryTotal();
+            
+            // Initialize Lucide icons for the new category icons
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+            }
         }
         
+        function fadeChartUpdate(chartContainer, updateFunction) {
+            if (!chartContainer) return;
+            
+            // Start fade out
+            chartContainer.classList.add('chart-fade-transition');
+            
+            // After fade out, update content and fade back in
+            setTimeout(() => {
+                updateFunction();
+                chartContainer.classList.add('chart-fade-in');
+                
+                // Remove classes after animation
+                setTimeout(() => {
+                    chartContainer.classList.remove('chart-fade-transition', 'chart-fade-in');
+                }, 200);
+            }, 100); // Half the transition time for smooth crossfade
+        }
+
+        function getCategoryColorFromBar(categoryBar) {
+            // Get the category visual element to determine its CSS class
+            const categoryVisual = categoryBar.querySelector('.category-visual');
+            if (!categoryVisual) return '#6b7280';
+            
+            // Map CSS classes to their corresponding colors
+            const classColorMap = {
+                'food': '#f59e0b',
+                'transportation': '#3b82f6', 
+                'health': '#10b981',
+                'entertainment': '#8b5cf6',
+                'shopping': '#ef4444',
+                'utilities': '#f97316',
+                'other': '#6b7280'
+            };
+            
+            // Check which category class this visual has
+            for (const cssClass of Object.keys(classColorMap)) {
+                if (categoryVisual.classList.contains(cssClass)) {
+                    return classColorMap[cssClass];
+                }
+            }
+            
+            return '#6b7280'; // default color
+        }
+
         function selectCategory(category, amount) {
             const chartContainer = document.getElementById('categorySpendingChart');
             const chartBars = document.querySelectorAll('#categorySpendingChart .chart-bar');
@@ -8550,11 +8609,22 @@ margin-right: 0.5rem;
             // Add has-selection class to container for fade effect
             chartContainer.classList.add('has-selection');
             
-            // Update selected state
+            // Update selected state and icon colors
             chartBars.forEach(bar => {
                 bar.classList.remove('selected');
+                const barIcon = bar.querySelector('.bar-amount-icon svg');
                 if (bar.dataset.category === category) {
                     bar.classList.add('selected');
+                    // Change icon color to match the actual bar color
+                    if (barIcon) {
+                        const color = getCategoryColorFromBar(bar);
+                        barIcon.style.setProperty('color', color, 'important');
+                    }
+                } else {
+                    // Reset other icons to default color
+                    if (barIcon) {
+                        barIcon.style.color = '';
+                    }
                 }
             });
             
@@ -8625,7 +8695,14 @@ margin-right: 0.5rem;
             const categoryBars = document.querySelectorAll('#categorySpendingChart .chart-bar');
             if (categoryContainer) {
                 categoryContainer.classList.remove('has-selection');
-                categoryBars.forEach(bar => bar.classList.remove('selected'));
+                categoryBars.forEach(bar => {
+                    bar.classList.remove('selected');
+                    // Reset icon color to default
+                    const barIcon = bar.querySelector('.bar-amount-icon svg');
+                    if (barIcon) {
+                        barIcon.style.color = '';
+                    }
+                });
                 
                 // Show total spend for displayed categories with animation
                 const totalElement = document.getElementById('selectedCategoryTotal');
@@ -10046,7 +10123,16 @@ margin-right: 0.5rem;
             
             // Update display
             if (valueSpan) {
-                valueSpan.textContent = text;
+                if (selectType === 'expenseCategory') {
+                    // For category selection, use icon + text
+                    valueSpan.innerHTML = getCategoryEmoji(value) + text.replace(/^[^\w\s]*\s*/, '');
+                    // Initialize Lucide icons for the new content
+                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                        window.lucide.createIcons();
+                    }
+                } else {
+                    valueSpan.textContent = text;
+                }
             }
             
             // Update hidden select
@@ -10606,8 +10692,11 @@ margin-right: 0.5rem;
             
             // Update budgetDisplay category chart if it's currently shown
             if (currentChartIndex === 1) {
-                generateCategoryChart();
-                updateSelectedCategoryTotal();
+                const categoryContainer = document.getElementById('categorySpendingChart');
+                fadeChartUpdate(categoryContainer, () => {
+                    generateCategoryChart();
+                    updateSelectedCategoryTotal();
+                });
             }
         }
 
@@ -10791,17 +10880,17 @@ margin-right: 0.5rem;
         };
         // Initial render on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🚀 DOMContentLoaded fired!');
+            console.log('DOMContentLoaded fired!');
             renderBudgetTitle();
             renderSaveTitle();
             updateHomeScreen(); // Load home page data by default
             
             // Check if carousel container exists
             const carouselCheck = document.querySelector('.chart-carousel-container');
-            console.log('🔍 Carousel container check:', carouselCheck ? 'FOUND' : 'NOT FOUND');
+            console.log('Carousel container check:', carouselCheck ? 'FOUND' : 'NOT FOUND');
             
             // Check what screen we're on
-            console.log('📱 Current screen:', currentScreen);
+            console.log('Current screen:', currentScreen);
             
             // Make sure we're on the cashflow screen (screen 0)
             if (currentScreen !== 0) {
@@ -10819,7 +10908,7 @@ margin-right: 0.5rem;
             }
             
             // Initialize charts and swipe functionality
-            console.log('📊 Calling switchToChart(0)');
+            console.log('Calling switchToChart(0)');
             if (typeof switchToChart === 'function') {
                 switchToChart(0); // Show first chart by default
             }
@@ -11573,28 +11662,28 @@ margin-right: 0.5rem;
         }
 
         function getCategoryEmoji(category) {
-            const emojiMap = {
-                'groceries': '🛒',
-                'transportation': '🚗',
-                'dining': '🍽️',
-                'entertainment': '🎬',
-                'personal': '🧴',
-                'clothing': '👕',
-                'health': '⚕️',
-                'subscriptions': '📺',
-                'mortgage': '🏠',
-                'loan': '💰',
-                'garbage': '🗂️',
-                'home improvement': '🔨',
-                'insurance': '☂️',
-                'pets': '🐕',
-                'phone': '📱',
-                'internet': '🌐',
-                'utilities': '⚡',
-                'other': '💸'
+            const iconMap = {
+                'groceries': '<i data-lucide="shopping-cart" class="w-4 h-4"></i>',
+                'transportation': '<i data-lucide="car" class="w-4 h-4"></i>',
+                'dining': '<i data-lucide="utensils" class="w-4 h-4"></i>',
+                'entertainment': '<i data-lucide="film" class="w-4 h-4"></i>',
+                'personal': '<i data-lucide="user" class="w-4 h-4"></i>',
+                'clothing': '<i data-lucide="shirt" class="w-4 h-4"></i>',
+                'health': '<i data-lucide="heart-pulse" class="w-4 h-4"></i>',
+                'subscriptions': '<i data-lucide="tv" class="w-4 h-4"></i>',
+                'mortgage': '<i data-lucide="home" class="w-4 h-4"></i>',
+                'loan': '<i data-lucide="dollar-sign" class="w-4 h-4"></i>',
+                'garbage': '<i data-lucide="trash-2" class="w-4 h-4"></i>',
+                'home improvement': '<i data-lucide="hammer" class="w-4 h-4"></i>',
+                'insurance': '<i data-lucide="umbrella" class="w-4 h-4"></i>',
+                'pets': '<i data-lucide="dog" class="w-4 h-4"></i>',
+                'phone': '<i data-lucide="smartphone" class="w-4 h-4"></i>',
+                'internet': '<i data-lucide="globe" class="w-4 h-4"></i>',
+                'utilities': '<i data-lucide="zap" class="w-4 h-4"></i>',
+                'other': '<i data-lucide="more-horizontal" class="w-4 h-4"></i>'
             };
             
-            return emojiMap[category.toLowerCase()] || '💸';
+            return iconMap[category.toLowerCase()] || '<i data-lucide="more-horizontal" class="w-4 h-4"></i>';
         }
         
         function updateSaveChangeIndicators(targetAmount, progressAmount, progressPercentage) {
@@ -11707,6 +11796,11 @@ margin-right: 0.5rem;
                     </div>
                 `;
             }).join('');
+            
+            // Initialize Lucide icons for the new transaction icons
+            if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                window.lucide.createIcons();
+            }
         }
         
         function updateHomeCashflow() {
@@ -14205,7 +14299,7 @@ margin-right: 0.5rem;
             } else if (remainingBudget > 10) {
                 validation = '✅ Feasible';
             } else {
-                validation = '⚠️ Over budget';
+                validation = 'Over budget';
             }
             document.getElementById('budgetValidationSummary').textContent = validation;
         }
