@@ -791,7 +791,7 @@
         .monthly-spending-chart .bar-visual {
             border: 1px solid #ea580c;
             background: linear-gradient(to bottom, rgba(234, 88, 12, 0.8) 0%, rgba(234, 88, 12, 0.4) 100%);
-            border-radius: 4px 4px 0 0;
+            border-radius: 4px;
         }
         
         .selected-month-total {
@@ -818,6 +818,63 @@
             font-variant-numeric: tabular-nums;
             color: #ce5a2a;
             font-size: 1.3rem;
+        }
+        
+        .chart-carousel {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+        }
+        
+        .chart-slide {
+            display: none;
+            width: 100%;
+        }
+        
+        .chart-slide.active {
+            display: block;
+        }
+        
+        .chart-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 0 8px 0;
+        }
+        
+        .chart-dots .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: hsl(var(--muted));
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .chart-dots .dot.active {
+            background-color: hsl(var(--primary));
+        }
+        
+        .chart-dots .dot:hover {
+            opacity: 0.8;
+        }
+        
+        .category-spending-chart {
+            display: flex;
+            align-items: end;
+            gap: 0.5rem;
+            padding: 2rem 1rem 1rem 1rem;
+            min-height: 140px;
+            position: relative;
+            justify-content: center;
+        }
+        
+        .category-spending-chart .chart-bar {
+            min-width: 40px;
+            max-width: 40px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
         }
         
         .chart-bar {
@@ -2256,6 +2313,58 @@
         .chart-container {
             /* Use .card class instead of custom styling */
             height: 350px;
+        }
+        
+        /* Charts with headers use flexbox layout */
+        .chart-container.chart-with-header {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chart-container.chart-with-header canvas {
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .chart-canvas-wrapper {
+            flex: 1;
+            padding: 0 1rem 1rem 1rem;
+            min-height: 0;
+            position: relative;
+        }
+        
+        .chart-canvas-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* Specific styling for category chart to prevent height issues */
+        #categoryChart {
+            max-height: none !important;
+            min-height: 200px !important;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .chart-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+        
+        .chart-time-range {
+            font-size: 0.8rem;
+            color: hsl(var(--muted-foreground));
+            background: hsl(var(--muted));
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
         }
         
         .stats-grid {
@@ -5382,11 +5491,27 @@ margin-right: 0.5rem;
                     <!-- Daily Budget Display -->
                     <div class="card" id="budgetDisplay">
                         <div class="card-content">
-                            <div class="monthly-spending-chart" id="monthlySpendingChart">
-                                <!-- Monthly bars will be generated dynamically -->
+                            <div class="chart-carousel" id="chartCarousel">
+                                <div class="chart-slide active" id="monthlyChartSlide">
+                                    <div class="monthly-spending-chart" id="monthlySpendingChart">
+                                        <!-- Monthly bars will be generated dynamically -->
+                                    </div>
+                                    <div id="selectedMonthTotal" class="selected-month-total">
+                                        <!-- Total for selected month will be displayed here -->
+                                    </div>
+                                </div>
+                                <div class="chart-slide" id="categoryChartSlide">
+                                    <div class="category-spending-chart" id="categorySpendingChart">
+                                        <!-- Category bars will be generated dynamically -->
+                                    </div>
+                                    <div id="selectedCategoryTotal" class="selected-month-total">
+                                        <!-- Total for selected category will be displayed here -->
+                                    </div>
+                                </div>
                             </div>
-                            <div id="selectedMonthTotal" class="selected-month-total">
-                                <!-- Total for selected month will be displayed here -->
+                            <div class="chart-dots" id="chartDots">
+                                <div class="dot active" onclick="switchToChart(0)"></div>
+                                <div class="dot" onclick="switchToChart(1)"></div>
                             </div>
                         </div>
                     </div>
@@ -5703,11 +5828,28 @@ margin-right: 0.5rem;
                         </div>
                         
                         <!-- Chart with Overlay -->
-                        <div class="card chart-container full-width-chart">
+                        <div class="card chart-container full-width-chart" id="spendingChartContainer">
                             <canvas id="spendingChart"></canvas>
                             <div class="chart-overlay" id="chartOverlay">
                                 <div class="chart-crosshair" id="chartCrosshair"></div>
                             </div>
+                        </div>
+                        
+                        <!-- Category Spending Chart -->
+                        <div class="card chart-container chart-with-header full-width-chart" id="categoryChartContainer" style="display: none;">
+                            <div class="chart-header">
+                                <h3>Top Categories</h3>
+                                <div class="chart-time-range" id="categoryChartTimeRange"></div>
+                            </div>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Chart Navigation Dots -->
+                        <div class="chart-dots">
+                            <div class="dot active" onclick="showChart(0)"></div>
+                            <div class="dot" onclick="showChart(1)"></div>
                         </div>
                         
                         <!-- Chart Period Selector at Bottom -->
@@ -6384,6 +6526,7 @@ margin-right: 0.5rem;
         
         let currentScreen = 0;
         let spendingChart;
+        let categoryChart;
         
         // Storage keys
         const EXPENSES_KEY = 'dailyExpenses';
@@ -7320,6 +7463,7 @@ margin-right: 0.5rem;
             savingsGradient.addColorStop(0.8, 'rgba(16, 185, 129, 0.02)');
             savingsGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
             
+            
             spendingChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -7645,6 +7789,214 @@ margin-right: 0.5rem;
             { id: 'emergency', name: 'Emergency Fund' }
         ];
         
+        function updateCategoryChart() {
+            // Get expenses and filter by time range
+            const expenses = loadExpenses();
+            const dateRange = getDateRangeForTimeRange(currentTimeRange);
+            const startDate = dateRange.startDate;
+            const endDate = dateRange.endDate;
+            
+            // Update time range label
+            const timeRangeLabel = document.getElementById('categoryChartTimeRange');
+            if (timeRangeLabel) {
+                timeRangeLabel.textContent = getTimeRangeLabel(currentTimeRange);
+            }
+            
+            // Filter expenses by date range
+            const filteredExpenses = {};
+            Object.keys(expenses).forEach(dateKey => {
+                const date = new Date(dateKey);
+                if (date >= startDate && date <= endDate) {
+                    filteredExpenses[dateKey] = expenses[dateKey];
+                }
+            });
+            
+            // Calculate category totals
+            const categoryTotals = {};
+            Object.values(filteredExpenses).flat().forEach(expense => {
+                const category = expense.category || 'Other';
+                categoryTotals[category] = (categoryTotals[category] || 0) + expense.amount;
+            });
+            
+            // Get top 6 categories
+            const sortedCategories = Object.entries(categoryTotals)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 6);
+            
+            // Prepare chart data
+            const labels = sortedCategories.map(([category]) => category);
+            const data = sortedCategories.map(([,total]) => total);
+            const colors = [
+                '#3b82f6', // blue
+                '#ef4444', // red
+                '#f59e0b', // amber
+                '#10b981', // emerald
+                '#8b5cf6', // violet
+                '#f97316'  // orange
+            ];
+            
+            // Get chart canvas
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (categoryChart) {
+                categoryChart.destroy();
+            }
+            
+            // Create new chart
+            categoryChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Spending',
+                        data: data,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderColor: colors.slice(0, labels.length),
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    resizeDelay: 0,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `$${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: data.length > 0 ? Math.max(...data) * 1.1 : 100, // Add 10% padding above highest value
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toFixed(0);
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Force resize after chart creation to ensure proper dimensions
+            setTimeout(() => {
+                if (categoryChart) {
+                    categoryChart.resize();
+                }
+            }, 100);
+        }
+        
+        let currentChartIndex = 0;
+        const chartContainers = ['spendingChartContainer', 'categoryChartContainer'];
+        
+        function showChart(index) {
+            // Hide all charts
+            chartContainers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.style.display = 'none';
+                }
+            });
+            
+            // Show selected chart
+            const selectedContainer = document.getElementById(chartContainers[index]);
+            if (selectedContainer) {
+                selectedContainer.style.display = 'block';
+            }
+            
+            // Update dots
+            const dots = document.querySelectorAll('.chart-dots .dot');
+            dots.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+            
+            currentChartIndex = index;
+            
+            // Initialize chart if needed
+            if (index === 1 && typeof updateCategoryChart === 'function') {
+                updateCategoryChart();
+            }
+        }
+        
+        function initializeChartSwipe() {
+            // Add swipe functionality to both chart containers
+            chartContainers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                
+                let startX = 0;
+                let startY = 0;
+                let isScrolling = false;
+                
+                container.addEventListener('touchstart', function(e) {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                    isScrolling = false;
+                });
+                
+                container.addEventListener('touchmove', function(e) {
+                    if (!startX || !startY) return;
+                    
+                    const currentX = e.touches[0].clientX;
+                    const currentY = e.touches[0].clientY;
+                    const diffX = startX - currentX;
+                    const diffY = startY - currentY;
+                    
+                    if (Math.abs(diffY) > Math.abs(diffX)) {
+                        isScrolling = true;
+                        return;
+                    }
+                    
+                    // Prevent default to stop scrolling during horizontal swipe
+                    if (!isScrolling && Math.abs(diffX) > 20) {
+                        e.preventDefault();
+                    }
+                    
+                    if (!isScrolling && Math.abs(diffX) > 50) {
+                        if (diffX > 0 && currentChartIndex < chartContainers.length - 1) {
+                            // Swipe left - next chart
+                            showChart(currentChartIndex + 1);
+                        } else if (diffX < 0 && currentChartIndex > 0) {
+                            // Swipe right - previous chart
+                            showChart(currentChartIndex - 1);
+                        }
+                        startX = 0;
+                        startY = 0;
+                    }
+                }, { passive: false });
+                
+                container.addEventListener('touchend', function() {
+                    startX = 0;
+                    startY = 0;
+                    isScrolling = false;
+                });
+            });
+        }
+        
         function getCurrentPeriodKey() {
             if (currentPeriodMode === 'today') {
                 return getCurrentDate();
@@ -7889,6 +8241,162 @@ margin-right: 0.5rem;
                 const scrollPosition = barOffsetLeft - (containerWidth / 2) + (barWidth / 2);
                 
                 chartContainer.scrollLeft = Math.max(0, scrollPosition);
+            }
+        }
+        
+        function switchToChart(index) {
+            currentChartIndex = index;
+            
+            // Update slide visibility
+            const slides = document.querySelectorAll('.chart-slide');
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
+            });
+            
+            // Update dots
+            const dots = document.querySelectorAll('.chart-dots .dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+            
+            // Generate appropriate chart content
+            if (index === 1) {
+                generateCategoryChart();
+            }
+        }
+        
+        function generateCategoryChart() {
+            const chartContainer = document.getElementById('categorySpendingChart');
+            if (!chartContainer) return;
+            
+            const expenses = loadExpenses();
+            const categoryTotals = {};
+            
+            // Calculate category totals for the selected time range
+            const { startDate, endDate } = getDateRangeForTimeRange(currentTimeRange);
+            const startDateStr = startDate.toISOString().split('T')[0];
+            const endDateStr = endDate.toISOString().split('T')[0];
+            
+            Object.keys(expenses).forEach(dateKey => {
+                if (dateKey >= startDateStr && dateKey <= endDateStr) {
+                    const dayExpenses = expenses[dateKey];
+                    dayExpenses.forEach(expense => {
+                        const category = expense.category || 'other';
+                        categoryTotals[category] = (categoryTotals[category] || 0) + (expense.amount || 0);
+                    });
+                }
+            });
+            
+            // Get top 6 categories
+            const sortedCategories = Object.entries(categoryTotals)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 6);
+            
+            // Clear existing content
+            chartContainer.innerHTML = '';
+            
+            if (sortedCategories.length === 0) {
+                chartContainer.innerHTML = '<div style="text-align: center; color: hsl(var(--muted-foreground)); padding: 40px;">No spending data for this period</div>';
+                return;
+            }
+            
+            // Category colors
+            const categoryColors = [
+                '#EA580C', // Orange
+                '#3B82F6', // Blue  
+                '#10B981', // Green
+                '#8B5CF6', // Purple
+                '#F59E0B', // Amber
+                '#EF4444'  // Red
+            ];
+            
+            // Find max value for scaling
+            const maxValue = Math.max(...sortedCategories.map(([,amount]) => amount), 1);
+            
+            // Generate bars for each category
+            sortedCategories.forEach(([category, amount], index) => {
+                const height = Math.max((amount / maxValue) * 100, 10);
+                const color = categoryColors[index];
+                
+                const chartBar = document.createElement('div');
+                chartBar.className = 'chart-bar category-bar';
+                chartBar.dataset.category = category;
+                
+                // Category icon (using emoji for now)
+                const barAmount = document.createElement('div');
+                barAmount.className = 'bar-amount';
+                barAmount.innerHTML = `<span style="font-size: 1.2rem;">${getCategoryEmoji(category)}</span>`;
+                
+                // Bar visual
+                const barVisual = document.createElement('div');
+                barVisual.className = 'bar-visual category-visual';
+                barVisual.style.height = `${height}px`;
+                barVisual.style.background = `linear-gradient(to bottom, ${color}CC 0%, ${color}66 100%)`;
+                barVisual.style.border = `1px solid ${color}`;
+                barVisual.style.borderRadius = '4px 4px 0 0';
+                
+                // Click handler for category selection
+                chartBar.onclick = (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    selectCategory(category, amount);
+                };
+                
+                chartBar.appendChild(barVisual);
+                chartBar.appendChild(barAmount);
+                chartContainer.appendChild(chartBar);
+            });
+            
+            // Update category total display
+            updateSelectedCategoryTotal();
+        }
+        
+        function selectCategory(category, amount) {
+            // Update selected state (similar to month selection)
+            const chartBars = document.querySelectorAll('#categorySpendingChart .chart-bar');
+            chartBars.forEach(bar => {
+                bar.classList.remove('selected');
+                if (bar.dataset.category === category) {
+                    bar.classList.add('selected');
+                }
+            });
+            
+            // Update total display
+            const totalElement = document.getElementById('selectedCategoryTotal');
+            if (totalElement) {
+                const categoryName = category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ');
+                totalElement.innerHTML = `
+                    <span class="month-name">${categoryName}</span>
+                    <span class="month-amount">$${amount.toFixed(2)}</span>
+                `;
+            }
+        }
+        
+        function updateSelectedCategoryTotal() {
+            // Show total for first category by default
+            const firstBar = document.querySelector('#categorySpendingChart .chart-bar');
+            if (firstBar) {
+                const category = firstBar.dataset.category;
+                const expenses = loadExpenses();
+                const categoryTotals = {};
+                
+                // Recalculate for selected time range
+                const { startDate, endDate } = getDateRangeForTimeRange(currentTimeRange);
+                const startDateStr = startDate.toISOString().split('T')[0];
+                const endDateStr = endDate.toISOString().split('T')[0];
+                
+                Object.keys(expenses).forEach(dateKey => {
+                    if (dateKey >= startDateStr && dateKey <= endDateStr) {
+                        const dayExpenses = expenses[dateKey];
+                        dayExpenses.forEach(expense => {
+                            const expenseCategory = expense.category || 'other';
+                            categoryTotals[expenseCategory] = (categoryTotals[expenseCategory] || 0) + (expense.amount || 0);
+                        });
+                    }
+                });
+                
+                const amount = categoryTotals[category] || 0;
+                selectCategory(category, amount);
             }
         }
         
@@ -9744,6 +10252,11 @@ margin-right: 0.5rem;
             if (typeof updateChart === 'function') {
                 updateChart();
             }
+            
+            // Update category chart if needed
+            if (typeof updateCategoryChart === 'function') {
+                updateCategoryChart();
+            }
         }
 
         function getDateRangeForTimeRange(timeRange) {
@@ -9929,6 +10442,15 @@ margin-right: 0.5rem;
             renderBudgetTitle();
             renderSaveTitle();
             updateHomeScreen(); // Load home page data by default
+            
+            // Initialize charts and swipe functionality
+            showChart(0); // Show first chart by default
+            initializeChartSwipe();
+            
+            // Initialize category chart
+            if (typeof updateCategoryChart === 'function') {
+                updateCategoryChart();
+            }
             
             // Load accounts with recent transactions on page load
             try {
