@@ -1011,6 +1011,10 @@
             border-bottom: 0;  
         }
         
+        .current-month .spending-visual {
+            border-style: dashed;
+        }
+        
         #budgetDisplay .stat-card {
             display: flex;
             flex-direction: column;
@@ -8362,7 +8366,7 @@ margin-right: 0.5rem;
             updateSelectedMonthTotal();
         }
         
-        function animateCountUp(element, startValue, endValue, duration = 600) {
+        function animateCountUp(element, startValue, endValue, duration = 300) {
             const startTime = performance.now();
             const difference = endValue - startValue;
             
@@ -8370,8 +8374,8 @@ margin-right: 0.5rem;
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 
-                // Use easeOutCubic for smooth animation
-                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                // Use easeOutQuad for more subtle animation
+                const easeProgress = 1 - Math.pow(1 - progress, 2);
                 const currentValue = startValue + (difference * easeProgress);
                 
                 element.textContent = `$${currentValue.toFixed(2)}`;
