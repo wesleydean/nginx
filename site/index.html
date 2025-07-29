@@ -102,7 +102,7 @@
             --secondary: 210 40% 96%;
             --secondary-foreground: 222.2 84% 4.9%;
             --muted: 210 40% 96%;
-            --muted-foreground: 215.4 16.3% 46.9%;
+            --muted-foreground: 215.4deg 24.61% 40.65%;
             --accent: 210 40% 96%;
             --accent-foreground: 222.2 84% 4.9%;
             --destructive: 0 84.2% 60.2%;
@@ -733,7 +733,7 @@
             border-bottom: 2px solid hsl(var(--border) / 0.5);
             border-radius: 0;
             margin: 0 -1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.3rem;
         }
 
         #budgetDisplay .card-content {
@@ -754,7 +754,7 @@
             display: flex;
             align-items: end;
             gap: 0.5rem;
-            padding: 2rem 1rem 1rem 1rem;
+            padding: 2rem 1rem 0.5rem 1rem;
             height: 140px;
             position: relative;
             overflow-x: auto;
@@ -775,15 +775,16 @@
         }
         
         .monthly-spending-chart .chart-bar.selected .bar-visual {
-            border-width: 2px;
-            background: linear-gradient(to bottom, rgba(234, 88, 12, 1) 0%, rgba(234, 88, 12, 0.6) 100%);
+            border-width: 2px !important;
+            background: linear-gradient(to bottom, rgba(234, 88, 12, 1) 0%, rgba(234, 88, 12, 0.6) 100%) !important;
+            opacity: 1 !important;
         }
         
         .monthly-spending-chart .chart-bar.current-month .bar-visual {
             opacity: 1;
         }
         
-        .monthly-spending-chart .chart-bar:not(.current-month) .bar-visual {
+        .monthly-spending-chart .chart-bar:not(.current-month):not(.selected) .bar-visual {
             opacity: 0.7;
         }
         
@@ -794,26 +795,29 @@
         }
         
         .selected-month-total {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 1rem 0 1rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: hsl(var(--foreground));
-            margin-top: -0.5rem;
-            margin-bottom: 0.5rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: hsl(var(--foreground));
+                margin-top: -0.5rem;
+                margin-bottom: 0.5rem;
         }
         
         .selected-month-total .month-name {
             flex: 1;
             text-align: left;
+            font-weight: 400;
         }
         
         .selected-month-total .month-amount {
             flex: 1;
             text-align: right;
             font-variant-numeric: tabular-nums;
+            color: #ce5a2a;
+            font-size: 1.3rem;
         }
         
         .chart-bar {
@@ -1223,6 +1227,10 @@
             box-sizing: border-box;
             outline: none;
             width: auto;
+        }
+        
+        .time-range-selector-icon:hover {
+            background-color: hsl(var(--muted));
         }
         
         .dropdown-header {
@@ -2465,7 +2473,7 @@
             position: sticky;
             top: -2px;
             z-index: 100;
-            background: hsl(33.9deg 52.95% 85.48% / 26%);
+            background: hsl(0deg 0% 100% / 70%);
             /* border: 1px solid hsl(var(--border)); */
             padding: 0.6rem;
             /* margin: 0 -1rem 0 -1rem; */
@@ -2473,7 +2481,7 @@
             /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); */
             transform: translateY(0);
             /* transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); */
-            margin: 0.7rem 0;
+            margin: 0.5rem 0;
             border-radius: 1rem;
             backdrop-filter: blur(22px);
         }
@@ -5425,9 +5433,14 @@ margin-right: 0.5rem;
                     
                     <!-- Sticky Controls Section (White Background) -->
                     <div class="sticky-controls-section" id="stickyControlsSection">
-                        <div class="sticky-controls-content" style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3 class="section-title" id="expensesListTitle" style="margin: 0;">Transactions</h3>
-                            <div id="budgetTitleContainer" style="text-align:right;"></div>
+                        <div class="sticky-controls-content" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div class="section-header-left">
+                                <h3 class="section-title" id="expensesListTitle">Transactions</h3>
+                                <div id="budgetTitleContainer"></div>
+                            </div>
+                            <div class="section-header-right">
+                                <div id="timeRangeContextMenu"></div>
+                            </div>
                         </div>
                     </div>
                     
@@ -7777,6 +7790,10 @@ margin-right: 0.5rem;
             // Only update total if this is the initial chart generation
             // (selectMonth will handle updates for manual selection)
             if (selectedMonth === new Date().getMonth() && selectedYear === new Date().getFullYear()) {
+                // Initialize previousTotal for the first time
+                const monthlyTotals = calculateMonthlySpending();
+                const monthKey = `${selectedYear}-${selectedMonth}`;
+                previousTotal = monthlyTotals[monthKey] || 0;
                 updateSelectedMonthTotal();
             }
             
@@ -7797,11 +7814,34 @@ margin-right: 0.5rem;
                 if (parseInt(bar.dataset.month) === month && parseInt(bar.dataset.year) === year) {
                     console.log('Adding selected class to bar for month:', month);
                     bar.classList.add('selected');
+                    console.log('Bar classes after selection:', bar.className);
                 }
             });
             
             // Update total display only (don't trigger other updates)
             updateSelectedMonthTotal();
+        }
+        
+        function animateCountUp(element, startValue, endValue, duration = 600) {
+            const startTime = performance.now();
+            const difference = endValue - startValue;
+            
+            function updateCount(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Use easeOutCubic for smooth animation
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                const currentValue = startValue + (difference * easeProgress);
+                
+                element.textContent = `$${currentValue.toFixed(2)}`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCount);
+                }
+            }
+            
+            requestAnimationFrame(updateCount);
         }
         
         function updateSelectedMonthTotal() {
@@ -7815,11 +7855,23 @@ margin-right: 0.5rem;
             const totalElement = document.getElementById('selectedMonthTotal');
             if (totalElement) {
                 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                
+                // Update the month name immediately
                 totalElement.innerHTML = `
                     <span class="month-name">${monthNames[selectedMonth]} ${selectedYear}</span>
-                    <span class="month-amount">$${total.toFixed(2)}</span>
+                    <span class="month-amount" id="animatedAmount">$${previousTotal.toFixed(2)}</span>
                 `;
-                console.log('Updated total element with month:', monthNames[selectedMonth], 'amount:', total.toFixed(2));
+                
+                // Animate the amount
+                const amountElement = document.getElementById('animatedAmount');
+                if (amountElement) {
+                    animateCountUp(amountElement, previousTotal, total);
+                }
+                
+                console.log('Updated total element with month:', monthNames[selectedMonth], 'animating from:', previousTotal, 'to:', total);
+                
+                // Update previous total for next animation
+                previousTotal = total;
             } else {
                 console.error('selectedMonthTotal element not found!');
             }
@@ -9548,36 +9600,41 @@ margin-right: 0.5rem;
         // Monthly chart tracking
         let selectedMonth = new Date().getMonth(); // 0-based month index
         let selectedYear = new Date().getFullYear();
+        let previousTotal = 0; // Track previous total for animation
         
         function renderBudgetTitle() {
-            const container = document.getElementById('budgetTitleContainer');
-            if (!container) return;
-            container.innerHTML = '';
+            const subtitleContainer = document.getElementById('budgetTitleContainer');
+            const contextMenuContainer = document.getElementById('timeRangeContextMenu');
             
-            // Always show time range dropdown selector
+            if (!subtitleContainer || !contextMenuContainer) return;
+            
+            // Clear both containers
+            subtitleContainer.innerHTML = '';
+            contextMenuContainer.innerHTML = '';
+            
+            // Add subtitle text (left side)
+            const subtitleDiv = document.createElement('div');
+            subtitleDiv.className = 'section-subtitle';
+            subtitleDiv.id = 'timeRangeText';
+            subtitleDiv.textContent = getTimeRangeLabel(currentTimeRange);
+            subtitleContainer.appendChild(subtitleDiv);
+            
+            // Add context menu (right side)
             const dropdownContainer = document.createElement('div');
             dropdownContainer.style.position = 'relative';
             dropdownContainer.style.display = 'inline-block';
             
-            const btn = document.createElement('button');
-            btn.id = 'timeRangeSelector';
-            btn.className = 'time-range-selector';
-            btn.onclick = toggleTimeRangeDropdown;
+            const contextBtn = document.createElement('button');
+            contextBtn.id = 'timeRangeSelector';
+            contextBtn.className = 'dot-menu-btn';
+            contextBtn.onclick = toggleTimeRangeDropdown;
             
-            // Time range text
-            const span = document.createElement('span');
-            span.id = 'timeRangeText';
-            span.textContent = getTimeRangeLabel(currentTimeRange);
+            // Three dots icon (more-horizontal)
+            const dotsIcon = document.createElement('i');
+            dotsIcon.setAttribute('data-lucide', 'more-horizontal');
+            dotsIcon.className = 'w-5 h-5';
             
-            // Lucide chevron icon
-            const icon = document.createElement('i');
-            icon.setAttribute('data-lucide', 'chevron-down');
-            icon.className = 'w-4 h-4';
-            icon.style.marginLeft = '0.5rem';
-            icon.style.color = 'hsl(var(--muted-foreground))';
-            
-            btn.appendChild(span);
-            btn.appendChild(icon);
+            contextBtn.appendChild(dotsIcon);
             
             // Create dropdown menu
             const dropdown = document.createElement('div');
@@ -9596,9 +9653,9 @@ margin-right: 0.5rem;
                 <div class="dropdown-item ${currentTimeRange === 'alltime' ? 'active' : ''}" onclick="updateTimeRange('alltime')">All time</div>
             `;
             
-            dropdownContainer.appendChild(btn);
+            dropdownContainer.appendChild(contextBtn);
             dropdownContainer.appendChild(dropdown);
-            container.appendChild(dropdownContainer);
+            contextMenuContainer.appendChild(dropdownContainer);
             
             // Ensure Lucide icons are rendered
             if (window.lucide && typeof window.lucide.createIcons === 'function') {
