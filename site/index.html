@@ -353,10 +353,14 @@
         }
 
         .transaction-description {
-            font-size: 0.875rem;
+            display: flex;
             font-weight: 500;
             color: hsl(var(--foreground));
             margin-bottom: 0.1rem;
+            font-size: 0.875rem;
+            align-items: center;
+            gap: 0.5rem;
+            line-height: 1.4;
         }
 
         .transaction-category {
@@ -790,7 +794,7 @@
         }
         
         .monthly-spending-chart .chart-bar.current-month .bar-visual {
-            opacity: 1;
+            background: #e7743c3d;
         }
         
         .monthly-spending-chart .chart-bar:not(.current-month):not(.selected) .bar-visual {
@@ -862,6 +866,50 @@
         
         .chart-fade-in {
             opacity: 1 !important;
+        }
+        
+        .chart-fade-slide-in {
+            animation: slideInFromLeft 0.3s ease-out forwards;
+        }
+        
+        .chart-fade-slide-out {
+            animation: slideOutToRight 0.3s ease-out forwards;
+        }
+        
+        @keyframes slideInFromLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideOutToRight {
+            0% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+        
+        .chart-bar-stagger-in {
+            opacity: 0;
+            animation: barFadeInStagger 0.3s ease-out forwards;
+        }
+        
+        @keyframes barFadeInStagger {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
         }
         
         .chart-slide {
@@ -1015,6 +1063,97 @@
             border-style: dashed;
         }
         
+        /* Horizontal Account Type Chart */
+        .account-type-horizontal {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .account-type-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .account-type-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .account-type-label {
+            font-size: 1rem;
+            font-weight: 500;
+            color: hsl(var(--foreground));
+        }
+        
+        .account-type-amount {
+            font-size: 1rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+        
+        .account-type-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .account-type-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: hsl(var(--muted));
+            color: hsl(var(--foreground));
+            flex-shrink: 0;
+        }
+        
+        .account-type-bar-container {
+            position: relative;
+            height: 24px;
+            background: hsl(var(--muted));
+            border-radius: 4px;
+            overflow: hidden;
+            flex: 1;
+        }
+        
+        .account-type-bar-visual {
+            height: 100%;
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .account-type-bar-visual.investments {
+            background: linear-gradient(to bottom, #f59e0bCC 0%, #f59e0b66 100%);
+            border: 1px solid #f59e0b;
+        }
+        
+        .account-type-bar-visual.cash {
+            background: linear-gradient(to bottom, #10b981CC 0%, #10b98166 100%);
+            border: 1px solid #10b981;
+        }
+        
+        .account-type-bar-visual.debt {
+            background: linear-gradient(to bottom, #ef4444CC 0%, #ef444466 100%);
+            border: 1px solid #ef4444;
+        }
+        
+        .account-type-percentage {
+            position: absolute;
+            top: 50%;
+            left: 8px;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
         #budgetDisplay .stat-card {
             display: flex;
             flex-direction: column;
@@ -1114,6 +1253,8 @@
             text-align: left;
             position: relative;
             width: 100%;
+            /* border-bottom: 1px solid #e9e9e9; */
+            padding-bottom: 0.6rem;
         }
         
         .home-section .card-header > .home-section-header {
@@ -1137,7 +1278,7 @@
         .section-header-left {
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
+            gap: 0.15rem;
             align-items: flex-start;
             text-align: left;
             flex: 1;
@@ -1458,8 +1599,8 @@
         .home-transaction-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 0;
+            align-items: flex-start;
+            padding: 0.7rem 0;
             border-bottom: 1px solid hsl(var(--border));
         }
         
@@ -1467,24 +1608,19 @@
             border-bottom: none;
         }
         
-        .transaction-info {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .transaction-description {
-            font-weight: 500;
-            font-size: 0.875rem;
-        }
+     
         
         .transaction-date {
             color: hsl(var(--muted-foreground));
             font-size: 0.75rem;
+            margin-left: 1.5rem; /* Align with description text, accounting for icon + gap */
         }
         
         .transaction-amount {
             font-weight: 600;
             color: hsl(var(--foreground));
+            font-size: 0.875rem;
+            white-space: nowrap;
         }
         
         /* Chart Legend */
@@ -8580,6 +8716,50 @@ margin-right: 0.5rem;
             }, 100); // Half the transition time for smooth crossfade
         }
 
+        function slideChartUpdate(chartContainer, updateFunction) {
+            if (!chartContainer) return;
+            
+            // Start slide out to right
+            chartContainer.classList.add('chart-fade-slide-out');
+            
+            // After slide out, update content and slide in from left
+            setTimeout(() => {
+                updateFunction();
+                chartContainer.classList.remove('chart-fade-slide-out');
+                chartContainer.classList.add('chart-fade-slide-in');
+                
+                // Remove classes after animation
+                setTimeout(() => {
+                    chartContainer.classList.remove('chart-fade-slide-in');
+                }, 300);
+            }, 300); // Wait for slide out animation to complete
+        }
+
+        function staggeredBarUpdate(chartContainer, updateFunction) {
+            if (!chartContainer) return;
+            
+            // Update content immediately
+            updateFunction();
+            
+            // Apply staggered animation to all chart bars
+            const chartBars = chartContainer.querySelectorAll('.chart-bar');
+            chartBars.forEach((bar, index) => {
+                // Set initial state
+                bar.style.opacity = '0';
+                
+                // Apply staggered animation with delay
+                setTimeout(() => {
+                    bar.classList.add('chart-bar-stagger-in');
+                    
+                    // Clean up class after animation
+                    setTimeout(() => {
+                        bar.classList.remove('chart-bar-stagger-in');
+                        bar.style.opacity = '';
+                    }, 300);
+                }, index * 40); // 40ms delay between each bar
+            });
+        }
+
         function getCategoryColorFromBar(categoryBar) {
             // Get the category visual element to determine its CSS class
             const categoryVisual = categoryBar.querySelector('.category-visual');
@@ -10694,14 +10874,16 @@ margin-right: 0.5rem;
                 updateCategoryChart();
             }
             
-            // Update budgetDisplay category chart if it's currently shown
+            // Update category chart with staggered bar animation (only if currently shown)
             if (currentChartIndex === 1) {
+                // Category chart - staggered bar animation (data changes with time range)
                 const categoryContainer = document.getElementById('categorySpendingChart');
-                fadeChartUpdate(categoryContainer, () => {
+                staggeredBarUpdate(categoryContainer, () => {
                     generateCategoryChart();
                     updateSelectedCategoryTotal();
                 });
             }
+            // Monthly chart doesn't need animation since it's not affected by time range
         }
 
         function getDateRangeForTimeRange(timeRange) {
@@ -13936,8 +14118,111 @@ margin-right: 0.5rem;
         }
 
 
+        function generateAccountTypeChart() {
+            const accountTypeChart = document.getElementById('accountTypeChart');
+            if (!accountTypeChart) return;
+            
+            // Sample data - replace with real account data
+            const accountData = [
+                {
+                    type: 'investments',
+                    label: 'Investments',
+                    amount: 53461.09,
+                    icon: 'trending-up'
+                },
+                {
+                    type: 'cash',
+                    label: 'Cash',
+                    amount: 12847.52,
+                    icon: 'dollar-sign'
+                },
+                {
+                    type: 'debt',
+                    label: 'Debt',
+                    amount: 8234.18, // Show as positive for percentage calculation
+                    icon: 'credit-card'
+                }
+            ];
+            
+            // Calculate total for percentage
+            const totalValue = accountData.reduce((sum, account) => sum + account.amount, 0);
+            
+            // Clear existing content and create new structure with home container
+            accountTypeChart.innerHTML = `
+                <div class="card-header">
+                    <div class="home-section-header">
+                        <h3 class="section-title">Account Balances</h3>
+                        <div class="section-subtitle">Investment, cash & debt</div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="account-type-horizontal" id="accountTypeHorizontal">
+                        <!-- Account bars will be generated here -->
+                    </div>
+                </div>
+            `;
+            
+            // Add the home-section class to the chart container
+            accountTypeChart.classList.add('home-section');
+            
+            const container = document.getElementById('accountTypeHorizontal');
+            
+            accountData.forEach((account, index) => {
+                const percentage = (account.amount / totalValue) * 100;
+                const displayAmount = account.type === 'debt' ? -account.amount : account.amount;
+                
+                const barItem = document.createElement('div');
+                barItem.className = 'account-type-bar';
+                
+                barItem.innerHTML = `
+                    <div class="account-type-header">
+                        <div class="account-type-label">${account.label}</div>
+                        <div class="account-type-amount">$${formatAccountTypeAmount(displayAmount)}</div>
+                    </div>
+                    <div class="account-type-bar-row">
+                        <div class="account-type-icon">
+                            <i data-lucide="${account.icon}" class="w-4 h-4"></i>
+                        </div>
+                        <div class="account-type-bar-container">
+                            <div class="account-type-bar-visual ${account.type}" style="width: ${percentage}%">
+                                <div class="account-type-percentage">${Math.round(percentage)}%</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Apply staggered fade animation
+                barItem.style.opacity = '0';
+                setTimeout(() => {
+                    barItem.classList.add('chart-bar-stagger-in');
+                    setTimeout(() => {
+                        barItem.classList.remove('chart-bar-stagger-in');
+                        barItem.style.opacity = '';
+                    }, 300);
+                }, index * 100); // 100ms delay between each bar
+                
+                container.appendChild(barItem);
+            });
+            
+            // Ensure Lucide icons are rendered
+            setTimeout(() => {
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    window.lucide.createIcons();
+                }
+            }, 50);
+        }
+
+        function formatAccountTypeAmount(amount) {
+            const absAmount = Math.abs(amount);
+            return absAmount.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
         function updateAccountsView() {
-            // Your existing code to update accounts
+            // Generate the account type chart
+            generateAccountTypeChart();
             
             // Add account buttons at the bottom
             const accountsList = document.getElementById('accountsList');
