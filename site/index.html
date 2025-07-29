@@ -1054,13 +1054,60 @@
             font-weight: 500;
         }
 
-        .connect-account-btn:hover {
+        .connect-account-btn:hover,
+        .connect-account-btn:active {
             background-color: #c8a03d0a;
             border-color: #8b6914;
+            border-style: solid;
         }
 
-        .connect-account-btn i[data-lucide] {
+        .account-buttons-container .connect-account-btn [data-lucide] {
+            color: #685012;
+        }
+
+        .add-balance-btn {
+            margin: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px;
+            background: transparent;
+            border: 2px dashed #c8a03d;
+            border-radius: 12px;
             color: #8b6914;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .add-balance-btn:hover,
+        .add-balance-btn:active {
+            background-color: #c8a03d0a;
+            border-color: #8b6914;
+            border-style: solid;
+        }
+
+        .account-buttons-container .add-balance-btn [data-lucide] {
+            color: #8a6c20;
+        }
+
+        .account-buttons-container {
+            display: flex;
+            flex-direction: row;
+            gap: 0;
+        }
+
+        .account-buttons-container .connect-account-btn,
+        .account-buttons-container .add-balance-btn {
+            margin: 0.5rem;
+            flex: 1;
+        }
+
+        /* Hide the original quick action add balance button */
+        #saveBalanceActionCard {
+            display: none !important;
         }
         
         .dropdown-menu {
@@ -12457,9 +12504,14 @@ margin-right: 0.5rem;
         function updateAccountsView() {
             // Your existing code to update accounts
             
-            // Add Plaid connection button at the bottom
+            // Add account buttons at the bottom
             const accountsList = document.getElementById('accountsList');
             if (accountsList) {
+                // Create buttons container
+                const buttonsContainer = document.createElement('div');
+                buttonsContainer.className = 'account-buttons-container';
+                
+                // Create connect account button
                 const connectButton = document.createElement('div');
                 connectButton.className = 'connect-account-btn';
                 connectButton.innerHTML = `
@@ -12468,8 +12520,21 @@ margin-right: 0.5rem;
                 `;
                 connectButton.onclick = connectPlaidAccount;
                 
-                // Append to accountsList
-                accountsList.appendChild(connectButton);
+                // Create add balance button
+                const addBalanceButton = document.createElement('div');
+                addBalanceButton.className = 'add-balance-btn';
+                addBalanceButton.innerHTML = `
+                    <i data-lucide="wallet" class="w-5 h-5"></i>
+                    <span>Add Balance</span>
+                `;
+                addBalanceButton.onclick = showBalanceSlideOut;
+                
+                // Add buttons to container
+                buttonsContainer.appendChild(connectButton);
+                buttonsContainer.appendChild(addBalanceButton);
+                
+                // Append container to accountsList
+                accountsList.appendChild(buttonsContainer);
                 
                 // Ensure Lucide icons are rendered for the new button
                 if (window.lucide && typeof window.lucide.createIcons === 'function') {
