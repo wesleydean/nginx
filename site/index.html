@@ -852,6 +852,7 @@
             width: 200%;
             transition: transform 0.3s ease;
             overflow: hidden;
+            margin-bottom: 0;
         }
         
         .chart-slide {
@@ -866,13 +867,13 @@
         .chart-dots {
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             padding: 12px 0 8px 0;
         }
         
         .chart-dots .dot {
-            width: 12px;
-            height: 12px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             background-color: #9ca3af;
             cursor: pointer;
@@ -937,10 +938,18 @@
         }
         
         .bar-amount {
-            font-weight: 500;
-            text-align: center;
-            font-size: 0.7rem;
-            text-transform: uppercase;
+                font-weight: 500;
+                text-align: center;
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                background: #a9a6be2b;
+                padding: 0.1rem 0.5rem;
+                border-radius: 1rem;
+        }
+
+        .bar-amount span,
+        .bar-amount-icon {
+            font-size: 1.1rem;
         }
         
         .bar-visual {
@@ -1224,7 +1233,9 @@
         .cashflow-menu-container {
             position: relative;
             z-index: 100;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
         .dot-menu-btn {
@@ -5680,12 +5691,7 @@ margin-right: 0.5rem;
                     
                     <!-- Quick Action Cards -->
                     <div class="quick-actions">
-                        <div class="quick-action-card" onclick="showExpenseSlideOut()">
-                            <div class="quick-action-title">Add Expense</div>
-                            <div class="quick-action-icon">
-                                <i data-lucide="arrow-right" class="w-6 h-6"></i>
-                            </div>
-                        </div>
+                        <!-- Add Expense moved to header next to time range dropdown -->
                     </div>
                 </div>
                 
@@ -7994,6 +8000,7 @@ margin-right: 0.5rem;
         }
         
         let currentChartIndex = 0;
+        let previousCategoryAmount = 0;
         
         function showChart(index) {
             console.log('showChart called with index:', index);
@@ -8513,7 +8520,7 @@ margin-right: 0.5rem;
                 // Category icon (using emoji for now)
                 const barAmount = document.createElement('div');
                 barAmount.className = 'bar-amount';
-                barAmount.innerHTML = `<span style="font-size: 1.2rem;">${getCategoryEmoji(category)}</span>`;
+                barAmount.innerHTML = `<span class="bar-amount-icon">${getCategoryEmoji(category)}</span>`;
                 
                 // Bar visual
                 const barVisual = document.createElement('div');
@@ -8551,14 +8558,22 @@ margin-right: 0.5rem;
                 }
             });
             
-            // Update total display
+            // Update total display with animation
             const totalElement = document.getElementById('selectedCategoryTotal');
             if (totalElement) {
                 const categoryName = category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ');
                 totalElement.innerHTML = `
                     <span class="month-name">${categoryName}</span>
-                    <span class="month-amount">$${amount.toFixed(2)}</span>
+                    <span class="month-amount" id="animatedCategoryAmount">$${previousCategoryAmount.toFixed(2)}</span>
                 `;
+                
+                // Animate the amount
+                const amountElement = document.getElementById('animatedCategoryAmount');
+                if (amountElement) {
+                    animateCountUp(amountElement, previousCategoryAmount, amount);
+                }
+                
+                previousCategoryAmount = amount;
             }
         }
         
@@ -8574,16 +8589,34 @@ margin-right: 0.5rem;
                 monthlyContainer.classList.remove('has-selection');
                 monthlyBars.forEach(bar => bar.classList.remove('selected'));
                 
-                // Show July total by default
+                // Reset selected month/year to null so next selection animates properly
+                selectedMonth = null;
+                selectedYear = null;
+                
+                // Show current month + year by default
                 const totalElement = document.getElementById('selectedMonthTotal');
                 if (totalElement) {
+                    const currentDate = new Date();
+                    const currentMonth = currentDate.getMonth();
+                    const currentYear = currentDate.getFullYear();
+                    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                    
                     const monthlyTotals = calculateMonthlySpending();
-                    const julyKey = `2025-6`; // July is month 6 (0-indexed)
-                    const julyTotal = monthlyTotals[julyKey] || 0;
+                    const currentMonthKey = `${currentYear}-${currentMonth}`;
+                    const currentMonthTotal = monthlyTotals[currentMonthKey] || 0;
+                    
                     totalElement.innerHTML = `
-                        <span class="month-name">July Total</span>
-                        <span class="month-amount">$${julyTotal.toFixed(2)}</span>
+                        <span class="month-name">${monthNames[currentMonth]} ${currentYear}</span>
+                        <span class="month-amount" id="animatedAmount">$${previousTotal.toFixed(2)}</span>
                     `;
+                    
+                    // Animate to current month total
+                    const amountElement = document.getElementById('animatedAmount');
+                    if (amountElement) {
+                        animateCountUp(amountElement, previousTotal, currentMonthTotal);
+                    }
+                    
+                    previousTotal = currentMonthTotal;
                 }
             }
             
@@ -8594,29 +8627,80 @@ margin-right: 0.5rem;
                 categoryContainer.classList.remove('has-selection');
                 categoryBars.forEach(bar => bar.classList.remove('selected'));
                 
-                // Show total spend
+                // Show total spend for displayed categories with animation
                 const totalElement = document.getElementById('selectedCategoryTotal');
                 if (totalElement) {
+                    // Calculate total for just the categories displayed in the chart
                     const expenses = loadExpenses();
-                    const totalSpend = calculateTotalSpending(expenses);
+                    const categoryTotals = {};
+                    
+                    // Calculate category totals for the selected time range (same logic as generateCategoryChart)
+                    const { startDate, endDate } = getDateRangeForTimeRange(currentTimeRange);
+                    const startDateStr = startDate.toISOString().split('T')[0];
+                    const endDateStr = endDate.toISOString().split('T')[0];
+                    
+                    Object.keys(expenses).forEach(dateKey => {
+                        if (dateKey >= startDateStr && dateKey <= endDateStr) {
+                            const dayExpenses = expenses[dateKey];
+                            dayExpenses.forEach(expense => {
+                                const category = expense.category || 'other';
+                                categoryTotals[category] = (categoryTotals[category] || 0) + (expense.amount || 0);
+                            });
+                        }
+                    });
+                    
+                    // Sum ALL categories for the time range, not just the displayed ones
+                    const totalCategorySpend = Object.values(categoryTotals).reduce((sum, amount) => sum + amount, 0);
+                    
                     totalElement.innerHTML = `
                         <span class="month-name">Total Spend</span>
-                        <span class="month-amount">$${totalSpend.toFixed(2)}</span>
+                        <span class="month-amount" id="animatedCategoryAmount">$${previousCategoryAmount.toFixed(2)}</span>
                     `;
+                    
+                    // Animate to total category spend
+                    const amountElement = document.getElementById('animatedCategoryAmount');
+                    if (amountElement) {
+                        animateCountUp(amountElement, previousCategoryAmount, totalCategorySpend);
+                    }
+                    
+                    previousCategoryAmount = totalCategorySpend;
                 }
             }
         }
         
         function updateSelectedCategoryTotal() {
-            // Show total spend by default instead of first category
+            // Show total spend for displayed categories by default
             const totalElement = document.getElementById('selectedCategoryTotal');
             if (totalElement) {
+                // Calculate total for just the categories displayed in the chart (same logic as clearChartSelections)
                 const expenses = loadExpenses();
-                const totalSpend = calculateTotalSpending(expenses);
+                const categoryTotals = {};
+                
+                // Calculate category totals for the selected time range
+                const { startDate, endDate } = getDateRangeForTimeRange(currentTimeRange);
+                const startDateStr = startDate.toISOString().split('T')[0];
+                const endDateStr = endDate.toISOString().split('T')[0];
+                
+                Object.keys(expenses).forEach(dateKey => {
+                    if (dateKey >= startDateStr && dateKey <= endDateStr) {
+                        const dayExpenses = expenses[dateKey];
+                        dayExpenses.forEach(expense => {
+                            const category = expense.category || 'other';
+                            categoryTotals[category] = (categoryTotals[category] || 0) + (expense.amount || 0);
+                        });
+                    }
+                });
+                
+                // Sum ALL categories for the time range, not just the displayed ones
+                const totalCategorySpend = Object.values(categoryTotals).reduce((sum, amount) => sum + amount, 0);
+                
                 totalElement.innerHTML = `
                     <span class="month-name">Total Spend</span>
-                    <span class="month-amount">$${totalSpend.toFixed(2)}</span>
+                    <span class="month-amount">$${totalCategorySpend.toFixed(2)}</span>
                 `;
+                
+                // Initialize previous amount for animations
+                previousCategoryAmount = totalCategorySpend;
             }
         }
         
@@ -10411,6 +10495,20 @@ margin-right: 0.5rem;
             
             dropdownContainer.appendChild(contextBtn);
             dropdownContainer.appendChild(dropdown);
+            
+            // Create add expense button
+            const addExpenseBtn = document.createElement('button');
+            addExpenseBtn.className = 'dot-menu-btn';
+            addExpenseBtn.onclick = showExpenseSlideOut;
+            addExpenseBtn.setAttribute('aria-label', 'Add Expense');
+            
+            // Plus icon
+            const plusIcon = document.createElement('i');
+            plusIcon.setAttribute('data-lucide', 'plus');
+            plusIcon.className = 'w-5 h-5';
+            addExpenseBtn.appendChild(plusIcon);
+            
+            contextMenuContainer.appendChild(addExpenseBtn);
             contextMenuContainer.appendChild(dropdownContainer);
             
             // Ensure Lucide icons are rendered
@@ -10504,6 +10602,12 @@ margin-right: 0.5rem;
             // Update category chart if needed
             if (typeof updateCategoryChart === 'function') {
                 updateCategoryChart();
+            }
+            
+            // Update budgetDisplay category chart if it's currently shown
+            if (currentChartIndex === 1) {
+                generateCategoryChart();
+                updateSelectedCategoryTotal();
             }
         }
 
