@@ -780,12 +780,33 @@
             opacity: 1 !important;
         }
         
+        /* Push button effect for chart bars */
+        .monthly-spending-chart .chart-bar .bar-visual {
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        
+        .monthly-spending-chart .chart-bar .bar-visual:active {
+            transform: scale(0.95);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
         .monthly-spending-chart .chart-bar.current-month .bar-visual {
             opacity: 1;
         }
         
         .monthly-spending-chart .chart-bar:not(.current-month):not(.selected) .bar-visual {
             opacity: 0.7;
+        }
+        
+        /* Fade out non-selected bars when one is selected */
+        .monthly-spending-chart.has-selection .chart-bar:not(.selected) {
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+        
+        .monthly-spending-chart.has-selection .chart-bar.selected {
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
         
         .monthly-spending-chart .bar-visual {
@@ -795,15 +816,15 @@
         }
         
         .selected-month-total {
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                align-items: center;
-                font-size: 1.1rem;
-                font-weight: 600;
-                color: hsl(var(--foreground));
-                margin-top: -0.5rem;
-                margin-bottom: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
         }
         
         .selected-month-total .month-name {
@@ -820,19 +841,26 @@
             font-size: 1.3rem;
         }
         
-        .chart-carousel {
+        .chart-carousel-container {
             position: relative;
-            overflow: hidden;
             width: 100%;
+            overflow: hidden;
+        }
+        
+        .chart-carousel {
+            display: flex;
+            width: 200%;
+            transition: transform 0.3s ease;
+            overflow: hidden;
         }
         
         .chart-slide {
-            display: none;
-            width: 100%;
+            width: 50%;
+            flex-shrink: 0;
         }
         
         .chart-slide.active {
-            display: block;
+            /* No specific styling needed, position handled by transform */
         }
         
         .chart-dots {
@@ -843,16 +871,16 @@
         }
         
         .chart-dots .dot {
-            width: 8px;
-            height: 8px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background-color: hsl(var(--muted));
+            background-color: #9ca3af;
             cursor: pointer;
             transition: background-color 0.2s ease;
         }
         
         .chart-dots .dot.active {
-            background-color: hsl(var(--primary));
+            background-color: #374151;
         }
         
         .chart-dots .dot:hover {
@@ -863,7 +891,6 @@
             display: flex;
             align-items: end;
             gap: 0.5rem;
-            padding: 2rem 1rem 1rem 1rem;
             min-height: 140px;
             position: relative;
             justify-content: center;
@@ -875,6 +902,27 @@
             flex-shrink: 0;
             cursor: pointer;
             transition: opacity 0.2s ease;
+        }
+        
+        /* Fade out non-selected bars when one is selected */
+        .category-spending-chart.has-selection .chart-bar:not(.selected) {
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+        
+        .category-spending-chart.has-selection .chart-bar.selected {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        
+        /* Push button effect for category chart bars */
+        .category-spending-chart .chart-bar .bar-visual {
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        
+        .category-spending-chart .chart-bar .bar-visual:active {
+            transform: scale(0.95);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         
         .chart-bar {
@@ -897,13 +945,43 @@
         
         .bar-visual {
             width: 100%;
-            border-radius: 6px 6px 0 0;
+            border-radius: 4px;
             transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             min-height: 24px;
             height: 0px;
             /* position: absolute; */
             /* bottom: 0;
             left: 0; */
+        }
+        
+        /* Category bar colors */
+        .category-visual.food { 
+            background: linear-gradient(to bottom, #f59e0bCC 0%, #f59e0b66 100%); 
+            border: 1px solid #f59e0b; 
+        }
+        .category-visual.transportation { 
+            background: linear-gradient(to bottom, #3b82f6CC 0%, #3b82f666 100%); 
+            border: 1px solid #3b82f6; 
+        }
+        .category-visual.entertainment { 
+            background: linear-gradient(to bottom, #8b5cf6CC 0%, #8b5cf666 100%); 
+            border: 1px solid #8b5cf6; 
+        }
+        .category-visual.shopping { 
+            background: linear-gradient(to bottom, #ef4444CC 0%, #ef444466 100%); 
+            border: 1px solid #ef4444; 
+        }
+        .category-visual.health { 
+            background: linear-gradient(to bottom, #10b981CC 0%, #10b98166 100%); 
+            border: 1px solid #10b981; 
+        }
+        .category-visual.utilities { 
+            background: linear-gradient(to bottom, #f97316CC 0%, #f9731666 100%); 
+            border: 1px solid #f97316; 
+        }
+        .category-visual.other { 
+            background: linear-gradient(to bottom, #6b7280CC 0%, #6b728066 100%); 
+            border: 1px solid #6b7280; 
         }
         
         .income-visual {
@@ -5827,29 +5905,38 @@ margin-right: 0.5rem;
                             </div>
                         </div>
                         
-                        <!-- Chart with Overlay -->
-                        <div class="card chart-container full-width-chart" id="spendingChartContainer">
-                            <canvas id="spendingChart"></canvas>
-                            <div class="chart-overlay" id="chartOverlay">
-                                <div class="chart-crosshair" id="chartCrosshair"></div>
+                        <!-- Chart Carousel Container -->
+                        <div class="chart-carousel-container">
+                            <div class="chart-carousel" id="chartCarousel">
+                                <!-- Chart with Overlay -->
+                                <div class="chart-slide active" id="spendingChartSlide">
+                                    <div class="card chart-container full-width-chart">
+                                        <canvas id="spendingChart"></canvas>
+                                        <div class="chart-overlay" id="chartOverlay">
+                                            <div class="chart-crosshair" id="chartCrosshair"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Category Spending Chart -->
+                                <div class="chart-slide" id="categoryChartSlide">
+                                    <div class="card chart-container chart-with-header full-width-chart">
+                                        <div class="chart-header">
+                                            <h3>Top Categories</h3>
+                                            <div class="chart-time-range" id="categoryChartTimeRange"></div>
+                                        </div>
+                                        <div class="chart-canvas-wrapper">
+                                            <canvas id="categoryChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <!-- Category Spending Chart -->
-                        <div class="card chart-container chart-with-header full-width-chart" id="categoryChartContainer" style="display: none;">
-                            <div class="chart-header">
-                                <h3>Top Categories</h3>
-                                <div class="chart-time-range" id="categoryChartTimeRange"></div>
+                            
+                            <!-- Chart Navigation Dots -->
+                            <div class="chart-dots" id="chartDots">
+                                <div class="dot active" onclick="console.log('Dot 0 clicked!'); showChart(0)"></div>
+                                <div class="dot" onclick="console.log('Dot 1 clicked!'); showChart(1)"></div>
                             </div>
-                            <div class="chart-canvas-wrapper">
-                                <canvas id="categoryChart"></canvas>
-                            </div>
-                        </div>
-                        
-                        <!-- Chart Navigation Dots -->
-                        <div class="chart-dots">
-                            <div class="dot active" onclick="showChart(0)"></div>
-                            <div class="dot" onclick="showChart(1)"></div>
                         </div>
                         
                         <!-- Chart Period Selector at Bottom -->
@@ -7907,25 +7994,21 @@ margin-right: 0.5rem;
         }
         
         let currentChartIndex = 0;
-        const chartContainers = ['spendingChartContainer', 'categoryChartContainer'];
         
         function showChart(index) {
-            // Hide all charts
-            chartContainers.forEach(containerId => {
-                const container = document.getElementById(containerId);
-                if (container) {
-                    container.style.display = 'none';
-                }
-            });
+            console.log('showChart called with index:', index);
+            const carousel = document.getElementById('chartCarousel');
+            console.log('Carousel element:', carousel);
+            if (!carousel) return;
             
-            // Show selected chart
-            const selectedContainer = document.getElementById(chartContainers[index]);
-            if (selectedContainer) {
-                selectedContainer.style.display = 'block';
-            }
+            // Move carousel to show selected chart
+            const translateX = index * -50; // Each slide is 50% width
+            console.log('Setting translateX to:', translateX + '%');
+            carousel.style.transform = `translateX(${translateX}%)`;
             
             // Update dots
             const dots = document.querySelectorAll('.chart-dots .dot');
+            console.log('Found dots:', dots.length);
             dots.forEach((dot, i) => {
                 if (i === index) {
                     dot.classList.add('active');
@@ -7934,7 +8017,19 @@ margin-right: 0.5rem;
                 }
             });
             
+            // Update slide active states
+            const slides = document.querySelectorAll('.chart-slide');
+            console.log('Found slides:', slides.length);
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            
             currentChartIndex = index;
+            console.log('Updated currentChartIndex to:', currentChartIndex);
             
             // Initialize chart if needed
             if (index === 1 && typeof updateCategoryChart === 'function') {
@@ -7943,57 +8038,138 @@ margin-right: 0.5rem;
         }
         
         function initializeChartSwipe() {
-            // Add swipe functionality to both chart containers
-            chartContainers.forEach(containerId => {
-                const container = document.getElementById(containerId);
-                if (!container) return;
-                
-                let startX = 0;
-                let startY = 0;
-                let isScrolling = false;
-                
-                container.addEventListener('touchstart', function(e) {
-                    startX = e.touches[0].clientX;
-                    startY = e.touches[0].clientY;
+            // Look for the budgetDisplay chart carousel
+            const budgetDisplay = document.getElementById('budgetDisplay');
+            const carouselContainer = budgetDisplay ? budgetDisplay.querySelector('.chart-carousel') : null;
+            if (!carouselContainer) {
+                return;
+            }
+            
+            let startX = 0;
+            let startY = 0;
+            let isScrolling = false;
+            let hasSwiped = false;
+            let isDragging = false;
+            
+            // Use document-level events to avoid interference from Chart.js
+            function isInsideCarousel(x, y) {
+                const rect = carouselContainer.getBoundingClientRect();
+                return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+            }
+            
+            document.addEventListener('mousedown', function(e) {
+                if (isInsideCarousel(e.clientX, e.clientY)) {
+                    isDragging = true;
+                    startX = e.clientX;
+                    startY = e.clientY;
                     isScrolling = false;
-                });
+                    hasSwiped = false;
+                    carouselContainer.style.cursor = 'grabbing';
+                    e.preventDefault();
+                }
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging || !startX || !startY) return;
                 
-                container.addEventListener('touchmove', function(e) {
-                    if (!startX || !startY) return;
-                    
-                    const currentX = e.touches[0].clientX;
-                    const currentY = e.touches[0].clientY;
-                    const diffX = startX - currentX;
-                    const diffY = startY - currentY;
-                    
-                    if (Math.abs(diffY) > Math.abs(diffX)) {
-                        isScrolling = true;
-                        return;
-                    }
-                    
-                    // Prevent default to stop scrolling during horizontal swipe
-                    if (!isScrolling && Math.abs(diffX) > 20) {
-                        e.preventDefault();
-                    }
-                    
-                    if (!isScrolling && Math.abs(diffX) > 50) {
-                        if (diffX > 0 && currentChartIndex < chartContainers.length - 1) {
-                            // Swipe left - next chart
-                            showChart(currentChartIndex + 1);
-                        } else if (diffX < 0 && currentChartIndex > 0) {
-                            // Swipe right - previous chart
-                            showChart(currentChartIndex - 1);
-                        }
-                        startX = 0;
-                        startY = 0;
-                    }
-                }, { passive: false });
+                const currentX = e.clientX;
+                const currentY = e.clientY;
+                const diffX = startX - currentX;
+                const diffY = startY - currentY;
                 
-                container.addEventListener('touchend', function() {
+                if (Math.abs(diffY) > Math.abs(diffX)) {
+                    isScrolling = true;
+                    return;
+                }
+                
+                if (!isScrolling && !hasSwiped && Math.abs(diffX) > 50) {
+                    hasSwiped = true;
+                    if (diffX > 0 && currentChartIndex < 1) {
+                        switchToChart(currentChartIndex + 1);
+                    } else if (diffX < 0 && currentChartIndex > 0) {
+                        switchToChart(currentChartIndex - 1);
+                    }
+                }
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
                     startX = 0;
                     startY = 0;
                     isScrolling = false;
-                });
+                    hasSwiped = false;
+                    carouselContainer.style.cursor = 'grab';
+                }
+            });
+            
+            // Touch events for mobile
+            function handleTouchStart(e) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                isScrolling = false;
+                hasSwiped = false;
+            }
+            
+            carouselContainer.addEventListener('touchstart', handleTouchStart);
+            
+            // Note: budgetDisplay uses bar charts, not a canvas, so we only need container events
+            
+            function handleTouchMove(e) {
+                if (!startX || !startY) return;
+                
+                const currentX = e.touches[0].clientX;
+                const currentY = e.touches[0].clientY;
+                const diffX = startX - currentX;
+                const diffY = startY - currentY;
+                
+                // Determine scroll direction
+                if (Math.abs(diffY) > Math.abs(diffX)) {
+                    isScrolling = true;
+                    return;
+                }
+                
+                // Prevent default to stop scrolling during horizontal swipe
+                if (!isScrolling && Math.abs(diffX) > 20) {
+                    e.preventDefault();
+                }
+                
+                // Trigger swipe on sufficient horizontal movement
+                if (!isScrolling && !hasSwiped && Math.abs(diffX) > 50) {
+                    hasSwiped = true;
+                    if (diffX > 0 && currentChartIndex < 1) {
+                        switchToChart(currentChartIndex + 1);
+                    } else if (diffX < 0 && currentChartIndex > 0) {
+                        switchToChart(currentChartIndex - 1);
+                    }
+                }
+            }
+            
+            carouselContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+            
+            function handleTouchEnd() {
+                startX = 0;
+                startY = 0;
+                isScrolling = false;
+                hasSwiped = false;
+            }
+            
+            carouselContainer.addEventListener('touchend', handleTouchEnd);
+            
+            // Add document click listener to clear selections when clicking outside charts
+            document.addEventListener('click', function(e) {
+                // Check if click is outside both chart containers
+                const monthlyChart = document.getElementById('monthlySpendingChart');
+                const categoryChart = document.getElementById('categorySpendingChart');
+                
+                if (monthlyChart && categoryChart) {
+                    const isInsideMonthly = monthlyChart.contains(e.target);
+                    const isInsideCategory = categoryChart.contains(e.target);
+                    
+                    if (!isInsideMonthly && !isInsideCategory) {
+                        clearChartSelections();
+                    }
+                }
             });
         }
         
@@ -8154,19 +8330,20 @@ margin-right: 0.5rem;
         }
         
         function selectChartMonth(month, year) {
-            console.log('selectChartMonth called with:', month, year);
             selectedMonth = month;
             selectedYear = year;
             
-            // Update selected state
+            const chartContainer = document.getElementById('monthlySpendingChart');
             const chartBars = document.querySelectorAll('#monthlySpendingChart .chart-bar');
-            console.log('Found chart bars:', chartBars.length);
+            
+            // Add has-selection class to container for fade effect
+            chartContainer.classList.add('has-selection');
+            
+            // Update selected state
             chartBars.forEach(bar => {
                 bar.classList.remove('selected');
                 if (parseInt(bar.dataset.month) === month && parseInt(bar.dataset.year) === year) {
-                    console.log('Adding selected class to bar for month:', month);
                     bar.classList.add('selected');
-                    console.log('Bar classes after selection:', bar.className);
                 }
             });
             
@@ -8247,16 +8424,26 @@ margin-right: 0.5rem;
         function switchToChart(index) {
             currentChartIndex = index;
             
-            // Update slide visibility
-            const slides = document.querySelectorAll('.chart-slide');
-            slides.forEach((slide, i) => {
-                slide.classList.toggle('active', i === index);
-            });
+            // Find the budgetDisplay carousel specifically 
+            const budgetDisplay = document.getElementById('budgetDisplay');
+            const carousel = budgetDisplay ? budgetDisplay.querySelector('.chart-carousel') : null;
             
-            // Update dots
-            const dots = document.querySelectorAll('.chart-dots .dot');
+            if (carousel) {
+                // Transform the carousel
+                const translateX = index * -50; // Each slide is 50% width
+                carousel.style.transform = `translateX(${translateX}%)`;
+            }
+            
+            // Update dots in budgetDisplay
+            const dots = budgetDisplay ? budgetDisplay.querySelectorAll('.chart-dots .dot') : [];
             dots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === index);
+            });
+            
+            // Update slide active states in budgetDisplay
+            const slides = budgetDisplay ? budgetDisplay.querySelectorAll('.chart-slide') : [];
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === index);
             });
             
             // Generate appropriate chart content
@@ -8300,14 +8487,15 @@ margin-right: 0.5rem;
                 return;
             }
             
-            // Category colors
-            const categoryColors = [
-                '#EA580C', // Orange
-                '#3B82F6', // Blue  
-                '#10B981', // Green
-                '#8B5CF6', // Purple
-                '#F59E0B', // Amber
-                '#EF4444'  // Red
+            // Category CSS class mapping
+            const categoryClasses = [
+                'food',          // Orange
+                'transportation', // Blue  
+                'health',        // Green
+                'entertainment', // Purple
+                'shopping',      // Amber -> Red (swapped)
+                'utilities',     // Red -> Orange (swapped)
+                'other'          // Gray
             ];
             
             // Find max value for scaling
@@ -8316,7 +8504,7 @@ margin-right: 0.5rem;
             // Generate bars for each category
             sortedCategories.forEach(([category, amount], index) => {
                 const height = Math.max((amount / maxValue) * 100, 10);
-                const color = categoryColors[index];
+                const categoryClass = categoryClasses[index % categoryClasses.length];
                 
                 const chartBar = document.createElement('div');
                 chartBar.className = 'chart-bar category-bar';
@@ -8329,11 +8517,8 @@ margin-right: 0.5rem;
                 
                 // Bar visual
                 const barVisual = document.createElement('div');
-                barVisual.className = 'bar-visual category-visual';
+                barVisual.className = `bar-visual category-visual ${categoryClass}`;
                 barVisual.style.height = `${height}px`;
-                barVisual.style.background = `linear-gradient(to bottom, ${color}CC 0%, ${color}66 100%)`;
-                barVisual.style.border = `1px solid ${color}`;
-                barVisual.style.borderRadius = '4px 4px 0 0';
                 
                 // Click handler for category selection
                 chartBar.onclick = (event) => {
@@ -8352,8 +8537,13 @@ margin-right: 0.5rem;
         }
         
         function selectCategory(category, amount) {
-            // Update selected state (similar to month selection)
+            const chartContainer = document.getElementById('categorySpendingChart');
             const chartBars = document.querySelectorAll('#categorySpendingChart .chart-bar');
+            
+            // Add has-selection class to container for fade effect
+            chartContainer.classList.add('has-selection');
+            
+            // Update selected state
             chartBars.forEach(bar => {
                 bar.classList.remove('selected');
                 if (bar.dataset.category === category) {
@@ -8372,7 +8562,65 @@ margin-right: 0.5rem;
             }
         }
         
+        function calculateTotalSpending(expenses) {
+            return expenses.reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
+        }
+        
+        function clearChartSelections() {
+            // Clear monthly chart selection
+            const monthlyContainer = document.getElementById('monthlySpendingChart');
+            const monthlyBars = document.querySelectorAll('#monthlySpendingChart .chart-bar');
+            if (monthlyContainer) {
+                monthlyContainer.classList.remove('has-selection');
+                monthlyBars.forEach(bar => bar.classList.remove('selected'));
+                
+                // Show July total by default
+                const totalElement = document.getElementById('selectedMonthTotal');
+                if (totalElement) {
+                    const monthlyTotals = calculateMonthlySpending();
+                    const julyKey = `2025-6`; // July is month 6 (0-indexed)
+                    const julyTotal = monthlyTotals[julyKey] || 0;
+                    totalElement.innerHTML = `
+                        <span class="month-name">July Total</span>
+                        <span class="month-amount">$${julyTotal.toFixed(2)}</span>
+                    `;
+                }
+            }
+            
+            // Clear category chart selection
+            const categoryContainer = document.getElementById('categorySpendingChart');
+            const categoryBars = document.querySelectorAll('#categorySpendingChart .chart-bar');
+            if (categoryContainer) {
+                categoryContainer.classList.remove('has-selection');
+                categoryBars.forEach(bar => bar.classList.remove('selected'));
+                
+                // Show total spend
+                const totalElement = document.getElementById('selectedCategoryTotal');
+                if (totalElement) {
+                    const expenses = loadExpenses();
+                    const totalSpend = calculateTotalSpending(expenses);
+                    totalElement.innerHTML = `
+                        <span class="month-name">Total Spend</span>
+                        <span class="month-amount">$${totalSpend.toFixed(2)}</span>
+                    `;
+                }
+            }
+        }
+        
         function updateSelectedCategoryTotal() {
+            // Show total spend by default instead of first category
+            const totalElement = document.getElementById('selectedCategoryTotal');
+            if (totalElement) {
+                const expenses = loadExpenses();
+                const totalSpend = calculateTotalSpending(expenses);
+                totalElement.innerHTML = `
+                    <span class="month-name">Total Spend</span>
+                    <span class="month-amount">$${totalSpend.toFixed(2)}</span>
+                `;
+            }
+        }
+        
+        function updateSelectedCategoryTotalOld() {
             // Show total for first category by default
             const firstBar = document.querySelector('#categorySpendingChart .chart-bar');
             if (firstBar) {
@@ -10439,13 +10687,53 @@ margin-right: 0.5rem;
         };
         // Initial render on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 DOMContentLoaded fired!');
             renderBudgetTitle();
             renderSaveTitle();
             updateHomeScreen(); // Load home page data by default
             
+            // Check if carousel container exists
+            const carouselCheck = document.querySelector('.chart-carousel-container');
+            console.log('🔍 Carousel container check:', carouselCheck ? 'FOUND' : 'NOT FOUND');
+            
+            // Check what screen we're on
+            console.log('📱 Current screen:', currentScreen);
+            
+            // Make sure we're on the cashflow screen (screen 0)
+            if (currentScreen !== 0) {
+                console.log('🔄 Not on cashflow screen, switching to screen 0');
+                showScreen(0);
+            }
+            
+            // Also check if the dots exist
+            const dotsCheck = document.querySelector('.chart-dots');
+            console.log('🔘 Chart dots check:', dotsCheck ? 'FOUND' : 'NOT FOUND');
+            if (dotsCheck) {
+                console.log('🔘 Dots element:', dotsCheck);
+                console.log('🔘 Dots innerHTML:', dotsCheck.innerHTML);
+                console.log('🔘 Dots visible?', getComputedStyle(dotsCheck).display !== 'none');
+            }
+            
             // Initialize charts and swipe functionality
-            showChart(0); // Show first chart by default
-            initializeChartSwipe();
+            console.log('📊 Calling switchToChart(0)');
+            if (typeof switchToChart === 'function') {
+                switchToChart(0); // Show first chart by default
+            }
+            
+            // Test dot clicks directly
+            setTimeout(() => {
+                console.log('🧪 Testing dot clicks...');
+                const dots = document.querySelectorAll('#budgetDisplay .chart-dots .dot');
+                dots.forEach((dot, index) => {
+                    dot.addEventListener('click', function() {
+                        console.log(`✅ Dot ${index} clicked via event listener!`);
+                        switchToChart(index);
+                    });
+                });
+                console.log(`📍 Added click listeners to ${dots.length} dots in budgetDisplay`);
+            }, 100);
+            
+            // Chart swipe will be initialized when navigating to Screen 3 (Dashboard)
             
             // Initialize category chart
             if (typeof updateCategoryChart === 'function') {
@@ -13694,6 +13982,8 @@ margin-right: 0.5rem;
                 // Ensure monthly chart is generated
                 setTimeout(() => {
                     generateMonthlyChart();
+                    // Initialize chart swipe for budgetDisplay after chart is rendered
+                    initializeChartSwipe();
                 }, 100);
             } else if (screenIndex === 2) {
                 // Accounts screen (formerly Save)
