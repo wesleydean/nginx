@@ -7212,7 +7212,9 @@ margin-right: 0.5rem;
 
             if (screenIndex === 0) {
                 // Home screen
-                updateHomeScreen();
+                updateHomeScreen().catch(error => {
+                    console.error('Error updating home screen:', error);
+                });
             } else if (screenIndex === 1) {
                 // Cashflow screen (formerly Spend)
                 setPeriodMode('month');
@@ -7247,9 +7249,51 @@ margin-right: 0.5rem;
             return `${year}-${month}-${day}`;
         }
 
-        function loadAccountBalances() {
-            const balances = localStorage.getItem('accountBalances');
-            return balances ? JSON.parse(balances) : {};
+        async function loadAccountBalances() {
+            try {
+                // Get Clerk session token
+                const sessionToken = await window.plaidService.getClerkSessionToken();
+                
+                // Fetch accounts from database
+                const response = await fetch(`${window.plaidService.baseUrl}/api/accounts`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionToken}`,
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load accounts: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Convert accounts to the balance format expected by the app
+                const balances = {};
+                
+                if (data.accounts && Array.isArray(data.accounts)) {
+                    data.accounts.forEach(account => {
+                        // Create a balance entry for today's date for each account
+                        const today = new Date().toISOString().split('T')[0];
+                        const accountKey = account.name.toLowerCase().replace(/\s+/g, '_');
+                        
+                        if (!balances[accountKey]) {
+                            balances[accountKey] = {};
+                        }
+                        
+                        balances[accountKey][today] = {
+                            amount: account.current_balance || 0,
+                            date: today
+                        };
+                    });
+                }
+                
+                return balances;
+            } catch (error) {
+                console.error('Error loading account balances from database:', error);
+                return {}; // Return empty object if error
+            }
         }
 
         function saveAccountBalances(balances) {
@@ -8749,19 +8793,55 @@ margin-right: 0.5rem;
                 selectedMonthDate.getFullYear() === now.getFullYear();
         }
 
-        function loadExpenses() {
-            const stored = localStorage.getItem(EXPENSES_KEY);
-            if (stored) {
-                try {
-                    const parsed = JSON.parse(stored);
-                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-                        return parsed;
+        async function loadExpenses() {
+            try {
+                // Get Clerk session token
+                const sessionToken = await window.plaidService.getClerkSessionToken();
+                
+                // Fetch transactions from database
+                const response = await fetch(`${window.plaidService.baseUrl}/api/transactions`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionToken}`,
                     }
-                } catch (e) {
-                    // Ignore parse errors and fall through to return empty object
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load transactions: ${response.status}`);
                 }
+
+                const data = await response.json();
+                
+                // Convert transactions to the expenses format expected by the app
+                const expenses = {};
+                
+                if (data.transactions && Array.isArray(data.transactions)) {
+                    data.transactions.forEach(transaction => {
+                        // Only include expense transactions (positive amounts in the database are expenses/outgoing)
+                        if (transaction.amount > 0) {
+                            const date = transaction.date;
+                            if (!expenses[date]) {
+                                expenses[date] = [];
+                            }
+                            
+                            expenses[date].push({
+                                amount: transaction.amount,
+                                category: transaction.category || 'other',
+                                description: transaction.description || transaction.name,
+                                timestamp: new Date(transaction.date).getTime(),
+                                created: new Date(transaction.created_at).getTime(),
+                                updated: new Date(transaction.updated_at).getTime()
+                            });
+                        }
+                    });
+                }
+                
+                return expenses;
+            } catch (error) {
+                console.error('Error loading expenses from database:', error);
+                return {}; // Return empty object if error
             }
-            return {};
         }
 
         // Monthly spending chart functions
@@ -11680,7 +11760,9 @@ margin-right: 0.5rem;
             console.log('DOMContentLoaded fired!');
             renderBudgetTitle();
             renderSaveTitle();
-            updateHomeScreen(); // Load home page data by default
+            updateHomeScreen().catch(error => {
+                console.error('Error loading home page data:', error);
+            }); // Load home page data by default
 
             // Check if carousel container exists
             const carouselCheck = document.querySelector('.chart-carousel-container');
@@ -11955,7 +12037,7 @@ margin-right: 0.5rem;
                 
                 // Update home screen charts
                 if (typeof updateHomeScreen === 'function') {
-                    updateHomeScreen();
+                    await updateHomeScreen();
                 }
 
                 alert(`Sample data loaded successfully! Added ${result.accounts} accounts and ${result.transactions} transactions.`);
@@ -12152,15 +12234,15 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateHomeScreen() {
-            updateHomeTransactions();
-            updateHomeCashflow();
+        async function updateHomeScreen() {
+            await updateHomeTransactions();
+            await updateHomeCashflow();
             updateHomeNetWorth();
             initializeHomeRangePickers();
         }
 
-        function updateHomeTransactions() {
-            const expenses = loadExpenses();
+        async function updateHomeTransactions() {
+            const expenses = await loadExpenses();
             let monthlyTransactions = [];
 
             // Always get current month's transactions regardless of toggle state
@@ -12231,9 +12313,9 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateHomeCashflow() {
+        async function updateHomeCashflow() {
             // Initialize with 1M view by default
-            updateHomeCashflowWithRange('1m');
+            await updateHomeCashflowWithRange('1m');
         }
 
         function calculateCumulativeSpending(expenses, monthKey, isCurrentMonth) {
@@ -12888,8 +12970,8 @@ margin-right: 0.5rem;
             // Net Worth now uses dropdown menu instead of bottom picker
         }
 
-        function updateHomeCashflowWithRange(range) {
-            const expenses = loadExpenses();
+        async function updateHomeCashflowWithRange(range) {
+            const expenses = await loadExpenses();
             const today = new Date();
             const currentYear = today.getFullYear();
             const currentMonth = today.getMonth();
@@ -13050,7 +13132,7 @@ margin-right: 0.5rem;
                 default:
                     console.log(`Unhandled range type: ${range}, falling back to 'month'`);
                     // Default to this month vs. last month
-                    return updateHomeCashflowWithRange('month');
+                    return await updateHomeCashflowWithRange('month');
                     break;
             }
 
@@ -13153,7 +13235,7 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateCashflowRange(rangeType) {
+        async function updateCashflowRange(rangeType) {
             // Close dropdown
             const dropdown = document.getElementById('cashflowDropdown');
             if (dropdown) {
@@ -13180,7 +13262,7 @@ margin-right: 0.5rem;
             console.log(`Selected range: ${rangeType}`);
 
             // Update the chart with the mapped range
-            updateHomeCashflowWithRange(chartRange);
+            await updateHomeCashflowWithRange(chartRange);
         }
 
         function toggleAccountsDropdown() {
