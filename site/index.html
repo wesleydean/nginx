@@ -258,8 +258,7 @@
             align-items: center;
             padding: 0.5rem;
             background-color: hsl(var(--card));
-            border: 1px solid hsl(var(--border));
-            border-radius: 0;
+            border-bottom: 1px solid hsl(var(--border));
             transition: transform 0.12s, background-color 0.16s;
             cursor: pointer;
             gap: 0.75rem;
@@ -298,23 +297,20 @@
             text-align: right;
         }
         
-        .account-transactions {
-            display: none;
-        }
-        
-        .account-transactions.expanded {
-            display: block;
-            margin-bottom: 1rem;
-        }
 
         .date-group-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0.5rem 1rem;
-            margin-bottom: 0;
+            margin: 0;
             background: hsl(0deg 0% 0% / 2%);
             font-weight: 600;
+            position: sticky;
+            top: 86px; /* Account for fixed header height */
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .transaction-item {
@@ -734,9 +730,8 @@
         /* Income/Spending Bar Chart Layout */
 
         #budgetDisplay {
-            /* Now uses home-section styling, remove conflicting styles */
-            margin-bottom: 1.5rem;
             overflow: hidden;
+            margin-bottom: 0;
         }
 
         #budgetDisplay .card-content {
@@ -2223,7 +2218,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 20px;
-            background: linear-gradient(to bottom, hsl(var(--background)) 0%, hsla(var(--background)) 70%, transparent 100%);
+            background: hsl(36deg 55.56% 98.24%);
             position: fixed;
             top: 0;
             left: 0;
@@ -2438,6 +2433,7 @@
             margin: 0 -1rem;
         }
         
+        
         /* .expense-item {
             display: flex;
             justify-content: space-between;
@@ -2455,9 +2451,9 @@
             align-items: center;
             padding: 1rem;
             background-color: hsl(var(--card));
-            border: 1px solid hsl(var(--border));
+            border-top: 1px solid hsl(var(--border));
             border-radius: 0;
-            transition: transform 0.12s, background-color 0.16s;
+            transition: transform 0.3s, background-color 0.3s;
             cursor: pointer;
             gap: 0.75rem;
         }
@@ -2476,7 +2472,7 @@
         
         .expense-description {
             text-transform: capitalize;
-            font-size: 0.95rem;
+            /* font-size: 0.95rem; */
             color: #444;
             font-weight: 500;
             flex: 1 1 40%;
@@ -2503,11 +2499,12 @@
             justify-content: space-between;
             align-items: center;
             padding: 0.5rem 1rem;
-            margin-bottom: 0;
+            margin: 0;
             background: hsl(0deg 0% 0% / 2%);
-            /* border-radius: var(--radius); */
             font-weight: 600;
         }
+        
+     
         
         .date-title {
             font-size: 0.9rem;
@@ -2518,6 +2515,13 @@
             font-size: 0.9rem;
             color: hsl(var(--muted-foreground));
             font-weight: 700;
+        }
+        
+        .account-header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
         }
         
         .date-transactions {
@@ -2810,21 +2814,19 @@
             text-align: center;
         }
         
+        .sticky-container {
+            /* Container for sticky controls and expenses list */
+        }
+        
         .sticky-controls-section {
             position: sticky;
             top: -2px;
             z-index: 100;
-            background: hsl(0deg 0% 100% / 70%);
-            /* border: 1px solid hsl(var(--border)); */
-            padding: 0.6rem;
-            /* margin: 0 -1rem 0 -1rem; */
-            /* width: calc(100% + 2rem); */
-            /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); */
             transform: translateY(0);
-            /* transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); */
-            margin: 0.5rem 0;
-            border-radius: 1rem;
-            backdrop-filter: blur(22px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin: 0 -1rem;
+            backdrop-filter: blur(21px);
+            background: hsl(36deg 55.56% 98.24% / 70%);
         }
         
         .sticky-controls-section.hidden {
@@ -2834,8 +2836,17 @@
         .sticky-controls-content {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             min-height: 38px;
+            padding: 0.6rem 0;
+            margin: 1rem;
+            border-radius: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Style the expenses list card inside sticky section */
+        .sticky-controls-section .expenses-list-card {
+            margin: 0 1rem 1rem 1rem;
         }
         
         .sticky-title-section {
@@ -2875,6 +2886,11 @@
             transition: background 0.2s ease;
         }
         
+        .expenses-list-card {
+            position: sticky;
+            top: 80px;
+            z-index: 10;
+        }
         
         .combined-budget-stats {
             display: flex;
@@ -4918,7 +4934,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: transparent;
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
@@ -4941,6 +4957,7 @@
             overflow-y: auto;
             transition: right 0.3s ease, transform 0.3s ease;
             box-sizing: border-box;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
         }
 
         .settings-panel.active {
@@ -4959,6 +4976,7 @@
             overflow-y: auto;
             transition: right 0.3s ease;
             box-sizing: border-box;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
         }
 
         .budget-panel.active {
@@ -4986,7 +5004,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: transparent;
             z-index: 1100;
             opacity: 0;
             visibility: hidden;
@@ -5008,6 +5026,7 @@
             transition: right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             overflow-y: auto;
             padding: 0;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
         }
 
         .account-detail-overlay.active .account-detail-screen {
@@ -5017,23 +5036,28 @@
         .account-detail-header {
             display: flex;
             align-items: center;
+            justify-content: center;
             padding: 1rem;
             background-color: hsl(var(--background));
             border-bottom: 1px solid hsl(var(--border));
             position: sticky;
             top: 0;
             z-index: 10;
+            position: relative;
         }
 
         .account-detail-back {
             background: none;
             border: none;
             padding: 0.5rem;
-            margin-right: 1rem;
             border-radius: 50%;
             cursor: pointer;
             transition: background-color 0.2s ease;
             color: hsl(var(--foreground));
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .account-detail-back:hover {
@@ -5042,6 +5066,7 @@
 
         .account-detail-title-container {
             flex: 1;
+            text-align: center;
         }
 
         .account-detail-title {
@@ -5335,6 +5360,33 @@ margin-right: 0.5rem;
   font-weight: 700;
   color: #222;
   line-height: 1.1;
+}
+
+.modern-account-change {
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.modern-account-change.positive {
+  color: #10b981;
+}
+
+.modern-account-change.negative {
+  color: #ef4444;
+}
+
+.modern-account-change .change-arrow {
+  width: 12px;
+  height: 12px;
+  transform: rotate(-45deg);
+}
+
+.modern-account-change.negative .change-arrow {
+  transform: rotate(45deg);
 }
 .modern-account-balance.debt {
   color: hsl(var(--foreground));
@@ -5897,24 +5949,27 @@ margin-right: 0.5rem;
                         <button class="add-btn" onclick="addExpense()">Add Expense</button>
                     </div>
                     
-                    <!-- Sticky Controls Section (White Background) -->
-                    <div class="sticky-controls-section" id="stickyControlsSection">
-                        <div class="sticky-controls-content" style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div class="section-header-left">
-                                <h3 class="section-title" id="expensesListTitle">Transactions</h3>
-                                <div id="budgetTitleContainer"></div>
-                            </div>
-                            <div class="section-header-right">
-                                <div id="timeRangeContextMenu"></div>
+                    <!-- Sticky Container -->
+                    <div class="sticky-container">
+                        <!-- Sticky Controls Section -->
+                        <div class="sticky-controls-section" id="stickyControlsSection">
+                            <div class="sticky-controls-content">
+                                <div class="section-header-left">
+                                    <h3 class="section-title" id="expensesListTitle">Transactions</h3>
+                                    <div id="budgetTitleContainer"></div>
+                                </div>
+                                <div class="section-header-right">
+                                    <div id="timeRangeContextMenu"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Period Expenses -->
-                    <div class="card">
-                        <div class="expenses-list" id="expensesList">
-                            <div style="text-align: center; color: #7f8c8d; padding: 20px;">
-                                No transactions recorded this week
+                        
+                        <!-- Period Expenses -->
+                        <div class="card expenses-list-card">
+                            <div class="expenses-list" id="expensesList">
+                                <div style="text-align: center; color: #7f8c8d; padding: 20px;">
+                                    No transactions recorded this week
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -6032,7 +6087,7 @@ margin-right: 0.5rem;
                                         <button class="dot-menu-btn" onclick="toggleAccountsNetWorthDropdown()" id="accountsNetWorthMenuBtn">
                                             <i data-lucide="more-horizontal" class="w-5 h-5"></i>
                                         </button>
-                                        <div class="dropdown-menu" id="accountsNetWorthDropdown">
+                                        <div class="dropdown-menu dropdown-right" id="accountsNetWorthDropdown">
                                             <div class="dropdown-header">Select date range</div>
                                             <div class="dropdown-item" onclick="updateAccountsNetWorthRange('1m', event)">1 month</div>
                                             <div class="dropdown-item" onclick="updateAccountsNetWorthRange('3m', event)">3 months</div>
@@ -6054,7 +6109,7 @@ margin-right: 0.5rem;
                             </div>
                         </div>
                         <!-- Accounts Header -->
-                        <div class="account-header-section" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                        <div class="account-header-section">
                             <div class="account-title-info">
                                 <h3 class="section-title" style="margin-bottom: 0.25rem;">Accounts</h3>
                             </div>
@@ -10886,6 +10941,7 @@ margin-right: 0.5rem;
                     isScrolling = true;
                 }
             }, { passive: true });
+            
         }
 
         /**
@@ -14363,9 +14419,6 @@ margin-right: 0.5rem;
                             </div>
                             <div class="account-balance">${formattedBalance}</div>
                         </div>
-                        <div class="account-transactions" id="transactions-${account.id}">
-                            ${renderAccountTransactions(accountTransactions)}
-                        </div>
                     `;
                 });
             });
@@ -14522,6 +14575,38 @@ margin-right: 0.5rem;
             drawAccountDetailChart(accountHistory);
         }
 
+        function smoothAccountData(data) {
+            if (data.length <= 2) return data;
+            
+            const smoothed = [];
+            const windowSize = Math.min(3, data.length); // Use smaller window for limited data
+            
+            for (let i = 0; i < data.length; i++) {
+                if (i === 0 || i === data.length - 1) {
+                    // Keep first and last points unchanged
+                    smoothed.push(data[i]);
+                } else {
+                    // Calculate moving average for middle points
+                    const start = Math.max(0, i - Math.floor(windowSize / 2));
+                    const end = Math.min(data.length, i + Math.floor(windowSize / 2) + 1);
+                    
+                    let sum = 0;
+                    let count = 0;
+                    for (let j = start; j < end; j++) {
+                        sum += data[j].value;
+                        count++;
+                    }
+                    
+                    smoothed.push({
+                        date: data[i].date,
+                        value: sum / count
+                    });
+                }
+            }
+            
+            return smoothed;
+        }
+
         function generateAccountHistory(accountId, range) {
             const balances = loadAccountBalances();
             const accountBalances = balances[accountId] || {};
@@ -14582,7 +14667,10 @@ margin-right: 0.5rem;
                 }
             });
 
-            return history.length > 0 ? history : generateDemoAccountHistory(range);
+            // Smooth the data to reduce rough deltas
+            const smoothedHistory = smoothAccountData(history);
+
+            return smoothedHistory.length > 0 ? smoothedHistory : generateDemoAccountHistory(range);
         }
 
         function generateDemoAccountHistory(range) {
@@ -14938,13 +15026,17 @@ margin-right: 0.5rem;
             const screen = document.getElementById('accountDetailScreen');
             const overlay = document.getElementById('accountDetailOverlay');
             let startX = 0;
+            let startY = 0;
             let currentX = 0;
             let isDragging = false;
+            let isHorizontalSwipe = false;
 
             function handleTouchStart(e) {
                 startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
                 currentX = startX;
                 isDragging = true;
+                isHorizontalSwipe = false;
                 
                 // Disable CSS transitions during drag
                 screen.style.transition = 'none';
@@ -14955,17 +15047,31 @@ margin-right: 0.5rem;
                 if (!isDragging) return;
                 
                 currentX = e.touches[0].clientX;
+                const currentY = e.touches[0].clientY;
                 const deltaX = currentX - startX;
+                const deltaY = currentY - startY;
                 
-                // Only allow rightward swipes (closing gesture)
-                if (deltaX > 0) {
+                // Determine if this is a horizontal swipe
+                if (!isHorizontalSwipe && (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10)) {
+                    isHorizontalSwipe = Math.abs(deltaX) > Math.abs(deltaY);
+                    
+                    if (isHorizontalSwipe) {
+                        // Prevent vertical scrolling during horizontal swipe
+                        screen.style.touchAction = 'pan-x';
+                        e.preventDefault();
+                    } else {
+                        // Allow vertical scrolling for non-horizontal gestures
+                        screen.style.touchAction = 'pan-y';
+                        isDragging = false;
+                        return;
+                    }
+                }
+                
+                // Only allow rightward swipes (closing gesture) and only if horizontal
+                if (isHorizontalSwipe && deltaX > 0) {
+                    e.preventDefault(); // Prevent vertical scroll
                     const transform = Math.min(deltaX, screen.offsetWidth);
                     screen.style.transform = `translateX(${transform}px)`;
-                    
-                    // Fade out backdrop based on drag progress (but keep screen opaque)
-                    const progress = Math.min(transform / screen.offsetWidth, 1);
-                    const backdropOpacity = 1 - (progress * 0.3); // Much more subtle fade
-                    overlay.style.background = `rgba(0, 0, 0, ${backdropOpacity * 0.15})`;
                 }
             }
 
@@ -14973,7 +15079,11 @@ margin-right: 0.5rem;
                 if (!isDragging) return;
                 
                 isDragging = false;
+                isHorizontalSwipe = false;
                 const deltaX = currentX - startX;
+                
+                // Restore normal touch behavior
+                screen.style.touchAction = '';
                 
                 // If swiped more than 1/3 of the screen width, close
                 if (deltaX > screen.offsetWidth / 3) {
@@ -14982,16 +15092,12 @@ margin-right: 0.5rem;
                 } else if (deltaX > 0) {
                     // Snap back to original position with snappier transition
                     screen.style.transition = 'transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)';
-                    overlay.style.transition = 'background 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)';
                     screen.style.transform = 'translateX(0)';
-                    overlay.style.background = 'rgba(0, 0, 0, 0.15)';
                     
                     // Clean up after animation
                     setTimeout(() => {
                         screen.style.transition = '';
                         screen.style.transform = '';
-                        overlay.style.transition = '';
-                        overlay.style.background = '';
                     }, 200);
                 } else {
                     // No drag happened, just clean up
@@ -15002,7 +15108,7 @@ margin-right: 0.5rem;
 
             // Add touch event listeners
             screen.addEventListener('touchstart', handleTouchStart, { passive: true });
-            screen.addEventListener('touchmove', handleTouchMove, { passive: true });
+            screen.addEventListener('touchmove', handleTouchMove, { passive: false });
             screen.addEventListener('touchend', handleTouchEnd, { passive: true });
         }
 
@@ -15151,6 +15257,10 @@ margin-right: 0.5rem;
                         </div>
                         <div class="modern-account-header-right">
                             <div class="modern-account-balance${debtClass}">${formatAmount(latest.amount)}</div>
+                            <div class="modern-account-change ${allTimePercent >= 0 ? 'positive' : 'negative'}">
+                                <i data-lucide="${allTimePercent >= 0 ? 'trending-up' : 'trending-down'}" class="change-arrow"></i>
+                                ${Math.abs(allTimePercent).toFixed(1)}%
+                            </div>
                         </div>
                         <div class="account-chevron"><i data-lucide="chevron-down" class="modern-account-chevron" id="chevron-${accountId}"></i></div>
                     </div>
