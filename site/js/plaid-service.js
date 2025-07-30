@@ -481,7 +481,6 @@ async function connectPlaidAccount() {
         if (result && result.success) {
             // Add the connected institution to our account system
             const institution = result.institution;
-            
             // Create a new account entry
             const newAccount = {
                 id: `plaid_${institution.id}`,
@@ -489,19 +488,42 @@ async function connectPlaidAccount() {
                 type: 'plaid',
                 institutionId: institution.id
             };
-            
             // Add to accounts list
             savingsAccounts.push(newAccount);
             saveSavingsAccounts(savingsAccounts);
-            
-            // Update UI
-            updateAccountManagementList();
-            updateAccountSelector();
-            
-            // Show success message
-            alert(`Successfully connected ${institution.name}!`);
-            
-            // Fetch transactions if available
+
+            // --- Scroll to Accounts screen and show skeleton loading ---
+            // Go to Accounts screen (screen index 2)
+            if (typeof goToScreen === 'function') {
+                goToScreen(2);
+            }
+            // Wait for DOM to update, then scroll to accounts section and show skeleton
+            setTimeout(() => {
+                // Scroll to the accounts list section
+                const accountsSection = document.getElementById('saveSavingsSection');
+                if (accountsSection) {
+                    accountsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                // Show skeleton loading placeholder
+                if (typeof showAccountsLoadingPlaceholder === 'function') {
+                    showAccountsLoadingPlaceholder();
+                }
+                // Now update the UI (after skeleton is visible)
+                updateAccountManagementList();
+                updateAccountSelector();
+            }, 300);
+
+            // Simulate loading, then fade in real accounts list
+            setTimeout(() => {
+                if (typeof renderAccountsList === 'function') {
+                    renderAccountsList(savingsAccounts);
+                }
+                if (typeof hideAccountsLoadingPlaceholder === 'function') {
+                    hideAccountsLoadingPlaceholder();
+                }
+            }, 1200);
+
+            // Fetch transactions if available (no alert)
             fetchPlaidTransactions();
         } else {
             console.log('Plaid connection cancelled or failed', result);

@@ -6152,11 +6152,11 @@ margin-right: 0.5rem;
                         
                         <!-- Account Action Pills -->
                         <div class="account-action-pills">
-                            <button class="account-pill-btn" onclick="showAccountManagementModal()">
-                                <span>Manage</span>
-                            </button>
                             <button class="account-pill-btn" onclick="connectPlaidAccount()">
                                 <span>Connect</span>
+                            </button>
+                            <button class="account-pill-btn" onclick="showAccountManagementModal()">
+                                <span>Manage</span>
                             </button>
                             <button class="account-pill-btn" onclick="showBalanceSlideOut()">
                                 <span>Add Balance</span>
@@ -6164,9 +6164,113 @@ margin-right: 0.5rem;
                         </div>
                         
                         <!-- New Accounts List -->
+                        <div class="accounts-list" id="accountsListLoading" style="display: none;">
+                          <!-- Skeleton placeholder row -->
+                          <div class="account-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 1rem 0;">
+                            <div class="skeleton-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #e5e7eb;"></div>
+                            <div style="flex: 1;">
+                              <div class="skeleton-line" style="width: 60%; height: 14px; border-radius: 7px; background: #e5e7eb; margin-bottom: 0.5rem;"></div>
+                              <div class="skeleton-line" style="width: 40%; height: 12px; border-radius: 6px; background: #e5e7eb;"></div>
+                            </div>
+                            <div class="skeleton-amount" style="width: 60px; height: 16px; border-radius: 8px; background: #e5e7eb;"></div>
+                          </div>
+                          <div class="account-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 1rem 0;">
+                            <div class="skeleton-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #e5e7eb;"></div>
+                            <div style="flex: 1;">
+                              <div class="skeleton-line" style="width: 50%; height: 14px; border-radius: 7px; background: #e5e7eb; margin-bottom: 0.5rem;"></div>
+                              <div class="skeleton-line" style="width: 30%; height: 12px; border-radius: 6px; background: #e5e7eb;"></div>
+                            </div>
+                            <div class="skeleton-amount" style="width: 50px; height: 16px; border-radius: 8px; background: #e5e7eb;"></div>
+                          </div>
+                        </div>
                         <div class="accounts-list" id="accountsList">
                             <!-- Account groups will be dynamically populated here -->
                         </div>
+    <style>
+    /* Skeleton loading animation */
+    .account-skeleton-row .skeleton-icon,
+    .account-skeleton-row .skeleton-line,
+    .account-skeleton-row .skeleton-amount {
+      animation: skeleton-loading 1.2s infinite linear alternate;
+    }
+    @keyframes skeleton-loading {
+      0% { background-color: #e5e7eb; }
+      100% { background-color: #f3f4f6; }
+    }
+    .fade-in {
+      opacity: 0;
+      animation: fadeIn 0.5s ease-in forwards;
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    </style>
+    <script>
+    // Show skeleton, then fade in real accounts list
+    function showAccountsLoadingPlaceholder() {
+      const loading = document.getElementById('accountsListLoading');
+      const list = document.getElementById('accountsList');
+      if (loading && list) {
+        loading.style.display = '';
+        list.style.display = 'none';
+      }
+    }
+    function hideAccountsLoadingPlaceholder() {
+      const loading = document.getElementById('accountsListLoading');
+      const list = document.getElementById('accountsList');
+      if (loading && list) {
+        loading.style.display = 'none';
+        list.classList.add('fade-in');
+        list.style.display = '';
+        setTimeout(() => list.classList.remove('fade-in'), 600);
+      }
+    }
+
+    // Helper to load accounts and show skeleton
+    async function loadAccountsAndShowSkeleton(fetchAccountsFn) {
+      showAccountsLoadingPlaceholder();
+      try {
+        const accounts = await fetchAccountsFn();
+        renderAccountsList(accounts);
+      } finally {
+        hideAccountsLoadingPlaceholder();
+      }
+    }
+
+    // Example render function (replace with your actual rendering logic)
+    function renderAccountsList(accounts) {
+      const list = document.getElementById('accountsList');
+      if (!list) return;
+      list.innerHTML = '';
+      if (!accounts || !accounts.length) {
+        list.innerHTML = '<div style="text-align:center;color:#7f8c8d;padding:20px;">No accounts found</div>';
+        return;
+      }
+      for (const acc of accounts) {
+        const row = document.createElement('div');
+        row.className = 'account-row';
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.gap = '1rem';
+        row.style.padding = '1rem 0';
+        row.innerHTML = `
+          <div style="width:40px;height:40px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="wallet" class="w-6 h-6" style="color:#8b5cf6;"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="font-weight:600;">${acc.name}</div>
+            <div style="font-size:0.9em;color:#7f8c8d;">${acc.type || ''}</div>
+          </div>
+          <div style="font-weight:500;">${acc.amount ? '$' + acc.amount : ''}</div>
+        `;
+        list.appendChild(row);
+      }
+      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+    }
+
+    // Usage example:
+    // loadAccountsAndShowSkeleton(async () => await fetch('/api/accounts').then(r => r.json()));
+    </script>
                     </div>
                     
                     <!-- Quick Action Cards for Save Screen -->
@@ -6968,10 +7072,103 @@ margin-right: 0.5rem;
       <!-- Clerk -->
   <script>
   window.addEventListener('load', async function () {
-    await Clerk.load()
+    await Clerk.load({
+      appearance: {
+        theme: 'light',
+        variables: {
+          colorPrimary: 'hsl(260, 58%, 58%)',
+          colorBackground: 'hsl(0 0% 100%)',
+          colorText: 'hsl(222.2 84% 4.9%)',
+          colorTextSecondary: 'hsl(215.4 24.61% 40.65%)',
+          colorInputBackground: 'hsl(0 0% 100%)',
+          colorInputText: 'hsl(222.2 84% 4.9%)',
+          colorDanger: 'hsl(0 84.2% 60.2%)',
+          colorSuccess: 'hsl(142.1 76.2% 36.3%)',
+          colorWarning: 'hsl(47.9 95.8% 53.1%)',
+          borderRadius: '0.5rem',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          fontSize: '0.875rem',
+          fontWeight: {
+            normal: '400',
+            medium: '500',
+            semibold: '600',
+            bold: '700'
+          }
+        },
+        elements: {
+          userButtonPopoverCard: {
+            borderRadius: '12px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            backgroundColor: 'hsl(var(--card))',
+            borderBottom: '1px solid hsl(var(--border))'
+          },
+          userButtonPopoverActionButton: {
+            color: 'hsl(var(--foreground))',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            padding: '0.75rem 1rem',
+            borderRadius: '0.5rem',
+            margin: '0.25rem 0.5rem',
+            transition: 'all 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem'
+          },
+          userButtonPopoverActionButton__hover: {
+            backgroundColor: 'hsl(var(--accent))',
+            color: 'hsl(var(--accent-foreground))'
+          },
+          userButtonPopoverActionButtonIcon: {
+            color: 'hsl(var(--muted-foreground))',
+            width: '1.5rem',
+            height: '1.5rem',
+            fontSize: '1.5rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          },
+          userButtonPopoverFooter: {
+            display: 'none !important'
+          },
+          userButtonPopoverActionButton__signOut: {
+            color: 'hsl(var(--destructive))',
+            fontWeight: '500'
+          },
+          userButtonPopoverActionButton__signOut__hover: {
+            backgroundColor: 'hsl(var(--destructive) / 0.1)',
+            color: 'hsl(var(--destructive))'
+          },
+          userButtonTrigger: {
+            borderRadius: '50%',
+            border: '2px solid hsl(var(--border))',
+            width: '40px',
+            height: '40px',
+            transition: 'all 0.2s ease'
+          },
+          userButtonTrigger__hover: {
+            borderColor: 'hsl(var(--ring))',
+            transform: 'scale(1.05)'
+          },
+          userButtonAvatarImage: {
+            borderRadius: '50%'
+          },
+          badge: {
+            backgroundColor: 'hsl(var(--primary))',
+            color: 'hsl(var(--primary-foreground))',
+            fontSize: '0.75rem',
+            fontWeight: '600',
+            borderRadius: '9999px',
+            padding: '0.125rem 0.375rem'
+          }
+        },
+        layout: {
+          logoImageUrl: '',
+          showOptionalFields: false
+        }
+      }
+    });
 
     if (Clerk.user) {
-      
       const userButton = document.createElement('div');
       userButton.setAttribute('id', 'user-button');
       const app = document.querySelector('#user-avatar');
@@ -6981,20 +7178,52 @@ margin-right: 0.5rem;
       } else {
         app.appendChild(userButton);
       }
-        
-      const userButtonDiv = document.getElementById('user-button')
-
-      Clerk.mountUserButton(userButtonDiv)
+      const userButtonDiv = document.getElementById('user-button');
+      Clerk.mountUserButton(userButtonDiv, {
+        showName: false,
+        appearance: {
+          elements: {
+            userButtonTrigger: {
+              '&:focus': {
+                outline: '2px solid hsl(var(--ring))',
+                outlineOffset: '2px'
+              }
+            }
+          }
+        }
+      });
     } else {
       document.getElementById('app').innerHTML = `
         <div id="sign-in"></div>
-      `
-
-      const signInDiv = document.getElementById('sign-in')
-
-      Clerk.mountSignIn(signInDiv)
+      `;
+      const signInDiv = document.getElementById('sign-in');
+      Clerk.mountSignIn(signInDiv, {
+        appearance: {
+          variables: {
+            colorPrimary: 'hsl(260, 58%, 58%)',
+            colorBackground: 'hsl(0 0% 100%)',
+            colorText: 'hsl(222.2 84% 4.9%)',
+            borderRadius: '0.5rem',
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          },
+          elements: {
+            card: {
+              borderRadius: '12px',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+              border: '2px solid hsl(var(--border) / 0.5)'
+            },
+            formButtonPrimary: {
+              backgroundColor: 'hsl(260, 58%, 58%)',
+              borderRadius: '0.5rem',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              padding: '0.75rem 1.5rem'
+            }
+          }
+        }
+      });
     }
-  })
+  });
 </script>
 
     <script>
