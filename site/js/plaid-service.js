@@ -513,7 +513,10 @@ async function connectPlaidAccount() {
             savingsAccounts.push(newAccount);
             saveSavingsAccounts(savingsAccounts);
 
-            // Use the same animation/logic as simulateAccountsSkeletonAnimation
+            // Show skeleton loader immediately
+            if (typeof showAccountsLoadingPlaceholder === 'function') {
+                showAccountsLoadingPlaceholder();
+            }
             if (typeof goToScreen === 'function') {
                 goToScreen(2);
             }
@@ -522,9 +525,6 @@ async function connectPlaidAccount() {
                 if (accountsSection) {
                     accountsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
-                if (typeof showAccountsLoadingPlaceholder === 'function') {
-                    showAccountsLoadingPlaceholder();
-                }
                 if (typeof updateAccountManagementList === 'function') {
                     updateAccountManagementList();
                 }
@@ -532,17 +532,16 @@ async function connectPlaidAccount() {
                     updateAccountSelector();
                 }
             }, 300);
-            setTimeout(() => {
+
+            // Fetch transactions, then render and hide skeleton
+            fetchPlaidTransactions().finally(() => {
                 if (typeof renderAccountsList === 'function') {
                     renderAccountsList(savingsAccounts);
                 }
                 if (typeof hideAccountsLoadingPlaceholder === 'function') {
                     hideAccountsLoadingPlaceholder();
                 }
-            }, 1200);
-
-            // Fetch transactions if available (no alert)
-            fetchPlaidTransactions();
+            });
         } else {
             console.log('Plaid connection cancelled or failed', result);
             
