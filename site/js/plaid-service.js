@@ -277,58 +277,120 @@ class PlaidService {
     }
   }
   
-  // Fetch transactions from connected accounts
-  async fetchTransactions() {
-    if (!this.institutions || this.institutions.length === 0) {
-      return [];
+  // Cache object for storing API responses
+  transactionCache = new Map();
+
+  // Fetch transactions using optimized endpoint with caching
+  async fetchTransactions(startDate = null, days = 30, includeCategories = true) {
+    // Generate cache key
+    const cacheKey = `${startDate || 'default'}-${days}-${includeCategories}`;
+
+    // Check cache first
+    if (this.transactionCache.has(cacheKey)) {
+      console.log('Returning cached transactions');
+      return this.transactionCache.get(cacheKey);
     }
-    
-    const allTransactions = [];
-    
-    for (const institution of this.institutions) {
-      try {
-        // Get Clerk session token
-        const sessionToken = await this.getClerkSessionToken();
-        
-        const response = await fetch(`${this.baseUrl}/api/transactions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${sessionToken}`,
-          },
-          body: JSON.stringify({ access_token: institution.accessToken }),
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Transactions fetch failed: ${response.status}`);
+
+    try {
+      // Get Clerk session token
+      const sessionToken = await this.getClerkSessionToken();
+
+      // Use the optimized range endpoint
+      const params = new URLSearchParams({
+        start_date: startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        days: days.toString(),
+        category_summary: includeCategories.toString()
+      });
+
+      const response = await fetch(`${this.baseUrl}/api/transactions/range?${params}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`,
         }
-        
-        const data = await response.json();
-        if (data.transactions) {
-          // Format transactions to match your app's format
-          const formattedTransactions = data.transactions.map(transaction => {
-            return {
-              amount: Math.abs(transaction.amount),
-              category: mapPlaidCategoryToApp(transaction.category?.[0] || 'other'),
-              description: transaction.name,
-              date: transaction.date,
-              timestamp: new Date(transaction.date).getTime(),
-              created: new Date().getTime(),
-              accountName: transaction.account_name,
-              institution: institution.name,
-              plaidId: transaction.transaction_id
-            };
-          });
-          
-          allTransactions.push(...formattedTransactions);
-        }
-      } catch (error) {
-        console.error(`Error fetching transactions for ${institution.name}:`, error);
-        // Continue with other institutions even if one fails
+      });
+
+      if (!response.ok) {
+        throw new Error(`Transactions fetch failed: ${response.status}`);
       }
+
+      const data = await response.json();
+
+      // Format transactions to match app's format
+      const formattedData = {
+        transactions: data.transactions.map(transaction => ({
+          amount: Math.abs(transaction.amount),
+          category: mapPlaidCategoryToApp(transaction.category || 'other'),
+          description: transaction.name,
+          date: transaction.date,
+          timestamp: new Date(transaction.date).getTime(),
+          created: new Date().getTime(),
+          accountName: transaction.account_name,
+          institution: transaction.institution_name,
+          plaidId: transaction.transaction_id
+        })),
+        categories: data.categories || []
+      };
+
+      // Cache the response for 5 minutes
+      this.transactionCache.set(cacheKey, formattedData);
+      setTimeout(() => this.transactionCache.delete(cacheKey), 5 * 60 * 1000);
+
+      return formattedData;
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      throw error;
     }
-    
-    return allTransactions;
+  }
+
+  // Fetch monthly overview with caching
+  async fetchMonthlyOverview() {
+    const cacheKey = 'monthly-overview';
+
+    if (this.transactionCache.has(cacheKey)) {
+      console.log('Returning cached monthly overview');
+      return this.transactionCache.get(cacheKey);
+    }
+
+    try {
+      const sessionToken = await this.getClerkSessionToken();
+
+      const response = await fetch(`${this.baseUrl}/api/transactions/monthly-overview`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`,
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Monthly overview fetch failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Cache for 10 minutes
+      this.transactionCache.set(cacheKey, data.summary);
+      setTimeout(() => this.transactionCache.delete(cacheKey), 10 * 60 * 1000);
+
+      return data.summary;
+    } catch (error) {
+      console.error('Error fetching monthly overview:', error);
+      throw error;
+    }
+  }
+
+  // Pre-fetch data for spending page
+  async prefetchSpendingData(startDate, days) {
+    try {
+      // Pre-fetch transactions and categories
+      await this.fetchTransactions(startDate, days, true);
+      
+      // Pre-fetch monthly overview if needed
+      await this.fetchMonthlyOverview();
+      
+      console.log('Spending data pre-fetched');
+    } catch (error) {
+      console.error('Error pre-fetching spending data:', error);
+    }
   }
   
   // Get connected financial institutions
@@ -576,67 +638,68 @@ async function connectPlaidAccount() {
     }
 }
 
-// Add function to fetch transactions from Plaid
-async function fetchPlaidTransactions() {
-    try {
-        const transactions = await plaidService.fetchTransactions();
-        if (transactions && transactions.length > 0) {
-            console.log(`Fetched ${transactions.length} transactions from Plaid`);
-            
-            // Convert Plaid transactions to your app's format and add them
-            const expenses = loadExpenses();
-            
-            // Group by date
-            const transactionsByDate = {};
-            transactions.forEach(transaction => {
-                const date = transaction.date;
-                if (!transactionsByDate[date]) {
-                    transactionsByDate[date] = [];
-                }
-                
-                // Convert to your app's expense format
-                const expense = {
-                    amount: transaction.amount,
-                    category: transaction.category,
-                    description: transaction.description,
-                    timestamp: transaction.timestamp,
-                    created: transaction.created,
-                    plaidId: transaction.plaidId,  // Store Plaid ID to avoid duplicates
-                    institution: transaction.institution
-                };
-                
-                transactionsByDate[date].push(expense);
-            });
-            
-            // Add to expenses object
-            Object.keys(transactionsByDate).forEach(date => {
-                if (!expenses[date]) {
-                    expenses[date] = [];
-                }
-                
-                // Filter out any expenses that already have a plaidId (avoid duplicates)
-                const existingPlaidIds = expenses[date]
-                    .filter(e => e.plaidId)
-                    .map(e => e.plaidId);
-                
-                // Add only new transactions
-                const newTransactions = transactionsByDate[date]
-                    .filter(t => !existingPlaidIds.includes(t.plaidId));
-                
-                expenses[date] = expenses[date].concat(newTransactions);
-            });
-            
-            saveExpenses(expenses);
-            
-            // Update UI
-            updatePeriodView();
-            
-        } else {
-            console.log('No transactions found or available');
+async function fetchPlaidTransactions(startDate = null, days = 30) {
+  try {
+    const data = await plaidService.fetchTransactions(startDate, days, true);
+    
+    if (data.transactions && data.transactions.length > 0) {
+      console.log(`Fetched ${data.transactions.length} transactions from API`);
+      
+      // Convert to app's format and add them (same as before)
+      const expenses = loadExpenses();
+      
+      // Group by date
+      const transactionsByDate = {};
+      data.transactions.forEach(transaction => {
+        const date = transaction.date;
+        if (!transactionsByDate[date]) {
+          transactionsByDate[date] = [];
         }
-    } catch (error) {
-        console.error('Error fetching Plaid transactions:', error);
+        
+        const expense = {
+          amount: transaction.amount,
+          category: transaction.category,
+          description: transaction.description,
+          timestamp: transaction.timestamp,
+          created: transaction.created,
+          plaidId: transaction.plaidId,
+          institution: transaction.institution
+        };
+        
+        transactionsByDate[date].push(expense);
+      });
+      
+      // Add to expenses object (same duplicate check)
+      Object.keys(transactionsByDate).forEach(date => {
+        if (!expenses[date]) {
+          expenses[date] = [];
+        }
+        
+        const existingPlaidIds = expenses[date]
+          .filter(e => e.plaidId)
+          .map(e => e.plaidId);
+        
+        const newTransactions = transactionsByDate[date]
+          .filter(t => !existingPlaidIds.includes(t.plaidId));
+        
+        expenses[date] = expenses[date].concat(newTransactions);
+      });
+      
+      saveExpenses(expenses);
+      
+      // Update UI
+      updatePeriodView();
+      
+      // Return data including categories for view switching
+      return data;
+    } else {
+      console.log('No transactions found');
+      return { transactions: [], categories: [] };
     }
+  } catch (error) {
+    console.error('Error fetching Plaid transactions:', error);
+    throw error;
+  }
 }
 
 // Add this to your document.addEventListener('DOMContentLoaded') function

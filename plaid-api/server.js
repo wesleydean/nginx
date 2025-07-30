@@ -14,7 +14,7 @@ app.use(express.json());
 // Then CORS configuration with proper options
 console.log('Setting up CORS configuration');
 app.use(cors({
-  origin: '*', // Allow all origins for development
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -31,6 +31,7 @@ app.options('*', (req, res) => {
   res.header('Access-Control-Allow-Credentials', true);
   res.status(200).end();
 });
+
 
 // Configure Plaid client
 console.log('PLAID_ENV:', process.env.PLAID_ENV);
@@ -63,6 +64,53 @@ const plaidClient = new PlaidApi(configuration);
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Monthly Overview Endpoint
+app.get('/api/transactions/monthly-overview', clerkAuth, async (req, res) => {
+  try {
+    const clerkUserId = req.auth.userId;
+    // Returns [{ month: '2025-07', total: 1234.56, categories: {...}, ... }]
+    const summary = await database.getMonthlyTransactionSummary(clerkUserId);
+    res.json({ summary });
+  } catch (error) {
+    console.error('Error getting monthly overview:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Time-Range Optimized Transactions Endpoint
+app.get('/api/transactions/range', clerkAuth, async (req, res) => {
+  try {
+    const clerkUserId = req.auth.userId;
+    const { start_date, days, category_summary } = req.query;
+    if (!start_date || !days) {
+      return res.status(400).json({ error: 'start_date and days are required' });
+    }
+    const startDate = new Date(start_date);
+    const parsedDays = parseInt(days);
+
+    // Get transactions in range - passing startDate and days directly to match DB method signature
+    const transactions = await database.getTransactionsByDateRange(
+      clerkUserId,
+      startDate.toISOString().split('T')[0],
+      parsedDays
+    );
+
+    let categories = undefined;
+    if (category_summary === 'true') {
+      categories = await database.getTransactionCategoriesByRange(
+        clerkUserId,
+        startDate.toISOString().split('T')[0],
+        parsedDays
+      );
+    }
+
+    res.json({ transactions, categories });
+  } catch (error) {
+    console.error('Error getting transactions by range:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Test endpoint without auth for debugging
@@ -272,18 +320,47 @@ app.post('/api/transactions', clerkAuth, async (req, res) => {
 });
 
 // Get stored transactions for authenticated user
+// Enhanced: supports start_date, days, include_categories, limit, offset
 app.get('/api/transactions', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
-    const limit = req.query.limit ? parseInt(req.query.limit) : null;
-    const offset = req.query.offset ? parseInt(req.query.offset) : 0;
-    
-    const transactions = await database.getUserTransactions(clerkUserId, limit, offset);
-    const stats = await database.getUserStats(clerkUserId);
-    
+    const { start_date, days, include_categories, limit, offset } = req.query;
+
+    let transactions, stats, categories;
+    if (start_date && days) {
+      const startDate = new Date(start_date);
+      const parsedDays = parseInt(days);
+      transactions = await database.getTransactionsByDateRange(
+        clerkUserId,
+        startDate.toISOString().split('T')[0],
+        parsedDays
+      );
+      // Optionally, you can adjust getUserStats to accept a date range if needed
+      stats = await database.getUserStats(clerkUserId, startDate, new Date(startDate.getTime() + (parsedDays - 1) * 24 * 60 * 60 * 1000));
+      if (include_categories === 'true') {
+        categories = await database.getTransactionCategoriesByRange(
+          clerkUserId,
+          startDate.toISOString().split('T')[0],
+          parsedDays
+        );
+      }
+    } else {
+      // Default: last 30 days or all if no params
+      transactions = await database.getUserTransactions(
+        clerkUserId,
+        limit ? parseInt(limit) : null,
+        offset ? parseInt(offset) : 0
+      );
+      stats = await database.getUserStats(clerkUserId);
+      if (include_categories === 'true') {
+        categories = await database.getTransactionsByCategory(clerkUserId);
+      }
+    }
+
     res.json({
       transactions,
       stats,
+      categories,
       count: transactions.length
     });
   } catch (error) {

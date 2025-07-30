@@ -506,6 +506,142 @@ class Database {
     });
   }
 
+  // Get monthly transaction summary for optimized overview
+  getMonthlyTransactionSummary(clerkUserId, months = 12) {
+    return new Promise((resolve, reject) => {
+      // Calculate the start date for the number of months requested
+      const startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - months);
+      const startDateStr = startDate.toISOString().split('T')[0];
+
+      this.db.all(`
+        SELECT 
+          strftime('%Y-%m', date) as month,
+          COUNT(*) as transaction_count,
+          SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END) as total_spent,
+          SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END) as total_income,
+          category,
+          COUNT(CASE WHEN amount > 0 THEN 1 END) as expense_count
+        FROM transactions 
+        WHERE user_id = ? AND date >= ?
+        GROUP BY strftime('%Y-%m', date), category
+        ORDER BY month DESC, total_spent DESC
+      `, [clerkUserId, startDateStr], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          // Group by month and format the data
+          const monthlyData = {};
+          rows.forEach(row => {
+            if (!monthlyData[row.month]) {
+              monthlyData[row.month] = {
+                month: row.month,
+                total_spent: 0,
+                total_income: 0,
+                transaction_count: 0,
+                categories: []
+              };
+            }
+            
+            const monthData = monthlyData[row.month];
+            monthData.total_spent += row.total_spent || 0;
+            monthData.total_income += row.total_income || 0;
+            monthData.transaction_count += row.expense_count || 0;
+            
+            if (row.category && row.total_spent > 0) {
+              monthData.categories.push({
+                category: this.formatPlaidCategory(row.category),
+                amount: row.total_spent,
+                count: row.expense_count
+              });
+            }
+          });
+
+          // Convert to array and sort by month
+          const result = Object.values(monthlyData).sort((a, b) => b.month.localeCompare(a.month));
+          resolve(result);
+        }
+      });
+    });
+  }
+
+  // Get transactions by date range for optimized queries
+  getTransactionsByDateRange(clerkUserId, startDate, days, limit = null) {
+    return new Promise((resolve, reject) => {
+      // Calculate end date
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + days);
+      
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
+
+      let query = `
+        SELECT * FROM transactions 
+        WHERE user_id = ? AND date >= ? AND date <= ? 
+        ORDER BY date DESC, created_at DESC
+      `;
+      const params = [clerkUserId, startDateStr, endDateStr];
+
+      if (limit) {
+        query += ' LIMIT ?';
+        params.push(limit);
+      }
+
+      this.db.all(query, params, (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          // Format transactions for frontend compatibility
+          const formattedTransactions = rows.map(transaction => ({
+            ...transaction,
+            description: transaction.name,
+            category: this.formatPlaidCategory(transaction.category),
+            type: transaction.amount < 0 ? 'expense' : 'income'
+          }));
+          resolve(formattedTransactions);
+        }
+      });
+    });
+  }
+
+  // Get transaction categories by date range for category breakdown
+  getTransactionCategoriesByRange(clerkUserId, startDate, days) {
+    return new Promise((resolve, reject) => {
+      // Calculate end date
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + days);
+      
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
+
+      this.db.all(`
+        SELECT 
+          category,
+          COUNT(*) as count,
+          SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END) as total_spent,
+          AVG(CASE WHEN amount > 0 THEN amount ELSE NULL END) as avg_amount,
+          MAX(CASE WHEN amount > 0 THEN amount ELSE 0 END) as max_amount,
+          MIN(CASE WHEN amount > 0 THEN amount ELSE NULL END) as min_amount
+        FROM transactions 
+        WHERE user_id = ? AND date >= ? AND date <= ? AND amount > 0 AND category IS NOT NULL
+        GROUP BY category 
+        ORDER BY total_spent DESC
+      `, [clerkUserId, startDateStr, endDateStr], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          // Format categories for frontend display
+          const formattedCategories = rows.map(row => ({
+            ...row,
+            category: this.formatPlaidCategory(row.category),
+            percentage: 0 // Will be calculated on frontend based on total
+          }));
+          resolve(formattedCategories);
+        }
+      });
+    });
+  }
+
   close() {
     if (this.db) {
       this.db.close((err) => {
