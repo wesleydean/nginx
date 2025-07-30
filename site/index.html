@@ -6172,6 +6172,9 @@ margin-right: 0.5rem;
         loading.style.display = '';
         list.style.display = 'none';
       }
+      // Hide any import success message during loading
+      const importMsg = document.getElementById('importSuccessMsg');
+      if (importMsg) importMsg.style.display = 'none';
     }
     function hideAccountsLoadingPlaceholder() {
       const loading = document.getElementById('accountsListLoading');
@@ -6182,6 +6185,7 @@ margin-right: 0.5rem;
         list.style.display = '';
         setTimeout(() => list.classList.remove('fade-in'), 600);
       }
+      // Do not show import success message here
     }
 
     // Helper to load accounts and show skeleton
@@ -6193,6 +6197,7 @@ margin-right: 0.5rem;
       } finally {
         hideAccountsLoadingPlaceholder();
       }
+      // Do not show import success message here
     }
 
     // Example render function (replace with your actual rendering logic)
@@ -6270,6 +6275,7 @@ function renderAccountsList(accounts) {
     }
   }
   if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+  // Do not show import success message here
 }
 
     // Usage example:
