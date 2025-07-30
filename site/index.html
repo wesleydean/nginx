@@ -3422,7 +3422,7 @@
             display: block; /* Remove any inline spacing */
         }
         
-        #homeCashflowCanvas, #homeNetWorthCanvas {
+        #homeCashflowCanvas, #homeNetWorthCanvas, #accountsNetWorthCanvas {
             padding: 0;
             margin: 0;
             display: block;
@@ -4977,6 +4977,106 @@
             transform: translateX(-10px);
         }
 
+        /* Account Detail Screen */
+        .account-detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .account-detail-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .account-detail-screen {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: hsl(var(--background));
+            transition: right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .account-detail-overlay.active .account-detail-screen {
+            right: 0;
+        }
+
+        .account-detail-header {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background-color: hsl(var(--background));
+            border-bottom: 1px solid hsl(var(--border));
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .account-detail-back {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            margin-right: 1rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            color: hsl(var(--foreground));
+        }
+
+        .account-detail-back:hover {
+            background-color: hsl(var(--accent));
+        }
+
+        .account-detail-title-container {
+            flex: 1;
+        }
+
+        .account-detail-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            color: hsl(var(--foreground));
+        }
+
+        .account-detail-balance {
+            font-size: 1.125rem;
+            color: hsl(var(--muted-foreground));
+            margin-top: 0.25rem;
+        }
+
+        .account-detail-chart-card {
+            margin: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .account-detail-activity {
+            margin: 0.5rem 1rem;
+        }
+
+        .account-detail-transactions {
+            margin: 0.5rem 1rem 1rem;
+        }
+
+        /* Canvas styling for account detail chart */
+        #accountDetailCanvas {
+            padding: 0;
+            margin: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
         .settings-header {
             display: flex;
             align-items: center;
@@ -5911,37 +6011,39 @@ margin-right: 0.5rem;
                     
                     <!-- Savings Accounts Section -->
                     <div class="card savings-accounts-section" id="saveSavingsSection">
-                        <!-- Account Type Chart -->
-                        <div class="card" id="accountTypeChart">
-                            <div class="card-content">
-                                <div class="income-spending-chart">
-                                    <div class="chart-bar investment-bar">
-                                        <div class="bar-amount" id="investmentAmount">$15,000</div>
-                                        <div class="bar-visual investment-visual" id="investmentBar" style="height: 70px;"></div>
+                        <!-- Net Worth Chart -->
+                        <div class="card home-section" onclick="handleAccountsNetWorthCardClick(event)">
+                            <div class="card-header home-section-header">
+                                <div class="section-header-left">
+                                    <h3 class="section-title" id="accountsNetWorthTitle">$85,000 total assets</h3>
+                                    <div class="section-change" id="accountsNetWorthChange">
+                                        <i data-lucide="arrow-up" class="w-4 h-4 inline"></i>
+                                        <span>$210.32 (0.3%)</span>
                                     </div>
-                                    <div class="chart-bar cash-bar">
-                                        <div class="bar-amount" id="cashAmount">$8,500</div>
-                                        <div class="bar-visual cash-visual" id="cashBar" style="height: 45px;"></div>
-                                    </div>
-                                    <div class="chart-bar debt-bar">
-                                        <div class="bar-amount" id="debtAmount">-$3,200</div>
-                                        <div class="bar-visual debt-visual" id="debtBar" style="height: 20px;"></div>
+                                    <div class="section-subtitle" id="accountsNetWorthSubtitle">All time</div>
+                                </div>
+                                <div class="section-header-right">
+                                    <div class="cashflow-menu-container">
+                                        <button class="dot-menu-btn" onclick="toggleAccountsNetWorthDropdown()" id="accountsNetWorthMenuBtn">
+                                            <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                                        </button>
+                                        <div class="dropdown-menu" id="accountsNetWorthDropdown">
+                                            <div class="dropdown-header">Select date range</div>
+                                            <div class="dropdown-item" onclick="updateAccountsNetWorthRange('1m', event)">1 month</div>
+                                            <div class="dropdown-item" onclick="updateAccountsNetWorthRange('3m', event)">3 months</div>
+                                            <div class="dropdown-item" onclick="updateAccountsNetWorthRange('6m', event)">6 months</div>
+                                            <div class="dropdown-item" onclick="updateAccountsNetWorthRange('ytd', event)">Year to date</div>
+                                            <div class="dropdown-item" onclick="updateAccountsNetWorthRange('1y', event)">1 year</div>
+                                            <div class="dropdown-item active" onclick="updateAccountsNetWorthRange('all', event)">All time</div>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <!-- Chart Legend -->
-                                <div class="chart-legend">
-                                    <div class="legend-item">
-                                        <div class="legend-color" style="background: #f59e0b;"></div>
-                                        <span class="legend-label">Investments</span>
-                                    </div>
-                                    <div class="legend-item">
-                                        <div class="legend-color" style="background: #06b6d4;"></div>
-                                        <span class="legend-label">Cash</span>
-                                    </div>
-                                    <div class="legend-item">
-                                        <div class="legend-color" style="background: #ef4444;"></div>
-                                        <span class="legend-label">Debt</span>
+                            </div>
+                            <div class="card-content">
+                                <div class="chart-container" style="position: relative; height: 200px;">
+                                    <canvas id="accountsNetWorthCanvas"></canvas>
+                                    <div class="chart-overlay" id="accountsNetWorthOverlay">
+                                        <div class="chart-crosshair" id="accountsNetWorthCrosshair"></div>
                                     </div>
                                 </div>
                             </div>
@@ -6133,6 +6235,70 @@ margin-right: 0.5rem;
                     <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
                 </div>
                 <div class="label">Dashboard</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Detail Screen -->
+    <div class="account-detail-overlay" id="accountDetailOverlay">
+        <div class="account-detail-screen" id="accountDetailScreen">
+            <!-- Header with back button -->
+            <div class="account-detail-header">
+                <button class="account-detail-back" onclick="closeAccountDetail()" aria-label="Back">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </button>
+                <div class="account-detail-title-container">
+                    <h2 class="account-detail-title" id="accountDetailTitle">Account Name</h2>
+                    <div class="account-detail-balance" id="accountDetailBalance">$0.00</div>
+                </div>
+            </div>
+
+            <!-- Account Balance Chart -->
+            <div class="card account-detail-chart-card">
+                <div class="card-content">
+                    <div class="chart-container" style="position: relative; height: 200px;">
+                        <canvas id="accountDetailCanvas"></canvas>
+                        <div class="chart-overlay" id="accountDetailChartOverlay">
+                            <div class="chart-crosshair" id="accountDetailCrosshair"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Section -->
+            <div class="card account-detail-activity">
+                <div class="card-header">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <h3 class="section-title">Activity</h3>
+                            <div class="section-subtitle" id="accountDetailActivitySubtitle">This month</div>
+                        </div>
+                        <div class="section-header-right">
+                            <div class="cashflow-menu-container">
+                                <button class="dot-menu-btn" onclick="toggleAccountDetailTimeRange()" id="accountDetailTimeRangeBtn">
+                                    <i data-lucide="more-horizontal" class="w-5 h-5"></i>
+                                </button>
+                                <div class="dropdown-menu" id="accountDetailTimeRangeDropdown">
+                                    <div class="dropdown-header">Select time range</div>
+                                    <div class="dropdown-item" onclick="updateAccountDetailTimeRange('week', event)">This week</div>
+                                    <div class="dropdown-item active" onclick="updateAccountDetailTimeRange('month', event)">This month</div>
+                                    <div class="dropdown-item" onclick="updateAccountDetailTimeRange('quarter', event)">This quarter</div>
+                                    <div class="dropdown-item" onclick="updateAccountDetailTimeRange('year', event)">This year</div>
+                                    <div class="dropdown-item" onclick="updateAccountDetailTimeRange('all', event)">All time</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction List -->
+            <div class="card account-detail-transactions">
+                <div class="expenses-list" id="accountDetailTransactionsList">
+                    <div style="text-align: center; color: #7f8c8d; padding: 20px;">
+                        No transactions found
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -12254,6 +12420,162 @@ margin-right: 0.5rem;
             return history;
         }
         
+        function generateAssetsHistory(currentValue, range) {
+            const balances = loadAccountBalances();
+            const savingsAccounts = JSON.parse(localStorage.getItem('savingsAccounts')) || [];
+            
+            // Get all available dates with balance data
+            const availableDates = getAllAvailableDates(balances).sort();
+            
+            if (availableDates.length === 0) {
+                // Fallback to demo data if no real data exists
+                return generateDemoAssetsHistory(currentValue, range);
+            }
+            
+            // Determine sampling frequency based on range
+            let sampleEveryNDays = 1;
+            let maxDaysBack = 30;
+            
+            switch (range) {
+                case '1m': 
+                    maxDaysBack = 30; 
+                    sampleEveryNDays = 1; // Daily if available
+                    break;
+                case '3m': 
+                    maxDaysBack = 90; 
+                    sampleEveryNDays = 3; // Every 3 days
+                    break;
+                case '6m': 
+                    maxDaysBack = 180; 
+                    sampleEveryNDays = 7; // Weekly
+                    break;
+                case 'ytd': 
+                    const now = new Date();
+                    const startOfYear = new Date(now.getFullYear(), 0, 1);
+                    maxDaysBack = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+                    sampleEveryNDays = maxDaysBack > 180 ? 14 : 7; // Bi-weekly or weekly
+                    break;
+                case '1y': 
+                    maxDaysBack = 365; 
+                    sampleEveryNDays = 14; // Bi-weekly
+                    break;
+                case 'all': 
+                default:
+                    maxDaysBack = 1095; // 3 years
+                    sampleEveryNDays = 30; // Monthly
+                    break;
+            }
+            
+            // Calculate cutoff date
+            const today = new Date();
+            const cutoffDate = new Date();
+            cutoffDate.setDate(today.getDate() - maxDaysBack);
+            const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+            
+            // Filter dates within range
+            const relevantDates = availableDates.filter(date => date >= cutoffDateStr);
+            
+            if (relevantDates.length === 0) {
+                // Fallback if no data in range
+                return generateDemoAssetsHistory(currentValue, range);
+            }
+            
+            // Sample dates based on frequency
+            const sampledDates = [];
+            let lastSampledIndex = -sampleEveryNDays; // Start so first date gets included
+            
+            for (let i = 0; i < relevantDates.length; i++) {
+                if (i - lastSampledIndex >= sampleEveryNDays || i === relevantDates.length - 1) {
+                    sampledDates.push(relevantDates[i]);
+                    lastSampledIndex = i;
+                }
+            }
+            
+            // Calculate real asset totals for each sampled date
+            const history = [];
+            
+            sampledDates.forEach(date => {
+                let assetsTotal = 0;
+                
+                // Sum up all asset accounts (exclude liabilities) for this date
+                Object.keys(balances).forEach(accountId => {
+                    const accountBalances = balances[accountId] || {};
+                    const accountInfo = savingsAccounts.find(acc => acc.id === accountId);
+                    const isLiability = accountInfo && accountInfo.type === 'liability';
+                    
+                    // Only count assets, not liabilities
+                    if (!isLiability) {
+                        // Get balance for this date, or closest previous date
+                        let balance = 0;
+                        if (accountBalances[date]) {
+                            const balanceData = accountBalances[date];
+                            balance = balanceData && typeof balanceData === 'object' ? balanceData.amount : balanceData;
+                        } else {
+                            // Find closest previous date with balance
+                            const accountDates = Object.keys(accountBalances).filter(d => d <= date).sort();
+                            if (accountDates.length > 0) {
+                                const lastDate = accountDates[accountDates.length - 1];
+                                const balanceData = accountBalances[lastDate];
+                                balance = balanceData && typeof balanceData === 'object' ? balanceData.amount : balanceData;
+                            }
+                        }
+                        
+                        if (typeof balance === 'number' && !isNaN(balance)) {
+                            assetsTotal += balance;
+                        }
+                    }
+                });
+                
+                history.push({
+                    date: date,
+                    value: Math.max(0, assetsTotal)
+                });
+            });
+            
+            return history.length > 0 ? history : generateDemoAssetsHistory(currentValue, range);
+        }
+        
+        function generateDemoAssetsHistory(currentValue, range) {
+            // Fallback demo data when no real data exists
+            const history = [];
+            let totalDays = 30;
+            let sampleEveryNDays = 1;
+            
+            switch (range) {
+                case '1m': totalDays = 30; sampleEveryNDays = 1; break;
+                case '3m': totalDays = 90; sampleEveryNDays = 2; break;
+                case '6m': totalDays = 180; sampleEveryNDays = 3; break;
+                case 'ytd': 
+                    const now = new Date();
+                    const startOfYear = new Date(now.getFullYear(), 0, 1);
+                    totalDays = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+                    sampleEveryNDays = totalDays > 180 ? 7 : 3;
+                    break;
+                case '1y': totalDays = 365; sampleEveryNDays = 7; break;
+                case 'all': totalDays = 1095; sampleEveryNDays = 14; break;
+            }
+            
+            const baseValue = currentValue > 0 ? currentValue : 85000;
+            
+            for (let i = totalDays; i >= 0; i -= sampleEveryNDays) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                
+                // Simple trend with small variation for demo
+                const progress = (totalDays - i) / totalDays;
+                const trendFactor = 0.85 + (0.3 * progress);
+                const fluctuation = (Math.random() - 0.5) * 0.05; // ±2.5%
+                const dayValue = baseValue * trendFactor * (1 + fluctuation);
+                
+                history.push({
+                    date: date.toISOString().split('T')[0],
+                    value: Math.max(baseValue * 0.7, dayValue)
+                });
+            }
+            
+            return history;
+        }
+        
         function drawHomeNetWorthChart(data) {
             console.log('Drawing net worth chart with data:', data);
             const canvas = document.getElementById('homeNetWorthCanvas');
@@ -12820,6 +13142,272 @@ margin-right: 0.5rem;
             
             // Update the net worth chart with new range
             updateHomeNetWorthWithChart(rangeType);
+        }
+        
+        // Accounts Assets functions (showing total assets instead of net worth)
+        function updateAccountsNetWorthWithChart(range) {
+            const balances = loadAccountBalances();
+            const today = getCurrentDate();
+            
+            // Calculate total assets (excluding liabilities)
+            let totalAssets = 0;
+            
+            // Load account types to distinguish between assets and liabilities
+            const savingsAccounts = JSON.parse(localStorage.getItem('savingsAccounts')) || [];
+            
+            Object.keys(balances).forEach(accountName => {
+                const accountBalances = balances[accountName];
+                const currentBalance = getTotalBalanceForDate(accountBalances, today);
+                
+                // Check if this account is a liability
+                const accountInfo = savingsAccounts.find(acc => acc.id === accountName);
+                const isLiability = accountInfo && accountInfo.type === 'liability';
+                
+                // Only count assets, not liabilities
+                if (!isLiability) {
+                    totalAssets += currentBalance;
+                }
+            });
+            
+            // Use demo value if no actual balance data  
+            const displayAssets = totalAssets > 0 ? totalAssets : 85000; // Higher demo value for assets only
+            
+            // Generate sample assets history for chart with more variation
+            const assetsHistory = generateAssetsHistory(displayAssets, range);
+            
+            // Draw the assets chart
+            drawAccountsNetWorthChart(assetsHistory);
+            
+            // Update the title and change indicator
+            updateAccountsNetWorthDisplay(displayAssets, range);
+        }
+
+        function drawAccountsNetWorthChart(data) {
+            console.log('Drawing accounts assets chart with data:', data);
+            const canvas = document.getElementById('accountsNetWorthCanvas');
+            if (!canvas) {
+                console.log('Accounts assets canvas not found');
+                return;
+            }
+            
+            // Set canvas size to match container (same as home chart)
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            const containerHeight = Math.max(rect.height, 250); // Minimum 250px height
+            
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = containerHeight * window.devicePixelRatio;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = containerHeight + 'px';
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            const width = rect.width;
+            const height = containerHeight;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            if (!data.length) return;
+            
+            // Chart dimensions (proper margins for edge-to-edge feel)
+            const margin = { top: 20, right: 20, bottom: 20, left: 60 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            // Find min/max values
+            const values = data.map(d => d.value);
+            const minValue = Math.min(...values);
+            const maxValue = Math.max(...values);
+            const valueRange = maxValue - minValue;
+            
+            // Round maxValue to nearest appropriate value for cleaner labels
+            const roundedMax = Math.ceil(maxValue / 10000) * 10000;
+            const adjustedRange = roundedMax - minValue;
+            
+            // Helper functions
+            const xScale = (index) => margin.left + (index / (data.length - 1)) * chartWidth;
+            const yScale = (value) => margin.top + chartHeight - ((value - minValue) / adjustedRange) * chartHeight;
+            
+            // Draw reference line at current (latest) value
+            const currentValue = data.length > 0 ? data[data.length - 1].value : 0;
+            const currentY = yScale(currentValue);
+            
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]); // Dashed line
+            ctx.beginPath();
+            ctx.moveTo(margin.left, currentY);
+            ctx.lineTo(margin.left + chartWidth, currentY);
+            ctx.stroke();
+            
+            // Current amount label
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`$${(currentValue / 1000).toFixed(1)}k`, 10, currentY - 8);
+            
+            // Reset line dash for chart lines
+            ctx.setLineDash([]);
+            
+            // Create correct gradient (matching home chart)
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#5fa42e');
+            gradient.addColorStop(1, '#4a7c23');
+            
+            // Draw area fill
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(xScale(0), yScale(data[0].value));
+            
+            for (let i = 1; i < data.length; i++) {
+                ctx.lineTo(xScale(i), yScale(data[i].value));
+            }
+            
+            ctx.lineTo(xScale(data.length - 1), height - margin.bottom);
+            ctx.lineTo(xScale(0), height - margin.bottom);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Draw main line
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = '#5fa42e';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(xScale(0), yScale(data[0].value));
+            
+            for (let i = 1; i < data.length; i++) {
+                ctx.lineTo(xScale(i), yScale(data[i].value));
+            }
+            
+            ctx.stroke();
+        }
+
+        function updateAccountsNetWorthDisplay(totalAssets, range) {
+            // Calculate change percentage based on range (mock data for now)
+            let changePercent = 0;
+            let rangeLabel = '';
+            
+            switch(range) {
+                case '1m': 
+                    changePercent = 1.2; 
+                    rangeLabel = '1 month';
+                    break;
+                case '3m': 
+                    changePercent = 3.8; 
+                    rangeLabel = '3 months';
+                    break;
+                case '6m': 
+                    changePercent = 7.2; 
+                    rangeLabel = '6 months';
+                    break;
+                case 'ytd': 
+                    changePercent = 5.1; 
+                    rangeLabel = 'Year to date';
+                    break;
+                case '1y': 
+                    changePercent = 12.4; 
+                    rangeLabel = '1 year';
+                    break;
+                case 'all': 
+                default: 
+                    changePercent = 24.6; 
+                    rangeLabel = 'All time';
+                    break;
+            }
+            
+            const assetsTitle = document.getElementById('accountsNetWorthTitle');
+            const assetsChange = document.getElementById('accountsNetWorthChange');
+            
+            if (assetsTitle) {
+                assetsTitle.textContent = `${formatCurrency(totalAssets)} total assets`;
+            }
+            
+            if (assetsChange) {
+                const isPositive = changePercent > 0;
+                const arrow = isPositive ? 'arrow-up' : 'arrow-down';
+                const color = isPositive ? '#5fa42e' : '#ef4444';
+                const changeAmount = (totalAssets * changePercent / 100).toFixed(2);
+                assetsChange.innerHTML = `
+                    <i data-lucide="${arrow}" class="w-4 h-4 inline" style="color: ${color}"></i>
+                    <span style="color: ${color}">$${Math.abs(changeAmount)} (${Math.abs(changePercent).toFixed(1)}%)</span>
+                `;
+                
+                // Re-initialize Lucide icons
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    window.lucide.createIcons();
+                }
+            }
+        }
+
+        function updateAccountsNetWorth() {
+            updateAccountsNetWorthWithChart('all'); // Default to all time view to match active button
+        }
+
+        function handleAccountsNetWorthCardClick(event) {
+            // Prevent navigation if clicking on dropdown menu or menu button
+            const dropdown = document.getElementById('accountsNetWorthDropdown');
+            const menuBtn = document.getElementById('accountsNetWorthMenuBtn');
+            
+            if (dropdown && (dropdown.contains(event.target) || menuBtn.contains(event.target))) {
+                event.stopPropagation();
+                return;
+            }
+            
+            // Navigate to reports or detailed view
+            console.log('Navigate to accounts net worth details');
+        }
+
+        function toggleAccountsNetWorthDropdown() {
+            const dropdown = document.getElementById('accountsNetWorthDropdown');
+            const menuBtn = document.getElementById('accountsNetWorthMenuBtn');
+            
+            if (dropdown && menuBtn) {
+                dropdown.classList.toggle('show');
+                
+                if (dropdown.classList.contains('show')) {
+                    setTimeout(() => {
+                        document.addEventListener('click', closeAccountsNetWorthDropdownOutside);
+                    }, 0);
+                }
+            }
+        }
+
+        function closeAccountsNetWorthDropdownOutside(event) {
+            const dropdown = document.getElementById('accountsNetWorthDropdown');
+            const menuBtn = document.getElementById('accountsNetWorthMenuBtn');
+            
+            if (dropdown && !dropdown.contains(event.target) && !menuBtn.contains(event.target)) {
+                dropdown.classList.remove('show');
+                document.removeEventListener('click', closeAccountsNetWorthDropdownOutside);
+            }
+        }
+
+        function updateAccountsNetWorthRange(rangeType, event) {
+            // Close dropdown
+            const dropdown = document.getElementById('accountsNetWorthDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+                document.removeEventListener('click', closeAccountsNetWorthDropdownOutside);
+            }
+            
+            // Update active state in dropdown
+            const dropdownItems = document.querySelectorAll('#accountsNetWorthDropdown .dropdown-item');
+            dropdownItems.forEach(item => item.classList.remove('active'));
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+            
+            // Update subtitle
+            const subtitle = document.getElementById('accountsNetWorthSubtitle');
+            if (subtitle && event && event.currentTarget) {
+                subtitle.textContent = event.currentTarget.textContent;
+            }
+            
+            // Update the assets chart with new range
+            updateAccountsNetWorthWithChart(rangeType);
         }
         
         function calculateCumulativeSpendingForMonths(expenses, monthCount, offsetMonths) {
@@ -13640,29 +14228,7 @@ margin-right: 0.5rem;
             const balanceLabel = hasDebtAccounts ? 'Net Balance' : 'Total Balance';
             if (balanceChangeEl) balanceChangeEl.textContent = balanceLabel;
 
-            // Update chart amounts
-            const investmentAmountEl = document.getElementById('investmentAmount');
-            const cashAmountEl = document.getElementById('cashAmount');
-            const debtAmountEl = document.getElementById('debtAmount');
-            
-            if (investmentAmountEl) investmentAmountEl.textContent = formatCurrency(investmentTotal);
-            if (cashAmountEl) cashAmountEl.textContent = formatCurrency(cashTotal);
-            if (debtAmountEl) debtAmountEl.textContent = `(${formatCurrency(debtTotal)})`;
-
-            // Calculate chart heights (max 70px)
-            const maxAmount = Math.max(investmentTotal, cashTotal, debtTotal);
-            const investmentHeight = maxAmount > 0 ? Math.max(20, (investmentTotal / maxAmount) * 70) : 20;
-            const cashHeight = maxAmount > 0 ? Math.max(20, (cashTotal / maxAmount) * 70) : 20;
-            const debtHeight = maxAmount > 0 ? Math.max(20, (debtTotal / maxAmount) * 70) : 20;
-
-            // Update chart bar heights
-            const investmentBarEl = document.getElementById('investmentBar');
-            const cashBarEl = document.getElementById('cashBar');
-            const debtBarEl = document.getElementById('debtBar');
-            
-            if (investmentBarEl) investmentBarEl.style.height = `${investmentHeight}px`;
-            if (cashBarEl) cashBarEl.style.height = `${cashHeight}px`;
-            if (debtBarEl) debtBarEl.style.height = `${debtHeight}px`;
+            // Old chart update code removed - now using networth chart
         }
 
         // Render new accounts layout
@@ -13823,12 +14389,471 @@ margin-right: 0.5rem;
         // Open account detail page (placeholder)
         function openAccountDetail(accountId) {
             const account = savingsAccounts.find(acc => acc.id === accountId);
-            const accountName = account ? account.name : accountId;
+            if (!account) {
+                console.error('Account not found:', accountId);
+                return;
+            }
+
+            // Store current account for detail view
+            window.currentAccountDetail = {
+                id: accountId,
+                account: account,
+                timeRange: 'month'
+            };
+
+            // Update header info
+            document.getElementById('accountDetailTitle').textContent = account.name;
             
-            // Create a simple placeholder page
-            alert(`Opening ${accountName} account details...\n\nThis would navigate to a detailed account page showing:\n- Full transaction history\n- Account settings\n- Balance trends\n- Account management options`);
+            // Get current balance
+            const currentBalance = getLastBalanceForAccount(accountId);
+            const balance = currentBalance ? currentBalance.amount : 0;
+            const isLiability = account.type === 'liability';
+            const displayBalance = isLiability ? -Math.abs(balance) : balance;
             
-            console.log('Navigate to account detail page for:', accountId);
+            document.getElementById('accountDetailBalance').textContent = formatCurrency(displayBalance);
+
+            // Show the overlay
+            document.getElementById('accountDetailOverlay').classList.add('active');
+
+            // Load account data
+            updateAccountDetailChart();
+            updateAccountDetailTransactions();
+
+            // Initialize swipe-to-go-back
+            initAccountDetailSwipe();
+        }
+
+        function closeAccountDetail() {
+            const screen = document.getElementById('accountDetailScreen');
+            const overlay = document.getElementById('accountDetailOverlay');
+            
+            // First remove the overlay active class to start fade out
+            overlay.classList.remove('active');
+            
+            // The CSS transition on .account-detail-screen will handle the slide-out animation
+            // No need for manual transform - the CSS does: right: -100% when overlay is not active
+            
+            // Clean up after animation completes
+            setTimeout(() => {
+                if (window.currentAccountDetail) {
+                    window.currentAccountDetail = null;
+                }
+            }, 300);
+        }
+
+        function updateAccountDetailChart() {
+            if (!window.currentAccountDetail) return;
+
+            const accountId = window.currentAccountDetail.id;
+            const timeRange = window.currentAccountDetail.timeRange;
+            
+            // Generate account history for the specific account
+            const accountHistory = generateAccountHistory(accountId, timeRange);
+            
+            // Draw the chart
+            drawAccountDetailChart(accountHistory);
+        }
+
+        function generateAccountHistory(accountId, range) {
+            const balances = loadAccountBalances();
+            const accountBalances = balances[accountId] || {};
+            
+            if (Object.keys(accountBalances).length === 0) {
+                return generateDemoAccountHistory(range);
+            }
+
+            // Get available dates for this account
+            const availableDates = Object.keys(accountBalances).sort();
+            
+            // Determine sampling and range
+            let maxDaysBack = 30;
+            let sampleEveryNDays = 1;
+            
+            switch (range) {
+                case 'week': maxDaysBack = 7; sampleEveryNDays = 1; break;
+                case 'month': maxDaysBack = 30; sampleEveryNDays = 1; break;
+                case 'quarter': maxDaysBack = 90; sampleEveryNDays = 3; break;
+                case 'year': maxDaysBack = 365; sampleEveryNDays = 7; break;
+                case 'all': maxDaysBack = 1095; sampleEveryNDays = 30; break;
+            }
+
+            // Filter dates within range
+            const today = new Date();
+            const cutoffDate = new Date();
+            cutoffDate.setDate(today.getDate() - maxDaysBack);
+            const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+            
+            const relevantDates = availableDates.filter(date => date >= cutoffDateStr);
+            
+            if (relevantDates.length === 0) {
+                return generateDemoAccountHistory(range);
+            }
+
+            // Sample dates
+            const sampledDates = [];
+            let lastSampledIndex = -sampleEveryNDays;
+            
+            for (let i = 0; i < relevantDates.length; i++) {
+                if (i - lastSampledIndex >= sampleEveryNDays || i === relevantDates.length - 1) {
+                    sampledDates.push(relevantDates[i]);
+                    lastSampledIndex = i;
+                }
+            }
+
+            // Build history
+            const history = [];
+            sampledDates.forEach(date => {
+                const balanceData = accountBalances[date];
+                const balance = balanceData && typeof balanceData === 'object' ? balanceData.amount : balanceData;
+                
+                if (typeof balance === 'number' && !isNaN(balance)) {
+                    history.push({
+                        date: date,
+                        value: Math.abs(balance) // Use absolute value for chart display
+                    });
+                }
+            });
+
+            return history.length > 0 ? history : generateDemoAccountHistory(range);
+        }
+
+        function generateDemoAccountHistory(range) {
+            const history = [];
+            let totalDays = 30;
+            let baseValue = 5000;
+            
+            switch (range) {
+                case 'week': totalDays = 7; break;
+                case 'month': totalDays = 30; break;
+                case 'quarter': totalDays = 90; break;
+                case 'year': totalDays = 365; break;
+                case 'all': totalDays = 1095; break;
+            }
+
+            for (let i = totalDays; i >= 0; i -= 1) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                
+                const progress = (totalDays - i) / totalDays;
+                const trend = 0.9 + (0.2 * progress);
+                const fluctuation = (Math.random() - 0.5) * 0.1;
+                const value = baseValue * trend * (1 + fluctuation);
+                
+                history.push({
+                    date: date.toISOString().split('T')[0],
+                    value: Math.max(100, value)
+                });
+            }
+
+            return history;
+        }
+
+        function drawAccountDetailChart(data) {
+            const canvas = document.getElementById('accountDetailCanvas');
+            if (!canvas || !data.length) return;
+
+            // Use the same drawing logic as the assets chart
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            const containerHeight = Math.max(rect.height, 200);
+            
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = containerHeight * window.devicePixelRatio;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = containerHeight + 'px';
+            
+            const ctx = canvas.getContext('2d');
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            const width = rect.width;
+            const height = containerHeight;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const margin = { top: 20, right: 20, bottom: 20, left: 60 };
+            const chartWidth = width - margin.left - margin.right;
+            const chartHeight = height - margin.top - margin.bottom;
+            
+            const values = data.map(d => d.value);
+            const minValue = Math.min(...values);
+            const maxValue = Math.max(...values);
+            const valueRange = maxValue - minValue;
+            
+            const roundedMax = Math.ceil(maxValue / 1000) * 1000;
+            const adjustedRange = roundedMax - minValue;
+            
+            const xScale = (index) => margin.left + (index / (data.length - 1)) * chartWidth;
+            const yScale = (value) => margin.top + chartHeight - ((value - minValue) / adjustedRange) * chartHeight;
+            
+            // Current value reference line
+            const currentValue = data[data.length - 1].value;
+            const currentY = yScale(currentValue);
+            
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(margin.left, currentY);
+            ctx.lineTo(margin.left + chartWidth, currentY);
+            ctx.stroke();
+            
+            // Current amount label
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(`$${(currentValue / 1000).toFixed(1)}k`, 10, currentY - 8);
+            
+            ctx.setLineDash([]);
+            
+            // Gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#5fa42e');
+            gradient.addColorStop(1, '#4a7c23');
+            
+            // Area fill
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(xScale(0), yScale(data[0].value));
+            
+            for (let i = 1; i < data.length; i++) {
+                ctx.lineTo(xScale(i), yScale(data[i].value));
+            }
+            
+            ctx.lineTo(xScale(data.length - 1), height - margin.bottom);
+            ctx.lineTo(xScale(0), height - margin.bottom);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Main line
+            ctx.globalAlpha = 1;
+            ctx.strokeStyle = '#5fa42e';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(xScale(0), yScale(data[0].value));
+            
+            for (let i = 1; i < data.length; i++) {
+                ctx.lineTo(xScale(i), yScale(data[i].value));
+            }
+            
+            ctx.stroke();
+        }
+
+        function toggleAccountDetailTimeRange() {
+            const dropdown = document.getElementById('accountDetailTimeRangeDropdown');
+            const menuBtn = document.getElementById('accountDetailTimeRangeBtn');
+            
+            if (dropdown && menuBtn) {
+                dropdown.classList.toggle('show');
+                
+                if (dropdown.classList.contains('show')) {
+                    setTimeout(() => {
+                        document.addEventListener('click', closeAccountDetailTimeRangeOutside);
+                    }, 0);
+                }
+            }
+        }
+
+        function closeAccountDetailTimeRangeOutside(event) {
+            const dropdown = document.getElementById('accountDetailTimeRangeDropdown');
+            const menuBtn = document.getElementById('accountDetailTimeRangeBtn');
+            
+            if (dropdown && !dropdown.contains(event.target) && !menuBtn.contains(event.target)) {
+                dropdown.classList.remove('show');
+                document.removeEventListener('click', closeAccountDetailTimeRangeOutside);
+            }
+        }
+
+        function updateAccountDetailTimeRange(rangeType, event) {
+            if (!window.currentAccountDetail) return;
+
+            // Close dropdown
+            const dropdown = document.getElementById('accountDetailTimeRangeDropdown');
+            if (dropdown) {
+                dropdown.classList.remove('show');
+                document.removeEventListener('click', closeAccountDetailTimeRangeOutside);
+            }
+            
+            // Update active state in dropdown
+            const dropdownItems = document.querySelectorAll('#accountDetailTimeRangeDropdown .dropdown-item');
+            dropdownItems.forEach(item => item.classList.remove('active'));
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+            
+            // Update subtitle
+            const subtitle = document.getElementById('accountDetailActivitySubtitle');
+            if (subtitle && event && event.currentTarget) {
+                subtitle.textContent = event.currentTarget.textContent;
+            }
+            
+            // Update stored range and refresh data
+            window.currentAccountDetail.timeRange = rangeType;
+            updateAccountDetailChart();
+            updateAccountDetailTransactions();
+        }
+
+        function updateAccountDetailTransactions() {
+            if (!window.currentAccountDetail) return;
+
+            const accountId = window.currentAccountDetail.id;
+            const timeRange = window.currentAccountDetail.timeRange;
+            
+            // Get transactions for this account
+            const transactions = getAccountTransactions(accountId, timeRange);
+            
+            // Render transaction list
+            renderAccountDetailTransactions(transactions);
+        }
+
+        function getAccountTransactions(accountId, timeRange) {
+            // For now, return mock transactions
+            // In real implementation, this would filter actual transaction data
+            const mockTransactions = [
+                {
+                    date: '2025-07-29',
+                    description: 'Direct Deposit - Salary',
+                    amount: 2500.00,
+                    type: 'credit'
+                },
+                {
+                    date: '2025-07-28',
+                    description: 'Grocery Store Purchase',
+                    amount: -89.32,
+                    type: 'debit'
+                },
+                {
+                    date: '2025-07-27',
+                    description: 'Online Transfer',
+                    amount: -200.00,
+                    type: 'debit'
+                },
+                {
+                    date: '2025-07-26',
+                    description: 'ATM Withdrawal',
+                    amount: -60.00,
+                    type: 'debit'  
+                }
+            ];
+
+            // Filter by time range
+            const today = new Date();
+            let cutoffDate = new Date();
+            
+            switch (timeRange) {
+                case 'week': cutoffDate.setDate(today.getDate() - 7); break;
+                case 'month': cutoffDate.setMonth(today.getMonth() - 1); break;
+                case 'quarter': cutoffDate.setMonth(today.getMonth() - 3); break;
+                case 'year': cutoffDate.setFullYear(today.getFullYear() - 1); break;
+                case 'all': cutoffDate = new Date('2000-01-01'); break;
+            }
+
+            return mockTransactions.filter(transaction => {
+                return new Date(transaction.date) >= cutoffDate;
+            });
+        }
+
+        function renderAccountDetailTransactions(transactions) {
+            const container = document.getElementById('accountDetailTransactionsList');
+            
+            if (!transactions || transactions.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #7f8c8d; padding: 20px;">
+                        No transactions found for this period
+                    </div>
+                `;
+                return;
+            }
+
+            const transactionsHtml = transactions.map(transaction => {
+                const isCredit = transaction.amount > 0;
+                const amountClass = isCredit ? 'credit' : 'debit';
+                const amountText = isCredit ? `+${formatCurrency(transaction.amount)}` : formatCurrency(transaction.amount);
+                
+                return `
+                    <div class="expense-item">
+                        <div class="expense-date">${formatDate(transaction.date)}</div>
+                        <div class="expense-details">
+                            <div class="expense-description">${transaction.description}</div>
+                        </div>
+                        <div class="expense-amount ${amountClass}">${amountText}</div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = transactionsHtml;
+        }
+
+        function initAccountDetailSwipe() {
+            const screen = document.getElementById('accountDetailScreen');
+            let startX = 0;
+            let currentX = 0;
+            let isDragging = false;
+
+            function handleTouchStart(e) {
+                startX = e.touches[0].clientX;
+                isDragging = true;
+                screen.style.transition = 'none';
+            }
+
+            function handleTouchMove(e) {
+                if (!isDragging) return;
+                
+                currentX = e.touches[0].clientX;
+                const deltaX = currentX - startX;
+                
+                // Only allow rightward swipes (closing gesture)
+                if (deltaX > 0) {
+                    const transform = Math.min(deltaX, screen.offsetWidth);
+                    screen.style.transform = `translateX(${transform}px)`;
+                }
+            }
+
+            function handleTouchEnd(e) {
+                if (!isDragging) return;
+                
+                isDragging = false;
+                const deltaX = currentX - startX;
+                
+                screen.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                
+                // If swiped more than 1/3 of the screen width, close
+                if (deltaX > screen.offsetWidth / 3) {
+                    closeAccountDetail();
+                } else {
+                    // Snap back
+                    screen.style.transform = 'translateX(0)';
+                }
+                
+                // Reset
+                setTimeout(() => {
+                    screen.style.transition = '';
+                    screen.style.transform = '';
+                }, 300);
+            }
+
+            // Add touch event listeners
+            screen.addEventListener('touchstart', handleTouchStart, { passive: true });
+            screen.addEventListener('touchmove', handleTouchMove, { passive: true });
+            screen.addEventListener('touchend', handleTouchEnd, { passive: true });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            if (date.toDateString() === today.toDateString()) {
+                return 'Today';
+            } else if (date.toDateString() === yesterday.toDateString()) {
+                return 'Yesterday';
+            } else {
+                return date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            }
         }
 
         async function updateSaveBalanceHistory() {
@@ -14342,6 +15367,7 @@ margin-right: 0.5rem;
             updateSaveTargetDisplay();
             await updateSaveTotalSavingsDisplay();
             updateAccountsView();
+            updateAccountsNetWorth(); // Initialize accounts networth chart
         }
 
         /**
