@@ -2271,7 +2271,7 @@
         .screens-wrapper {
             display: flex;
             height: 100%;
-            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            /* transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); */
             will-change: transform;
         }
         
@@ -11099,7 +11099,7 @@ margin-right: 0.5rem;
             // Make sure we're on the cashflow screen (screen 0)
             if (currentScreen !== 0) {
                 console.log('🔄 Not on cashflow screen, switching to screen 0');
-                showScreen(0);
+                goToScreen(0);
             }
             
             // Also check if the dots exist
