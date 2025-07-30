@@ -1543,10 +1543,11 @@
         }
         
         .dropdown-item.active {
-            background-color: hsl(var(--primary) / 0.1);
-            border-left-color: hsl(var(--primary));
-            color: hsl(var(--primary));
-            font-weight: 500;
+            background-color: transparent;
+            border-left-color: transparent;
+            color: hsl(var(--foreground));
+            font-weight: 700;
+            text-decoration: underline;
         }
         
         .dropdown-item:first-of-type {
@@ -1773,8 +1774,10 @@
         }
         
         .select-item.selected {
-            background-color: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
+            background-color: transparent;
+            color: hsl(var(--foreground));
+            font-weight: 700;
+            text-decoration: underline;
         }
         
         .select-item:first-child {
@@ -2107,8 +2110,10 @@
         }
         
         .period-select-item.selected {
-            background-color: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
+            background-color: transparent;
+            color: hsl(var(--foreground));
+            font-weight: 700;
+            text-decoration: underline;
         }
         
         /* Utility Classes */
@@ -11070,12 +11075,36 @@ margin-right: 0.5rem;
             return labels[timeRange] || 'Last 30 days';
         }
 
+        // Helper function to close all dropdowns
+        function closeAllDropdowns() {
+            const dropdowns = [
+                'timeRangeDropdown',
+                'cashflowDropdown', 
+                'accountsDropdown',
+                'netWorthDropdown',
+                'accountsNetWorthDropdown',
+                'accountDetailTimeRangeDropdown'
+            ];
+            
+            dropdowns.forEach(id => {
+                const dropdown = document.getElementById(id);
+                if (dropdown) {
+                    dropdown.classList.remove('show');
+                }
+            });
+        }
+
         function toggleTimeRangeDropdown() {
             const dropdown = document.getElementById('timeRangeDropdown');
             const btn = document.getElementById('timeRangeSelector');
+            const isCurrentlyOpen = dropdown && dropdown.classList.contains('show');
             
-            if (dropdown && btn) {
-                dropdown.classList.toggle('show');
+            // Close all dropdowns first
+            closeAllDropdowns();
+            
+            // If this dropdown wasn't open, open it
+            if (dropdown && btn && !isCurrentlyOpen) {
+                dropdown.classList.add('show');
                 
                 if (dropdown.classList.contains('show')) {
                     setTimeout(() => {
@@ -13142,9 +13171,14 @@ margin-right: 0.5rem;
         function toggleCashflowDropdown() {
             const dropdown = document.getElementById('cashflowDropdown');
             const menuBtn = document.getElementById('cashflowMenuBtn');
+            const isCurrentlyOpen = dropdown && dropdown.classList.contains('show');
             
-            if (dropdown && menuBtn) {
-                dropdown.classList.toggle('show');
+            // Close all dropdowns first
+            closeAllDropdowns();
+            
+            // If this dropdown wasn't open, open it
+            if (dropdown && menuBtn && !isCurrentlyOpen) {
+                dropdown.classList.add('show');
                 
                 if (dropdown.classList.contains('show')) {
                     // Don't position with inline styles - use CSS instead
@@ -13201,9 +13235,14 @@ margin-right: 0.5rem;
         function toggleAccountsDropdown() {
             const dropdown = document.getElementById('accountsDropdown');
             const menuBtn = document.getElementById('accountsMenuBtn');
+            const isCurrentlyOpen = dropdown && dropdown.classList.contains('show');
             
-            if (dropdown && menuBtn) {
-                dropdown.classList.toggle('show');
+            // Close all dropdowns first
+            closeAllDropdowns();
+            
+            // If this dropdown wasn't open, open it
+            if (dropdown && menuBtn && !isCurrentlyOpen) {
+                dropdown.classList.add('show');
                 
                 if (dropdown.classList.contains('show')) {
                     setTimeout(() => {
@@ -13230,9 +13269,14 @@ margin-right: 0.5rem;
         function toggleNetWorthDropdown() {
             const dropdown = document.getElementById('netWorthDropdown');
             const menuBtn = document.getElementById('netWorthMenuBtn');
+            const isCurrentlyOpen = dropdown && dropdown.classList.contains('show');
             
-            if (dropdown && menuBtn) {
-                dropdown.classList.toggle('show');
+            // Close all dropdowns first
+            closeAllDropdowns();
+            
+            // If this dropdown wasn't open, open it
+            if (dropdown && menuBtn && !isCurrentlyOpen) {
+                dropdown.classList.add('show');
                 
                 if (dropdown.classList.contains('show')) {
                     setTimeout(() => {
@@ -13498,9 +13542,14 @@ margin-right: 0.5rem;
         function toggleAccountsNetWorthDropdown() {
             const dropdown = document.getElementById('accountsNetWorthDropdown');
             const menuBtn = document.getElementById('accountsNetWorthMenuBtn');
+            const isCurrentlyOpen = dropdown && dropdown.classList.contains('show');
             
-            if (dropdown && menuBtn) {
-                dropdown.classList.toggle('show');
+            // Close all dropdowns first
+            closeAllDropdowns();
+            
+            // If this dropdown wasn't open, open it
+            if (dropdown && menuBtn && !isCurrentlyOpen) {
+                dropdown.classList.add('show');
                 
                 if (dropdown.classList.contains('show')) {
                     setTimeout(() => {
@@ -14815,9 +14864,14 @@ margin-right: 0.5rem;
         function toggleAccountDetailTimeRange() {
             const dropdown = document.getElementById('accountDetailTimeRangeDropdown');
             const menuBtn = document.getElementById('accountDetailTimeRangeBtn');
+            const isCurrentlyOpen = dropdown && dropdown.classList.contains('show');
             
-            if (dropdown && menuBtn) {
-                dropdown.classList.toggle('show');
+            // Close all dropdowns first
+            closeAllDropdowns();
+            
+            // If this dropdown wasn't open, open it
+            if (dropdown && menuBtn && !isCurrentlyOpen) {
+                dropdown.classList.add('show');
                 
                 if (dropdown.classList.contains('show')) {
                     setTimeout(() => {
