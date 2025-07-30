@@ -635,7 +635,6 @@ async function fetchPlaidTransactions() {
             // Update UI
             updatePeriodView();
             
-            alert(`Successfully imported ${transactions.length} transactions from your bank!`);
         } else {
             console.log('No transactions found or available');
         }
