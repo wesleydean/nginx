@@ -11964,94 +11964,408 @@ margin-right: 0.5rem;
                 console.error('Error loading sample data:', error);
                 alert('Failed to load sample data. Please make sure you are signed in and try again.');
             }
-        }
 
         /**
-         * Show placeholder for home net worth chart when no data is available
+         * Formats a number as a currency string with proper commas and 2 decimal places.
+         * @param {number} amount - The amount to format.
+         * @returns {string} Formatted currency string (e.g., "$1,234.56").
          */
-        function showHomeNetWorthPlaceholder() {
-            const canvas = document.getElementById('homeNetWorthCanvas');
-            if (!canvas) return;
-            
-            // Hide the canvas and show basic placeholder text
-            canvas.style.display = 'none';
-            
-            // Find or create placeholder element
-            let placeholder = document.getElementById('homeNetWorthPlaceholder');
-            if (!placeholder) {
-                placeholder = document.createElement('div');
-                placeholder.id = 'homeNetWorthPlaceholder';
-                placeholder.style.cssText = `
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    color: #7f8c8d;
-                    padding: 40px 20px;
-                    height: 200px;
-                `;
-                placeholder.textContent = 'No account data';
-                canvas.parentNode.insertBefore(placeholder, canvas);
-            }
-            placeholder.style.display = 'flex';
-        }
+                cryptoVolatility = 1 + Math.sin(marketCycle * 2) * 0.5; // 0.5 to 1.5 range
 
-        /**
-         * Show placeholder for home cashflow chart when no spending data is available
-         */
-        function showHomeCashflowPlaceholder() {
-            const canvas = document.getElementById('homeCashflowCanvas');
-            if (!canvas) return;
-            
-            // Hide the canvas and show basic placeholder text
-            canvas.style.display = 'none';
-            
-            // Find or create placeholder element
-            let placeholder = document.getElementById('homeCashflowPlaceholder');
-            if (!placeholder) {
-                placeholder = document.createElement('div');
-                placeholder.id = 'homeCashflowPlaceholder';
-                placeholder.style.cssText = `
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    color: #7f8c8d;
-                    padding: 40px 20px;
-                    height: 200px;
-                `;
-                placeholder.textContent = 'No spending data';
-                canvas.parentNode.insertBefore(placeholder, canvas);
-            }
-            placeholder.style.display = 'flex';
-        }
+                // Check if today is a paycheck date
+                const isPayday = paycheckDates.some(date =>
+                    date.getFullYear() === currentDate.getFullYear() &&
+                    date.getMonth() === currentDate.getMonth() &&
+                    date.getDate() === currentDate.getDate()
+                );
 
-        /**
-         * Hide chart placeholders and show actual charts
-         */
-        function hideChartPlaceholders() {
-            // Hide net worth placeholder
-            const netWorthPlaceholder = document.getElementById('homeNetWorthPlaceholder');
-            if (netWorthPlaceholder) {
-                netWorthPlaceholder.style.display = 'none';
+                // Determine if we should record a balance update for this day
+                // Prioritize important dates: paydays, month start/end, and tax refund/bonus days
+                const isMonthStart = dayOfMonth === 1;
+                const isMonthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate() === dayOfMonth;
+                const isTaxRefundDay = currentDate.getFullYear() === taxRefundDate.getFullYear() &&
+                    currentDate.getMonth() === taxRefundDate.getMonth() &&
+                    currentDate.getDate() === taxRefundDate.getDate();
+                const isBonusDay = currentDate.getFullYear() === bonusDate.getFullYear() &&
+                    currentDate.getMonth() === bonusDate.getMonth() &&
+                    currentDate.getDate() === bonusDate.getDate();
+
+                // Record these important days regardless of other factors
+                const isVeryImportantDay = isMonthStart || isMonthEnd || isPayday || isTaxRefundDay || isBonusDay;
+
+                // For other days, calculate if we should record based on:
+                // 1. How many entries we already have this month
+                // 2. How much time has passed since the last recorded entry
+                // 3. How significant the balance changes have been
+
+                // Track significant changes in balances (> 5% from previous day)
+                const significantChanges = {
+                    checking: Math.abs(checkingBalance - (testBalances.checking[getPreviousDateKey(dateKey)] || 0)) > checkingBalance * 0.05,
+                    savings: Math.abs(savingsBalance - (testBalances.savings[getPreviousDateKey(dateKey)] || 0)) > savingsBalance * 0.05,
+                    emergency: Math.abs(emergencyBalance - (testBalances.emergency[getPreviousDateKey(dateKey)] || 0)) > emergencyBalance * 0.05,
+                    investment: Math.abs(investmentBalance - (testBalances.investment[getPreviousDateKey(dateKey)] || 0)) > investmentBalance * 0.05,
+                    retirement: Math.abs(retirementBalance - (testBalances.retirement[getPreviousDateKey(dateKey)] || 0)) > retirementBalance * 0.05,
+                    crypto: Math.abs(cryptoBalance - (testBalances.crypto[getPreviousDateKey(dateKey)] || 0)) > cryptoBalance * 0.05
+                };
+
+                // If there's a significant change in any account, we might want to record it
+                const hasSignificantChange = Object.values(significantChanges).some(change => change);
+
+                // Higher chance of recording if we have fewer entries already
+                const entriesThisMonth = Object.values(entriesPerMonth[monthKey]).reduce((sum, count) => sum + count, 0);
+                const fewEntriesBoost = entriesThisMonth < 6 ? 0.15 : 0; // Boost chance if we have fewer than 6 total entries
+
+                // Combine factors for a weighted decision
+                const shouldRecordToday = isVeryImportantDay ||
+                    hasSignificantChange ||
+                    Math.random() < (0.05 + fewEntriesBoost); // 5-20% chance
+
+                // Check if we're still under the limit of 3 entries per month per account
+                const canAddMoreEntries = Object.values(entriesPerMonth[monthKey]).some(count => count < 3);
+
+                // Helper function to get previous date key
+                function getPreviousDateKey(dateKey) {
+                    const date = new Date(dateKey);
+                    date.setDate(date.getDate() - 1);
+                    return date.toISOString().split('T')[0];
+                }
+
+                // Regular daily simulation
+                // Add some balance updates for important days or based on our weighted decision
+                if (shouldRecordToday && canAddMoreEntries) { // Record if we should and still under limit
+                    // Simulate salary deposits on paydays
+                    if (isPayday) {
+                        const salary = 2500 + Math.random() * 500;
+                        checkingBalance += salary; // Salary deposit
+
+                        // Automatic transfers to savings and retirement on payday
+                        const savingsTransfer = salary * (0.1 + Math.random() * 0.1); // 10-20%
+                        const retirementTransfer = salary * (0.05 + Math.random() * 0.05); // 5-10%
+
+                        checkingBalance -= savingsTransfer;
+                        savingsBalance += savingsTransfer;
+
+                        checkingBalance -= retirementTransfer;
+                        retirementBalance += retirementTransfer;
+                    }
+
+                    // Random transfers between accounts
+                    if (Math.random() < 0.15) {
+                        const transfer = 500 + Math.random() * 1000;
+                        if (checkingBalance > transfer + 1000) { // Only if enough buffer
+                            checkingBalance -= transfer;
+                            savingsBalance += transfer;
+                        }
+                    }
+
+                    // Occasional emergency fund contributions
+                    if (Math.random() < 0.08) {
+                        const emergencyTransfer = 200 + Math.random() * 300;
+                        if (savingsBalance > emergencyTransfer + 1000) {
+                            savingsBalance -= emergencyTransfer;
+                            emergencyBalance += emergencyTransfer;
+                        }
+                    }
+
+                    // Random investment activity
+                    if (Math.random() < 0.1) {
+                        const investAmount = 500 + Math.random() * 1000;
+                        if (savingsBalance > investAmount + 2000) {
+                            savingsBalance -= investAmount;
+                            investmentBalance += investAmount;
+                        }
+                    }
+
+                    // Random crypto trading
+                    if (Math.random() < 0.05) {
+                        const cryptoAmount = 200 + Math.random() * 500;
+                        if (checkingBalance > cryptoAmount + 1000) {
+                            checkingBalance -= cryptoAmount;
+                            cryptoBalance += cryptoAmount;
+                        }
+                    }
+
+                    // Tax refund deposit
+                    if (currentDate.getFullYear() === taxRefundDate.getFullYear() &&
+                        currentDate.getMonth() === taxRefundDate.getMonth() &&
+                        currentDate.getDate() === taxRefundDate.getDate()) {
+                        const refundAmount = 1200 + Math.random() * 1800; // $1200-3000
+                        checkingBalance += refundAmount;
+                    }
+
+                    // Year-end bonus
+                    if (currentDate.getFullYear() === bonusDate.getFullYear() &&
+                        currentDate.getMonth() === bonusDate.getMonth() &&
+                        currentDate.getDate() === bonusDate.getDate()) {
+                        const bonusAmount = 3000 + Math.random() * 2000; // $3000-5000
+                        checkingBalance += bonusAmount;
+                    }
+
+                    // Add some daily spending from checking (more on weekends)
+                    const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+                    const dailySpending = isWeekend ?
+                        (50 + Math.random() * 150) : // $50-200 on weekends
+                        (20 + Math.random() * 80);  // $20-100 on weekdays
+                    checkingBalance = Math.max(500, checkingBalance - dailySpending); // Keep minimum $500
+
+                    // Market fluctuations affect investment accounts
+                    const dailyMarketChange = marketTrend + (Math.random() * 0.02 - 0.01); // -0.01 to +0.01 + trend
+                    investmentBalance += investmentBalance * dailyMarketChange * 0.01; // Apply percentage change
+                    retirementBalance += retirementBalance * dailyMarketChange * 0.008; // Slightly less volatile
+
+                    // Crypto is even more volatile
+                    const cryptoChange = dailyMarketChange * 4 * cryptoVolatility;
+                    cryptoBalance += cryptoBalance * cryptoChange * 0.01;
+
+                    // Add some interest to savings and emergency fund
+                    // Higher interest during certain months (promotional rates)
+                    const interestMultiplier = (month === 1 || month === 7) ? 2 : 1; // Feb and Aug
+                    savingsBalance += savingsBalance * 0.0004 * interestMultiplier; // ~0.04% daily (APY ~1.5%)
+                    emergencyBalance += emergencyBalance * 0.0005 * interestMultiplier; // ~0.05% daily (APY ~1.8%)
+                }
+
+                // Always ensure balances stay above minimum values
+                checkingBalance = Math.max(100, checkingBalance);
+                savingsBalance = Math.max(100, savingsBalance);
+                emergencyBalance = Math.max(100, emergencyBalance);
+                investmentBalance = Math.max(100, investmentBalance);
+                retirementBalance = Math.max(100, retirementBalance);
+                cryptoBalance = Math.max(10, cryptoBalance);
+
+                // For each account, check previous entries this month and ensure new balance is different
+                const checkPreviousEntryDifferent = (accountType, currentBalance) => {
+                    // Get all dates with entries for this account in the current month
+                    const datesWithEntries = Object.keys(testBalances[accountType])
+                        .filter(date => date.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`));
+
+                    // Check if any previous entries have the same rounded balance value
+                    if (datesWithEntries.length > 0) {
+                        const roundedCurrentBalance = accountType.includes('investment') || accountType.includes('crypto') || accountType.includes('retirement')
+                            ? Math.round(currentBalance * 100) / 100  // Round to cents for investments
+                            : Math.round(currentBalance);              // Round to dollars for regular accounts
+
+                        // Check if this exact balance already exists
+                        const hasSameBalance = datesWithEntries.some(date => {
+                            return Math.abs(testBalances[accountType][date] - roundedCurrentBalance) < 0.01;
+                        });
+
+                        // If same balance exists, add a small random change (0.5%-2%)
+                        if (hasSameBalance) {
+                            const changeDirection = Math.random() > 0.5 ? 1 : -1;
+                            const changePercent = 0.005 + Math.random() * 0.015; // 0.5% to 2%
+                            return currentBalance * (1 + (changeDirection * changePercent));
+                        }
+                    }
+
+                    return currentBalance;
+                };
+
+                // Record with realistic rounding - only add entries if we're under the limit of 3 per month per account
+                if (entriesPerMonth[monthKey].checking < 3) {
+                    // Ensure this entry is different from previous entries
+                    checkingBalance = checkPreviousEntryDifferent('checking', checkingBalance);
+                    testBalances.checking[dateKey] = Math.round(checkingBalance);
+                    entriesPerMonth[monthKey].checking++;
+                }
+
+                if (entriesPerMonth[monthKey].savings < 3) {
+                    // Ensure this entry is different from previous entries
+                    savingsBalance = checkPreviousEntryDifferent('savings', savingsBalance);
+                    testBalances.savings[dateKey] = Math.round(savingsBalance);
+                    entriesPerMonth[monthKey].savings++;
+                }
+
+                if (entriesPerMonth[monthKey].emergency < 3) {
+                    // Ensure this entry is different from previous entries
+                    emergencyBalance = checkPreviousEntryDifferent('emergency', emergencyBalance);
+                    testBalances.emergency[dateKey] = Math.round(emergencyBalance);
+                    entriesPerMonth[monthKey].emergency++;
+                }
+
+                if (entriesPerMonth[monthKey].investment < 3) {
+                    // Ensure this entry is different from previous entries
+                    investmentBalance = checkPreviousEntryDifferent('investment', investmentBalance);
+                    testBalances.investment[dateKey] = Math.round(investmentBalance * 100) / 100;
+                    entriesPerMonth[monthKey].investment++;
+                }
+
+                if (entriesPerMonth[monthKey].retirement < 3) {
+                    // Ensure this entry is different from previous entries
+                    retirementBalance = checkPreviousEntryDifferent('retirement', retirementBalance);
+                    testBalances.retirement[dateKey] = Math.round(retirementBalance * 100) / 100;
+                    entriesPerMonth[monthKey].retirement++;
+                }
+
+                if (entriesPerMonth[monthKey].crypto < 3) {
+                    // Ensure this entry is different from previous entries
+                    cryptoBalance = checkPreviousEntryDifferent('crypto', cryptoBalance);
+                    testBalances.crypto[dateKey] = Math.round(cryptoBalance * 100) / 100;
+                    entriesPerMonth[monthKey].crypto++;
+                }
+
+                if (entriesPerMonth[monthKey].credit_card < 3) {
+                    // Ensure this entry is different from previous entries
+                    creditCardBalance = checkPreviousEntryDifferent('credit_card', creditCardBalance);
+                    testBalances.credit_card[dateKey] = Math.round(creditCardBalance);
+                    entriesPerMonth[monthKey].credit_card++;
+                }
+
+                if (entriesPerMonth[monthKey].student_loan < 3) {
+                    // Ensure this entry is different from previous entries
+                    studentLoanBalance = checkPreviousEntryDifferent('student_loan', studentLoanBalance);
+                    testBalances.student_loan[dateKey] = Math.round(studentLoanBalance);
+                    entriesPerMonth[monthKey].student_loan++;
+                }
+
+                if (entriesPerMonth[monthKey].mortgage < 3) {
+                    // Ensure this entry is different from previous entries
+                    mortgageBalance = checkPreviousEntryDifferent('mortgage', mortgageBalance);
+                    testBalances.mortgage[dateKey] = Math.round(mortgageBalance);
+                    entriesPerMonth[monthKey].mortgage++;
+                }
+
+                // Generate expense data (not every day)
+                if (Math.random() < 0.7) { // 70% chance of expenses
+                    const expenseCategories = ['groceries', 'transportation', 'dining', 'entertainment', 'personal', 'clothing', 'health', 'subscriptions', 'other'];
+                    const numExpenses = Math.floor(Math.random() * 3) + 1; // 1-3 expenses per day
+
+                    testExpenses[dateKey] = [];
+
+                    for (let i = 0; i < numExpenses; i++) {
+                        const category = expenseCategories[Math.floor(Math.random() * expenseCategories.length)];
+                        let amount = 0;
+
+                        // Generate realistic amounts based on category
+                        switch (category) {
+                            case 'groceries':
+                                amount = 15 + Math.random() * 85; // $15-100
+                                break;
+                            case 'transportation':
+                                amount = 5 + Math.random() * 45; // $5-50
+                                break;
+                            case 'dining':
+                                amount = 12 + Math.random() * 38; // $12-50
+                                break;
+                            case 'entertainment':
+                                amount = 8 + Math.random() * 42; // $8-50
+                                break;
+                            case 'personal':
+                                amount = 10 + Math.random() * 40; // $10-50
+                                break;
+                            case 'clothing':
+                                amount = 25 + Math.random() * 75; // $25-100
+                                break;
+                            case 'health':
+                                amount = 15 + Math.random() * 35; // $15-50
+                                break;
+                            case 'subscriptions':
+                                amount = 5 + Math.random() * 25; // $5-30
+                                break;
+                            case 'other':
+                                amount = 5 + Math.random() * 45; // $5-50
+                                break;
+                        }
+
+                        testExpenses[dateKey].push({
+                            amount: Math.round(amount * 100) / 100, // Round to 2 decimal places
+                            category: category,
+                            description: `${category.charAt(0).toUpperCase() + category.slice(1)} expense`,
+                            timestamp: Date.now() + i, // Ensure unique timestamps
+                            created: Date.now() + i,
+                            updated: Date.now() + i
+                        });
+                    }
+                }
+
+                // Count how many accounts have reached their maximum entries
+                const accountsWithMaxEntries = Object.values(entriesPerMonth[monthKey]).filter(count => count >= 3).length;
+                const totalAccounts = Object.keys(entriesPerMonth[monthKey]).length;
+
+                // Skip ahead if we're close to the end of the month and have most accounts filled
+                // This balances between optimizing performance and ensuring good data distribution
+                const isLateInMonth = dayOfMonth > 20; // Later part of month
+                const mostAccountsFilled = accountsWithMaxEntries >= totalAccounts - 1; // All but one account filled
+                const shouldSkipToNextMonth = isLateInMonth && mostAccountsFilled;
+
+                // If we're about to start a new month, apply monthly growth to all accounts
+                // This ensures consistent month-to-month growth for the "Saved this month" calculation
+                if (dayOfMonth === 1 || shouldSkipToNextMonth) {
+                    // Apply monthly growth rates to simulate consistent saving and investment returns
+                    checkingBalance *= (1 + growthRates.checking / 30); // Daily equivalent of monthly rate
+                    savingsBalance *= (1 + growthRates.savings / 30);
+                    emergencyBalance *= (1 + growthRates.emergency / 30);
+                    investmentBalance *= (1 + growthRates.investment / 30);
+                    retirementBalance *= (1 + growthRates.retirement / 30);
+                    cryptoBalance *= (1 + growthRates.crypto / 30);
+
+                    // Apply debt paydown rates (negative growth means reducing debt)
+                    creditCardBalance *= (1 + growthRates.credit_card / 30);
+                    studentLoanBalance *= (1 + growthRates.student_loan / 30);
+                    mortgageBalance *= (1 + growthRates.mortgage / 30);
+                }
+
+                if (shouldSkipToNextMonth) {
+                    // Move to first day of next month
+                    currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+                } else {
+                    // Move to next day
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
             }
-            
-            // Hide cashflow placeholder
-            const cashflowPlaceholder = document.getElementById('homeCashflowPlaceholder');
-            if (cashflowPlaceholder) {
-                cashflowPlaceholder.style.display = 'none';
+
+            // Save test data to localStorage
+            localStorage.setItem('accountBalances', JSON.stringify(testBalances));
+            localStorage.setItem('dailyExpenses', JSON.stringify(testExpenses));
+
+            // Initialize or update savings accounts
+            const defaultAccounts = [
+                { id: 'checking', name: 'Checking', type: 'cash' },
+                { id: 'savings', name: 'Savings', type: 'cash' },
+                { id: 'emergency', name: 'Emergency Fund', type: 'cash' },
+                { id: 'investment', name: 'Brokerage Account', type: 'investment' },
+                { id: 'retirement', name: '401(k)', type: 'investment' },
+                { id: 'crypto', name: 'Crypto Portfolio', type: 'investment' },
+                { id: 'credit_card', name: 'Credit Card', type: 'liability' },
+                { id: 'student_loan', name: 'Student Loan', type: 'liability' },
+                { id: 'mortgage', name: 'Mortgage', type: 'liability' }
+            ];
+
+            // Always update savings accounts when loading test data
+            localStorage.setItem('savingsAccounts', JSON.stringify(defaultAccounts));
+            // Update the global savingsAccounts variable to match
+            savingsAccounts = [...defaultAccounts];
+
+            console.log('Test data loaded successfully!');
+            console.log('Balance data:', testBalances);
+            console.log('Entries per month:', entriesPerMonth);
+            console.log('Expense data sample:', Object.keys(testExpenses).slice(0, 5).map(date => ({ date, expenses: testExpenses[date] })));
+
+            // Ensure all required functions are called to update the UI
+            updatePeriodView(); // This will call updateSaveScreen() internally
+            // Force update of all relevant UI components
+            await updateSaveBalanceHistory();
+            await updateSaveTotalSavingsDisplay(); // Make sure the total savings display is updated
+            updateSaveTargetDisplay(); // Update the saving target display
+            updateAccountList();
+            updateSlideOutAccountDropdown();
+
+            if (currentScreen === 1) {
+                updateChart();
             }
-            
-            // Show chart canvases
-            const netWorthCanvas = document.getElementById('homeNetWorthCanvas');
-            if (netWorthCanvas) {
-                netWorthCanvas.style.display = 'block';
-            }
-            
-            const cashflowCanvas = document.getElementById('homeCashflowCanvas');
-            if (cashflowCanvas) {
-                cashflowCanvas.style.display = 'block';
-            }
+
+            // Log some useful information
+            console.log('Final account totals:');
+            Object.keys(testBalances).forEach(account => {
+                const dates = Object.keys(testBalances[account]).sort();
+                if (dates.length > 0) {
+                    const firstDate = dates[0];
+                    const lastDate = dates[dates.length - 1];
+                    console.log(`${account}: ${testBalances[account][firstDate]} → ${testBalances[account][lastDate]}`);
+                }
+            });
+
+            // Show success message
+            alert('Test data loaded successfully! Check the Reports screen to see the chart with comprehensive data from January to today.');
         }
 
         /**
@@ -13058,15 +13372,6 @@ margin-right: 0.5rem;
             const maxCurrent = currentPeriodData.length ? Math.max(...currentPeriodData.map(d => d.cumulative)) : 0;
             const maxLast = lastPeriodData.length ? Math.max(...lastPeriodData.map(d => d.cumulative)) : 0;
             const maxValue = Math.max(maxCurrent, maxLast);
-
-            // Check if we have any spending data
-            if (maxValue === 0 && currentPeriodData.length === 0 && lastPeriodData.length === 0) {
-                showHomeCashflowPlaceholder();
-                return;
-            }
-
-            // Hide placeholders and show chart
-            hideChartPlaceholders();
 
             // Round to nearest $100
             const yAxisMax = Math.ceil(maxValue / 100) * 100;

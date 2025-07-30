@@ -455,6 +455,141 @@ app.put('/api/transactions/:transactionId', clerkAuth, async (req, res) => {
   }
 });
 
+// Seed sample data for testing/demo purposes
+app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
+  try {
+    const clerkUserId = req.auth.userId;
+    console.log(`Seeding sample data for user: ${clerkUserId}`);
+    
+    // Ensure user exists in database
+    await database.createUser(clerkUserId);
+    
+    // Define sample accounts
+    const sampleAccounts = [
+      { 
+        account_id: `sample_checking_${clerkUserId}`,
+        name: 'Checking',
+        original_name: 'Checking',
+        type: 'depository',
+        subtype: 'checking',
+        institution_name: 'Sample Bank',
+        mask: '0000',
+        current_balance: 2500.00,
+        currency: 'USD',
+        access_token: 'sample_token_checking'
+      },
+      {
+        account_id: `sample_savings_${clerkUserId}`,
+        name: 'Savings',
+        original_name: 'Savings',
+        type: 'depository',
+        subtype: 'savings',
+        institution_name: 'Sample Bank',
+        mask: '0001',
+        current_balance: 15000.00,
+        currency: 'USD',
+        access_token: 'sample_token_savings'
+      },
+      {
+        account_id: `sample_investment_${clerkUserId}`,
+        name: 'Brokerage Account',
+        original_name: 'Brokerage Account',
+        type: 'investment',
+        subtype: 'brokerage',
+        institution_name: 'Sample Investment',
+        mask: '0002',
+        current_balance: 45000.00,
+        currency: 'USD',
+        access_token: 'sample_token_investment'
+      },
+      {
+        account_id: `sample_credit_${clerkUserId}`,
+        name: 'Credit Card',
+        original_name: 'Credit Card',
+        type: 'credit',
+        subtype: 'credit_card',
+        institution_name: 'Sample Credit',
+        mask: '0003',
+        current_balance: -1250.00,
+        currency: 'USD',
+        access_token: 'sample_token_credit'
+      }
+    ];
+    
+    // Add sample accounts to database
+    const addedAccounts = [];
+    for (const account of sampleAccounts) {
+      try {
+        const result = await database.addAccount(clerkUserId, account);
+        addedAccounts.push(result);
+        console.log(`Added sample account: ${account.name}`);
+      } catch (error) {
+        console.error(`Error adding sample account ${account.name}:`, error);
+      }
+    }
+    
+    // Generate sample transactions for the past 30 days
+    const sampleTransactions = [];
+    const today = new Date();
+    
+    for (let i = 0; i < 30; i++) {
+      const transactionDate = new Date(today);
+      transactionDate.setDate(transactionDate.getDate() - i);
+      const dateStr = transactionDate.toISOString().split('T')[0];
+      
+      // Generate 1-3 transactions per day
+      const transactionsToday = Math.floor(Math.random() * 3) + 1;
+      
+      for (let j = 0; j < transactionsToday; j++) {
+        const categories = ['FOOD_AND_DRINK', 'TRANSPORTATION', 'SHOPPING', 'ENTERTAINMENT', 'UTILITIES'];
+        const category = categories[Math.floor(Math.random() * categories.length)];
+        const amount = Math.round((Math.random() * 100 + 10) * 100) / 100; // $10-110
+        
+        const transaction = {
+          transaction_id: `sample_txn_${clerkUserId}_${i}_${j}`,
+          account_id: sampleAccounts[0].account_id, // Use checking account
+          amount: amount,
+          iso_currency_code: 'USD',
+          name: `Sample ${category.toLowerCase().replace('_', ' ')} transaction`,
+          merchant_name: `Sample Merchant ${j + 1}`,
+          date: dateStr,
+          personal_finance_category: {
+            primary: category,
+            detailed: category
+          },
+          pending: false,
+          location: {
+            city: 'Sample City',
+            region: 'Sample State',
+            country: 'US'
+          }
+        };
+        
+        sampleTransactions.push(transaction);
+      }
+    }
+    
+    // Add sample transactions to database
+    const addedTransactions = await database.addTransactions(clerkUserId, sampleTransactions);
+    
+    console.log(`Sample data seeded successfully: ${addedAccounts.length} accounts, ${addedTransactions.length} transactions`);
+    
+    res.json({
+      success: true,
+      message: 'Sample data seeded successfully',
+      accounts: addedAccounts.length,
+      transactions: addedTransactions.length
+    });
+    
+  } catch (error) {
+    console.error('Error seeding sample data:', error);
+    res.status(500).json({ 
+      error: 'Failed to seed sample data',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);

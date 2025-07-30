@@ -475,18 +475,7 @@ async function connectPlaidAccount() {
         const result = await plaidService.openPlaidLink(userId);
         
         if (result && result.success) {
-            // Add the connected institution to our account system
-            const institution = result.institution;
-            // Create a new account entry
-            const newAccount = {
-                id: `plaid_${institution.id}`,
-                name: institution.name,
-                type: 'plaid',
-                institutionId: institution.id
-            };
-            // Add to accounts list
-            savingsAccounts.push(newAccount);
-            saveSavingsAccounts(savingsAccounts);
+            console.log('Plaid connection successful:', result.institution);
 
             // Show skeleton loader immediately
             if (typeof showAccountsLoadingPlaceholder === 'function') {
@@ -513,15 +502,41 @@ async function connectPlaidAccount() {
 
             // Only fetch transactions (which will also update accounts) ONCE
             fetchPlaidTransactions().finally(() => {
-                if (typeof renderAccountsList === 'function') {
-                    renderAccountsList(savingsAccounts);
-                }
-                if (typeof hideAccountsLoadingPlaceholder === 'function') {
-                    hideAccountsLoadingPlaceholder();
-                }
-                // Force refresh of account management list after transaction fetch
-                if (typeof updateAccountManagementList === 'function') {
-                    updateAccountManagementList();
+                // Refresh accounts list from API after transaction fetch
+                if (typeof loadAccountsWithTransactions === 'function') {
+                    loadAccountsWithTransactions().then(() => {
+                        if (typeof renderAccountsList === 'function') {
+                            renderAccountsList(savingsAccounts);
+                        }
+                        if (typeof hideAccountsLoadingPlaceholder === 'function') {
+                            hideAccountsLoadingPlaceholder();
+                        }
+                        // Force refresh of account management list after loading accounts
+                        if (typeof updateAccountManagementList === 'function') {
+                            updateAccountManagementList();
+                        }
+                        
+                        // Update home screen charts and net worth
+                        if (typeof updateHomeScreen === 'function') {
+                            updateHomeScreen();
+                        }
+                    });
+                } else {
+                    if (typeof renderAccountsList === 'function') {
+                        renderAccountsList(savingsAccounts);
+                    }
+                    if (typeof hideAccountsLoadingPlaceholder === 'function') {
+                        hideAccountsLoadingPlaceholder();
+                    }
+                    // Force refresh of account management list after transaction fetch
+                    if (typeof updateAccountManagementList === 'function') {
+                        updateAccountManagementList();
+                    }
+                    
+                    // Update home screen charts and net worth
+                    if (typeof updateHomeScreen === 'function') {
+                        updateHomeScreen();
+                    }
                 }
             });
         } else {
