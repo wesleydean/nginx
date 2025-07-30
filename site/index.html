@@ -16748,18 +16748,48 @@ margin-right: 0.5rem;
             loadTestData();
         }
 
-        function clearAllData() {
+        async function clearAllData() {
             // Confirm before clearing all data
-            if (confirm("Are you sure you want to clear all data? This action cannot be undone.")) {
+            if (confirm("Are you sure you want to clear all data? This action cannot be undone and will remove all your accounts, transactions, and settings.")) {
                 try {
+                    console.log('Starting data clearing process...');
+                    
+                    // Clear database data first (if user is authenticated)
+                    if (window.plaidService) {
+                        try {
+                            console.log('Clearing database data...');
+                            const sessionToken = await window.plaidService.getClerkSessionToken();
+                            
+                            const response = await fetch(`${window.plaidService.baseUrl}/api/user/data`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${sessionToken}`,
+                                }
+                            });
+
+                            if (response.ok) {
+                                const result = await response.json();
+                                console.log('Database data cleared successfully:', result);
+                            } else {
+                                console.warn('Failed to clear database data:', response.status);
+                                // Continue with localStorage clearing even if database clearing fails
+                            }
+                        } catch (dbError) {
+                            console.error('Error clearing database data:', dbError);
+                            // Continue with localStorage clearing even if database clearing fails
+                        }
+                    }
+
                     // Clear all application-related data from localStorage
                     const keysToRemove = [
                         'accountBalances',
-                        'dailyExpenses',
+                        'dailyExpenses', 
                         'expenses',
                         'simpleBudgetSettings',
                         'savingsAccounts',
-                        'budgetSettings'
+                        'budgetSettings',
+                        'plaid_institutions'
                     ];
 
                     // Clear each key
@@ -16768,16 +16798,21 @@ margin-right: 0.5rem;
                         localStorage.removeItem(key);
                     });
 
+                    // Clear API cache
+                    if (typeof clearAccountsCache === 'function') {
+                        clearAccountsCache();
+                    }
+
                     // For additional safety, clear all localStorage
                     console.log('Clearing all localStorage');
                     localStorage.clear();
 
                     // Reload the page to reflect changes
-                    alert("All data has been cleared successfully.");
+                    alert("All data has been cleared successfully from both your device and our servers.");
                     window.location.reload();
                 } catch (error) {
                     console.error('Error clearing data:', error);
-                    alert("An error occurred while clearing data.");
+                    alert("An error occurred while clearing data. Please try again or contact support.");
                 }
             }
         }

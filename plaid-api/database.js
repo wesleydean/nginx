@@ -244,6 +244,60 @@ class Database {
     });
   }
 
+  // Clear all data for a specific user
+  clearUserData(clerkUserId) {
+    return new Promise((resolve, reject) => {
+      this.db.serialize(() => {
+        this.db.run('BEGIN TRANSACTION');
+        
+        const deleteTransactions = this.db.prepare('DELETE FROM transactions WHERE user_id = ?');
+        const deleteAccounts = this.db.prepare('DELETE FROM accounts WHERE user_id = ?');
+        const deleteUser = this.db.prepare('DELETE FROM users WHERE clerk_user_id = ?');
+        
+        try {
+          // Delete transactions first (due to foreign key constraints)
+          deleteTransactions.run([clerkUserId], function(err) {
+            if (err) throw err;
+            console.log(`Deleted ${this.changes} transactions for user ${clerkUserId}`);
+          });
+          
+          // Delete accounts
+          deleteAccounts.run([clerkUserId], function(err) {
+            if (err) throw err;
+            console.log(`Deleted ${this.changes} accounts for user ${clerkUserId}`);
+          });
+          
+          // Delete user record
+          deleteUser.run([clerkUserId], function(err) {
+            if (err) throw err;
+            console.log(`Deleted user record for ${clerkUserId}`);
+          });
+          
+          this.db.run('COMMIT', (err) => {
+            if (err) {
+              reject(err);
+            } else {
+              console.log(`Successfully cleared all data for user ${clerkUserId}`);
+              resolve({ 
+                userId: clerkUserId,
+                success: true 
+              });
+            }
+          });
+          
+        } catch (error) {
+          this.db.run('ROLLBACK');
+          console.error('Error during user data deletion, rolled back:', error);
+          reject(error);
+        } finally {
+          deleteTransactions.finalize();
+          deleteAccounts.finalize();
+          deleteUser.finalize();
+        }
+      });
+    });
+  }
+
   getUserAccounts(clerkUserId) {
     return new Promise((resolve, reject) => {
       this.db.all(

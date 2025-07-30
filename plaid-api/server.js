@@ -15,7 +15,7 @@ app.use(express.json());
 console.log('Setting up CORS configuration');
 app.use(cors({
   origin: '*', // Allow all origins for development
-  methods: ['GET', 'POST', 'PUT', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
   preflightContinue: false // Explicitly prevent preflight continuation issues
@@ -26,7 +26,7 @@ app.use(cors({
 // Handle preflight requests - more specific handling to avoid path-to-regexp issues
 app.options('*', (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.header('Access-Control-Allow-Credentials', true);
   res.status(200).end();
@@ -364,6 +364,26 @@ app.put('/api/accounts/:accountId', clerkAuth, async (req, res) => {
   } catch (error) {
     console.error('Error updating account name:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Clear all user data
+app.delete('/api/user/data', clerkAuth, async (req, res) => {
+  try {
+    const clerkUserId = req.auth.userId;
+    console.log(`Clearing all data for user: ${clerkUserId}`);
+    
+    // Delete all user data from database
+    await database.clearUserData(clerkUserId);
+    
+    console.log(`Successfully cleared all data for user: ${clerkUserId}`);
+    res.json({ success: true, message: 'All user data cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing user data:', error);
+    res.status(500).json({ 
+      error: 'Failed to clear user data. Please try again.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
