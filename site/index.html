@@ -14424,21 +14424,19 @@ margin-right: 0.5rem;
         }
 
         function closeAccountDetail() {
-            const screen = document.getElementById('accountDetailScreen');
             const overlay = document.getElementById('accountDetailOverlay');
             
-            // First remove the overlay active class to start fade out
-            overlay.classList.remove('active');
-            
-            // The CSS transition on .account-detail-screen will handle the slide-out animation
-            // No need for manual transform - the CSS does: right: -100% when overlay is not active
-            
-            // Clean up after animation completes
-            setTimeout(() => {
-                if (window.currentAccountDetail) {
-                    window.currentAccountDetail = null;
-                }
-            }, 300);
+            if (overlay) {
+                // Remove active class to trigger CSS slide-out animation
+                overlay.classList.remove('active');
+                
+                // Clean up after animation completes
+                setTimeout(() => {
+                    if (window.currentAccountDetail) {
+                        window.currentAccountDetail = null;
+                    }
+                }, 300);
+            }
         }
 
         function updateAccountDetailChart() {
@@ -14815,21 +14813,23 @@ margin-right: 0.5rem;
                 isDragging = false;
                 const deltaX = currentX - startX;
                 
-                screen.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                
                 // If swiped more than 1/3 of the screen width, close
                 if (deltaX > screen.offsetWidth / 3) {
-                    closeAccountDetail();
-                } else {
-                    // Snap back
-                    screen.style.transform = 'translateX(0)';
-                }
-                
-                // Reset
-                setTimeout(() => {
+                    // Reset transform first, then close
                     screen.style.transition = '';
                     screen.style.transform = '';
-                }, 300);
+                    closeAccountDetail();
+                } else {
+                    // Snap back using CSS transition
+                    screen.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    screen.style.transform = 'translateX(0)';
+                    
+                    // Reset after snap back
+                    setTimeout(() => {
+                        screen.style.transition = '';
+                        screen.style.transform = '';
+                    }, 300);
+                }
             }
 
             // Add touch event listeners
