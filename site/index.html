@@ -525,11 +525,6 @@
         }
         
         /* Month view: remove borders and shadows from main cards */
-        .card {
-            border: none;
-            box-shadow: none;
-            background-color: transparent;
-        }
         
        
         
@@ -2513,8 +2508,7 @@
         
         .date-total {
             font-size: 0.9rem;
-            color: hsl(var(--muted-foreground));
-            font-weight: 700;
+            font-weight: 600;
         }
         
         .account-header-section {
@@ -4559,9 +4553,6 @@
         }
 
         /* Better spacing between card sections */
-        .card {
-            margin-bottom: 20px;
-        }
         
         .expense-input {
             margin-bottom: 32px;
@@ -5162,7 +5153,7 @@
         }
 
         .card {
-            margin-bottom: 1.25rem; /* consistent spacing between cards */
+            margin-bottom: 0.85rem; /* consistent spacing between cards */
         }
 
         .settings-menu-list {
@@ -5965,7 +5956,7 @@ margin-right: 0.5rem;
                         </div>
                         
                         <!-- Period Expenses -->
-                        <div class="card expenses-list-card">
+                        <div class="expenses-list-card">
                             <div class="expenses-list" id="expensesList">
                                 <div style="text-align: center; color: #7f8c8d; padding: 20px;">
                                     No transactions recorded this week
@@ -6070,7 +6061,7 @@ margin-right: 0.5rem;
 
                     
                     <!-- Savings Accounts Section -->
-                    <div class="card savings-accounts-section" id="saveSavingsSection">
+                    <div class="savings-accounts-section" id="saveSavingsSection">
                         <!-- Net Worth Chart -->
                         <div class="card home-section" onclick="handleAccountsNetWorthCardClick(event)">
                             <div class="card-header home-section-header">
@@ -6326,7 +6317,7 @@ margin-right: 0.5rem;
             </div>
 
             <!-- Activity Section -->
-            <div class="card account-detail-activity">
+            <div class="account-detail-activity">
                 <div class="card-header">
                     <div class="section-header">
                         <div class="section-header-left">
@@ -6353,7 +6344,7 @@ margin-right: 0.5rem;
             </div>
 
             <!-- Transaction List -->
-            <div class="card account-detail-transactions">
+            <div class="account-detail-transactions">
                 <div class="expenses-list" id="accountDetailTransactionsList">
                     <div style="text-align: center; color: #7f8c8d; padding: 20px;">
                         No transactions found
@@ -7065,18 +7056,34 @@ margin-right: 0.5rem;
                 item.classList.toggle('active', index === screenIndex);
             });
             
-            if (screenIndex === 2) {
-                updateReports();
-                setTimeout(updateChart, 300);
-            } else if (screenIndex === 0) {
-                // Ensure today mode is set when navigating to tracking screen
-                setPeriodMode('today');
+            // Update header title
+            updateHeaderTitle();
+            
+            if (screenIndex === 0) {
+                // Home screen
+                updateHomeScreen();
             } else if (screenIndex === 1) {
-                // Save screen - currently blank, ready for future functionality
-                console.log('Save screen loaded');
-                // Set month mode as default for save screen
+                // Cashflow screen (formerly Spend)
+                setPeriodMode('month');
+                // Ensure monthly chart is generated
+                setTimeout(() => {
+                    renderMonthlySpendingChart();
+                    // Re-initialize swipe functionality after chart render
+                    if (typeof initializeSwipeToDelete === 'function') {
+                        initializeSwipeToDelete();
+                    }
+                }, 100);
+                updateCashflowPeriodDisplay();
+                updateBudgetDisplay();
+                updateExpensesList();
+            } else if (screenIndex === 2) {
+                // Accounts screen (formerly Save)
                 setSavePeriodMode('month');
                 updateSaveScreen();
+            } else if (screenIndex === 3) {
+                // Dashboard screen (formerly Reports)
+                updateReports();
+                setTimeout(updateChart, 300);
             }
         }
         
@@ -8664,11 +8671,12 @@ margin-right: 0.5rem;
                 chartBar.dataset.month = month;
                 chartBar.dataset.year = currentYear;
                 
-                // Add current month and selected classes
+                // Add current month class (but don't auto-select)
                 if (month === currentMonth) {
                     chartBar.classList.add('current-month');
                 }
-                if (month === selectedMonth && currentYear === selectedYear) {
+                // Only add selected class if month was manually selected
+                if (selectedMonth !== null && month === selectedMonth && currentYear === selectedYear) {
                     chartBar.classList.add('selected');
                 }
                 
@@ -8695,14 +8703,19 @@ margin-right: 0.5rem;
                 chartContainer.appendChild(chartBar);
             }
             
-            // Only update total if this is the initial chart generation
-            // (selectMonth will handle updates for manual selection)
-            if (selectedMonth === new Date().getMonth() && selectedYear === new Date().getFullYear()) {
-                // Initialize previousTotal for the first time
-                const monthlyTotals = calculateMonthlySpending();
-                const monthKey = `${selectedYear}-${selectedMonth}`;
-                previousTotal = monthlyTotals[monthKey] || 0;
-                updateSelectedMonthTotal();
+            // Show current month total by default (but don't select the bar)
+            const currentMonthKey = `${currentYear}-${currentMonth}`;
+            const currentMonthTotal = monthlyTotals[currentMonthKey] || 0;
+            previousTotal = currentMonthTotal;
+            
+            // Update display to show current month amount
+            const totalElement = document.getElementById('selectedMonthTotal');
+            if (totalElement) {
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                totalElement.innerHTML = `
+                    <span class="month-name">${monthNames[currentMonth]} ${currentYear}</span>
+                    <span class="month-amount">$${currentMonthTotal.toFixed(2)}</span>
+                `;
             }
             
             // Scroll to current month
@@ -10953,8 +10966,8 @@ margin-right: 0.5rem;
         let currentTimeRange = 'last30days';
         
         // Monthly chart tracking
-        let selectedMonth = new Date().getMonth(); // 0-based month index
-        let selectedYear = new Date().getFullYear();
+        let selectedMonth = null; // No month selected by default
+        let selectedYear = null; // No year selected by default
         let previousTotal = 0; // Track previous total for animation
         
         function renderBudgetTitle() {
@@ -15766,39 +15779,6 @@ margin-right: 0.5rem;
             }
         }
 
-        // Update goToScreen to call updateHeaderTitle
-        const originalGoToScreen = goToScreen;
-        goToScreen = function(screenIndex) {
-            currentScreen = screenIndex;
-            const wrapper = document.getElementById('screensWrapper');
-            wrapper.style.transform = `translateX(-${screenIndex * 100}vw)`;
-            document.querySelectorAll('.nav-item').forEach((item, index) => {
-                item.classList.toggle('active', index === screenIndex);
-            });
-            updateHeaderTitle();
-            // ... existing code for updating screens ...
-            if (screenIndex === 0) {
-                // Home screen
-                updateHomeScreen();
-            } else if (screenIndex === 1) {
-                // Cashflow screen (formerly Spend)
-                setPeriodMode('month');
-                // Ensure monthly chart is generated
-                setTimeout(() => {
-                    generateMonthlyChart();
-                    // Initialize chart swipe for budgetDisplay after chart is rendered
-                    initializeChartSwipe();
-                }, 100);
-            } else if (screenIndex === 2) {
-                // Accounts screen (formerly Save)
-                setSavePeriodMode('month');
-                updateSaveScreen();
-            } else if (screenIndex === 3) {
-                // Dashboard screen (formerly Reports)
-                updateReports();
-                setTimeout(updateChart, 300);
-            }
-        };
 
         document.addEventListener('DOMContentLoaded', function() {
             updateHeaderTitle();
