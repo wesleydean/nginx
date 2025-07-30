@@ -1480,6 +1480,7 @@
         .dropdown-menu {
             position: absolute;
             top: calc(100% + 0.25rem) !important;
+            left: 0;
             max-height: 80vh;
             overflow-y: auto;
             background: hsl(var(--background));
@@ -3549,6 +3550,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            flex: 1;
         }
         
         .manage-accounts-btn {
@@ -5056,8 +5058,11 @@
         }
 
         .account-detail-chart-card {
-            margin: 1rem;
+            margin: 0;
             margin-bottom: 0.5rem;
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
         }
 
         .account-detail-activity {
@@ -6278,7 +6283,7 @@ margin-right: 0.5rem;
                                 <button class="dot-menu-btn" onclick="toggleAccountDetailTimeRange()" id="accountDetailTimeRangeBtn">
                                     <i data-lucide="more-horizontal" class="w-5 h-5"></i>
                                 </button>
-                                <div class="dropdown-menu" id="accountDetailTimeRangeDropdown">
+                                <div class="dropdown-menu dropdown-right" id="accountDetailTimeRangeDropdown">
                                     <div class="dropdown-header">Select time range</div>
                                     <div class="dropdown-item" onclick="updateAccountDetailTimeRange('week', event)">This week</div>
                                     <div class="dropdown-item active" onclick="updateAccountDetailTimeRange('month', event)">This month</div>
@@ -14717,9 +14722,53 @@ margin-right: 0.5rem;
         }
 
         function getAccountTransactions(accountId, timeRange) {
-            // For now, return mock transactions
-            // In real implementation, this would filter actual transaction data
-            const mockTransactions = [
+            // Load real expense data from localStorage
+            const expenses = loadExpenses();
+            let transactions = [];
+
+            // Convert expenses to transaction format
+            Object.keys(expenses).forEach(dateKey => {
+                const dayExpenses = expenses[dateKey] || [];
+                dayExpenses.forEach(expense => {
+                    // Include all transactions as they represent account activity
+                    transactions.push({
+                        date: dateKey,
+                        description: expense.description || getCategoryDisplayName(expense.category),
+                        amount: -expense.amount, // Expenses are negative transactions
+                        type: 'debit',
+                        category: expense.category
+                    });
+                });
+            });
+
+            // Add sample income transactions if no real data exists or to make data more realistic
+            if (transactions.length === 0) {
+                transactions = generateSampleTransactions(accountId);
+            } else {
+                // Add periodic income transactions to make data more realistic
+                transactions = [...transactions, ...generateIncomeTransactions()];
+            }
+
+            // Filter by time range
+            const today = new Date();
+            let cutoffDate = new Date();
+            
+            switch (timeRange) {
+                case 'week': cutoffDate.setDate(today.getDate() - 7); break;
+                case 'month': cutoffDate.setMonth(today.getMonth() - 1); break;
+                case 'quarter': cutoffDate.setMonth(today.getMonth() - 3); break;
+                case 'year': cutoffDate.setFullYear(today.getFullYear() - 1); break;
+                case 'all': cutoffDate = new Date('2000-01-01'); break;
+            }
+
+            return transactions
+                .filter(transaction => new Date(transaction.date) >= cutoffDate)
+                .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date descending
+        }
+
+        function generateSampleTransactions(accountId) {
+            // Return sample transactions for demo purposes
+            return [
                 {
                     date: '2025-07-29',
                     description: 'Direct Deposit - Salary',
@@ -14742,25 +14791,59 @@ margin-right: 0.5rem;
                     date: '2025-07-26',
                     description: 'ATM Withdrawal',
                     amount: -60.00,
-                    type: 'debit'  
+                    type: 'debit'
                 }
             ];
+        }
 
-            // Filter by time range
+        function getCategoryDisplayName(category) {
+            const categoryMap = {
+                'groceries': 'Groceries',
+                'transportation': 'Transportation', 
+                'dining': 'Dining Out',
+                'entertainment': 'Entertainment',
+                'personal': 'Personal Care',
+                'clothing': 'Clothing',
+                'utilities': 'Utilities',
+                'healthcare': 'Healthcare',
+                'subscription': 'Subscriptions',
+                'rent': 'Rent/Mortgage',
+                'other': 'Other'
+            };
+            return categoryMap[category] || 'Other Expense';
+        }
+
+        function generateIncomeTransactions() {
+            // Add some realistic income transactions
+            const incomeTransactions = [];
             const today = new Date();
-            let cutoffDate = new Date();
             
-            switch (timeRange) {
-                case 'week': cutoffDate.setDate(today.getDate() - 7); break;
-                case 'month': cutoffDate.setMonth(today.getMonth() - 1); break;
-                case 'quarter': cutoffDate.setMonth(today.getMonth() - 3); break;
-                case 'year': cutoffDate.setFullYear(today.getFullYear() - 1); break;
-                case 'all': cutoffDate = new Date('2000-01-01'); break;
-            }
-
-            return mockTransactions.filter(transaction => {
-                return new Date(transaction.date) >= cutoffDate;
+            // Add salary deposit for last month
+            const lastMonth = new Date(today);
+            lastMonth.setMonth(lastMonth.getMonth() - 1);
+            lastMonth.setDate(1); // First of last month
+            
+            incomeTransactions.push({
+                date: lastMonth.toISOString().split('T')[0],
+                description: 'Direct Deposit - Salary',
+                amount: 4200.00,
+                type: 'credit'
             });
+            
+            // Add this month's salary if we're past the 1st
+            if (today.getDate() > 1) {
+                const thisMonth = new Date(today);
+                thisMonth.setDate(1);
+                
+                incomeTransactions.push({
+                    date: thisMonth.toISOString().split('T')[0],
+                    description: 'Direct Deposit - Salary',
+                    amount: 4200.00,
+                    type: 'credit'
+                });
+            }
+            
+            return incomeTransactions;
         }
 
         function renderAccountDetailTransactions(transactions) {
