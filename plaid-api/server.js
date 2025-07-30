@@ -305,33 +305,45 @@ app.get('/api/transactions/categories', clerkAuth, async (req, res) => {
   }
 });
 
-// Get user accounts with recent transactions
+// Get user accounts (without transactions for performance)
 app.get('/api/accounts', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
+    console.log(`Loading accounts for user: ${clerkUserId}`);
+    
     const accounts = await database.getUserAccounts(clerkUserId);
+    console.log(`Found ${accounts.length} accounts for user`);
     
-    // Get recent transactions for each account
-    const accountsWithTransactions = await Promise.all(
-      accounts.map(async (account) => {
-        const recentTransactions = await database.getAccountTransactions(
-          clerkUserId, 
-          account.account_id, 
-          5 // Get 5 most recent transactions
-        );
-        
-        return {
-          ...account,
-          recent_transactions: recentTransactions,
-          transaction_count: recentTransactions.length
-        };
-      })
-    );
-    
-    res.json({ accounts: accountsWithTransactions });
+    // Return accounts with basic info only - transactions loaded separately when needed
+    res.json({ accounts });
   } catch (error) {
     console.error('Error getting user accounts:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      error: 'Failed to load accounts. Please try again.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// Get transactions for a specific account
+app.get('/api/accounts/:accountId/transactions', clerkAuth, async (req, res) => {
+  try {
+    const clerkUserId = req.auth.userId;
+    const accountId = req.params.accountId;
+    const limit = parseInt(req.query.limit) || 50; // Default to 50 transactions
+    
+    console.log(`Loading transactions for account ${accountId}, limit: ${limit}`);
+    
+    const transactions = await database.getAccountTransactions(clerkUserId, accountId, limit);
+    console.log(`Found ${transactions.length} transactions for account ${accountId}`);
+    
+    res.json({ transactions });
+  } catch (error) {
+    console.error('Error getting account transactions:', error);
+    res.status(500).json({ 
+      error: 'Failed to load transactions. Please try again.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 

@@ -35,6 +35,7 @@ class Database {
         name TEXT NOT NULL,
         original_name TEXT NOT NULL,
         type TEXT NOT NULL,
+        subtype TEXT,
         institution_name TEXT NOT NULL,
         mask TEXT,
         current_balance REAL,
@@ -84,6 +85,15 @@ class Database {
       this.db.run(createUsersTable);
       this.db.run(createAccountsTable);
       this.db.run(createTransactionsTable);
+      
+      // Add subtype column if it doesn't exist (for existing databases)
+      this.db.run(`
+        ALTER TABLE accounts ADD COLUMN subtype TEXT
+      `, (err) => {
+        if (err && !err.message.includes('duplicate column')) {
+          console.error('Error adding subtype column:', err);
+        }
+      });
       
       createIndexes.forEach(indexSQL => {
         this.db.run(indexSQL);
@@ -165,9 +175,9 @@ class Database {
     return new Promise((resolve, reject) => {
       const stmt = this.db.prepare(`
         INSERT OR REPLACE INTO accounts (
-          account_id, user_id, name, original_name, type, 
+          account_id, user_id, name, original_name, type, subtype,
           institution_name, mask, current_balance, currency, access_token
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       
       const balances = accountData.balances || {};
@@ -178,6 +188,7 @@ class Database {
         accountData.name, // user can edit this
         accountData.name, // original from Plaid
         accountData.type,
+        accountData.subtype,
         accountData.institution_name,
         accountData.mask,
         balances.current,

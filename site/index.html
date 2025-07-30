@@ -9846,27 +9846,19 @@ margin-right: 0.5rem;
             await loadAccountsWithTransactions();
 
             listContainer.innerHTML = savingsAccounts.map(account => {
-                const recentTransactionsHtml = account.recentTransactions && account.recentTransactions.length > 0
-                    ? renderAccountTransactions(account.recentTransactions)
-                    : '<div style="text-align: center; color: #7f8c8d; padding: 0.5rem; font-size: 0.8rem;">No recent transactions</div>';
-
                 const balanceDisplay = account.currentBalance !== undefined
                     ? `<div style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">Balance: ${formatCurrency(account.currentBalance)}</div>`
                     : '';
 
                 return `
                         <div class="account-management-list-item" style="flex-direction: column; align-items: flex-start; padding: 1rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                 <div>
                                     <div class="account-management-name" style="font-weight: 600;">${account.name}</div>
                                     ${account.institutionName ? `<div style="font-size: 0.8rem; color: #666;">${account.institutionName}</div>` : ''}
                                     ${balanceDisplay}
                                 </div>
                                 ${savingsAccounts.length > 1 ? `<button class="account-management-delete-btn" onclick="deleteAccountFromSlideOut('${account.id}')">Delete</button>` : ''}
-                            </div>
-                            <div style="width: 100%; border-top: 1px solid #eee; padding-top: 0.5rem;">
-                                <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; font-weight: 500;">Recent Transactions</div>
-                                ${recentTransactionsHtml}
                             </div>
                         </div>
                     `;
@@ -10823,6 +10815,100 @@ margin-right: 0.5rem;
         window.clearAccountsCache = clearAccountsCache;
 
         /**
+         * Maps Plaid account types and subtypes to our app's account categories
+         * @param {string} type - Plaid account type (depository, credit, loan, investment)
+         * @param {string} subtype - Plaid account subtype (checking, savings, credit card, etc.)
+         * @returns {string} - Our app's account type
+         */
+        function mapPlaidAccountType(type, subtype) {
+            // Plaid account type mapping
+            const typeMapping = {
+                // Depository accounts (cash & checking)
+                'depository': {
+                    'checking': 'cash',
+                    'savings': 'cash', 
+                    'hsa': 'cash',
+                    'cd': 'cash',
+                    'money market': 'cash',
+                    'paypal': 'cash',
+                    'prepaid': 'cash',
+                    'cash management': 'cash',
+                    // Default for depository
+                    'default': 'cash'
+                },
+                
+                // Investment accounts
+                'investment': {
+                    '401k': 'retirement',
+                    '403B': 'retirement', 
+                    '457b': 'retirement',
+                    '401a': 'retirement',
+                    'ira': 'retirement',
+                    'roth': 'retirement',
+                    'rollover': 'retirement',
+                    'sep': 'retirement',
+                    'simple': 'retirement',
+                    'sarsep': 'retirement',
+                    'pension': 'retirement',
+                    'profit sharing': 'retirement',
+                    'stock plan': 'retirement',
+                    'thrift savings plan': 'retirement',
+                    'keogh': 'retirement',
+                    'mutual fund': 'investment',
+                    'fixed annuity': 'investment',
+                    'variable annuity': 'investment',
+                    'cash isa': 'investment',
+                    'stocks isa': 'investment',
+                    'investment-isa': 'investment',
+                    'brokerage': 'investment',
+                    'hsbc': 'investment',
+                    'tfsa': 'investment',
+                    'crypto exchange': 'crypto',
+                    // Default for investment
+                    'default': 'investment'
+                },
+                
+                // Credit accounts (liabilities)
+                'credit': {
+                    'credit card': 'credit_card',
+                    'paypal': 'credit_card',
+                    // Default for credit
+                    'default': 'credit_card'
+                },
+                
+                // Loan accounts (liabilities)  
+                'loan': {
+                    'auto': 'liability',
+                    'business': 'liability',
+                    'commercial': 'liability',
+                    'construction': 'liability',
+                    'consumer': 'liability',
+                    'home equity': 'liability',
+                    'loan': 'liability',
+                    'mortgage': 'mortgage',
+                    'overdraft': 'liability',
+                    'line of credit': 'liability',
+                    'student': 'student_loan',
+                    // Default for loan
+                    'default': 'liability'
+                }
+            };
+
+            // Get the type mapping object
+            const subtypeMapping = typeMapping[type];
+            if (!subtypeMapping) {
+                console.warn(`Unknown Plaid account type: ${type}`);
+                return 'cash'; // Default fallback
+            }
+
+            // Get the mapped type for the subtype, or use the default for this type
+            const mappedType = subtypeMapping[subtype] || subtypeMapping['default'];
+            
+            console.log(`Mapped Plaid account ${type}/${subtype} to ${mappedType}`);
+            return mappedType;
+        }
+
+        /**
          * Fetches accounts with recent transactions from the API with caching
          */
         async function loadAccountsWithTransactions() {
@@ -10850,6 +10936,10 @@ margin-right: 0.5rem;
                     accountsApiCache.data = data;
                     accountsApiCache.timestamp = now;
                     return data;
+                } catch (error) {
+                    console.error('Failed to fetch accounts data:', error);
+                    // Don't cache errors
+                    throw error;
                 } finally {
                     // Clear the promise whether successful or not
                     accountsApiCache.promise = null;
@@ -10869,20 +10959,28 @@ margin-right: 0.5rem;
             // Get Clerk session token
             const sessionToken = await window.plaidService.getClerkSessionToken();
 
-            const response = await fetch(`${window.plaidService.baseUrl}/api/accounts`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionToken}`,
+            // Add timeout to prevent hanging requests
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+            try {
+                const response = await fetch(`${window.plaidService.baseUrl}/api/accounts`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionToken}`,
+                    },
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load accounts: ${response.status}`);
                 }
-            });
 
-            if (!response.ok) {
-                throw new Error(`Failed to load accounts: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('Loaded accounts with transactions:', data);
+                const data = await response.json();
+                console.log('Loaded accounts with transactions:', data);
 
             if (data.accounts && Array.isArray(data.accounts)) {
                 // Update the global savingsAccounts with the API data
@@ -10890,16 +10988,17 @@ margin-right: 0.5rem;
                 const apiAccounts = data.accounts.map(account => ({
                     id: account.account_id,
                     name: account.name,
-                    type: 'plaid',
+                    type: mapPlaidAccountType(account.type, account.subtype),
+                    plaidType: account.type,
+                    plaidSubtype: account.subtype,
                     institutionName: account.institution_name,
                     currentBalance: account.current_balance,
-                    currency: account.currency,
-                    recentTransactions: account.recent_transactions || [],
-                    transactionCount: account.transaction_count || 0
+                    currency: account.currency
+                    // Note: transactions will be loaded separately when viewing account details
                 }));
 
                 // Merge with existing localStorage accounts
-                const existingAccounts = savingsAccounts.filter(acc => acc.type !== 'plaid');
+                const existingAccounts = savingsAccounts.filter(acc => !acc.plaidType);
                 savingsAccounts = [...existingAccounts, ...apiAccounts];
 
                 // Update localStorage
@@ -10915,6 +11014,13 @@ margin-right: 0.5rem;
             }
 
             return [];
+            } catch (error) {
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timeout: The server is taking too long to respond');
+                }
+                throw error;
+            }
         }
 
         /**
