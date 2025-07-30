@@ -5799,7 +5799,7 @@ margin-right: 0.5rem;
                                     <button class="dot-menu-btn" onclick="toggleNetWorthDropdown()" id="netWorthMenuBtn">
                                         <i data-lucide="more-horizontal" class="w-5 h-5"></i>
                                     </button>
-                                    <div class="dropdown-menu" id="netWorthDropdown">
+                                    <div class="dropdown-menu dropdown-right" id="netWorthDropdown">
                                         <div class="dropdown-header">Select date range</div>
                                         <div class="dropdown-item" onclick="updateNetWorthRange('1m')">1 month</div>
                                         <div class="dropdown-item" onclick="updateNetWorthRange('3m')">3 months</div>
@@ -6057,10 +6057,6 @@ margin-right: 0.5rem;
                         <div class="account-header-section" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                             <div class="account-title-info">
                                 <h3 class="section-title" style="margin-bottom: 0.25rem;">Accounts</h3>
-                                <div class="account-total-balance" id="accountTotalBalance">
-                                    <div class="current-balance-modern" id="accountBalanceAmount">$0.00</div>
-                                    <div class="balance-change-modern" id="accountBalanceChange">Total Balance</div>
-                                </div>
                             </div>
                             <div class="cashflow-menu-container">
                                 <button class="dot-menu-btn" onclick="toggleAccountsDropdown()" id="accountsMenuBtn">
@@ -6074,6 +6070,10 @@ margin-right: 0.5rem;
                                     <div class="dropdown-item" onclick="connectPlaidAccount()">
                                         <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
                                         Connect Account
+                                    </div>
+                                    <div class="dropdown-item" onclick="showBalanceSlideOut()">
+                                        <i data-lucide="wallet" class="w-4 h-4 mr-2"></i>
+                                        Add Balance
                                     </div>
                                 </div>
                             </div>
@@ -12220,6 +12220,74 @@ margin-right: 0.5rem;
             return cumulativeData;
         }
         
+        // Universal function for animating line charts from left to right (line only)
+        function animateLinePath(ctx, points, options = {}) {
+            const {
+                duration = 800,
+                strokeStyle = '#8b5cf6',
+                lineWidth = 2.5,
+                onComplete = null,
+                startDelay = 0
+            } = options;
+            
+            if (points.length < 2) {
+                if (onComplete) onComplete();
+                return;
+            }
+            
+            let startTime = null;
+            const totalLength = points.length - 1;
+            
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp + startDelay;
+                const elapsed = timestamp - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Use easing function for smoother animation
+                const easedProgress = 1 - Math.pow(1 - progress, 3); // cubic easing out
+                
+                const pointsToShow = Math.floor(easedProgress * totalLength) + 1;
+                
+                // Draw line up to current progress
+                ctx.strokeStyle = strokeStyle;
+                ctx.lineWidth = lineWidth;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                
+                for (let i = 0; i < Math.min(pointsToShow, points.length); i++) {
+                    if (i === 0) {
+                        ctx.moveTo(points[i].x, points[i].y);
+                    } else {
+                        ctx.lineTo(points[i].x, points[i].y);
+                    }
+                }
+                
+                // If we're between points, interpolate
+                if (pointsToShow < points.length && easedProgress < 1) {
+                    const lastIndex = Math.floor(easedProgress * totalLength);
+                    const nextIndex = Math.min(lastIndex + 1, points.length - 1);
+                    const segmentProgress = (easedProgress * totalLength) - lastIndex;
+                    
+                    if (lastIndex < points.length - 1) {
+                        const x = points[lastIndex].x + (points[nextIndex].x - points[lastIndex].x) * segmentProgress;
+                        const y = points[lastIndex].y + (points[nextIndex].y - points[lastIndex].y) * segmentProgress;
+                        ctx.lineTo(x, y);
+                    }
+                }
+                
+                ctx.stroke();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else if (onComplete) {
+                    onComplete();
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
         function drawHomeCashflowChart(currentMonthData, lastMonthData, yAxisMax) {
             const canvas = document.getElementById('homeCashflowCanvas');
             if (!canvas) return;
@@ -12293,39 +12361,43 @@ margin-right: 0.5rem;
                 ctx.stroke();
             }
             
-            // Draw current month data (purple color, thicker)
+            // Draw current month data (purple color, thicker) with animation
             if (currentMonthData.length > 0) {
                 const gradient = ctx.createLinearGradient(0, 0, 0, height);
                 gradient.addColorStop(0, '#8b5cf6');
                 gradient.addColorStop(1, '#7c3aed');
                 
-                ctx.strokeStyle = gradient;
-                ctx.lineWidth = 2.5;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
+                // Pre-fill the area
+                ctx.globalAlpha = 0.1;
+                ctx.fillStyle = gradient;
                 ctx.beginPath();
-                
                 currentMonthData.forEach((point, index) => {
                     const x = xScale(point.day);
                     const y = yScale(point.cumulative);
-                    
                     if (index === 0) {
                         ctx.moveTo(x, y);
                     } else {
                         ctx.lineTo(x, y);
                     }
                 });
-                
-                ctx.stroke();
-                
-                // Add subtle area fill
-                ctx.globalAlpha = 0.1;
-                ctx.fillStyle = gradient;
                 ctx.lineTo(xScale(currentMonthData[currentMonthData.length - 1].day), yScale(0));
                 ctx.lineTo(xScale(currentMonthData[0].day), yScale(0));
                 ctx.closePath();
                 ctx.fill();
                 ctx.globalAlpha = 1;
+                
+                // Convert data to points for animation
+                const points = currentMonthData.map(point => ({
+                    x: xScale(point.day),
+                    y: yScale(point.cumulative)
+                }));
+                
+                // Animate only the line from left to right
+                animateLinePath(ctx, points, {
+                    strokeStyle: gradient,
+                    lineWidth: 2.5,
+                    duration: 1000
+                });
             }
         }
         
@@ -12669,36 +12741,21 @@ margin-right: 0.5rem;
             ctx.fill();
             ctx.globalAlpha = 1;
             
-            // Draw smooth line using bezier curves
-            ctx.strokeStyle = '#5fa42e';
-            ctx.lineWidth = 2;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.beginPath();
-            
+            // Draw smooth line using bezier curves with animation
             if (data.length > 1) {
-                ctx.moveTo(xScale(0), yScale(data[0].value));
+                // Convert data to points for animation (simplified to linear for now)
+                const points = data.map((point, index) => ({
+                    x: xScale(index),
+                    y: yScale(point.value)
+                }));
                 
-                for (let i = 1; i < data.length; i++) {
-                    const prevX = xScale(i-1);
-                    const prevY = yScale(data[i-1].value);
-                    const currX = xScale(i);
-                    const currY = yScale(data[i].value);
-                    
-                    if (i === 1) {
-                        // First curve point - smoother transition
-                        const cpx = prevX + (currX - prevX) * 0.3;
-                        ctx.quadraticCurveTo(cpx, prevY, currX, currY);
-                    } else {
-                        // Much smoother curve through points
-                        const cpx1 = prevX + (currX - prevX) * 0.2;
-                        const cpx2 = currX - (currX - prevX) * 0.2;
-                        ctx.bezierCurveTo(cpx1, prevY, cpx2, currY, currX, currY);
-                    }
-                }
+                // Animate the line from left to right
+                animateLinePath(ctx, points, {
+                    strokeStyle: '#5fa42e',
+                    lineWidth: 2,
+                    duration: 1000
+                });
             }
-            
-            ctx.stroke();
         }
         
         function updateHomeNetWorthDisplay(totalNetWorth, range) {
@@ -13276,18 +13333,22 @@ margin-right: 0.5rem;
             ctx.closePath();
             ctx.fill();
             
-            // Draw main line
+            // Draw main line with animation
             ctx.globalAlpha = 1;
-            ctx.strokeStyle = '#5fa42e';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(xScale(0), yScale(data[0].value));
-            
-            for (let i = 1; i < data.length; i++) {
-                ctx.lineTo(xScale(i), yScale(data[i].value));
+            if (data.length > 1) {
+                // Convert data to points for animation
+                const points = data.map((point, index) => ({
+                    x: xScale(index),
+                    y: yScale(point.value)
+                }));
+                
+                // Animate only the line from left to right
+                animateLinePath(ctx, points, {
+                    strokeStyle: '#5fa42e',
+                    lineWidth: 2.5,
+                    duration: 1000
+                });
             }
-            
-            ctx.stroke();
         }
 
         function updateAccountsNetWorthDisplay(totalAssets, range) {
@@ -13545,50 +13606,43 @@ margin-right: 0.5rem;
                 ctx.stroke();
             }
             
-            // Draw current period data (purple color, thicker) with smooth curves
+            // Draw current period data (purple color, thicker) with animation
             if (currentPeriodData.length > 0) {
                 const gradient = ctx.createLinearGradient(0, 0, 0, height);
                 gradient.addColorStop(0, '#8b5cf6');
                 gradient.addColorStop(1, '#7c3aed');
                 
-                ctx.strokeStyle = gradient;
-                ctx.lineWidth = 2.5;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
+                // Pre-fill the area
+                ctx.globalAlpha = 0.1;
+                ctx.fillStyle = gradient;
                 ctx.beginPath();
-                
-                if (currentPeriodData.length > 1) {
-                    ctx.moveTo(xScale(currentPeriodData[0].day), yScale(currentPeriodData[0].cumulative));
-                    
-                    for (let i = 1; i < currentPeriodData.length; i++) {
-                        const prevX = xScale(currentPeriodData[i-1].day);
-                        const prevY = yScale(currentPeriodData[i-1].cumulative);
-                        const currX = xScale(currentPeriodData[i].day);
-                        const currY = yScale(currentPeriodData[i].cumulative);
-                        
-                        if (i === 1) {
-                            const cpx = prevX + (currX - prevX) * 0.3;
-                            ctx.quadraticCurveTo(cpx, prevY, currX, currY);
-                        } else {
-                            const cpx1 = prevX + (currX - prevX) * 0.15;
-                            const cpx2 = currX - (currX - prevX) * 0.15;
-                            ctx.bezierCurveTo(cpx1, prevY, cpx2, currY, currX, currY);
-                        }
+                currentPeriodData.forEach((point, index) => {
+                    const x = xScale(point.day);
+                    const y = yScale(point.cumulative);
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
                     }
-                }
+                });
+                ctx.lineTo(xScale(currentPeriodData[currentPeriodData.length - 1].day), yScale(0));
+                ctx.lineTo(xScale(currentPeriodData[0].day), yScale(0));
+                ctx.closePath();
+                ctx.fill();
+                ctx.globalAlpha = 1;
                 
-                ctx.stroke();
+                // Convert data to points for animation (simplified to linear for now)
+                const points = currentPeriodData.map(point => ({
+                    x: xScale(point.day),
+                    y: yScale(point.cumulative)
+                }));
                 
-                // Add subtle area fill
-                if (currentPeriodData.length > 1) {
-                    ctx.globalAlpha = 0.1;
-                    ctx.fillStyle = gradient;
-                    ctx.lineTo(xScale(currentPeriodData[currentPeriodData.length - 1].day), yScale(0));
-                    ctx.lineTo(xScale(currentPeriodData[0].day), yScale(0));
-                    ctx.closePath();
-                    ctx.fill();
-                    ctx.globalAlpha = 1;
-                }
+                // Animate only the line from left to right
+                animateLinePath(ctx, points, {
+                    strokeStyle: gradient,
+                    lineWidth: 2.5,
+                    duration: 1000
+                });
             }
         }
         
@@ -14223,15 +14277,6 @@ margin-right: 0.5rem;
                 }
             });
 
-            // Update total balance display
-            const balanceAmountEl = document.getElementById('accountBalanceAmount');
-            const balanceChangeEl = document.getElementById('accountBalanceChange');
-            if (balanceAmountEl) balanceAmountEl.textContent = formatCurrency(totalBalance);
-            
-            // Determine if this is a net balance (includes debt) or total balance
-            const hasDebtAccounts = savingsAccounts.some(account => account.type === 'liability');
-            const balanceLabel = hasDebtAccounts ? 'Net Balance' : 'Total Balance';
-            if (balanceChangeEl) balanceChangeEl.textContent = balanceLabel;
 
             // Old chart update code removed - now using networth chart
         }
@@ -14419,6 +14464,10 @@ margin-right: 0.5rem;
 
             // Show the overlay
             document.getElementById('accountDetailOverlay').classList.add('active');
+            
+            // Add slide transition to main content
+            const appContainer = document.querySelector('.app-container');
+            appContainer.classList.add('settings-open');
 
             // Load account data
             updateAccountDetailChart();
@@ -14431,8 +14480,12 @@ margin-right: 0.5rem;
         function closeAccountDetail() {
             const screen = document.getElementById('accountDetailScreen');
             const overlay = document.getElementById('accountDetailOverlay');
+            const appContainer = document.querySelector('.app-container');
             
             if (overlay && screen) {
+                // Remove slide transition from main content
+                appContainer.classList.remove('settings-open');
+                
                 // Animate the screen sliding out to the right with snappier transition
                 screen.style.transition = 'transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)';
                 screen.style.transform = 'translateX(100%)';
@@ -14640,18 +14693,22 @@ margin-right: 0.5rem;
             ctx.closePath();
             ctx.fill();
             
-            // Main line
+            // Main line with animation
             ctx.globalAlpha = 1;
-            ctx.strokeStyle = '#5fa42e';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(xScale(0), yScale(data[0].value));
-            
-            for (let i = 1; i < data.length; i++) {
-                ctx.lineTo(xScale(i), yScale(data[i].value));
+            if (data.length > 1) {
+                // Convert data to points for animation
+                const points = data.map((point, index) => ({
+                    x: xScale(index),
+                    y: yScale(point.value)
+                }));
+                
+                // Animate only the line from left to right
+                animateLinePath(ctx, points, {
+                    strokeStyle: '#5fa42e',
+                    lineWidth: 2.5,
+                    duration: 1000
+                });
             }
-            
-            ctx.stroke();
         }
 
         function toggleAccountDetailTimeRange() {
@@ -15416,49 +15473,6 @@ margin-right: 0.5rem;
             // Generate the account type chart
             generateAccountTypeChart();
             
-            // Add account buttons at the bottom
-            const accountsList = document.getElementById('accountsList');
-            if (accountsList) {
-                // Create buttons container
-                const buttonsContainer = document.createElement('div');
-                buttonsContainer.className = 'account-buttons-container';
-                
-                // Create connect account button
-                const connectButton = document.createElement('div');
-                connectButton.className = 'connect-account-btn';
-                connectButton.innerHTML = `
-                    <i data-lucide="plus" class="w-5 h-5"></i>
-                    <span>Connect Account</span>
-                `;
-                connectButton.onclick = connectPlaidAccount;
-                
-                // Create add balance button
-                const addBalanceButton = document.createElement('div');
-                addBalanceButton.className = 'add-balance-btn';
-                addBalanceButton.innerHTML = `
-                    <i data-lucide="wallet" class="w-5 h-5"></i>
-                    <span>Add Balance</span>
-                `;
-                addBalanceButton.onclick = showBalanceSlideOut;
-                
-                // Add buttons to container
-                buttonsContainer.appendChild(connectButton);
-                buttonsContainer.appendChild(addBalanceButton);
-                
-                // Append container to accountsList
-                accountsList.appendChild(buttonsContainer);
-                
-                // Ensure Lucide icons are rendered for the new button
-                if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                    window.lucide.createIcons();
-                } else {
-                    setTimeout(() => {
-                        if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                            window.lucide.createIcons();
-                        }
-                    }, 100);
-                }
-            }
         }
 
         // Function to get the default account ID
@@ -16087,6 +16101,7 @@ margin-right: 0.5rem;
             const budgetOverlay = document.getElementById('budgetOverlay');
             const budgetPanel = document.getElementById('budgetPanel');
             const settingsPanel = document.getElementById('settingsPanel');
+            const appContainer = document.querySelector('.app-container');
             
             // Show budget overlay and panel
             budgetOverlay.classList.add('active');
@@ -16094,6 +16109,9 @@ margin-right: 0.5rem;
             
             // Slide settings panel left
             settingsPanel.classList.add('budget-open');
+            
+            // Add slide transition to main content
+            appContainer.classList.add('settings-open');
             
             // Load existing settings into budget form
             loadBudgetSettings();
@@ -16103,6 +16121,7 @@ margin-right: 0.5rem;
             const budgetOverlay = document.getElementById('budgetOverlay');
             const budgetPanel = document.getElementById('budgetPanel');
             const settingsPanel = document.getElementById('settingsPanel');
+            const appContainer = document.querySelector('.app-container');
             
             // Hide budget overlay and panel
             budgetOverlay.classList.remove('active');
@@ -16110,6 +16129,9 @@ margin-right: 0.5rem;
             
             // Slide settings panel back to center
             settingsPanel.classList.remove('budget-open');
+            
+            // Remove slide transition from main content
+            appContainer.classList.remove('settings-open');
         }
         
         function loadBudgetSettings() {
@@ -16304,6 +16326,7 @@ margin-right: 0.5rem;
             const supportOverlay = document.getElementById('supportOverlay');
             const supportPanel = document.getElementById('supportPanel');
             const settingsPanel = document.getElementById('settingsPanel');
+            const appContainer = document.querySelector('.app-container');
             
             // Show support overlay and panel
             supportOverlay.classList.add('active');
@@ -16311,12 +16334,16 @@ margin-right: 0.5rem;
             
             // Slide settings panel left
             settingsPanel.classList.add('budget-open');
+            
+            // Add slide transition to main content
+            appContainer.classList.add('settings-open');
         }
         
         function closeSupport() {
             const supportOverlay = document.getElementById('supportOverlay');
             const supportPanel = document.getElementById('supportPanel');
             const settingsPanel = document.getElementById('settingsPanel');
+            const appContainer = document.querySelector('.app-container');
             
             // Hide support overlay and panel
             supportOverlay.classList.remove('active');
@@ -16324,6 +16351,9 @@ margin-right: 0.5rem;
             
             // Slide settings panel back to center
             settingsPanel.classList.remove('budget-open');
+            
+            // Remove slide transition from main content
+            appContainer.classList.remove('settings-open');
             
             // Clear form fields
             document.getElementById('supportTitle').value = '';
