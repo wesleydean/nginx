@@ -7072,10 +7072,10 @@ margin-right: 0.5rem;
                 setPeriodMode('month');
                 // Ensure monthly chart is generated
                 setTimeout(() => {
-                    renderMonthlySpendingChart();
+                    generateMonthlyChart();
                     // Re-initialize swipe functionality after chart render
-                    if (typeof initializeSwipeToDelete === 'function') {
-                        initializeSwipeToDelete();
+                    if (typeof initializeChartSwipe === 'function') {
+                        initializeChartSwipe();
                     }
                 }, 100);
                 updateCashflowPeriodDisplay();
@@ -8430,12 +8430,15 @@ margin-right: 0.5rem;
         }
         
         function initializeChartSwipe() {
+            console.log('🔄 Initializing chart swipe functionality');
             // Look for the budgetDisplay chart carousel
             const budgetDisplay = document.getElementById('budgetDisplay');
             const carouselContainer = budgetDisplay ? budgetDisplay.querySelector('.chart-carousel') : null;
             if (!carouselContainer) {
+                console.log('❌ No chart carousel found in budgetDisplay');
                 return;
             }
+            console.log('✅ Found chart carousel, setting up swipe events');
             
             let startX = 0;
             let startY = 0;
@@ -8497,6 +8500,7 @@ margin-right: 0.5rem;
             
             // Touch events for mobile
             function handleTouchStart(e) {
+                console.log('👆 Touch start detected');
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
                 isScrolling = false;
@@ -8515,6 +8519,8 @@ margin-right: 0.5rem;
                 const diffX = startX - currentX;
                 const diffY = startY - currentY;
                 
+                console.log('👆 Touch move - diffX:', diffX, 'diffY:', diffY, 'currentChartIndex:', currentChartIndex);
+                
                 // Determine scroll direction
                 if (Math.abs(diffY) > Math.abs(diffX)) {
                     isScrolling = true;
@@ -8528,10 +8534,13 @@ margin-right: 0.5rem;
                 
                 // Trigger swipe on sufficient horizontal movement
                 if (!isScrolling && !hasSwiped && Math.abs(diffX) > 50) {
+                    console.log('🚀 Swipe triggered! diffX:', diffX, 'currentChartIndex:', currentChartIndex);
                     hasSwiped = true;
                     if (diffX > 0 && currentChartIndex < 1) {
+                        console.log('➡️ Swiping to next chart (index ' + (currentChartIndex + 1) + ')');
                         switchToChart(currentChartIndex + 1);
                     } else if (diffX < 0 && currentChartIndex > 0) {
+                        console.log('⬅️ Swiping to previous chart (index ' + (currentChartIndex - 1) + ')');
                         switchToChart(currentChartIndex - 1);
                     }
                 }
