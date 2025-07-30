@@ -1394,95 +1394,24 @@
             background-color: hsl(var(--muted));
         }
 
-        .connect-account-btn {
-            margin: 1rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            padding: 16px 20px;
-            background: transparent;
-            border: 2px dashed #c8a03d;
-            border-radius: 12px;
-            color: #8b6914;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .connect-account-btn:hover,
-        .connect-account-btn:active {
-            background-color: #c8a03d0a;
-            border-color: #8b6914;
-            border-style: solid;
-        }
-
-        .account-buttons-container .connect-account-btn [data-lucide] {
-            color: #685012;
-        }
-
-        .add-balance-btn {
-            margin: 1rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            padding: 16px 20px;
-            background: transparent;
-            border: 2px dashed #c8a03d;
-            border-radius: 12px;
-            color: #8b6914;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .add-balance-btn:hover,
-        .add-balance-btn:active {
-            background-color: #c8a03d0a;
-            border-color: #8b6914;
-            border-style: solid;
-        }
-
-        .account-buttons-container .add-balance-btn [data-lucide] {
-            color: #8a6c20;
-        }
-
-        .account-buttons-container {
-            display: flex;
-            flex-direction: row;
-            gap: 0;
-        }
-
-        .account-buttons-container .connect-account-btn,
-        .account-buttons-container .add-balance-btn {
-            margin: 0.5rem;
-            flex: 1;
-        }
-
-        /* Hide the original quick action add balance button */
-        #saveBalanceActionCard {
-            display: none !important;
-        }
-        
-        .dropdown-menu {
-            position: absolute;
-            top: calc(100% + 0.25rem) !important;
-            left: 0;
-            max-height: 80vh;
-            overflow-y: auto;
-            background: hsl(var(--background));
-            border: 1px solid hsl(var(--border));
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            min-width: 220px;
-            z-index: 100;
-            display: none;
-            margin-top: 0.25rem;
-            pointer-events: auto;
-            transform: none !important;
+/* Dropdown menu positioning (moved from stray JS area) */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.25rem) !important;
+  left: 0;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  min-width: 220px;
+  z-index: 100;
+  display: none;
+  margin-top: 0.25rem;
+  pointer-events: auto;
+  transform: none !important;
+}
         }
         
         .dropdown-menu.show {
@@ -6031,10 +5960,6 @@ margin-right: 0.5rem;
                         </div>
                     </div> -->
                     
-                    <!-- Quick Action Cards -->
-                    <div class="quick-actions">
-                        <!-- Add Expense moved to header next to time range dropdown -->
-                    </div>
                 </div>
                 
                 <!-- Screen 2: Accounts (formerly Save) -->
@@ -6187,6 +6112,7 @@ margin-right: 0.5rem;
                             <!-- Account groups will be dynamically populated here -->
                         </div>
     <style>
+    /* .accounts-list and .account-row styles are already present above or in the main style block. Remove duplicates. */
     /* Skeleton loading animation */
     .account-skeleton-row {
       margin: 0.5rem 1rem;
@@ -6264,50 +6190,87 @@ margin-right: 0.5rem;
     }
 
     // Example render function (replace with your actual rendering logic)
-    function renderAccountsList(accounts) {
-      const list = document.getElementById('accountsList');
-      if (!list) return;
-      list.innerHTML = '';
-      if (!accounts || !accounts.length) {
-        list.innerHTML = '<div style="text-align:center;color:#7f8c8d;padding:20px;">No accounts found</div>';
-        return;
+function renderAccountsList(accounts) {
+  const list = document.getElementById('accountsList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!accounts || !accounts.length) {
+    list.innerHTML = '<div style="text-align:center;color:#7f8c8d;padding:20px;">No accounts found</div>';
+    return;
+  }
+
+  // If accounts are grouped, preserve grouping logic
+  if (Array.isArray(accounts) && accounts.length && accounts[0].accounts) {
+    // Grouped accounts (e.g., [{group: 'Bank', accounts: [...]}, ...])
+    for (const group of accounts) {
+      if (group.group) {
+        const groupHeader = document.createElement('div');
+        groupHeader.className = 'account-group-header';
+        groupHeader.style.fontWeight = '600';
+        groupHeader.style.fontSize = '1.05rem';
+        groupHeader.style.margin = '1.2rem 0 0.5rem 1.25rem';
+        groupHeader.style.color = '#222';
+        groupHeader.textContent = group.group;
+        list.appendChild(groupHeader);
       }
-      for (const acc of accounts) {
+      for (const acc of group.accounts) {
         const row = document.createElement('div');
         row.className = 'account-row';
         row.style.display = 'flex';
         row.style.alignItems = 'center';
-        row.style.gap = '1rem';
-        row.style.padding = '1rem 0';
+        row.style.gap = '1.25rem';
+        row.style.padding = '1.25rem 1.25rem';
+        row.style.background = 'none';
+        row.style.border = 'none';
+        row.style.boxShadow = 'none';
+        row.style.marginBottom = '0.5rem';
         row.innerHTML = `
-          <div style="width:40px;height:40px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;">
-            <i data-lucide="wallet" class="w-6 h-6" style="color:#8b5cf6;"></i>
+          <div style="width:44px;height:44px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="wallet" class="w-6 h-6" style="color:#fff;"></i>
           </div>
-          <div style="flex:1;">
-            <div style="font-weight:600;">${acc.name}</div>
-            <div style="font-size:0.9em;color:#7f8c8d;">${acc.type || ''}</div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:0.25rem;">
+            <div style="font-weight:600;font-size:1.08rem;line-height:1.2;">${acc.name}</div>
+            <div style="font-size:0.97em;color:#666;font-weight:400;">${acc.type || ''}</div>
           </div>
-          <div style="font-weight:500;">${acc.amount ? '$' + acc.amount : ''}</div>
+          <div style="font-weight:600;font-size:1.05rem;min-width:70px;text-align:right;">${acc.amount ? '$' + acc.amount : ''}</div>
         `;
         list.appendChild(row);
       }
-      if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
     }
+  } else {
+    // Flat list of accounts
+    for (const acc of accounts) {
+      const row = document.createElement('div');
+      row.className = 'account-row';
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.gap = '1.25rem';
+      row.style.padding = '1.25rem 1.25rem';
+      row.style.background = 'none';
+      row.style.border = 'none';
+      row.style.boxShadow = 'none';
+      row.style.marginBottom = '0.5rem';
+      row.innerHTML = `
+        <div style="width:44px;height:44px;border-radius:50%;background:#111;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="wallet" class="w-6 h-6" style="color:#fff;"></i>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:0.25rem;">
+          <div style="font-weight:600;font-size:1.08rem;line-height:1.2;">${acc.name}</div>
+          <div style="font-size:0.97em;color:#666;font-weight:400;">${acc.type || ''}</div>
+        </div>
+        <div style="font-weight:600;font-size:1.05rem;min-width:70px;text-align:right;">${acc.amount ? '$' + acc.amount : ''}</div>
+      `;
+      list.appendChild(row);
+    }
+  }
+  if (window.lucide && window.lucide.createIcons) window.lucide.createIcons();
+}
 
     // Usage example:
     // loadAccountsAndShowSkeleton(async () => await fetch('/api/accounts').then(r => r.json()));
     </script>
                     </div>
                     
-                    <!-- Quick Action Cards for Save Screen -->
-                    <div class="quick-actions">
-                        <div class="quick-action-card" onclick="showBalanceSlideOut()" id="saveBalanceActionCard">
-                            <div class="quick-action-title">Add Balance</div>
-                            <div class="quick-action-icon">
-                                <i data-lucide="arrow-right" class="w-6 h-6"></i>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 
                 <!-- Screen 3: Dashboard (formerly Reports) -->
