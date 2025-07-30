@@ -1,3 +1,34 @@
+// Simulate the skeleton/scroll/fade-in animation for the accounts list (without adding an account)
+window.simulateAccountsSkeletonAnimation = function() {
+    // Go to Accounts screen (screen index 2)
+    if (typeof goToScreen === 'function') {
+        goToScreen(2);
+    }
+    setTimeout(() => {
+        const accountsSection = document.getElementById('saveSavingsSection');
+        if (accountsSection) {
+            accountsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        if (typeof showAccountsLoadingPlaceholder === 'function') {
+            showAccountsLoadingPlaceholder();
+        }
+        // Optionally update the UI if you want to simulate a refresh
+        if (typeof updateAccountManagementList === 'function') {
+            updateAccountManagementList();
+        }
+        if (typeof updateAccountSelector === 'function') {
+            updateAccountSelector();
+        }
+    }, 300);
+    setTimeout(() => {
+        if (typeof renderAccountsList === 'function') {
+            renderAccountsList(savingsAccounts);
+        }
+        if (typeof hideAccountsLoadingPlaceholder === 'function') {
+            hideAccountsLoadingPlaceholder();
+        }
+    }, 1200);
+};
 class PlaidService {
   constructor() {
     // Dynamically determine API base URL based on environment
@@ -492,28 +523,25 @@ async function connectPlaidAccount() {
             savingsAccounts.push(newAccount);
             saveSavingsAccounts(savingsAccounts);
 
-            // --- Scroll to Accounts screen and show skeleton loading ---
-            // Go to Accounts screen (screen index 2)
+            // Use the same animation/logic as simulateAccountsSkeletonAnimation
             if (typeof goToScreen === 'function') {
                 goToScreen(2);
             }
-            // Wait for DOM to update, then scroll to accounts section and show skeleton
             setTimeout(() => {
-                // Scroll to the accounts list section
                 const accountsSection = document.getElementById('saveSavingsSection');
                 if (accountsSection) {
                     accountsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
-                // Show skeleton loading placeholder
                 if (typeof showAccountsLoadingPlaceholder === 'function') {
                     showAccountsLoadingPlaceholder();
                 }
-                // Now update the UI (after skeleton is visible)
-                updateAccountManagementList();
-                updateAccountSelector();
+                if (typeof updateAccountManagementList === 'function') {
+                    updateAccountManagementList();
+                }
+                if (typeof updateAccountSelector === 'function') {
+                    updateAccountSelector();
+                }
             }, 300);
-
-            // Simulate loading, then fade in real accounts list
             setTimeout(() => {
                 if (typeof renderAccountsList === 'function') {
                     renderAccountsList(savingsAccounts);

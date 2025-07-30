@@ -6188,14 +6188,40 @@ margin-right: 0.5rem;
                         </div>
     <style>
     /* Skeleton loading animation */
+    .account-skeleton-row {
+      margin: 0.5rem 1rem;
+      border-radius: 1rem;
+      background: none;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+    }
     .account-skeleton-row .skeleton-icon,
     .account-skeleton-row .skeleton-line,
     .account-skeleton-row .skeleton-amount {
       animation: skeleton-loading 1.2s infinite linear alternate;
+      background-color: #d3d6db;
+      border-radius: 0.5rem;
+    }
+    .account-skeleton-row .skeleton-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      margin-right: 1rem;
+    }
+    .account-skeleton-row .skeleton-line {
+      height: 1.1rem;
+      width: 40%;
+      margin-bottom: 0.5rem;
+    }
+    .account-skeleton-row .skeleton-amount {
+      height: 1.1rem;
+      width: 20%;
+      margin-left: auto;
     }
     @keyframes skeleton-loading {
-      0% { background-color: #e5e7eb; }
-      100% { background-color: #f3f4f6; }
+      0% { background-color: #d3d6db; }
+      100% { background-color: #b0b3b8; }
     }
     .fade-in {
       opacity: 0;
