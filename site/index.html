@@ -14304,14 +14304,14 @@ margin-right: 0.5rem;
                         formatCurrency(displayBalance);
                     
                     html += `
-                        <div class="account-item">
+                        <div class="account-item" onclick="openAccountDetail('${account.id}')">
                             <div class="account-icon">
                                 <i data-lucide="${icon}" class="w-5 h-5"></i>
                             </div>
                             <div class="account-info">
-                                <div class="account-name" onclick="openAccountDetail('${account.id}')">${account.name}</div>
+                                <div class="account-name">${account.name}</div>
                             </div>
-                            <div class="account-balance" onclick="toggleAccountTransactions('${account.id}')">${formattedBalance}</div>
+                            <div class="account-balance">${formattedBalance}</div>
                         </div>
                         <div class="account-transactions" id="transactions-${account.id}">
                             ${renderAccountTransactions(accountTransactions)}
@@ -14424,18 +14424,30 @@ margin-right: 0.5rem;
         }
 
         function closeAccountDetail() {
+            const screen = document.getElementById('accountDetailScreen');
             const overlay = document.getElementById('accountDetailOverlay');
             
-            if (overlay) {
-                // Remove active class to trigger CSS slide-out animation
-                overlay.classList.remove('active');
+            if (overlay && screen) {
+                // Animate the screen sliding out to the right with snappier transition
+                screen.style.transition = 'transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)';
+                screen.style.transform = 'translateX(100%)';
+                
+                // Start fading out the overlay with snappier transition
+                overlay.style.transition = 'opacity 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)';
+                overlay.style.opacity = '0';
                 
                 // Clean up after animation completes
                 setTimeout(() => {
+                    overlay.classList.remove('active');
+                    overlay.style.transition = '';
+                    overlay.style.opacity = '';
+                    screen.style.transition = '';
+                    screen.style.transform = '';
+                    
                     if (window.currentAccountDetail) {
                         window.currentAccountDetail = null;
                     }
-                }, 300);
+                }, 200);
             }
         }
 
@@ -14784,14 +14796,19 @@ margin-right: 0.5rem;
 
         function initAccountDetailSwipe() {
             const screen = document.getElementById('accountDetailScreen');
+            const overlay = document.getElementById('accountDetailOverlay');
             let startX = 0;
             let currentX = 0;
             let isDragging = false;
 
             function handleTouchStart(e) {
                 startX = e.touches[0].clientX;
+                currentX = startX;
                 isDragging = true;
+                
+                // Disable CSS transitions during drag
                 screen.style.transition = 'none';
+                overlay.style.transition = 'none';
             }
 
             function handleTouchMove(e) {
@@ -14804,6 +14821,11 @@ margin-right: 0.5rem;
                 if (deltaX > 0) {
                     const transform = Math.min(deltaX, screen.offsetWidth);
                     screen.style.transform = `translateX(${transform}px)`;
+                    
+                    // Fade out backdrop based on drag progress (but keep screen opaque)
+                    const progress = Math.min(transform / screen.offsetWidth, 1);
+                    const backdropOpacity = 1 - (progress * 0.3); // Much more subtle fade
+                    overlay.style.background = `rgba(0, 0, 0, ${backdropOpacity * 0.15})`;
                 }
             }
 
@@ -14815,20 +14837,26 @@ margin-right: 0.5rem;
                 
                 // If swiped more than 1/3 of the screen width, close
                 if (deltaX > screen.offsetWidth / 3) {
-                    // Reset transform first, then close
-                    screen.style.transition = '';
-                    screen.style.transform = '';
+                    // Close immediately without snap back
                     closeAccountDetail();
-                } else {
-                    // Snap back using CSS transition
-                    screen.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                } else if (deltaX > 0) {
+                    // Snap back to original position with snappier transition
+                    screen.style.transition = 'transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)';
+                    overlay.style.transition = 'background 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)';
                     screen.style.transform = 'translateX(0)';
+                    overlay.style.background = 'rgba(0, 0, 0, 0.15)';
                     
-                    // Reset after snap back
+                    // Clean up after animation
                     setTimeout(() => {
                         screen.style.transition = '';
                         screen.style.transform = '';
-                    }, 300);
+                        overlay.style.transition = '';
+                        overlay.style.background = '';
+                    }, 200);
+                } else {
+                    // No drag happened, just clean up
+                    screen.style.transition = '';
+                    screen.style.transform = '';
                 }
             }
 
