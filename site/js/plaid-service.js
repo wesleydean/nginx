@@ -12,23 +12,13 @@ window.simulateAccountsSkeletonAnimation = function() {
         if (typeof showAccountsLoadingPlaceholder === 'function') {
             showAccountsLoadingPlaceholder();
         }
-        // Optionally update the UI if you want to simulate a refresh
-        if (typeof updateAccountManagementList === 'function') {
-            updateAccountManagementList();
-        }
-        if (typeof updateAccountSelector === 'function') {
-            updateAccountSelector();
-        }
     }, 300);
     setTimeout(() => {
-        if (typeof renderAccountsList === 'function') {
-            renderAccountsList(savingsAccounts);
-        }
         if (typeof hideAccountsLoadingPlaceholder === 'function') {
             hideAccountsLoadingPlaceholder();
         }
     }, 1200);
-};
+}
 class PlaidService {
   constructor() {
     // Dynamically determine API base URL based on environment

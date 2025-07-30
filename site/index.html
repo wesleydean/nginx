@@ -906,10 +906,7 @@
             width: 50%;
             flex-shrink: 0;
         }
-        
-        .chart-slide.active {
-            /* No specific styling needed, position handled by transform */
-        }
+
         
         .chart-dots {
             display: flex;
@@ -1412,7 +1409,6 @@
   pointer-events: auto;
   transform: none !important;
 }
-        }
         
         .dropdown-menu.show {
             display: block;
@@ -2476,6 +2472,11 @@
             min-height: 0;
         }
 
+        .account-pill-btn.bold {
+            font-weight: 600;
+            border-width: 2px;
+        }
+
         .account-pill-btn:hover {
             background: #e9ecef;
             border-color: #dee2e6;
@@ -2781,9 +2782,6 @@
             text-align: center;
         }
         
-        .sticky-container {
-            /* Container for sticky controls and expenses list */
-        }
         
         .sticky-controls-section {
             position: sticky;
@@ -6077,7 +6075,7 @@ margin-right: 0.5rem;
                         
                         <!-- Account Action Pills -->
                         <div class="account-action-pills">
-                            <button class="account-pill-btn" onclick="connectPlaidAccount()">
+                            <button class="account-pill-btn bold" onclick="connectPlaidAccount()">
                                 <span>Connect</span>
                             </button>
                             <button class="account-pill-btn" onclick="showAccountManagementModal()">
@@ -6090,22 +6088,30 @@ margin-right: 0.5rem;
                         
                         <!-- New Accounts List -->
                         <div class="accounts-list" id="accountsListLoading" style="display: none;">
-                          <!-- Skeleton placeholder row -->
-                          <div class="account-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 1rem 0;">
-                            <div class="skeleton-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #e5e7eb;"></div>
+                          <!-- Skeleton placeholder rows -->
+                          <div class="account-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.6rem 0;">
+                            <div class="skeleton-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #f3f4f6;"></div>
                             <div style="flex: 1;">
-                              <div class="skeleton-line" style="width: 60%; height: 14px; border-radius: 7px; background: #e5e7eb; margin-bottom: 0.5rem;"></div>
-                              <div class="skeleton-line" style="width: 40%; height: 12px; border-radius: 6px; background: #e5e7eb;"></div>
+                              <div class="skeleton-line" style="width: 60%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.35rem;"></div>
+                              <div class="skeleton-line" style="width: 40%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
                             </div>
-                            <div class="skeleton-amount" style="width: 60px; height: 16px; border-radius: 8px; background: #e5e7eb;"></div>
+                            <div class="skeleton-amount" style="width: 60px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
                           </div>
-                          <div class="account-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 1rem 0;">
-                            <div class="skeleton-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #e5e7eb;"></div>
+                          <div class="account-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.6rem 0;">
+                            <div class="skeleton-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #f3f4f6;"></div>
                             <div style="flex: 1;">
-                              <div class="skeleton-line" style="width: 50%; height: 14px; border-radius: 7px; background: #e5e7eb; margin-bottom: 0.5rem;"></div>
-                              <div class="skeleton-line" style="width: 30%; height: 12px; border-radius: 6px; background: #e5e7eb;"></div>
+                              <div class="skeleton-line" style="width: 50%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.35rem;"></div>
+                              <div class="skeleton-line" style="width: 30%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
                             </div>
-                            <div class="skeleton-amount" style="width: 50px; height: 16px; border-radius: 8px; background: #e5e7eb;"></div>
+                            <div class="skeleton-amount" style="width: 50px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
+                          </div>
+                          <div class="account-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.6rem 0;">
+                            <div class="skeleton-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #f3f4f6;"></div>
+                            <div style="flex: 1;">
+                              <div class="skeleton-line" style="width: 55%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.35rem;"></div>
+                              <div class="skeleton-line" style="width: 35%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                            </div>
+                            <div class="skeleton-amount" style="width: 55px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
                           </div>
                         </div>
                         <div class="accounts-list" id="accountsList">
@@ -6115,19 +6121,19 @@ margin-right: 0.5rem;
     /* .accounts-list and .account-row styles are already present above or in the main style block. Remove duplicates. */
     /* Skeleton loading animation */
     .account-skeleton-row {
-      margin: 0.5rem 1rem;
+      margin: 0.2rem 1rem;
       border-radius: 1rem;
       background: none;
       display: flex;
       align-items: center;
       gap: 1rem;
-      padding: 0.75rem 1rem;
+      padding: 0.6rem 1rem;
     }
     .account-skeleton-row .skeleton-icon,
     .account-skeleton-row .skeleton-line,
     .account-skeleton-row .skeleton-amount {
       animation: skeleton-loading 1.2s infinite linear alternate;
-      background-color: #d3d6db;
+      background-color: #f3f4f6;
       border-radius: 0.5rem;
     }
     .account-skeleton-row .skeleton-icon {
@@ -6138,7 +6144,7 @@ margin-right: 0.5rem;
     .account-skeleton-row .skeleton-line {
       height: 1.1rem;
       width: 40%;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.35rem;
     }
     .account-skeleton-row .skeleton-amount {
       height: 1.1rem;
@@ -6146,8 +6152,8 @@ margin-right: 0.5rem;
       margin-left: auto;
     }
     @keyframes skeleton-loading {
-      0% { background-color: #d3d6db; }
-      100% { background-color: #b0b3b8; }
+      0% { background-color: #f6f5f3; }
+      100% { background-color: #dad7d0; }
     }
     .fade-in {
       opacity: 0;
