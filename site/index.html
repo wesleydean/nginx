@@ -2520,7 +2520,46 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: .4rem;
+        }
+
+        .account-action-pills {
+            display: flex;
+            gap: 0.5rem;
             margin-bottom: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .account-pill-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.75rem;
+            background: transparent;
+            border: 1px solid #000000;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #000000;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            min-height: 0;
+        }
+
+        .account-pill-btn:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+            color: #343a40;
+        }
+
+        .account-pill-btn:active {
+            transform: translateY(1px);
+        }
+
+        .account-pill-btn [data-lucide] {
+            width: 1rem;
+            height: 1rem;
         }
         
         .date-transactions {
@@ -5763,7 +5802,7 @@ margin-right: 0.5rem;
             <div class="header-title" id="headerTitle">Home</div>
             <div class="header-actions">
                 <button class="icon-btn" id="settingsButton" onclick="openSettings()" aria-label="Settings">
-                    <i data-lucide="settings" class="w-6 h-6"></i>
+                    <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
             </div>
         </div>
@@ -6109,26 +6148,21 @@ margin-right: 0.5rem;
                             <div class="account-title-info">
                                 <h3 class="section-title" style="margin-bottom: 0.25rem;">Accounts</h3>
                             </div>
-                            <div class="cashflow-menu-container">
-                                <button class="dot-menu-btn" onclick="toggleAccountsDropdown()" id="accountsMenuBtn">
-                                    <i data-lucide="more-horizontal" class="w-5 h-5"></i>
-                                </button>
-                                <div class="dropdown-menu dropdown-right" id="accountsDropdown">
-                                    <div class="dropdown-item" onclick="showAccountManagementModal()">
-                                        <i data-lucide="settings" class="w-4 h-4 mr-2"></i>
-                                        Manage Accounts
-                                    </div>
-                                    <div class="dropdown-item" onclick="connectPlaidAccount()">
-                                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i>
-                                        Connect Account
-                                    </div>
-                                    <div class="dropdown-item" onclick="showBalanceSlideOut()">
-                                        <i data-lucide="wallet" class="w-4 h-4 mr-2"></i>
-                                        Add Balance
-                                    </div>
-                                </div>
-                            </div>
                         </div>
+                        
+                        <!-- Account Action Pills -->
+                        <div class="account-action-pills">
+                            <button class="account-pill-btn" onclick="showAccountManagementModal()">
+                                <span>Manage</span>
+                            </button>
+                            <button class="account-pill-btn" onclick="connectPlaidAccount()">
+                                <span>Connect</span>
+                            </button>
+                            <button class="account-pill-btn" onclick="showBalanceSlideOut()">
+                                <span>Add Balance</span>
+                            </button>
+                        </div>
+                        
                         <!-- New Accounts List -->
                         <div class="accounts-list" id="accountsList">
                             <!-- Account groups will be dynamically populated here -->
