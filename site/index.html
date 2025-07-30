@@ -10801,64 +10801,120 @@ margin-right: 0.5rem;
             }
         }
 
+        // Cache for API calls to prevent duplicate requests
+        let accountsApiCache = {
+            data: null,
+            timestamp: 0,
+            promise: null
+        };
+        const CACHE_DURATION = 5000; // 5 seconds cache
+
         /**
-         * Fetches accounts with recent transactions from the API
+         * Clears the accounts API cache to force fresh data on next request
+         */
+        function clearAccountsCache() {
+            accountsApiCache.data = null;
+            accountsApiCache.timestamp = 0;
+            accountsApiCache.promise = null;
+            console.log('Accounts API cache cleared');
+        }
+
+        // Make the cache clearing function globally available
+        window.clearAccountsCache = clearAccountsCache;
+
+        /**
+         * Fetches accounts with recent transactions from the API with caching
          */
         async function loadAccountsWithTransactions() {
             try {
-                // Get Clerk session token
-                const sessionToken = await window.plaidService.getClerkSessionToken();
-
-                const response = await fetch(`${window.plaidService.baseUrl}/api/accounts`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${sessionToken}`,
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to load accounts: ${response.status}`);
+                // Check if we have a recent cache
+                const now = Date.now();
+                if (accountsApiCache.data && (now - accountsApiCache.timestamp) < CACHE_DURATION) {
+                    console.log('Using cached accounts data');
+                    return accountsApiCache.data;
                 }
 
-                const data = await response.json();
-                console.log('Loaded accounts with transactions:', data);
-
-                if (data.accounts && Array.isArray(data.accounts)) {
-                    // Update the global savingsAccounts with the API data
-                    // Keep existing localStorage accounts and add API accounts
-                    const apiAccounts = data.accounts.map(account => ({
-                        id: account.account_id,
-                        name: account.name,
-                        type: 'plaid',
-                        institutionName: account.institution_name,
-                        currentBalance: account.current_balance,
-                        currency: account.currency,
-                        recentTransactions: account.recent_transactions || [],
-                        transactionCount: account.transaction_count || 0
-                    }));
-
-                    // Merge with existing localStorage accounts
-                    const existingAccounts = savingsAccounts.filter(acc => acc.type !== 'plaid');
-                    savingsAccounts = [...existingAccounts, ...apiAccounts];
-
-                    // Update localStorage
-                    saveSavingsAccounts(savingsAccounts);
-
-                    // Update account type chart if on home page
-                    if (document.getElementById('accountTypeChart')) {
-                        generateAccountTypeChart();
-                    }
-
-                    console.log('Updated savingsAccounts with API data:', savingsAccounts.length, 'accounts');
-                    return apiAccounts;
+                // Check if there's already a request in progress
+                if (accountsApiCache.promise) {
+                    console.log('Waiting for ongoing accounts request');
+                    return await accountsApiCache.promise;
                 }
 
-                return [];
+                // Create new request
+                console.log('Making new accounts API request');
+                accountsApiCache.promise = _fetchAccountsFromApi();
+                
+                try {
+                    const data = await accountsApiCache.promise;
+                    // Cache the result
+                    accountsApiCache.data = data;
+                    accountsApiCache.timestamp = now;
+                    return data;
+                } finally {
+                    // Clear the promise whether successful or not
+                    accountsApiCache.promise = null;
+                }
             } catch (error) {
                 console.error('Error loading accounts with transactions:', error);
-                return [];
+                // Clear cache on error
+                accountsApiCache.promise = null;
+                throw error;
             }
+        }
+
+        /**
+         * Internal function to fetch accounts from API
+         */
+        async function _fetchAccountsFromApi() {
+            // Get Clerk session token
+            const sessionToken = await window.plaidService.getClerkSessionToken();
+
+            const response = await fetch(`${window.plaidService.baseUrl}/api/accounts`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionToken}`,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to load accounts: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Loaded accounts with transactions:', data);
+
+            if (data.accounts && Array.isArray(data.accounts)) {
+                // Update the global savingsAccounts with the API data
+                // Keep existing localStorage accounts and add API accounts
+                const apiAccounts = data.accounts.map(account => ({
+                    id: account.account_id,
+                    name: account.name,
+                    type: 'plaid',
+                    institutionName: account.institution_name,
+                    currentBalance: account.current_balance,
+                    currency: account.currency,
+                    recentTransactions: account.recent_transactions || [],
+                    transactionCount: account.transaction_count || 0
+                }));
+
+                // Merge with existing localStorage accounts
+                const existingAccounts = savingsAccounts.filter(acc => acc.type !== 'plaid');
+                savingsAccounts = [...existingAccounts, ...apiAccounts];
+
+                // Update localStorage
+                saveSavingsAccounts(savingsAccounts);
+
+                // Update account type chart if on home page
+                if (document.getElementById('accountTypeChart')) {
+                    generateAccountTypeChart();
+                }
+
+                console.log('Updated savingsAccounts with API data:', savingsAccounts.length, 'accounts');
+                return apiAccounts;
+            }
+
+            return [];
         }
 
         /**

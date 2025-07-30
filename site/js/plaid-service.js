@@ -435,32 +435,7 @@ const plaidService = new PlaidService();
 // Export the service
 window.plaidService = plaidService;
 
-// Add at the end of your updateAccountManagementList() function
-
-function updateAccountManagementList() {
-    const listContainer = document.getElementById('accountManagementList');
-    if (!listContainer) return;
-    
-    let accountsHtml = savingsAccounts.map(account => `
-        <div class="account-management-list-item" style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; flex-direction: column; flex: 1;">
-                <span class="account-management-name">${account.name}</span>
-                ${account.currentBalance !== undefined ? `<span style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">Balance: ${formatCurrency(account.currentBalance)}</span>` : ''}
-            </div>
-            ${savingsAccounts.length > 1 ? `<button class="account-management-delete-btn" onclick="deleteAccountFromSlideOut('${account.id}')">Delete</button>` : ''}
-        </div>
-    `).join('');
-    
-    // Add Plaid connect button at the top
-    accountsHtml = `
-        <div class="account-management-list-item" style="display: flex; justify-content: space-between; align-items: center;">
-            <span class="account-management-name">Connect Account</span>
-            <button class="account-management-add-btn" style="background-color: #5d59af; min-width: 100px;" onclick="connectPlaidAccount()">Connect</button>
-        </div>
-    ` + accountsHtml;
-    
-    listContainer.innerHTML = accountsHtml;
-}
+// Note: updateAccountManagementList() function is now defined in index.html with API caching
 
 // Add this function to handle the Plaid integration
 
@@ -525,21 +500,28 @@ async function connectPlaidAccount() {
                 if (accountsSection) {
                     accountsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
-                if (typeof updateAccountManagementList === 'function') {
-                    updateAccountManagementList();
-                }
+                // Note: updateAccountManagementList will be called automatically when fetchPlaidTransactions completes
                 if (typeof updateAccountSelector === 'function') {
                     updateAccountSelector();
                 }
             }, 300);
 
-            // Fetch transactions, then render and hide skeleton
+            // Clear accounts cache to ensure fresh data after connection
+            if (typeof clearAccountsCache === 'function') {
+                clearAccountsCache();
+            }
+
+            // Only fetch transactions (which will also update accounts) ONCE
             fetchPlaidTransactions().finally(() => {
                 if (typeof renderAccountsList === 'function') {
                     renderAccountsList(savingsAccounts);
                 }
                 if (typeof hideAccountsLoadingPlaceholder === 'function') {
                     hideAccountsLoadingPlaceholder();
+                }
+                // Force refresh of account management list after transaction fetch
+                if (typeof updateAccountManagementList === 'function') {
+                    updateAccountManagementList();
                 }
             });
         } else {
