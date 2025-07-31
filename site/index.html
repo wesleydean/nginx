@@ -11115,15 +11115,34 @@ margin-right: 0.5rem;
         /**
          * Shows the transactions loading skeleton placeholder
          */
+        // Add state tracking for skeleton
+        let transactionSkeletonState = {
+            isShowing: false,
+            showTimeout: null,
+            hideTimeout: null
+        };
+
         function showTransactionsLoadingPlaceholder() {
             const listContainer = document.getElementById('expensesList');
             
             if (listContainer) {
+                // Clear any existing timeouts
+                if (transactionSkeletonState.hideTimeout) {
+                    clearTimeout(transactionSkeletonState.hideTimeout);
+                    transactionSkeletonState.hideTimeout = null;
+                }
+                
+                // Mark as showing
+                transactionSkeletonState.isShowing = true;
+                
                 // First fade out existing content
                 listContainer.classList.add('skeleton-fade-out');
                 
                 // After fade out completes, show skeleton
-                setTimeout(() => {
+                transactionSkeletonState.showTimeout = setTimeout(() => {
+                    // Only proceed if still in showing state
+                    if (!transactionSkeletonState.isShowing) return;
+                    
                     listContainer.classList.remove('skeleton-fade-out');
                     listContainer.innerHTML = `
                         <div id="transactionsListLoading" class="skeleton-fade-in">
@@ -11169,6 +11188,7 @@ margin-right: 0.5rem;
                             </div>
                         </div>
                     `;
+                    transactionSkeletonState.showTimeout = null;
                 }, 200); // Wait for fade-out animation to complete
             }
         }
@@ -11177,22 +11197,41 @@ margin-right: 0.5rem;
          * Hides the transactions loading skeleton placeholder
          */
         function hideTransactionsLoadingPlaceholder() {
+            // Clear any pending show timeouts
+            if (transactionSkeletonState.showTimeout) {
+                clearTimeout(transactionSkeletonState.showTimeout);
+                transactionSkeletonState.showTimeout = null;
+            }
+            
+            // Mark as not showing
+            transactionSkeletonState.isShowing = false;
+            
             const loadingContainer = document.getElementById('transactionsListLoading');
             const listContainer = document.getElementById('expensesList');
+            
+            // If skeleton is not yet shown, just clear the fade-out class from listContainer
+            if (!loadingContainer && listContainer) {
+                listContainer.classList.remove('skeleton-fade-out');
+                return;
+            }
             
             if (loadingContainer) {
                 loadingContainer.classList.remove('skeleton-fade-in');
                 loadingContainer.classList.add('skeleton-fade-out');
-                setTimeout(() => {
-                    loadingContainer.remove();
+                transactionSkeletonState.hideTimeout = setTimeout(() => {
+                    if (loadingContainer.parentNode) {
+                        loadingContainer.remove();
+                    }
                     // Add fade-in to the updated transaction list content
                     if (listContainer) {
+                        listContainer.classList.remove('skeleton-fade-out');
                         listContainer.classList.add('skeleton-fade-in');
                         // Remove fade-in class after animation completes
                         setTimeout(() => {
                             listContainer.classList.remove('skeleton-fade-in');
                         }, 300);
                     }
+                    transactionSkeletonState.hideTimeout = null;
                 }, 200);
             }
         }
@@ -11845,10 +11884,10 @@ margin-right: 0.5rem;
                 showTransactionsLoadingPlaceholder();
             }
 
-            // Update transactions display based on selected range with a small delay to show skeleton
+            // Update transactions display based on selected range with enough delay for skeleton to appear
             setTimeout(() => {
                 updateTransactionsForTimeRange();
-            }, 100);
+            }, 300);
 
             // Update chart if needed
             if (typeof updateChart === 'function') {
