@@ -2283,6 +2283,13 @@
             padding: 1rem;
             padding-top: 86px; /* Account for fixed header height */
             background-color: rgba(200, 160, 61, 0.04);
+            scroll-behavior: smooth;
+        }
+        
+        /* Faster scroll animation for nav tap to top */
+        .screen.fast-scroll {
+            scroll-behavior: auto;
+            transition: scroll-top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         /* Remove old daily-budget styles - now using card classes */
@@ -7306,7 +7313,32 @@ margin-right: 0.5rem;
             if (currentScreen === screenIndex) {
                 const screens = document.querySelectorAll('.screen');
                 if (screens[screenIndex]) {
-                    screens[screenIndex].scrollTo({ top: 0, behavior: 'smooth' });
+                    // Use faster, more responsive scroll
+                    screens[screenIndex].scrollTo({ 
+                        top: 0, 
+                        behavior: 'smooth'
+                    });
+                    
+                    // Apply custom faster scroll animation
+                    screens[screenIndex].style.scrollBehavior = 'auto';
+                    const startTime = performance.now();
+                    const startScrollTop = screens[screenIndex].scrollTop;
+                    
+                    function animateScroll(currentTime) {
+                        const elapsed = currentTime - startTime;
+                        const progress = Math.min(elapsed / 300, 1); // 300ms duration
+                        const easeProgress = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+                        
+                        screens[screenIndex].scrollTop = startScrollTop * (1 - easeProgress);
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animateScroll);
+                        } else {
+                            screens[screenIndex].style.scrollBehavior = 'smooth';
+                        }
+                    }
+                    
+                    requestAnimationFrame(animateScroll);
                 }
                 return;
             }
