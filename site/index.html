@@ -9072,11 +9072,11 @@ margin-right: 0.5rem;
                 barVisual.style.height = `${height}px`;
 
                 // Click handler for month selection
-                chartBar.onclick = (event) => {
+                chartBar.onclick = async (event) => {
                     console.log('Bar clicked for month:', month);
                     event.preventDefault();
                     event.stopPropagation();
-                    selectChartMonth(month, currentYear);
+                    await selectChartMonth(month, currentYear);
                 };
 
                 chartBar.appendChild(barVisual);
@@ -9103,7 +9103,7 @@ margin-right: 0.5rem;
             scrollToCurrentMonth();
         }
 
-        function selectChartMonth(month, year) {
+        async function selectChartMonth(month, year) {
             selectedMonth = month;
             selectedYear = year;
 
@@ -9122,7 +9122,7 @@ margin-right: 0.5rem;
             });
 
             // Update total display only (don't trigger other updates)
-            updateSelectedMonthTotal();
+            await updateSelectedMonthTotal();
         }
 
         function animateCountUp(element, startValue, endValue, duration = 300) {
@@ -9147,9 +9147,9 @@ margin-right: 0.5rem;
             requestAnimationFrame(updateCount);
         }
 
-        function updateSelectedMonthTotal() {
+        async function updateSelectedMonthTotal() {
             console.log('updateSelectedMonthTotal - selectedMonth:', selectedMonth, 'selectedYear:', selectedYear);
-            const monthlyTotals = calculateMonthlySpending();
+            const monthlyTotals = await calculateMonthlySpending();
             const monthKey = `${selectedYear}-${selectedMonth}`;
             const total = monthlyTotals[monthKey] || 0;
             console.log('Updating total for:', monthKey, 'Total:', total);
