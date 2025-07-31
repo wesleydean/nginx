@@ -7302,6 +7302,15 @@ margin-right: 0.5rem;
         ];
 
         async function goToScreen(screenIndex) {
+            // If we're already on this screen, just scroll to top
+            if (currentScreen === screenIndex) {
+                const screens = document.querySelectorAll('.screen');
+                if (screens[screenIndex]) {
+                    screens[screenIndex].scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                return;
+            }
+
             currentScreen = screenIndex;
             const wrapper = document.getElementById('screensWrapper');
             wrapper.style.transform = `translateX(-${screenIndex * 100}vw)`;
