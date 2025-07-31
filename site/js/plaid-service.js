@@ -562,31 +562,49 @@ async function connectPlaidAccount() {
                 clearAccountsCache();
             }
 
+            // Show skeleton loader immediately
+            if (typeof showAccountsLoadingPlaceholder === 'function') {
+                showAccountsLoadingPlaceholder();
+            }
+
             // Fetch transactions and update accounts in a single flow
             fetchPlaidTransactions().finally(async () => {
                 try {
+                    // Show skeleton while loading accounts data
+                    if (typeof showAccountsLoadingPlaceholder === 'function') {
+                        showAccountsLoadingPlaceholder();
+                    }
+
                     // Load accounts once after transaction fetch
                     if (typeof loadAccountsWithTransactions === 'function') {
                         await loadAccountsWithTransactions();
                     }
                     
                     // Update UI components
-                    if (typeof renderAccountsList === 'function') {
-                        renderAccountsList(savingsAccounts);
-                    }
-                    if (typeof hideAccountsLoadingPlaceholder === 'function') {
-                        hideAccountsLoadingPlaceholder();
-                    }
                     if (typeof updateAccountManagementList === 'function') {
                         updateAccountManagementList();
+                    }
+                    
+                    // Refresh the accounts display components (without full screen refresh)
+                    if (typeof renderNewAccountsLayout === 'function') {
+                        await renderNewAccountsLayout();
+                    }
+                    if (typeof generateAccountTypeChart === 'function') {
+                        generateAccountTypeChart();
                     }
                     
                     // Update home screen (doesn't need additional account loading)
                     if (typeof updateHomeScreen === 'function') {
                         updateHomeScreen();
                     }
+
+                    // Hide skeleton loader after all updates are complete
+                    if (typeof hideAccountsLoadingPlaceholder === 'function') {
+                        hideAccountsLoadingPlaceholder();
+                    }
                 } catch (error) {
                     console.error('Error updating UI after Plaid connection:', error);
+                    // Always hide skeleton on error
                     if (typeof hideAccountsLoadingPlaceholder === 'function') {
                         hideAccountsLoadingPlaceholder();
                     }

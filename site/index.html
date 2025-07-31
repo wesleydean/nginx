@@ -11063,6 +11063,42 @@ margin-right: 0.5rem;
         window.clearAccountsCache = clearAccountsCache;
 
         /**
+         * Shows the accounts loading skeleton placeholder
+         */
+        function showAccountsLoadingPlaceholder() {
+            const loadingContainer = document.getElementById('accountsListLoading');
+            const accountsContainer = document.getElementById('accountsList');
+            
+            if (loadingContainer) {
+                loadingContainer.style.display = 'block';
+                console.log('Showing accounts loading skeleton');
+            }
+            if (accountsContainer) {
+                accountsContainer.style.display = 'none';
+            }
+        }
+
+        /**
+         * Hides the accounts loading skeleton placeholder
+         */
+        function hideAccountsLoadingPlaceholder() {
+            const loadingContainer = document.getElementById('accountsListLoading');
+            const accountsContainer = document.getElementById('accountsList');
+            
+            if (loadingContainer) {
+                loadingContainer.style.display = 'none';
+                console.log('Hiding accounts loading skeleton');
+            }
+            if (accountsContainer) {
+                accountsContainer.style.display = 'block';
+            }
+        }
+
+        // Make skeleton functions globally available
+        window.showAccountsLoadingPlaceholder = showAccountsLoadingPlaceholder;
+        window.hideAccountsLoadingPlaceholder = hideAccountsLoadingPlaceholder;
+
+        /**
          * Maps Plaid account types and subtypes to our app's account categories
          * @param {string} type - Plaid account type (depository, credit, loan, investment)
          * @param {string} subtype - Plaid account subtype (checking, savings, credit card, etc.)
