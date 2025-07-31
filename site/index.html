@@ -7197,7 +7197,7 @@ margin-right: 0.5rem;
             { id: 'investment', name: 'Investment', type: 'investment' }
         ];
 
-        function goToScreen(screenIndex) {
+        async function goToScreen(screenIndex) {
             currentScreen = screenIndex;
             const wrapper = document.getElementById('screensWrapper');
             wrapper.style.transform = `translateX(-${screenIndex * 100}vw)`;
@@ -7219,16 +7219,18 @@ margin-right: 0.5rem;
                 // Cashflow screen (formerly Spend)
                 setPeriodMode('month');
                 // Ensure monthly chart is generated
-                setTimeout(() => {
-                    generateMonthlyChart();
+                setTimeout(async () => {
+                    await generateMonthlyChart();
                     // Re-initialize swipe functionality after chart render
                     if (typeof initializeChartSwipe === 'function') {
                         initializeChartSwipe();
                     }
+                    // Also refresh the expenses list to ensure fresh data
+                    await updateExpensesList();
                 }, 100);
                 updateCashflowPeriodDisplay();
-                updateBudgetDisplay();
-                updateExpensesList();
+                await updateBudgetDisplay();
+                await updateExpensesList();
             } else if (screenIndex === 2) {
                 // Accounts screen (formerly Save)
                 setSavePeriodMode('month');
@@ -7300,15 +7302,15 @@ margin-right: 0.5rem;
             localStorage.setItem('accountBalances', JSON.stringify(balances));
         }
 
-        function updatePeriodView() {
-            updateBudgetDisplay();
-            updateExpensesList();
+        async function updatePeriodView() {
+            await updateBudgetDisplay();
+            await updateExpensesList();
             updateTotalSavingsDisplay(); // Always update, regardless of mode
             updateSaveScreen(); // Update save screen as well
         }
 
-        function updateBudgetDisplay() {
-            const expenses = loadExpenses();
+        async function updateBudgetDisplay() {
+            const expenses = await loadExpenses();
             const settings = getSimpleBudgetSettings();
             let totalSpent = 0;
             let monthlyIncome = settings.netIncome || 8084;
@@ -7340,7 +7342,7 @@ margin-right: 0.5rem;
             }
 
             // Generate monthly spending chart instead of income/spending bars
-            generateMonthlyChart();
+            await generateMonthlyChart();
 
             // Update change indicators (calculate monthly status once)
             updateMonthlyStatus();
@@ -7348,8 +7350,8 @@ margin-right: 0.5rem;
 
         let lastMonthlyStatusUpdate = null;
 
-        function updateMonthlyStatus() {
-            const expenses = loadExpenses();
+        async function updateMonthlyStatus() {
+            const expenses = await loadExpenses();
             const monthlyBudget = getMonthlyBudget();
             let monthlySpent = 0;
             const monthKey = getCurrentPeriodKey();
@@ -7396,8 +7398,8 @@ margin-right: 0.5rem;
             }
         }
 
-        function calculateMonthOverMonthChange(currentMonthSpent) {
-            const expenses = loadExpenses();
+        async function calculateMonthOverMonthChange(currentMonthSpent) {
+            const expenses = await loadExpenses();
             const currentDate = new Date(selectedMonthDate);
 
             // Get previous month
@@ -7422,7 +7424,7 @@ margin-right: 0.5rem;
             return ((currentMonthSpent - previousMonthSpent) / previousMonthSpent) * 100;
         }
 
-        function updateChangeIndicators(monthlySpent, monthlyRemaining, monthlyBudget) {
+        async function updateChangeIndicators(monthlySpent, monthlyRemaining, monthlyBudget) {
             console.log('updateChangeIndicators called with:', { monthlySpent, monthlyRemaining, monthlyBudget });
             const spentChange = document.getElementById('spentChange');
             const remainingChange = document.getElementById('remainingChange');
@@ -7431,7 +7433,7 @@ margin-right: 0.5rem;
             const monthlyPercentUsed = (monthlySpent / monthlyBudget) * 100;
 
             // Calculate month-over-month change for spending
-            const monthOverMonthChange = calculateMonthOverMonthChange(monthlySpent);
+            const monthOverMonthChange = await calculateMonthOverMonthChange(monthlySpent);
 
             // Update spent change indicator with month-over-month percentage
             if (spentChange) {
@@ -7479,8 +7481,8 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateExpensesList() {
-            const expenses = loadExpenses();
+        async function updateExpensesList() {
+            const expenses = await loadExpenses();
             const listContainer = document.getElementById('expensesList');
             const titleElement = document.getElementById('expensesListTitle');
 
@@ -7605,7 +7607,7 @@ margin-right: 0.5rem;
             }
         }
 
-        function deleteExpense(date, timestamp) {
+        async function deleteExpense(date, timestamp) {
             console.log('deleteExpense function called with date:', date, 'and timestamp:', timestamp);
             timestamp = parseInt(timestamp, 10); // Ensure timestamp is a number
 
@@ -7616,7 +7618,7 @@ margin-right: 0.5rem;
             }
 
             try {
-                const expenses = loadExpenses();
+                const expenses = await loadExpenses();
                 console.log('Current expenses for date:', date, expenses[date]);
 
                 // Handle the case where date might be undefined for today mode
@@ -7670,7 +7672,7 @@ margin-right: 0.5rem;
 
                     // Update the rest of the display
                     console.log('Updating UI after deletion');
-                    updatePeriodView();
+                    await updatePeriodView();
                     updateChart();
 
                     console.log('✅ Expense deleted successfully');
@@ -7697,9 +7699,9 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateReports() {
+        async function updateReports() {
             // Update weekly and monthly stats
-            const expenses = loadExpenses();
+            const expenses = await loadExpenses();
             const today = new Date(2025, 6, 7); // Hard-coded to July 7, 2025
             const dayOfMonth = today.getDate();
             const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
@@ -7882,9 +7884,9 @@ margin-right: 0.5rem;
             }, 100);
         }
 
-        function updateChart() {
+        async function updateChart() {
             // Get expenses and balances
-            const expenses = loadExpenses();
+            const expenses = await loadExpenses();
             const balances = loadAccountBalances();
 
             // Get chart canvas
@@ -8457,9 +8459,9 @@ margin-right: 0.5rem;
             { id: 'emergency', name: 'Emergency Fund' }
         ];
 
-        function updateCategoryChart() {
+        async function updateCategoryChart() {
             // Get expenses and filter by time range
-            const expenses = loadExpenses();
+            const expenses = await loadExpenses();
             const dateRange = getDateRangeForTimeRange(currentTimeRange);
             const startDate = dateRange.startDate;
             const endDate = dateRange.endDate;
@@ -8758,7 +8760,7 @@ margin-right: 0.5rem;
                     const isInsideCategory = categoryChart.contains(e.target);
 
                     if (!isInsideMonthly && !isInsideCategory) {
-                        clearChartSelections();
+                        clearChartSelections().catch(console.error);
                     }
                 }
             });
@@ -8845,8 +8847,8 @@ margin-right: 0.5rem;
         }
 
         // Monthly spending chart functions
-        function calculateMonthlySpending() {
-            const expenses = loadExpenses();
+        async function calculateMonthlySpending() {
+            const expenses = await loadExpenses();
             const monthlyTotals = {};
 
             // Initialize months from January to current month
@@ -8873,7 +8875,7 @@ margin-right: 0.5rem;
             return monthlyTotals;
         }
 
-        function generateMonthlyChart() {
+        async function generateMonthlyChart() {
             console.log('generateMonthlyChart called');
             const chartContainer = document.getElementById('monthlySpendingChart');
             if (!chartContainer) {
@@ -8882,7 +8884,7 @@ margin-right: 0.5rem;
             }
             console.log('Chart container found:', chartContainer);
 
-            const monthlyTotals = calculateMonthlySpending();
+            const monthlyTotals = await calculateMonthlySpending();
             console.log('Monthly totals:', monthlyTotals);
             const currentDate = new Date();
             const currentMonth = currentDate.getMonth();
@@ -9091,11 +9093,11 @@ margin-right: 0.5rem;
             }
         }
 
-        function generateCategoryChart() {
+        async function generateCategoryChart() {
             const chartContainer = document.getElementById('categorySpendingChart');
             if (!chartContainer) return;
 
-            const expenses = loadExpenses();
+            const expenses = await loadExpenses();
             const categoryTotals = {};
 
             // Calculate category totals for the selected time range
@@ -9172,7 +9174,7 @@ margin-right: 0.5rem;
             });
 
             // Update category total display
-            updateSelectedCategoryTotal();
+            await updateSelectedCategoryTotal();
 
             // Initialize Lucide icons for the new category icons
             if (window.lucide && typeof window.lucide.createIcons === 'function') {
@@ -9317,7 +9319,7 @@ margin-right: 0.5rem;
             return expenses.reduce((total, expense) => total + parseFloat(expense.amount || 0), 0);
         }
 
-        function clearChartSelections() {
+        async function clearChartSelections() {
             // Clear monthly chart selection
             const monthlyContainer = document.getElementById('monthlySpendingChart');
             const monthlyBars = document.querySelectorAll('#monthlySpendingChart .chart-bar');
@@ -9337,7 +9339,7 @@ margin-right: 0.5rem;
                     const currentYear = currentDate.getFullYear();
                     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-                    const monthlyTotals = calculateMonthlySpending();
+                    const monthlyTotals = await calculateMonthlySpending();
                     const currentMonthKey = `${currentYear}-${currentMonth}`;
                     const currentMonthTotal = monthlyTotals[currentMonthKey] || 0;
 
@@ -9374,7 +9376,7 @@ margin-right: 0.5rem;
                 const totalElement = document.getElementById('selectedCategoryTotal');
                 if (totalElement) {
                     // Calculate total for just the categories displayed in the chart
-                    const expenses = loadExpenses();
+                    const expenses = await loadExpenses();
                     const categoryTotals = {};
 
                     // Calculate category totals for the selected time range (same logic as generateCategoryChart)
@@ -9411,12 +9413,12 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateSelectedCategoryTotal() {
+        async function updateSelectedCategoryTotal() {
             // Show total spend for displayed categories by default
             const totalElement = document.getElementById('selectedCategoryTotal');
             if (totalElement) {
                 // Calculate total for just the categories displayed in the chart (same logic as clearChartSelections)
-                const expenses = loadExpenses();
+                const expenses = await loadExpenses();
                 const categoryTotals = {};
 
                 // Calculate category totals for the selected time range
@@ -9447,12 +9449,12 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateSelectedCategoryTotalOld() {
+        async function updateSelectedCategoryTotalOld() {
             // Show total for first category by default
             const firstBar = document.querySelector('#categorySpendingChart .chart-bar');
             if (firstBar) {
                 const category = firstBar.dataset.category;
-                const expenses = loadExpenses();
+                const expenses = await loadExpenses();
                 const categoryTotals = {};
 
                 // Recalculate for selected time range
@@ -9504,14 +9506,14 @@ margin-right: 0.5rem;
             }
 
             // Add event listeners
-            yearDropdown.addEventListener('change', (e) => {
+            yearDropdown.addEventListener('change', async (e) => {
                 selectedMonthDate.setFullYear(parseInt(e.target.value));
-                updatePeriodView();
+                await updatePeriodView();
             });
 
-            monthDropdown.addEventListener('change', (e) => {
+            monthDropdown.addEventListener('change', async (e) => {
                 selectedMonthDate.setMonth(parseInt(e.target.value));
-                updatePeriodView();
+                await updatePeriodView();
             });
         }
 
@@ -10586,7 +10588,7 @@ margin-right: 0.5rem;
             }
         }
 
-        function addExpenseFromSlideOut() {
+        async function addExpenseFromSlideOut() {
             const amount = parseFloat(document.getElementById('slideOutExpenseAmount').value);
             const category = document.getElementById('slideOutExpenseCategory').value;
             const description = document.getElementById('slideOutExpenseDescription').value;
@@ -10612,7 +10614,7 @@ margin-right: 0.5rem;
                 return;
             }
 
-            const expenses = loadExpenses();
+            const expenses = await loadExpenses();
 
             if (!expenses[targetDate]) {
                 expenses[targetDate] = [];
@@ -10648,7 +10650,7 @@ margin-right: 0.5rem;
             hideExpenseSlideOut();
 
             // Update display
-            updatePeriodView();
+            await updatePeriodView();
             updateChart();
             console.log('Expense added:', newExpense);
         }
@@ -11569,9 +11571,9 @@ margin-right: 0.5rem;
             if (currentChartIndex === 1) {
                 // Category chart - staggered bar animation (data changes with time range)
                 const categoryContainer = document.getElementById('categorySpendingChart');
-                staggeredBarUpdate(categoryContainer, () => {
-                    generateCategoryChart();
-                    updateSelectedCategoryTotal();
+                staggeredBarUpdate(categoryContainer, async () => {
+                    await generateCategoryChart();
+                    await updateSelectedCategoryTotal();
                 });
             }
             // Monthly chart doesn't need animation since it's not affected by time range
@@ -11632,8 +11634,8 @@ margin-right: 0.5rem;
             updateExpensesListWithRange(startDate, endDate);
         }
 
-        function updateExpensesListWithRange(startDate, endDate) {
-            const expenses = loadExpenses();
+        async function updateExpensesListWithRange(startDate, endDate) {
+            const expenses = await loadExpenses();
             const listContainer = document.getElementById('expensesList');
             const titleElement = document.getElementById('expensesListTitle');
 
@@ -12039,6 +12041,16 @@ margin-right: 0.5rem;
                 if (typeof updateHomeScreen === 'function') {
                     await updateHomeScreen();
                 }
+                
+                // Force refresh the spending UI components
+                await updatePeriodView();
+                await generateMonthlyChart();
+                
+                // If we're on the cashflow screen, refresh it
+                if (currentScreen === 1) {
+                    await updateBudgetDisplay();
+                    await updateExpensesList();
+                }
 
                 alert(`Sample data loaded successfully! Added ${result.accounts} accounts and ${result.transactions} transactions.`);
                 
@@ -12047,6 +12059,23 @@ margin-right: 0.5rem;
                 alert('Failed to load sample data. Please make sure you are signed in and try again.');
             }
         }
+
+        /**
+         * Test function to manually refresh spending UI (for debugging)
+         */
+        async function refreshSpendingUI() {
+            console.log('Refreshing spending UI...');
+            try {
+                await updatePeriodView();
+                await generateMonthlyChart();
+                console.log('Spending UI refreshed successfully');
+            } catch (error) {
+                console.error('Error refreshing spending UI:', error);
+            }
+        }
+        
+        // Make it available globally for console testing
+        window.refreshSpendingUI = refreshSpendingUI;
 
         /**
          * Show placeholder for home net worth chart when no data is available
@@ -14572,7 +14601,7 @@ margin-right: 0.5rem;
         }
 
         // Open account detail page (placeholder)
-        function openAccountDetail(accountId) {
+        async function openAccountDetail(accountId) {
             const account = savingsAccounts.find(acc => acc.id === accountId);
             if (!account) {
                 console.error('Account not found:', accountId);
@@ -14606,7 +14635,7 @@ margin-right: 0.5rem;
 
             // Load account data
             updateAccountDetailChart();
-            updateAccountDetailTransactions();
+            await updateAccountDetailTransactions();
 
             // Initialize swipe-to-go-back
             initAccountDetailSwipe();
@@ -14881,7 +14910,7 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateAccountDetailTimeRange(rangeType, event) {
+        async function updateAccountDetailTimeRange(rangeType, event) {
             if (!window.currentAccountDetail) return;
 
             // Close dropdown
@@ -14907,25 +14936,25 @@ margin-right: 0.5rem;
             // Update stored range and refresh data
             window.currentAccountDetail.timeRange = rangeType;
             updateAccountDetailChart();
-            updateAccountDetailTransactions();
+            await updateAccountDetailTransactions();
         }
 
-        function updateAccountDetailTransactions() {
+        async function updateAccountDetailTransactions() {
             if (!window.currentAccountDetail) return;
 
             const accountId = window.currentAccountDetail.id;
             const timeRange = window.currentAccountDetail.timeRange;
 
             // Get transactions for this account
-            const transactions = getAccountTransactions(accountId, timeRange);
+            const transactions = await getAccountTransactions(accountId, timeRange);
 
             // Render transaction list
             renderAccountDetailTransactions(transactions);
         }
 
-        function getAccountTransactions(accountId, timeRange) {
+        async function getAccountTransactions(accountId, timeRange) {
             // Load real expense data from localStorage
-            const expenses = loadExpenses();
+            const expenses = await loadExpenses();
             let transactions = [];
 
             // Convert expenses to transaction format
@@ -15898,7 +15927,7 @@ margin-right: 0.5rem;
             }
         }
 
-        function saveSimpleBudgetSettings() {
+        async function saveSimpleBudgetSettings() {
             const settings = {
                 grossIncome: parseFloat(document.getElementById('grossIncome').value) || 0,
                 federalTax: parseFloat(document.getElementById('federalTax').value) || 0,
@@ -15916,7 +15945,7 @@ margin-right: 0.5rem;
             localStorage.setItem('simpleBudgetSettings', JSON.stringify(settings));
 
             // Update all displays to reflect new settings
-            updatePeriodView();
+            await updatePeriodView();
             updateReports();
             updateSaveScreen();
 
@@ -16316,7 +16345,7 @@ margin-right: 0.5rem;
             validationElement.className = 'budget-value ' + validationClass;
         }
 
-        function saveBudgetSettings() {
+        async function saveBudgetSettings() {
             // Calculate monthly savings target first
             const annualSavingsGoal = parseFloat(document.getElementById('budgetAnnualSavingsGoal').value) || 0;
             const monthlySavingsTarget = annualSavingsGoal / 12;
@@ -16493,8 +16522,8 @@ margin-right: 0.5rem;
 
         // --- Expense Editing Support ---
         let editingExpense = null;
-        function editExpense(date, timestamp) {
-            const expenses = loadExpenses();
+        async function editExpense(date, timestamp) {
+            const expenses = await loadExpenses();
             const expenseList = expenses[date] || [];
             const expense = expenseList.find(e => e.timestamp === Number(timestamp));
             if (!expense) return;
@@ -16523,7 +16552,7 @@ margin-right: 0.5rem;
                 ctaBtn.onclick = saveEditedExpense;
             }
         }
-        function saveEditedExpense() {
+        async function saveEditedExpense() {
             if (!editingExpense) return;
             const amount = parseFloat(document.getElementById('slideOutExpenseAmount').value);
             const category = document.getElementById('slideOutExpenseCategory').value;
@@ -16539,7 +16568,7 @@ margin-right: 0.5rem;
                 alert('Please select a category');
                 return;
             }
-            const expenses = loadExpenses();
+            const expenses = await loadExpenses();
             // Remove the old expense and get its index
             let oldList = expenses[editingExpense.date] || [];
             const oldIndex = oldList.findIndex(e => e.timestamp === editingExpense.timestamp);
@@ -16586,7 +16615,7 @@ margin-right: 0.5rem;
                 ctaBtn.onclick = addExpenseFromSlideOut;
             }
             hideExpenseSlideOut();
-            updatePeriodView();
+            await updatePeriodView();
             updateChart();
         }
         function capitalizeFirstLetter(str) {
