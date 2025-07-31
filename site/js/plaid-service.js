@@ -562,42 +562,33 @@ async function connectPlaidAccount() {
                 clearAccountsCache();
             }
 
-            // Only fetch transactions (which will also update accounts) ONCE
-            fetchPlaidTransactions().finally(() => {
-                // Refresh accounts list from API after transaction fetch
-                if (typeof loadAccountsWithTransactions === 'function') {
-                    loadAccountsWithTransactions().then(() => {
-                        if (typeof renderAccountsList === 'function') {
-                            renderAccountsList(savingsAccounts);
-                        }
-                        if (typeof hideAccountsLoadingPlaceholder === 'function') {
-                            hideAccountsLoadingPlaceholder();
-                        }
-                        // Force refresh of account management list after loading accounts
-                        if (typeof updateAccountManagementList === 'function') {
-                            updateAccountManagementList();
-                        }
-                        
-                        // Update home screen charts and net worth
-                        if (typeof updateHomeScreen === 'function') {
-                            updateHomeScreen();
-                        }
-                    });
-                } else {
+            // Fetch transactions and update accounts in a single flow
+            fetchPlaidTransactions().finally(async () => {
+                try {
+                    // Load accounts once after transaction fetch
+                    if (typeof loadAccountsWithTransactions === 'function') {
+                        await loadAccountsWithTransactions();
+                    }
+                    
+                    // Update UI components
                     if (typeof renderAccountsList === 'function') {
                         renderAccountsList(savingsAccounts);
                     }
                     if (typeof hideAccountsLoadingPlaceholder === 'function') {
                         hideAccountsLoadingPlaceholder();
                     }
-                    // Force refresh of account management list after transaction fetch
                     if (typeof updateAccountManagementList === 'function') {
                         updateAccountManagementList();
                     }
                     
-                    // Update home screen charts and net worth
+                    // Update home screen (doesn't need additional account loading)
                     if (typeof updateHomeScreen === 'function') {
                         updateHomeScreen();
+                    }
+                } catch (error) {
+                    console.error('Error updating UI after Plaid connection:', error);
+                    if (typeof hideAccountsLoadingPlaceholder === 'function') {
+                        hideAccountsLoadingPlaceholder();
                     }
                 }
             });

@@ -11047,7 +11047,7 @@ margin-right: 0.5rem;
             timestamp: 0,
             promise: null
         };
-        const CACHE_DURATION = 5000; // 5 seconds cache
+        const CACHE_DURATION = 30000; // 30 seconds cache to reduce API calls
 
         /**
          * Clears the accounts API cache to force fresh data on next request
@@ -11974,13 +11974,8 @@ margin-right: 0.5rem;
                 updateCategoryChart();
             }
 
-            // Load accounts with recent transactions on page load
-            try {
-                await loadAccountsWithTransactions();
-                console.log('Loaded accounts with transactions on page load');
-            } catch (error) {
-                console.error('Error loading accounts on page load:', error);
-            }
+            // Accounts will be loaded when needed by specific screens
+            console.log('Page initialization complete');
         });
 
         // Swipe to Delete Functionality
@@ -12189,10 +12184,7 @@ margin-right: 0.5rem;
                     clearAccountsCache();
                 }
 
-                // Refresh the accounts list to show the new sample data
-                await loadAccountsWithTransactions();
-                
-                // Update the UI
+                // Update the UI (accounts will be loaded when management screen is accessed)
                 if (typeof updateAccountManagementList === 'function') {
                     await updateAccountManagementList();
                 }
@@ -14613,8 +14605,7 @@ margin-right: 0.5rem;
             const container = document.getElementById('accountsList');
             if (!container) return;
 
-            // Load accounts with recent transactions from API
-            await loadAccountsWithTransactions();
+            // Accounts data should already be loaded by updateSaveScreen()
 
             const balances = loadAccountBalances();
 
@@ -15776,6 +15767,10 @@ margin-right: 0.5rem;
             renderSaveTitle();
             updateSaveTargetDisplay();
             await updateSaveTotalSavingsDisplay();
+            
+            // Load accounts data when accessing accounts screen
+            await loadAccountsWithTransactions();
+            
             updateAccountsView();
             updateAccountsNetWorth(); // Initialize accounts networth chart
         }
