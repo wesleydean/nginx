@@ -6234,6 +6234,33 @@ margin-right: 0.5rem;
       0% { background-color: #f6f5f3; }
       100% { background-color: #dad7d0; }
     }
+
+    /* Transaction skeleton styles */
+    .transaction-skeleton-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .transaction-skeleton-row .skeleton-icon,
+    .transaction-skeleton-row .skeleton-line,
+    .transaction-skeleton-row .skeleton-amount {
+      animation: skeleton-loading 1.2s infinite linear alternate;
+      background-color: #f3f4f6;
+    }
+    .transaction-skeleton-row .skeleton-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+    }
+    .transaction-skeleton-row .skeleton-line {
+      border-radius: 6px;
+    }
+    .transaction-skeleton-row .skeleton-amount {
+      border-radius: 8px;
+      height: 16px;
+    }
     .fade-in {
       opacity: 0;
       animation: fadeIn 0.5s ease-in forwards;
@@ -11014,9 +11041,76 @@ margin-right: 0.5rem;
             }
         }
 
+        /**
+         * Shows the transactions loading skeleton placeholder
+         */
+        function showTransactionsLoadingPlaceholder() {
+            const listContainer = document.getElementById('expensesList');
+            
+            if (listContainer) {
+                listContainer.innerHTML = `
+                    <div id="transactionsListLoading">
+                        <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
+                            <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
+                            <div style="flex: 1;">
+                                <div class="skeleton-line" style="width: 70%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
+                                <div class="skeleton-line" style="width: 45%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                            </div>
+                            <div class="skeleton-amount" style="width: 50px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
+                        </div>
+                        <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
+                            <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
+                            <div style="flex: 1;">
+                                <div class="skeleton-line" style="width: 60%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
+                                <div class="skeleton-line" style="width: 35%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                            </div>
+                            <div class="skeleton-amount" style="width: 45px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
+                        </div>
+                        <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
+                            <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
+                            <div style="flex: 1;">
+                                <div class="skeleton-line" style="width: 65%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
+                                <div class="skeleton-line" style="width: 40%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                            </div>
+                            <div class="skeleton-amount" style="width: 55px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
+                        </div>
+                        <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
+                            <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
+                            <div style="flex: 1;">
+                                <div class="skeleton-line" style="width: 55%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
+                                <div class="skeleton-line" style="width: 30%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                            </div>
+                            <div class="skeleton-amount" style="width: 48px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
+                        </div>
+                        <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0;">
+                            <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
+                            <div style="flex: 1;">
+                                <div class="skeleton-line" style="width: 75%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
+                                <div class="skeleton-line" style="width: 50%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                            </div>
+                            <div class="skeleton-amount" style="width: 52px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * Hides the transactions loading skeleton placeholder
+         */
+        function hideTransactionsLoadingPlaceholder() {
+            const loadingContainer = document.getElementById('transactionsListLoading');
+            
+            if (loadingContainer) {
+                loadingContainer.remove();
+            }
+        }
+
         // Make skeleton functions globally available
         window.showAccountsLoadingPlaceholder = showAccountsLoadingPlaceholder;
         window.hideAccountsLoadingPlaceholder = hideAccountsLoadingPlaceholder;
+        window.showTransactionsLoadingPlaceholder = showTransactionsLoadingPlaceholder;
+        window.hideTransactionsLoadingPlaceholder = hideTransactionsLoadingPlaceholder;
 
         /**
          * Maps Plaid account types and subtypes to our app's account categories
@@ -11655,8 +11749,15 @@ margin-right: 0.5rem;
                 timeRangeText.textContent = getTimeRangeLabel(newRange);
             }
 
-            // Update transactions display based on selected range
-            updateTransactionsForTimeRange();
+            // Show skeleton loading while updating transactions
+            if (typeof showTransactionsLoadingPlaceholder === 'function') {
+                showTransactionsLoadingPlaceholder();
+            }
+
+            // Update transactions display based on selected range with a small delay to show skeleton
+            setTimeout(() => {
+                updateTransactionsForTimeRange();
+            }, 100);
 
             // Update chart if needed
             if (typeof updateChart === 'function') {
@@ -11844,6 +11945,11 @@ margin-right: 0.5rem;
                     window.initializeTransactionIcons();
                 }
                 initializeSwipeToDelete();
+            }
+
+            // Hide skeleton loading after updating transactions
+            if (typeof hideTransactionsLoadingPlaceholder === 'function') {
+                hideTransactionsLoadingPlaceholder();
             }
         }
         // Patch updatePeriodDropdownValues to update the title
