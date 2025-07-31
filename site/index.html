@@ -7218,6 +7218,10 @@ margin-right: 0.5rem;
             } else if (screenIndex === 1) {
                 // Cashflow screen (formerly Spend)
                 setPeriodMode('month');
+                // Add chart click listener for spending screen
+                if (typeof window.addChartClickListener === 'function') {
+                    window.addChartClickListener();
+                }
                 // Ensure monthly chart is generated
                 setTimeout(async () => {
                     await generateMonthlyChart();
@@ -7231,14 +7235,21 @@ margin-right: 0.5rem;
                 updateCashflowPeriodDisplay();
                 await updateBudgetDisplay();
                 await updateExpensesList();
-            } else if (screenIndex === 2) {
-                // Accounts screen (formerly Save)
-                setSavePeriodMode('month');
-                updateSaveScreen();
-            } else if (screenIndex === 3) {
-                // Dashboard screen (formerly Reports)
-                updateReports();
-                setTimeout(updateChart, 300);
+            } else {
+                // Remove chart click listener when not on spending screen
+                if (typeof window.removeChartClickListener === 'function') {
+                    window.removeChartClickListener();
+                }
+                
+                if (screenIndex === 2) {
+                    // Accounts screen (formerly Save)
+                    setSavePeriodMode('month');
+                    updateSaveScreen();
+                } else if (screenIndex === 3) {
+                    // Dashboard screen (formerly Reports)
+                    updateReports();
+                    setTimeout(updateChart, 300);
+                }
             }
         }
 
@@ -8750,20 +8761,48 @@ margin-right: 0.5rem;
             carouselContainer.addEventListener('touchend', handleTouchEnd);
 
             // Add document click listener to clear selections when clicking outside charts
-            document.addEventListener('click', function (e) {
-                // Check if click is outside both chart containers
-                const monthlyChart = document.getElementById('monthlySpendingChart');
-                const categoryChart = document.getElementById('categorySpendingChart');
+            // Only add this listener when we're on the spending page (screen 1)
+            let chartClickListener = null;
+            
+            function addChartClickListener() {
+                if (chartClickListener) return; // Prevent duplicate listeners
+                
+                chartClickListener = function (e) {
+                    // Only handle clicks when on spending screen
+                    if (currentScreen !== 1) return;
+                    
+                    // Check if click is outside both chart containers
+                    const monthlyChart = document.getElementById('monthlySpendingChart');
+                    const categoryChart = document.getElementById('categorySpendingChart');
 
-                if (monthlyChart && categoryChart) {
-                    const isInsideMonthly = monthlyChart.contains(e.target);
-                    const isInsideCategory = categoryChart.contains(e.target);
+                    if (monthlyChart && categoryChart) {
+                        const isInsideMonthly = monthlyChart.contains(e.target);
+                        const isInsideCategory = categoryChart.contains(e.target);
 
-                    if (!isInsideMonthly && !isInsideCategory) {
-                        clearChartSelections().catch(console.error);
+                        if (!isInsideMonthly && !isInsideCategory) {
+                            clearChartSelections().catch(console.error);
+                        }
                     }
+                };
+                
+                document.addEventListener('click', chartClickListener);
+            }
+            
+            function removeChartClickListener() {
+                if (chartClickListener) {
+                    document.removeEventListener('click', chartClickListener);
+                    chartClickListener = null;
                 }
-            });
+            }
+            
+            // Add listener initially if on spending screen
+            if (currentScreen === 1) {
+                addChartClickListener();
+            }
+            
+            // Store functions globally so they can be called when navigating screens
+            window.addChartClickListener = addChartClickListener;
+            window.removeChartClickListener = removeChartClickListener;
         }
 
         function getCurrentPeriodKey() {
@@ -9320,10 +9359,24 @@ margin-right: 0.5rem;
         }
 
         async function clearChartSelections() {
-            // Clear monthly chart selection
+            // Only clear selections if charts actually have selections
             const monthlyContainer = document.getElementById('monthlySpendingChart');
+            const categoryContainer = document.getElementById('categorySpendingChart');
+            
+            const hasMonthlySelection = monthlyContainer && monthlyContainer.classList.contains('has-selection');
+            const hasCategorySelection = categoryContainer && categoryContainer.classList.contains('has-selection');
+            
+            // If no selections exist, don't make any API calls
+            if (!hasMonthlySelection && !hasCategorySelection) {
+                return;
+            }
+            
+            // Load expenses data only once for both charts
+            const expenses = await loadExpenses();
+            
+            // Clear monthly chart selection
             const monthlyBars = document.querySelectorAll('#monthlySpendingChart .chart-bar');
-            if (monthlyContainer) {
+            if (hasMonthlySelection && monthlyContainer) {
                 monthlyContainer.classList.remove('has-selection');
                 monthlyBars.forEach(bar => bar.classList.remove('selected'));
 
@@ -9339,7 +9392,22 @@ margin-right: 0.5rem;
                     const currentYear = currentDate.getFullYear();
                     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-                    const monthlyTotals = await calculateMonthlySpending();
+                    // Calculate monthly totals from the already loaded expenses
+                    const monthlyTotals = {};
+                    for (let month = 0; month <= currentMonth; month++) {
+                        monthlyTotals[`${currentYear}-${month}`] = 0;
+                    }
+                    
+                    Object.keys(expenses).forEach(dateKey => {
+                        const date = new Date(dateKey);
+                        if (date.getFullYear() === currentYear && date.getMonth() <= currentMonth) {
+                            const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+                            const dayExpenses = expenses[dateKey];
+                            const dayTotal = dayExpenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+                            monthlyTotals[monthKey] += dayTotal;
+                        }
+                    });
+                    
                     const currentMonthKey = `${currentYear}-${currentMonth}`;
                     const currentMonthTotal = monthlyTotals[currentMonthKey] || 0;
 
@@ -9359,9 +9427,8 @@ margin-right: 0.5rem;
             }
 
             // Clear category chart selection
-            const categoryContainer = document.getElementById('categorySpendingChart');
             const categoryBars = document.querySelectorAll('#categorySpendingChart .chart-bar');
-            if (categoryContainer) {
+            if (hasCategorySelection && categoryContainer) {
                 categoryContainer.classList.remove('has-selection');
                 categoryBars.forEach(bar => {
                     bar.classList.remove('selected');
@@ -9375,11 +9442,10 @@ margin-right: 0.5rem;
                 // Show total spend for displayed categories with animation
                 const totalElement = document.getElementById('selectedCategoryTotal');
                 if (totalElement) {
-                    // Calculate total for just the categories displayed in the chart
-                    const expenses = await loadExpenses();
+                    // Calculate category totals using the already loaded expenses
                     const categoryTotals = {};
 
-                    // Calculate category totals for the selected time range (same logic as generateCategoryChart)
+                    // Calculate category totals for the selected time range
                     const { startDate, endDate } = getDateRangeForTimeRange(currentTimeRange);
                     const startDateStr = startDate.toISOString().split('T')[0];
                     const endDateStr = endDate.toISOString().split('T')[0];
