@@ -8036,7 +8036,7 @@ margin-right: 0.5rem;
 
             // Format dates for labels and lookup
             const labels = dates.map(date => {
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
             });
 
             const dateKeys = dates.map(date => {
@@ -9892,7 +9892,7 @@ margin-right: 0.5rem;
                             .map((item, idx, arr) => {
                                 const dateParts = item.date.split('-').map(Number);
                                 const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-                                const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
                                 // Calculate percent change vs previous entry in this month
                                 let percentChange = null;
                                 let arrow = '';
@@ -11893,9 +11893,9 @@ margin-right: 0.5rem;
                     const dateParts = date.split('-').map(Number);
                     const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
                     const formattedDate = dateObj.toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric'
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
                     });
 
                     const dayTotal = expenses.reduce((sum, expense) => sum + expense.amount, 0);
@@ -12508,7 +12508,7 @@ margin-right: 0.5rem;
                 // Parse date manually to avoid timezone issues (same as cashflow page)
                 const dateParts = transaction.date.split('-').map(Number);
                 const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-                const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const displayDate = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
                 // Format amounts same as cashflow page - just the amount with dark color
                 return `
@@ -14113,7 +14113,7 @@ margin-right: 0.5rem;
             if (progressLabel) {
                 if (currentSavePeriodMode === 'today') {
                     const lastDateObj = new Date(lastBalanceDate);
-                    const lastDateFormatted = lastDateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const lastDateFormatted = lastDateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
                     progressLabel.textContent = `Today vs ${lastDateFormatted}`;
                 } else {
                     // For monthly mode, show "Saved this month"
@@ -14548,7 +14548,7 @@ margin-right: 0.5rem;
                 const saveBalanceDate = document.getElementById('saveBalanceDate');
                 if (saveBalanceDate) {
                     const today = new Date();
-                    saveBalanceDate.textContent = today.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    saveBalanceDate.textContent = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
                 }
 
                 console.log('Today total:', { actualTotalBalance, previousTotal, balanceChange });
@@ -15330,8 +15330,9 @@ margin-right: 0.5rem;
                 return 'Yesterday';
             } else {
                 return date.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric'
+                    month: 'long',
+                    day: 'numeric',
+                    year: 'numeric'
                 });
             }
         }
@@ -15508,7 +15509,7 @@ margin-right: 0.5rem;
 
                         const [year, month, day] = update.date.split('-').map(Number);
                         const dateObj = new Date(year, month - 1, day);
-                        const displayDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        const displayDate = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
                         return {
                             ...update,
