@@ -12,7 +12,6 @@ const app = express();
 app.use(express.json());
 
 // Then CORS configuration with proper options
-console.log('Setting up CORS configuration');
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -34,7 +33,6 @@ app.options('*', (req, res) => {
 
 
 // Configure Plaid client
-console.log('PLAID_ENV:', process.env.PLAID_ENV);
 
 // Safely handle the environment path
 let basePath;
@@ -42,12 +40,9 @@ try {
   basePath = process.env.PLAID_ENV === 'production' 
     ? PlaidEnvironments.production 
     : PlaidEnvironments.sandbox;
-  console.log('PLAID environment path:', basePath);
 } catch (error) {
-  console.error('Error determining Plaid environment:', error);
   // Default to sandbox in case of error
   basePath = 'https://sandbox.plaid.com';
-  console.log('Defaulting to:', basePath);
 }
 
 const configuration = new Configuration({
@@ -74,7 +69,6 @@ app.get('/api/transactions/monthly-overview', clerkAuth, async (req, res) => {
     const summary = await database.getMonthlyTransactionSummary(clerkUserId);
     res.json({ summary });
   } catch (error) {
-    console.error('Error getting monthly overview:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -108,7 +102,6 @@ app.get('/api/transactions/range', clerkAuth, async (req, res) => {
 
     res.json({ transactions, categories });
   } catch (error) {
-    console.error('Error getting transactions by range:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -118,10 +111,8 @@ app.post('/api/create_link_token_test', async (req, res) => {
   try {
     const testUserId = 'test-user-id';
     
-    console.log('Creating test link token for user:', testUserId);
     
     const environment = process.env.PLAID_ENV === 'production' ? 'production' : 'sandbox';
-    console.log('Using Plaid environment:', environment);
     
     const config = {
       user: { client_user_id: testUserId },
@@ -132,7 +123,6 @@ app.post('/api/create_link_token_test', async (req, res) => {
     };
     
     if (environment === 'sandbox') {
-      console.log('Adding sandbox-specific configurations');
       config.account_filters = {
         depository: {
           account_subtypes: ['checking', 'savings']
@@ -142,7 +132,6 @@ app.post('/api/create_link_token_test', async (req, res) => {
     
     const createTokenResponse = await plaidClient.linkTokenCreate(config);
     
-    console.log('Link token created successfully');
     
     const responseData = {
       ...createTokenResponse.data,
@@ -151,7 +140,6 @@ app.post('/api/create_link_token_test', async (req, res) => {
     
     res.json(responseData);
   } catch (error) {
-    console.error('Error creating test link token:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -165,11 +153,9 @@ app.post('/api/create_link_token', clerkAuth, async (req, res) => {
     await database.createUser(clerkUserId);
     
     // Log the request data for debugging
-    console.log('Creating link token for Clerk user:', clerkUserId);
     
     // Determine the current environment
     const environment = process.env.PLAID_ENV === 'production' ? 'production' : 'sandbox';
-    console.log('Using Plaid environment:', environment);
     
     // Configure link token creation with options
     const config = {
@@ -182,7 +168,6 @@ app.post('/api/create_link_token', clerkAuth, async (req, res) => {
     
     // Add sandbox-specific configurations if in sandbox mode
     if (environment === 'sandbox') {
-      console.log('Adding sandbox-specific configurations');
       config.account_filters = {
         depository: {
           account_subtypes: ['checking', 'savings']
@@ -192,7 +177,6 @@ app.post('/api/create_link_token', clerkAuth, async (req, res) => {
     
     const createTokenResponse = await plaidClient.linkTokenCreate(config);
     
-    console.log('Link token created successfully');
     
     // Add environment info to the response
     const responseData = {
@@ -202,8 +186,6 @@ app.post('/api/create_link_token', clerkAuth, async (req, res) => {
     
     res.json(responseData);
   } catch (error) {
-    console.error('Error creating link token:', error);
-    console.error('Error details:', error.stack);
     res.status(500).json({ error: error.message });
   }
 });
@@ -267,9 +249,7 @@ app.post('/api/exchange_public_token', clerkAuth, async (req, res) => {
       // Store transactions in our database
       const addedTransactions = await database.addTransactions(clerkUserId, transactionsResponse.data.transactions);
       
-      console.log(`Automatically stored ${addedTransactions.length} transactions for new accounts`);
     } catch (transactionError) {
-      console.error('Error fetching transactions for new accounts:', transactionError);
       // Continue anyway, don't fail the account connection
     }
     
@@ -281,7 +261,6 @@ app.post('/api/exchange_public_token', clerkAuth, async (req, res) => {
       accounts: accountsResponse.data.accounts
     });
   } catch (error) {
-    console.error('Error exchanging public token:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -314,7 +293,6 @@ app.post('/api/transactions', clerkAuth, async (req, res) => {
       stored_count: addedTransactions.length 
     });
   } catch (error) {
-    console.error('Error fetching transactions:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -364,7 +342,6 @@ app.get('/api/transactions', clerkAuth, async (req, res) => {
       count: transactions.length
     });
   } catch (error) {
-    console.error('Error getting user transactions:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -377,7 +354,6 @@ app.get('/api/transactions/categories', clerkAuth, async (req, res) => {
     
     res.json({ categories });
   } catch (error) {
-    console.error('Error getting transactions by category:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -386,15 +362,12 @@ app.get('/api/transactions/categories', clerkAuth, async (req, res) => {
 app.get('/api/accounts', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
-    console.log(`Loading accounts for user: ${clerkUserId}`);
     
     const accounts = await database.getUserAccounts(clerkUserId);
-    console.log(`Found ${accounts.length} accounts for user`);
     
     // Return accounts with basic info only - transactions loaded separately when needed
     res.json({ accounts });
   } catch (error) {
-    console.error('Error getting user accounts:', error);
     res.status(500).json({ 
       error: 'Failed to load accounts. Please try again.',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -409,14 +382,11 @@ app.get('/api/accounts/:accountId/transactions', clerkAuth, async (req, res) => 
     const accountId = req.params.accountId;
     const limit = parseInt(req.query.limit) || 50; // Default to 50 transactions
     
-    console.log(`Loading transactions for account ${accountId}, limit: ${limit}`);
     
     const transactions = await database.getAccountTransactions(clerkUserId, accountId, limit);
-    console.log(`Found ${transactions.length} transactions for account ${accountId}`);
     
     res.json({ transactions });
   } catch (error) {
-    console.error('Error getting account transactions:', error);
     res.status(500).json({ 
       error: 'Failed to load transactions. Please try again.',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -439,7 +409,6 @@ app.put('/api/accounts/:accountId', clerkAuth, async (req, res) => {
     
     res.json({ success: true, result });
   } catch (error) {
-    console.error('Error updating account name:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -448,15 +417,12 @@ app.put('/api/accounts/:accountId', clerkAuth, async (req, res) => {
 app.delete('/api/user/data', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
-    console.log(`Clearing all data for user: ${clerkUserId}`);
     
     // Delete all user data from database
     await database.clearUserData(clerkUserId);
     
-    console.log(`Successfully cleared all data for user: ${clerkUserId}`);
     res.json({ success: true, message: 'All user data cleared successfully' });
   } catch (error) {
-    console.error('Error clearing user data:', error);
     res.status(500).json({ 
       error: 'Failed to clear user data. Please try again.',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -501,7 +467,6 @@ app.post('/api/accounts/refresh', clerkAuth, async (req, res) => {
           });
         }
       } catch (accountError) {
-        console.error(`Error refreshing account ${account.account_id}:`, accountError);
       }
     }
     
@@ -511,7 +476,6 @@ app.post('/api/accounts/refresh', clerkAuth, async (req, res) => {
       count: refreshedAccounts.length 
     });
   } catch (error) {
-    console.error('Error refreshing account balances:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -527,7 +491,6 @@ app.put('/api/transactions/:transactionId', clerkAuth, async (req, res) => {
     
     res.json({ success: true, result });
   } catch (error) {
-    console.error('Error updating transaction:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -536,7 +499,6 @@ app.put('/api/transactions/:transactionId', clerkAuth, async (req, res) => {
 app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
   try {
     const clerkUserId = req.auth.userId;
-    console.log(`Seeding sample data for user: ${clerkUserId}`);
     
     // Ensure user exists in database
     await database.createUser(clerkUserId);
@@ -599,9 +561,7 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
       try {
         const result = await database.addAccount(clerkUserId, account);
         addedAccounts.push(result);
-        console.log(`Added sample account: ${account.name}`);
       } catch (error) {
-        console.error(`Error adding sample account ${account.name}:`, error);
       }
     }
     
@@ -649,7 +609,6 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
     // Add sample transactions to database
     const addedTransactions = await database.addTransactions(clerkUserId, sampleTransactions);
     
-    console.log(`Sample data seeded successfully: ${addedAccounts.length} accounts, ${addedTransactions.length} transactions`);
     
     res.json({
       success: true,
@@ -659,7 +618,6 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error seeding sample data:', error);
     res.status(500).json({ 
       error: 'Failed to seed sample data',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -669,12 +627,9 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  console.error('Stack trace:', err.stack);
   
   // Special handling for path-to-regexp errors
   if (err.message && err.message.includes('Missing parameter name')) {
-    console.warn('Detected path-to-regexp error with URL parsing.');
     
     // Check if this is a CORS preflight request
     if (req.method === 'OPTIONS') {
@@ -695,19 +650,11 @@ app.use((err, req, res, next) => {
 });
 
 // Print all registered routes for debugging
-console.log('Registered routes:');
-app._router.stack.forEach(function(r){
-  if (r.route && r.route.path){
-    console.log(`${Object.keys(r.route.methods)} ${r.route.path}`);
-  }
-});
 
 // For direct execution
 if (require.main === module) {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 }
 

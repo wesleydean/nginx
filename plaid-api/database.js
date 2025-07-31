@@ -11,9 +11,8 @@ class Database {
     const dbPath = path.join(__dirname, 'plaid_data.sqlite');
     this.db = new sqlite3.Database(dbPath, (err) => {
       if (err) {
-        console.error('Error opening database:', err);
+        console.error('Error opening database:', err.message);
       } else {
-        console.log('Connected to SQLite database');
         this.createTables();
       }
     });
@@ -91,7 +90,7 @@ class Database {
         ALTER TABLE accounts ADD COLUMN subtype TEXT
       `, (err) => {
         if (err && !err.message.includes('duplicate column')) {
-          console.error('Error adding subtype column:', err);
+          console.error('Error adding subtype column:', err.message);
         }
       });
       
@@ -99,7 +98,6 @@ class Database {
         this.db.run(indexSQL);
       });
       
-      console.log('Database tables created successfully');
     });
   }
 
@@ -258,26 +256,22 @@ class Database {
           // Delete transactions first (due to foreign key constraints)
           deleteTransactions.run([clerkUserId], function(err) {
             if (err) throw err;
-            console.log(`Deleted ${this.changes} transactions for user ${clerkUserId}`);
           });
           
           // Delete accounts
           deleteAccounts.run([clerkUserId], function(err) {
             if (err) throw err;
-            console.log(`Deleted ${this.changes} accounts for user ${clerkUserId}`);
           });
           
           // Delete user record
           deleteUser.run([clerkUserId], function(err) {
             if (err) throw err;
-            console.log(`Deleted user record for ${clerkUserId}`);
           });
           
           this.db.run('COMMIT', (err) => {
             if (err) {
               reject(err);
             } else {
-              console.log(`Successfully cleared all data for user ${clerkUserId}`);
               resolve({ 
                 userId: clerkUserId,
                 success: true 
@@ -287,7 +281,6 @@ class Database {
           
         } catch (error) {
           this.db.run('ROLLBACK');
-          console.error('Error during user data deletion, rolled back:', error);
           reject(error);
         } finally {
           deleteTransactions.finalize();
@@ -425,7 +418,6 @@ class Database {
         const result = await this.addTransaction(clerkUserId, transaction);
         results.push(result);
       } catch (error) {
-        console.error(`Error adding transaction ${transaction.transaction_id}:`, error);
       }
     }
     return results;
@@ -646,9 +638,7 @@ class Database {
     if (this.db) {
       this.db.close((err) => {
         if (err) {
-          console.error('Error closing database:', err);
         } else {
-          console.log('Database connection closed');
         }
       });
     }

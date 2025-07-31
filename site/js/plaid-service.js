@@ -60,7 +60,6 @@ class PlaidService {
     const maxAttempts = 50; // 5 seconds max wait
     
     while (typeof window.Clerk === 'undefined' && attempts < maxAttempts) {
-      console.log(`Waiting for Clerk to load... (attempt ${attempts + 1}/${maxAttempts})`);
       await new Promise(resolve => setTimeout(resolve, 100));
       attempts++;
     }
@@ -76,7 +75,6 @@ class PlaidService {
   async getClerkSessionToken() {
     // Return cached promise if auth is already in progress
     if (this.authTokenPromise) {
-      console.log('🔄 Using cached auth promise');
       return this.authTokenPromise;
     }
 
@@ -95,53 +93,41 @@ class PlaidService {
   // Internal method to perform actual authentication
   async _performAuthentication() {
     try {
-      console.log('=== GETTING CLERK SESSION TOKEN ===');
       
       // Wait for Clerk to be available
       await this.waitForClerk();
       
-      console.log('✅ Clerk is now available');
       
-      console.log('✅ window.Clerk exists:', !!window.Clerk);
-      console.log('Clerk loaded:', window.Clerk.loaded);
-      console.log('Clerk user:', window.Clerk.user);
       
       // Wait for Clerk to be loaded if it isn't already
       if (!window.Clerk.loaded) {
-        console.log('Waiting for Clerk to load...');
         await window.Clerk.load();
       }
       
       // Check if user is signed in
       if (!window.Clerk.user) {
-        console.error('❌ No user found in window.Clerk.user');
         throw new Error('User is not signed in. Please sign in to continue.');
       }
       
-      console.log('✅ User found:', window.Clerk.user.id);
       
       // Try different methods to get the token
       let token = null;
       
       // Method 1: Direct session token
       if (window.Clerk.session) {
-        console.log('Trying session.getToken()...');
         token = await window.Clerk.session.getToken();
       }
       
       // Method 2: User getToken method
       if (!token && window.Clerk.user.getToken) {
-        console.log('Trying user.getToken()...');
         token = await window.Clerk.user.getToken();
       }
       
       // Method 3: Session from user
       if (!token && window.Clerk.user.session) {
-        console.log('Trying user.session.getToken()...');
         token = await window.Clerk.user.session.getToken();
       }
       
-      console.log('Token result:', token ? 'Got token' : 'No token');
       
       if (!token) {
         throw new Error('Could not get session token. Please try signing in again.');
@@ -149,7 +135,6 @@ class PlaidService {
       
       return token;
     } catch (error) {
-      console.error('Error getting Clerk session token:', error);
       
       // Show user-friendly error message
       if (error.message.includes('not signed in')) {
@@ -191,16 +176,9 @@ class PlaidService {
       const isSandbox = this.baseUrl.includes('localhost') || 
                        (data.environment && data.environment === 'sandbox') ||
                        this.isSandboxMode();
-      console.log(`Using Plaid in ${isSandbox ? 'sandbox' : 'production'} mode`);
       
       // If we're in sandbox mode, log test credentials
       if (isSandbox) {
-        console.log('========= PLAID SANDBOX TEST CREDENTIALS =========');
-        console.log('Username: user_good');
-        console.log('Password: pass_good');
-        console.log('For MFA prompt, use any 4-digit code, like: 1234');
-        console.log('For phone verification, use: 1234567890');
-        console.log('=================================================');
       }
       
       // 2. Initialize Plaid Link with the token
@@ -210,7 +188,6 @@ class PlaidService {
           token: linkToken,
           receivedRedirectUri: null,
           onLoad: () => {
-            console.log('Plaid Link loaded');
           },
           onSuccess: async (public_token, metadata) => {
             try {
@@ -254,16 +231,13 @@ class PlaidService {
                 }
               });
             } catch (error) {
-              console.error('Token exchange error:', error);
               reject(error);
             }
           },
           onExit: (err, metadata) => {
             if (err != null) {
-              console.log('Link exit error:', err);
               reject(err);
             } else {
-              console.log('Link exit metadata:', metadata);
               resolve({ success: false, metadata });
             }
           },
@@ -272,7 +246,6 @@ class PlaidService {
         handler.open();
       });
     } catch (error) {
-      console.error('Error in openPlaidLink:', error);
       throw error;
     }
   }
@@ -287,7 +260,6 @@ class PlaidService {
 
     // Check cache first
     if (this.transactionCache.has(cacheKey)) {
-      console.log('Returning cached transactions');
       return this.transactionCache.get(cacheKey);
     }
 
@@ -337,7 +309,6 @@ class PlaidService {
 
       return formattedData;
     } catch (error) {
-      console.error('Error fetching transactions:', error);
       throw error;
     }
   }
@@ -347,7 +318,6 @@ class PlaidService {
     const cacheKey = 'monthly-overview';
 
     if (this.transactionCache.has(cacheKey)) {
-      console.log('Returning cached monthly overview');
       return this.transactionCache.get(cacheKey);
     }
 
@@ -373,7 +343,6 @@ class PlaidService {
 
       return data.summary;
     } catch (error) {
-      console.error('Error fetching monthly overview:', error);
       throw error;
     }
   }
@@ -387,9 +356,7 @@ class PlaidService {
       // Pre-fetch monthly overview if needed
       await this.fetchMonthlyOverview();
       
-      console.log('Spending data pre-fetched');
     } catch (error) {
-      console.error('Error pre-fetching spending data:', error);
     }
   }
   
@@ -412,16 +379,12 @@ class PlaidService {
       });
       
       if (response.ok) {
-        console.log('✅ Plaid API server is running!');
         const data = await response.json();
-        console.log('Server time:', data.timestamp);
         return true;
       } else {
-        console.error('❌ Plaid API server returned an error:', response.status);
         return false;
       }
     } catch (error) {
-      console.error('❌ Cannot connect to Plaid API server:', error.message);
       return false;
     }
   }
@@ -436,13 +399,11 @@ class PlaidService {
   // Enable sandbox mode for testing
   enableSandboxMode() {
     localStorage.setItem('plaid_force_sandbox', 'true');
-    console.log('Plaid sandbox mode enabled for testing');
   }
   
   // Disable sandbox mode
   disableSandboxMode() {
     localStorage.removeItem('plaid_force_sandbox');
-    console.log('Plaid sandbox mode disabled');
   }
   
   // Get sandbox test credentials (for reference)
@@ -457,16 +418,6 @@ class PlaidService {
   
   // Log sandbox testing instructions to console
   logSandboxInstructions() {
-    console.log('=== PLAID SANDBOX TESTING INSTRUCTIONS ===');
-    console.log('1. For any institution, use these credentials:');
-    console.log('   Username: user_good');
-    console.log('   Password: pass_good');
-    console.log('2. For phone verification, enter: 1234567890');
-    console.log('3. For any MFA code prompt, enter: 1234');
-    console.log('4. To test specific error cases, use usernames like:');
-    console.log('   - user_login_required');
-    console.log('   - user_password_reset_required');
-    console.log('==========================================');
   }
 }
 
@@ -518,7 +469,6 @@ async function connectPlaidAccount() {
         if (!serverAvailable) {
             if (confirm('Cannot connect to Plaid API server. Would you like to use sandbox test mode?')) {
                 plaidService.enableSandboxMode();
-                console.log('Sandbox mode enabled for testing');
                 // Display sandbox credentials
                 plaidService.logSandboxInstructions();
             } else {
@@ -533,11 +483,9 @@ async function connectPlaidAccount() {
         }
         
         // Start Plaid Link flow
-        console.log('Initiating Plaid Link flow...');
         const result = await plaidService.openPlaidLink(userId);
         
         if (result && result.success) {
-            console.log('Plaid connection successful:', result.institution);
 
             // Show skeleton loader immediately
             if (typeof showAccountsLoadingPlaceholder === 'function') {
@@ -603,7 +551,6 @@ async function connectPlaidAccount() {
                         hideAccountsLoadingPlaceholder();
                     }
                 } catch (error) {
-                    console.error('Error updating UI after Plaid connection:', error);
                     // Always hide skeleton on error
                     if (typeof hideAccountsLoadingPlaceholder === 'function') {
                         hideAccountsLoadingPlaceholder();
@@ -611,7 +558,6 @@ async function connectPlaidAccount() {
                 }
             });
         } else {
-            console.log('Plaid connection cancelled or failed', result);
             
             // Check if we should offer sandbox mode
             if ((result && result.error && !plaidService.isSandboxMode()) || 
@@ -625,7 +571,6 @@ async function connectPlaidAccount() {
             }
         }
     } catch (error) {
-        console.error('Error connecting to Plaid:', error);
         
         // Offer sandbox mode if there's an error
         if (!plaidService.isSandboxMode() && 
@@ -652,7 +597,6 @@ async function fetchPlaidTransactions(startDate = null, days = 30) {
     const data = await plaidService.fetchTransactions(startDate, days, true);
     
     if (data.transactions && data.transactions.length > 0) {
-      console.log(`Fetched ${data.transactions.length} transactions from API`);
       
       // Convert to app's format and add them (same as before)
       const expenses = loadExpenses();
@@ -702,11 +646,9 @@ async function fetchPlaidTransactions(startDate = null, days = 30) {
       // Return data including categories for view switching
       return data;
     } else {
-      console.log('No transactions found');
       return { transactions: [], categories: [] };
     }
   } catch (error) {
-    console.error('Error fetching Plaid transactions:', error);
     throw error;
   }
 }
@@ -720,17 +662,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (window.plaidService) {
         try {
             await window.plaidService.initialize();
-            console.log('Plaid service initialized');
             
             // Check if server is running
             const serverStatus = await window.plaidService.checkServerStatus();
             if (serverStatus) {
-                console.log('Plaid API server is running');
             } else {
-                console.warn('Plaid API server is not reachable');
             }
         } catch (error) {
-            console.error('Failed to initialize Plaid service:', error);
         }
     }
 });

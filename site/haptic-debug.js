@@ -7,8 +7,6 @@ function testHapticPatterns() {
     const results = document.getElementById('hapticTestResults');
     if (results) results.innerHTML = '';
     
-    // Log test initiation
-    console.log('Testing haptic feedback patterns...');
     logHapticResult('Starting haptic test sequence');
     
     // Test all haptic types with delays
@@ -58,7 +56,6 @@ function testHapticPatterns() {
 
 // Log haptic test result
 function logHapticResult(message) {
-    console.log(message);
     const results = document.getElementById('hapticTestResults');
     if (results) {
         const line = document.createElement('div');

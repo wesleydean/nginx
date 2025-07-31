@@ -85,7 +85,6 @@ class DataStore {
       
       fs.writeFileSync(this.dataFile, JSON.stringify(data, null, 2));
     } catch (error) {
-      console.error('Error saving data:', error);
     }
   }
 
@@ -98,10 +97,8 @@ class DataStore {
         this.transactions = new Map(data.transactions || []);
         this.userAccounts = new Map(data.userAccounts || []);
         
-        console.log('Data loaded from file');
       }
     } catch (error) {
-      console.error('Error loading data:', error);
     }
   }
 

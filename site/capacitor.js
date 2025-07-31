@@ -23,7 +23,6 @@ function initHapticAudio() {
         // We're now allowed to use data URIs with our updated CSP
         hapticAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'; // Empty WAV
     } catch (e) {
-        console.error("Error setting audio source:", e);
         // Fallback: create a short silent mp3 file and add it to the project
         hapticAudio.src = 'silent.mp3';
     }
@@ -43,9 +42,8 @@ function triggerAudioHaptic() {
                 audio.pause();
                 audio.currentTime = 0;
             }, 20);
-        }).catch(e => console.log('Audio haptic error:', e));
+        }).catch(e => {});
     } catch (e) {
-        console.log('Audio haptic setup error:', e);
     }
 }
 
@@ -153,8 +151,7 @@ document.addEventListener('click', function() {
 
 // Add a simple test function
 window.testHaptics = function() {
-    console.log('Testing haptic feedback...');
     window.Capacitor.Plugins.Haptics.impact({style: 'medium'})
-        .then(() => console.log('Haptic impact completed'))
-        .catch(e => console.error('Haptic error:', e));
+        .then(() => {})
+        .catch(e => {});
 };

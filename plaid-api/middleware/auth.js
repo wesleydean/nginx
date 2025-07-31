@@ -25,10 +25,8 @@ async function clerkAuth(req, res, next) {
       sessionId: payload.sid
     };
     
-    console.log('✅ Authentication successful for user:', payload.sub);
     next();
   } catch (error) {
-    console.error('❌ Authentication failed:', error.message);
     return res.status(401).json({ 
       error: 'Unauthorized',
       message: 'Invalid or expired token'

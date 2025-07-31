@@ -83,7 +83,6 @@
                     try {
                         iconInitInProgress = true;
                         window.lucide.createIcons();
-                        console.log('Lucide icons initialized successfully');
                     } catch (error) {
                         console.error('Error initializing Lucide icons:', error);
                     } finally {
@@ -101,18 +100,15 @@
         
         // Special function for transaction/expense lists that need immediate icon rendering
         function initializeTransactionIcons() {
-            console.log('initializeTransactionIcons called');
             
             // For transaction lists, we need more immediate rendering
             if (window.lucide && typeof window.lucide.createIcons === 'function') {
                 try {
-                    console.log('Lucide available, initializing icons immediately');
                     // Use requestAnimationFrame to ensure DOM is ready
                     requestAnimationFrame(() => {
                         // Double-check that lucide is still available
                         if (window.lucide && typeof window.lucide.createIcons === 'function') {
                             window.lucide.createIcons();
-                            console.log('✅ Transaction icons initialized successfully');
                         } else {
                             console.warn('Lucide became unavailable during requestAnimationFrame');
                         }
@@ -131,9 +127,7 @@
                 // Strategy 1: Wait a bit and try again
                 setTimeout(() => {
                     if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                        console.log('Lucide became available after timeout, initializing');
                         window.lucide.createIcons();
-                        console.log('✅ Transaction icons initialized after delay');
                     } else {
                         console.warn('Lucide still not available after timeout');
                         // Strategy 2: Use the safe method
@@ -151,10 +145,8 @@
         function emergencyIconFix() {
             const uninitialized = document.querySelectorAll('[data-lucide]:not([data-lucide-initialized])');
             if (uninitialized.length > 0) {
-                console.log(`Found ${uninitialized.length} uninitialized icons, fixing...`);
                 if (window.lucide && typeof window.lucide.createIcons === 'function') {
                     window.lucide.createIcons();
-                    console.log('✅ Emergency icon fix applied');
                 } else {
                     console.warn('Emergency icon fix failed - Lucide not available');
                 }
@@ -6354,8 +6346,8 @@ margin-right: 0.5rem;
                             
                             <!-- Chart Navigation Dots -->
                             <div class="chart-dots" id="chartDots">
-                                <div class="dot active" onclick="console.log('Dot 0 clicked!'); showChart(0)"></div>
-                                <div class="dot" onclick="console.log('Dot 1 clicked!'); showChart(1)"></div>
+                                <div class="dot active" onclick="showChart(0)"></div>
+                                <div class="dot" onclick="showChart(1)"></div>
                             </div>
                         </div>
                         
@@ -7234,7 +7226,6 @@ margin-right: 0.5rem;
             const settings = getSimpleBudgetSettings();
             const discretionaryBudget = settings.discretionaryExpenses || 501;
             const dailyBudget = discretionaryBudget / 30; // Daily discretionary budget
-            console.log('Daily budget calculated:', dailyBudget, 'from discretionary:', discretionaryBudget);
             return dailyBudget;
         }
 
@@ -7245,7 +7236,6 @@ margin-right: 0.5rem;
         function getMonthlyBudget() {
             const settings = getSimpleBudgetSettings();
             const budget = (settings.essentialExpenses || 750) + (settings.discretionaryExpenses || 501);
-            console.log('Monthly budget calculated:', budget, 'from settings:', settings);
             return budget;
         }
 
@@ -7325,7 +7315,6 @@ margin-right: 0.5rem;
                 
                 // Ensure icons are initialized after all content is loaded
                 setTimeout(() => {
-                    console.log('Final icon initialization for spending screen');
                     if (window.initializeTransactionIcons) {
                         window.initializeTransactionIcons();
                     }
@@ -7424,16 +7413,13 @@ margin-right: 0.5rem;
             if (currentPeriodMode === 'today') {
                 // Calculate this week's spending
                 const weekDates = getCurrentWeekDates();
-                console.log('Week dates:', weekDates);
                 weekDates.forEach(date => {
                     const dayExpenses = expenses[date] || [];
-                    console.log(`Date ${date}: ${dayExpenses.length} expenses, total: $${dayExpenses.reduce((sum, expense) => sum + expense.amount, 0)}`);
                     totalSpent += dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
                 });
 
                 // Calculate weekly income (monthly income / ~4.33 weeks)
                 monthlyIncome = monthlyIncome / 4.33;
-                console.log(`Weekly: spent $${totalSpent}, income $${monthlyIncome.toFixed(2)}`);
             } else {
                 // Monthly calculation
                 const monthKey = getCurrentPeriodKey();
@@ -7444,7 +7430,6 @@ margin-right: 0.5rem;
                     }
                 });
 
-                console.log(`Monthly: spent $${totalSpent}, income $${monthlyIncome.toFixed(2)}`);
             }
 
             // Generate monthly spending chart instead of income/spending bars
@@ -7531,7 +7516,6 @@ margin-right: 0.5rem;
         }
 
         async function updateChangeIndicators(monthlySpent, monthlyRemaining, monthlyBudget) {
-            console.log('updateChangeIndicators called with:', { monthlySpent, monthlyRemaining, monthlyBudget });
             const spentChange = document.getElementById('spentChange');
             const remainingChange = document.getElementById('remainingChange');
 
@@ -7569,7 +7553,6 @@ margin-right: 0.5rem;
                 const remainingCard = document.querySelector('.remaining-card .change-indicator');
 
                 // Debug log
-                console.log(`Monthly spent: ${monthlySpent}, Monthly budget: ${monthlyBudget}, Percent used: ${monthlyPercentUsed.toFixed(1)}%`);
 
                 if (monthlyPercentUsed >= 100) {
                     if (remainingArrow) remainingArrow.textContent = '↓';
@@ -7719,7 +7702,6 @@ margin-right: 0.5rem;
         }
 
         async function deleteExpense(date, timestamp) {
-            console.log('deleteExpense function called with date:', date, 'and timestamp:', timestamp);
             timestamp = parseInt(timestamp, 10); // Ensure timestamp is a number
 
             if (!date || isNaN(timestamp)) {
@@ -7730,21 +7712,16 @@ margin-right: 0.5rem;
 
             try {
                 const expenses = await loadExpenses();
-                console.log('Current expenses for date:', date, expenses[date]);
 
                 // Handle the case where date might be undefined for today mode
                 const targetDate = date || getCurrentDate();
-                console.log('Target date for deletion:', targetDate);
 
                 if (expenses[targetDate]) {
-                    console.log('Found expenses for target date:', expenses[targetDate].length);
-                    console.log('Expense timestamps:', expenses[targetDate].map(e => e.timestamp));
 
                     // Filter out the expense with the matching timestamp
                     const originalLength = expenses[targetDate].length;
                     expenses[targetDate] = expenses[targetDate].filter(expense => {
                         const match = expense.timestamp !== timestamp;
-                        console.log(`Comparing ${expense.timestamp} with ${timestamp}: ${match ? 'keep' : 'remove'}`);
                         return expense.timestamp !== timestamp;
                     });
 
@@ -7762,31 +7739,25 @@ margin-right: 0.5rem;
                         return;
                     }
 
-                    console.log('After filtering, expenses length:', expenses[targetDate].length);
 
                     // Remove the date entry if no expenses left for that date
                     if (expenses[targetDate].length === 0) {
-                        console.log('No expenses left for date, removing date entry');
                         delete expenses[targetDate];
                     }
 
                     // Save the updated expenses
-                    console.log('Saving updated expenses');
                     saveExpenses(expenses);
 
                     // Force refresh UI
                     const listContainer = document.getElementById('expensesList');
                     if (listContainer) {
-                        console.log('Forcing expense list refresh');
                         updateExpensesList();
                     }
 
                     // Update the rest of the display
-                    console.log('Updating UI after deletion');
                     await updatePeriodView();
                     updateChart();
 
-                    console.log('✅ Expense deleted successfully');
 
                 } else {
                     console.error('No expenses found for date:', targetDate);
@@ -8062,27 +8033,19 @@ margin-right: 0.5rem;
 
             // Get all balance records and sort by date
             const balanceRecords = [];
-            console.log('=== CHART BALANCE DEBUGGING ===');
-            console.log('Chart period:', currentChartPeriod);
-            console.log('Date range:', dateKeys[0], 'to', dateKeys[dateKeys.length - 1]);
-            console.log('All balances from localStorage:', balances);
 
             // Create a map to sum up all account balances for each date
             const dateBalanceMap = new Map();
 
             Object.keys(balances).forEach(accountId => {
                 const accountBalances = balances[accountId] || {};
-                console.log(`Account ${accountId} balances:`, accountBalances);
                 Object.keys(accountBalances).forEach(date => {
-                    console.log(`Checking balance date: ${date} (in range: ${date >= dateKeys[0] && date <= dateKeys[dateKeys.length - 1]})`);
                     if (date >= dateKeys[0] && date <= dateKeys[dateKeys.length - 1]) {
                         const currentBalance = dateBalanceMap.get(date) || 0;
                         const accountBalance = accountBalances[date];
                         const newTotal = currentBalance + accountBalance;
                         dateBalanceMap.set(date, newTotal);
-                        console.log(`✓ Added balance for ${date}: $${accountBalance} (account: ${accountId}) → Total: $${newTotal}`);
                     } else {
-                        console.log(`✗ Skipped balance record: ${date} = $${accountBalances[date]} (outside date range)`);
                     }
                 });
             });
@@ -8095,8 +8058,6 @@ margin-right: 0.5rem;
                 });
             });
 
-            console.log('Final balance records for chart (summed by date):', balanceRecords);
-            console.log('=== END CHART BALANCE DEBUGGING ===');
 
             // Sort balance records by date
             balanceRecords.sort((a, b) => a.date.localeCompare(b.date));
@@ -8691,19 +8652,15 @@ margin-right: 0.5rem;
         let previousCategoryAmount = 0;
 
         function showChart(index) {
-            console.log('showChart called with index:', index);
             const carousel = document.getElementById('chartCarousel');
-            console.log('Carousel element:', carousel);
             if (!carousel) return;
 
             // Move carousel to show selected chart
             const translateX = index * -50; // Each slide is 50% width
-            console.log('Setting translateX to:', translateX + '%');
             carousel.style.transform = `translateX(${translateX}%)`;
 
             // Update dots
             const dots = document.querySelectorAll('.chart-dots .dot');
-            console.log('Found dots:', dots.length);
             dots.forEach((dot, i) => {
                 if (i === index) {
                     dot.classList.add('active');
@@ -8714,7 +8671,6 @@ margin-right: 0.5rem;
 
             // Update slide active states
             const slides = document.querySelectorAll('.chart-slide');
-            console.log('Found slides:', slides.length);
             slides.forEach((slide, i) => {
                 if (i === index) {
                     slide.classList.add('active');
@@ -8724,7 +8680,6 @@ margin-right: 0.5rem;
             });
 
             currentChartIndex = index;
-            console.log('Updated currentChartIndex to:', currentChartIndex);
 
             // Initialize chart if needed
             if (index === 1 && typeof updateCategoryChart === 'function') {
@@ -8733,15 +8688,12 @@ margin-right: 0.5rem;
         }
 
         function initializeChartSwipe() {
-            console.log('🔄 Initializing chart swipe functionality');
             // Look for the budgetDisplay chart carousel
             const budgetDisplay = document.getElementById('budgetDisplay');
             const carouselContainer = budgetDisplay ? budgetDisplay.querySelector('.chart-carousel') : null;
             if (!carouselContainer) {
-                console.log('❌ No chart carousel found in budgetDisplay');
                 return;
             }
-            console.log('✅ Found chart carousel, setting up swipe events');
 
             let startX = 0;
             let startY = 0;
@@ -8803,7 +8755,6 @@ margin-right: 0.5rem;
 
             // Touch events for mobile
             function handleTouchStart(e) {
-                console.log('👆 Touch start detected');
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
                 isScrolling = false;
@@ -8822,7 +8773,6 @@ margin-right: 0.5rem;
                 const diffX = startX - currentX;
                 const diffY = startY - currentY;
 
-                console.log('👆 Touch move - diffX:', diffX, 'diffY:', diffY, 'currentChartIndex:', currentChartIndex);
 
                 // Determine scroll direction
                 if (Math.abs(diffY) > Math.abs(diffX)) {
@@ -8837,13 +8787,10 @@ margin-right: 0.5rem;
 
                 // Trigger swipe on sufficient horizontal movement
                 if (!isScrolling && !hasSwiped && Math.abs(diffX) > 50) {
-                    console.log('🚀 Swipe triggered! diffX:', diffX, 'currentChartIndex:', currentChartIndex);
                     hasSwiped = true;
                     if (diffX > 0 && currentChartIndex < 1) {
-                        console.log('➡️ Swiping to next chart (index ' + (currentChartIndex + 1) + ')');
                         switchToChart(currentChartIndex + 1);
                     } else if (diffX < 0 && currentChartIndex > 0) {
-                        console.log('⬅️ Swiping to previous chart (index ' + (currentChartIndex - 1) + ')');
                         switchToChart(currentChartIndex - 1);
                     }
                 }
@@ -8924,7 +8871,6 @@ margin-right: 0.5rem;
             const month = String(selectedSaveMonthDate.getMonth() + 1).padStart(2, '0');
             const year = selectedSaveMonthDate.getFullYear();
             const key = `${year}-${month}`;
-            console.log(`Generated month key: ${key} for date: ${selectedSaveMonthDate.toISOString()}`);
             return key;
         }
 
@@ -9015,16 +8961,13 @@ margin-right: 0.5rem;
         }
 
         async function generateMonthlyChart() {
-            console.log('generateMonthlyChart called');
             const chartContainer = document.getElementById('monthlySpendingChart');
             if (!chartContainer) {
                 console.error('Monthly chart container not found!');
                 return;
             }
-            console.log('Chart container found:', chartContainer);
 
             const monthlyTotals = await calculateMonthlySpending();
-            console.log('Monthly totals:', monthlyTotals);
             const currentDate = new Date();
             const currentMonth = currentDate.getMonth();
             const currentYear = currentDate.getFullYear();
@@ -9034,18 +8977,15 @@ margin-right: 0.5rem;
 
             // Find max value for scaling
             const maxValue = Math.max(...Object.values(monthlyTotals), 1);
-            console.log('Max value for scaling:', maxValue);
 
             // Month names
             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
             // Generate bars for each month
-            console.log(`Generating bars for months 0 to ${currentMonth}`);
             for (let month = 0; month <= currentMonth; month++) {
                 const monthKey = `${currentYear}-${month}`;
                 const amount = monthlyTotals[monthKey] || 0;
                 const height = Math.max((amount / maxValue) * 100, 10); // Min height 10px
-                console.log(`Month ${month}: amount=${amount}, height=${height}px`);
 
                 const chartBar = document.createElement('div');
                 chartBar.className = 'chart-bar spending-bar';
@@ -9073,7 +9013,6 @@ margin-right: 0.5rem;
 
                 // Click handler for month selection
                 chartBar.onclick = async (event) => {
-                    console.log('Bar clicked for month:', month);
                     event.preventDefault();
                     event.stopPropagation();
                     await selectChartMonth(month, currentYear);
@@ -9148,12 +9087,9 @@ margin-right: 0.5rem;
         }
 
         async function updateSelectedMonthTotal() {
-            console.log('updateSelectedMonthTotal - selectedMonth:', selectedMonth, 'selectedYear:', selectedYear);
             const monthlyTotals = await calculateMonthlySpending();
             const monthKey = `${selectedYear}-${selectedMonth}`;
             const total = monthlyTotals[monthKey] || 0;
-            console.log('Updating total for:', monthKey, 'Total:', total);
-            console.log('Available monthly totals:', Object.keys(monthlyTotals));
 
             const totalElement = document.getElementById('selectedMonthTotal');
             if (totalElement) {
@@ -9171,7 +9107,6 @@ margin-right: 0.5rem;
                     animateCountUp(amountElement, previousTotal, total);
                 }
 
-                console.log('Updated total element with month:', monthNames[selectedMonth], 'animating from:', previousTotal, 'to:', total);
 
                 // Update previous total for next animation
                 previousTotal = total;
@@ -9780,8 +9715,6 @@ margin-right: 0.5rem;
             let totalBalance = 0;
             let accountsWithBalances = 0;
 
-            console.log('updateTotalSavingsDisplay - currentPeriodMode:', currentPeriodMode);
-            console.log('updateTotalSavingsDisplay - periodKey:', periodKey);
 
             // Calculate total balance across all accounts for current period
             Object.keys(balances).forEach(accountId => {
@@ -9802,18 +9735,14 @@ margin-right: 0.5rem;
                         .reverse();
                 }
 
-                console.log(`Account ${accountId} - periodBalances:`, periodBalances);
 
                 if (periodBalances.length > 0) {
                     const accountBalance = accountBalances[periodBalances[0]];
                     totalBalance += accountBalance;
                     accountsWithBalances++;
-                    console.log(`Account ${accountId} - balance: $${accountBalance}`);
                 }
             });
 
-            console.log('Total balance calculated:', totalBalance);
-            console.log('Accounts with balances:', accountsWithBalances);
 
             // Update total balance display
             const totalBalanceElement = document.getElementById('totalAccountBalance');
@@ -9999,7 +9928,6 @@ margin-right: 0.5rem;
         }
 
         function deleteBalance(accountId, date) {
-            console.log('Deleting balance:', accountId, date);
             const balances = loadAccountBalances();
 
             if (balances[accountId] && balances[accountId][date]) {
@@ -10014,7 +9942,6 @@ margin-right: 0.5rem;
 
                     // Add deleting animation
                     swipeContainer.classList.add('deleting');
-                    console.log('Adding deleting animation to container:', swipeContainer);
 
                     // Wait for animation to complete before removing from storage
                     setTimeout(() => {
@@ -10044,7 +9971,6 @@ margin-right: 0.5rem;
                         }
                     }, 300); // Match the CSS animation duration
                 } else {
-                    console.log('No swipe container found, deleting immediately');
                     // No swipe container found, just delete immediately
                     delete balances[accountId][date];
                     saveAccountBalances(balances);
@@ -10603,7 +10529,6 @@ margin-right: 0.5rem;
             const newExpenses = localStorage.getItem('dailyExpenses');
             if (oldExpenses && !newExpenses) {
                 localStorage.setItem('dailyExpenses', oldExpenses);
-                console.log('Migrated expense data from old storage key');
             }
 
             // Initialize datepickers
@@ -10634,7 +10559,6 @@ margin-right: 0.5rem;
                 if (typeof lucide !== 'undefined') {
                     try {
                         lucide.createIcons();
-                        console.log('Lucide icons initialized successfully');
                     } catch (error) {
                         console.error('Error initializing Lucide icons:', error);
                     }
@@ -10818,7 +10742,6 @@ margin-right: 0.5rem;
             // Update display
             await updatePeriodView();
             updateChart();
-            console.log('Expense added:', newExpense);
         }
 
         function addBalanceFromSlideOut() {
@@ -11056,7 +10979,6 @@ margin-right: 0.5rem;
             accountsApiCache.data = null;
             accountsApiCache.timestamp = 0;
             accountsApiCache.promise = null;
-            console.log('Accounts API cache cleared');
         }
 
         // Make the cache clearing function globally available
@@ -11071,7 +10993,6 @@ margin-right: 0.5rem;
             
             if (loadingContainer) {
                 loadingContainer.style.display = 'block';
-                console.log('Showing accounts loading skeleton');
             }
             if (accountsContainer) {
                 accountsContainer.style.display = 'none';
@@ -11087,7 +11008,6 @@ margin-right: 0.5rem;
             
             if (loadingContainer) {
                 loadingContainer.style.display = 'none';
-                console.log('Hiding accounts loading skeleton');
             }
             if (accountsContainer) {
                 accountsContainer.style.display = 'block';
@@ -11188,7 +11108,6 @@ margin-right: 0.5rem;
             // Get the mapped type for the subtype, or use the default for this type
             const mappedType = subtypeMapping[subtype] || subtypeMapping['default'];
             
-            console.log(`Mapped Plaid account ${type}/${subtype} to ${mappedType}`);
             return mappedType;
         }
 
@@ -11200,18 +11119,15 @@ margin-right: 0.5rem;
                 // Check if we have a recent cache
                 const now = Date.now();
                 if (accountsApiCache.data && (now - accountsApiCache.timestamp) < CACHE_DURATION) {
-                    console.log('Using cached accounts data');
                     return accountsApiCache.data;
                 }
 
                 // Check if there's already a request in progress
                 if (accountsApiCache.promise) {
-                    console.log('Waiting for ongoing accounts request');
                     return await accountsApiCache.promise;
                 }
 
                 // Create new request
-                console.log('Making new accounts API request');
                 accountsApiCache.promise = _fetchAccountsFromApi();
                 
                 try {
@@ -11223,9 +11139,7 @@ margin-right: 0.5rem;
                 } catch (error) {
                     console.error('Failed to fetch accounts data:', error);
                     // Fall back to localStorage accounts when API fails
-                    console.log('Falling back to localStorage accounts...');
                     const localStorageAccounts = savingsAccounts || [];
-                    console.log('Found', localStorageAccounts.length, 'accounts in localStorage');
                     return localStorageAccounts;
                 } finally {
                     // Clear the promise whether successful or not
@@ -11236,9 +11150,7 @@ margin-right: 0.5rem;
                 // Clear cache on error
                 accountsApiCache.promise = null;
                 // Final fallback to localStorage accounts
-                console.log('Final fallback to localStorage accounts...');
                 const localStorageAccounts = savingsAccounts || [];
-                console.log('Found', localStorageAccounts.length, 'accounts in localStorage');
                 return localStorageAccounts;
             }
         }
@@ -11271,7 +11183,6 @@ margin-right: 0.5rem;
                 }
 
                 const data = await response.json();
-                console.log('Loaded accounts with transactions:', data);
 
             if (data.accounts && Array.isArray(data.accounts)) {
                 // Update the global savingsAccounts with the API data
@@ -11300,7 +11211,6 @@ margin-right: 0.5rem;
                     generateAccountTypeChart();
                 }
 
-                console.log('Updated savingsAccounts with API data:', savingsAccounts.length, 'accounts');
                 return apiAccounts;
             }
 
@@ -11333,19 +11243,16 @@ margin-right: 0.5rem;
                 return;
             }
 
-            console.log('Saving expenses to localStorage');
             try {
                 localStorage.setItem(EXPENSES_KEY, JSON.stringify(expenses));
 
                 // Verify what was saved
                 setTimeout(() => {
                     const savedData = localStorage.getItem(EXPENSES_KEY);
-                    console.log('Verified localStorage after save - item exists:', !!savedData);
 
                     // Check if the specific expense was removed
                     try {
                         const parsedData = JSON.parse(savedData);
-                        console.log('Parsed saved data has keys:', Object.keys(parsedData));
                     } catch (e) {
                         console.error('Could not parse saved data');
                     }
@@ -11450,9 +11357,7 @@ margin-right: 0.5rem;
             // Use the temp variables directly
             if (typeof tempSelectedMonth === 'number' && typeof tempSelectedYear === 'number' && !isNaN(tempSelectedMonth) && !isNaN(tempSelectedYear)) {
                 if (isSaveScreenSelection) {
-                    console.log(`Setting selectedSaveMonthDate: Year=${tempSelectedYear}, Month=${tempSelectedMonth}`);
                     selectedSaveMonthDate = new Date(tempSelectedYear, tempSelectedMonth, 1);
-                    console.log(`New selectedSaveMonthDate: ${selectedSaveMonthDate.toISOString()}`);
                     // Force a clean rebuild of the savings display with the new month
                     updateSaveScreen();
                 } else {
@@ -11955,7 +11860,6 @@ margin-right: 0.5rem;
         };
         // Initial render on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', async function () {
-            console.log('DOMContentLoaded fired!');
             renderBudgetTitle();
             renderSaveTitle();
             updateHomeScreen().catch(error => {
@@ -11964,43 +11868,32 @@ margin-right: 0.5rem;
 
             // Check if carousel container exists
             const carouselCheck = document.querySelector('.chart-carousel-container');
-            console.log('Carousel container check:', carouselCheck ? 'FOUND' : 'NOT FOUND');
 
             // Check what screen we're on
-            console.log('Current screen:', currentScreen);
 
             // Make sure we're on the cashflow screen (screen 0)
             if (currentScreen !== 0) {
-                console.log('🔄 Not on cashflow screen, switching to screen 0');
                 goToScreen(0);
             }
 
             // Also check if the dots exist
             const dotsCheck = document.querySelector('.chart-dots');
-            console.log('🔘 Chart dots check:', dotsCheck ? 'FOUND' : 'NOT FOUND');
             if (dotsCheck) {
-                console.log('🔘 Dots element:', dotsCheck);
-                console.log('🔘 Dots innerHTML:', dotsCheck.innerHTML);
-                console.log('🔘 Dots visible?', getComputedStyle(dotsCheck).display !== 'none');
             }
 
             // Initialize charts and swipe functionality
-            console.log('Calling switchToChart(0)');
             if (typeof switchToChart === 'function') {
                 switchToChart(0); // Show first chart by default
             }
 
             // Test dot clicks directly
             setTimeout(() => {
-                console.log('🧪 Testing dot clicks...');
                 const dots = document.querySelectorAll('#budgetDisplay .chart-dots .dot');
                 dots.forEach((dot, index) => {
                     dot.addEventListener('click', function () {
-                        console.log(`✅ Dot ${index} clicked via event listener!`);
                         switchToChart(index);
                     });
                 });
-                console.log(`📍 Added click listeners to ${dots.length} dots in budgetDisplay`);
             }, 100);
 
             // Chart swipe will be initialized when navigating to Screen 3 (Dashboard)
@@ -12011,7 +11904,6 @@ margin-right: 0.5rem;
             }
 
             // Accounts will be loaded when needed by specific screens
-            console.log('Page initialization complete');
         });
 
         // Swipe to Delete Functionality
@@ -12022,7 +11914,6 @@ margin-right: 0.5rem;
             let currentSwipeContainer = null;
             let isSwipeAction = false; // Flag to track if swipe is active
 
-            console.log('Initializing simplified swipe-to-delete functionality');
 
             function handleTouchStart(e) {
                 const touch = e.touches ? e.touches[0] : e;
@@ -12123,21 +12014,18 @@ margin-right: 0.5rem;
 
                 // Don't trigger edit if we're clicking on the delete button
                 if (e.target.closest('.swipe-action')) {
-                    console.log('Click on swipe action, ignoring for edit');
                     return;
                 }
 
                 const container = e.target.closest('.swipe-container');
                 if (container) {
                     const type = container.dataset.type;
-                    console.log('Container click detected for type:', type);
 
                     // Handle expense edit
                     if (type === 'expense') {
                         const date = container.dataset.date;
                         const timestamp = container.dataset.timestamp;
                         if (date && timestamp) {
-                            console.log('Calling editExpense with:', { date, timestamp });
                             // Only call editExpense if this was a tap, not a swipe
                             editExpense(date, timestamp);
                         }
@@ -12193,7 +12081,6 @@ margin-right: 0.5rem;
          * This function creates realistic financial data for testing the chart and reports.
          */
         async function loadTestData() {
-            console.log('Loading sample data from database...');
             
             try {
                 // Get Clerk session token
@@ -12213,7 +12100,6 @@ margin-right: 0.5rem;
                 }
 
                 const result = await response.json();
-                console.log('Sample data seeded successfully:', result);
 
                 // Clear any existing accounts cache to force refresh
                 if (typeof clearAccountsCache === 'function') {
@@ -12252,11 +12138,9 @@ margin-right: 0.5rem;
          * Test function to manually refresh spending UI (for debugging)
          */
         async function refreshSpendingUI() {
-            console.log('Refreshing spending UI...');
             try {
                 await updatePeriodView();
                 await generateMonthlyChart();
-                console.log('Spending UI refreshed successfully');
             } catch (error) {
                 console.error('Error refreshing spending UI:', error);
             }
@@ -12993,10 +12877,8 @@ margin-right: 0.5rem;
 
 
         function drawHomeNetWorthChart(data) {
-            console.log('Drawing net worth chart with data:', data);
             const canvas = document.getElementById('homeNetWorthCanvas');
             if (!canvas) {
-                console.log('Net worth canvas not found');
                 return;
             }
 
@@ -13347,7 +13229,6 @@ margin-right: 0.5rem;
                     break;
 
                 default:
-                    console.log(`Unhandled range type: ${range}, falling back to 'month'`);
                     // Default to this month vs. last month
                     return await updateHomeCashflowWithRange('month');
                     break;
@@ -13476,7 +13357,6 @@ margin-right: 0.5rem;
             const chartRange = rangeType;
 
             // Log for debugging
-            console.log(`Selected range: ${rangeType}`);
 
             // Update the chart with the mapped range
             await updateHomeCashflowWithRange(chartRange);
@@ -13575,10 +13455,8 @@ margin-right: 0.5rem;
             let totalAssets = 0;
 
             // Use global savingsAccounts variable (loaded from API)
-            console.log('Accounts page chart - Using API-only data from savingsAccounts:', savingsAccounts?.length || 0, 'accounts');
             
             if (!savingsAccounts || savingsAccounts.length === 0) {
-                console.log('No savingsAccounts available from API');
                 const displayAssets = 0;
                 const assetsHistory = generateAssetsHistory(displayAssets, range);
                 drawAccountsNetWorthChart(assetsHistory);
@@ -13588,14 +13466,6 @@ margin-right: 0.5rem;
 
             // Process all accounts from API data
             savingsAccounts.forEach((account, index) => {
-                console.log(`Account ${index}:`, {
-                    name: account.name,
-                    type: account.type,
-                    subtype: account.subtype,
-                    currentBalance: account.currentBalance,
-                    hasCurrentBalance: account.currentBalance !== undefined,
-                    balanceType: typeof account.currentBalance
-                });
 
                 // Use API balance data if available, otherwise use sample data
                 let balance = 0;
@@ -13604,7 +13474,6 @@ margin-right: 0.5rem;
                 if (account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
                     balance = account.currentBalance;
                     hasRealBalance = true;
-                    console.log(`${account.name} (API): Using balance ${balance}`);
                 } else if (account.name) {
                     // For accounts that exist but don't have balance data yet, use sample balance
                     const isLiability = account.type === 'liability' || 
@@ -13613,9 +13482,7 @@ margin-right: 0.5rem;
                                        account.type === 'student_loan' ||
                                        account.subtype === 'credit card';
                     balance = isLiability ? -2500 : 5000; // Sample balances
-                    console.log(`${account.name} (Sample): Using default balance ${balance}`);
                 } else {
-                    console.log(`Skipping ${account.name} - no balance data available`);
                     return;
                 }
 
@@ -13626,20 +13493,16 @@ margin-right: 0.5rem;
                                    account.type === 'student_loan' ||
                                    account.subtype === 'credit card';
 
-                console.log(`Processing ${account.name}: balance=${balance}, isLiability=${isLiability}, hasRealBalance=${hasRealBalance}`);
 
                 // Only count assets, not liabilities
                 if (!isLiability) {
                     totalAssets += balance;
-                    console.log(`Added ${balance} to assets (total now: ${totalAssets})`);
                 } else {
-                    console.log(`Skipped liability account: ${account.name}`);
                 }
             });
 
             // Use the actual total assets (no demo values)
             const displayAssets = totalAssets;
-            console.log('Total assets calculated for accounts chart:', displayAssets);
 
             // Generate sample assets history for chart with more variation
             const assetsHistory = generateAssetsHistory(displayAssets, range);
@@ -13652,10 +13515,8 @@ margin-right: 0.5rem;
         }
 
         function drawAccountsNetWorthChart(data) {
-            console.log('Drawing accounts assets chart with data:', data);
             const canvas = document.getElementById('accountsNetWorthCanvas');
             if (!canvas) {
-                console.log('Accounts assets canvas not found');
                 return;
             }
 
@@ -13830,7 +13691,6 @@ margin-right: 0.5rem;
             }
 
             // Navigate to reports or detailed view
-            console.log('Navigate to accounts net worth details');
         }
 
         function toggleAccountsNetWorthDropdown() {
@@ -14100,13 +13960,6 @@ margin-right: 0.5rem;
             // For monthly view, this should show the amount saved since the previous month
             progressAmount = currentTotal - previousTotal;
 
-            // For testing/debugging - log the values
-            console.log('Save comparison:', {
-                currentTotal,
-                previousTotal,
-                progressAmount,
-                targetAmount
-            });
 
             // Store the last balance date for reference
             lastBalanceDate = lastDate;
@@ -14314,14 +14167,6 @@ margin-right: 0.5rem;
                     }
                 });
 
-                // Log for debugging
-                console.log('Month comparison:', {
-                    selectedMonth: selectedMonthKey,
-                    previousMonth: previousMonthKey,
-                    currentTotal,
-                    previousTotal,
-                    change: currentTotal - previousTotal
-                });
 
                 return { currentTotal, previousTotal, lastDate };
             }
@@ -14390,13 +14235,6 @@ margin-right: 0.5rem;
                 const startDate = new Date(year, month, 1);
                 const endDate = new Date(year, month + 1, 0);
 
-                console.log('getMostRecentBalanceDate', {
-                    mode: currentSavePeriodMode,
-                    year: year,
-                    month: month,
-                    startDate: startDate.toISOString().split('T')[0],
-                    endDate: endDate.toISOString().split('T')[0]
-                });
 
                 // Find all balance dates within this month across all accounts
                 let allDatesInMonth = [];
@@ -14418,11 +14256,9 @@ margin-right: 0.5rem;
                     });
                 }
 
-                console.log('All dates with balance data this month:', allDatesInMonth);
-
+    
                 // If there are no dates, return 'No data'
                 if (allDatesInMonth.length === 0) {
-                    console.log('No balance dates found for this month');
                     return 'No data';
                 }
 
@@ -14439,7 +14275,6 @@ margin-right: 0.5rem;
                     timeZone: 'UTC' // Ensure consistent date display regardless of local timezone
                 });
 
-                console.log('Most recent balance date:', formattedDate);
                 return formattedDate;
             } catch (error) {
                 console.error('Error in getMostRecentBalanceDate:', error);
@@ -14454,19 +14289,15 @@ margin-right: 0.5rem;
             // Update the "Last updated" note with the actual last balance date
             const lastUpdatedNote = document.getElementById('lastUpdatedNote');
             if (lastUpdatedNote) {
-                console.log('Updating last updated note with actual date...');
                 // Check if the function is defined first
                 if (typeof getMostRecentBalanceDate === 'function') {
                     const mostRecentDate = getMostRecentBalanceDate();
-                    console.log('Got most recent date for display:', mostRecentDate);
                     // Only show the note if there is actual data
                     if (mostRecentDate !== 'No data') {
                         lastUpdatedNote.textContent = `Last updated: ${mostRecentDate}`;
                         lastUpdatedNote.style.display = 'block'; // Show the note
-                        console.log('Showing last updated note:', lastUpdatedNote.textContent);
                     } else {
                         lastUpdatedNote.style.display = 'none'; // Hide the note if no data
-                        console.log('Hiding last updated note - no data available');
                     }
                 } else {
                     console.error('getMostRecentBalanceDate function not defined');
@@ -14480,7 +14311,6 @@ margin-right: 0.5rem;
             if (currentSavePeriodMode === 'month') {
                 // For month mode, use the balances from the selected month
                 const selectedMonthKey = getSelectedSaveMonthKey();
-                console.log('Calculating total for selected month:', selectedMonthKey);
 
                 Object.keys(balances).forEach(accountId => {
                     // Get all balance entries for this account in the selected month
@@ -14493,16 +14323,13 @@ margin-right: 0.5rem;
                         const lastDateInMonth = monthEntries[monthEntries.length - 1];
                         const lastBalanceInMonth = balances[accountId][lastDateInMonth];
 
-                        console.log(`Account ${accountId} last balance for ${lastDateInMonth}:`, lastBalanceInMonth);
 
                         // Handle both object format and direct number format
                         if (lastBalanceInMonth !== null && lastBalanceInMonth !== undefined) {
                             if (typeof lastBalanceInMonth === 'object' && typeof lastBalanceInMonth.amount === 'number') {
                                 actualTotalBalance += lastBalanceInMonth.amount;
-                                console.log(`Added ${formatCurrency(lastBalanceInMonth.amount)} from account ${accountId} (object format)`);
                             } else if (typeof lastBalanceInMonth === 'number') {
                                 actualTotalBalance += lastBalanceInMonth;
-                                console.log(`Added ${formatCurrency(lastBalanceInMonth)} from account ${accountId} (number format)`);
                             } else {
                                 console.warn(`Invalid balance format for account ${accountId}:`, lastBalanceInMonth);
                             }
@@ -14520,7 +14347,6 @@ margin-right: 0.5rem;
             }
 
             // Log individual account balances for verification
-            console.log(`Individual account balances for ${currentSavePeriodMode} mode:`);
             if (currentSavePeriodMode === 'month') {
                 const selectedMonthKey = getSelectedSaveMonthKey();
                 Object.keys(balances).forEach(accountId => {
@@ -14534,9 +14360,7 @@ margin-right: 0.5rem;
                         const lastDateInMonth = monthEntries[monthEntries.length - 1];
                         const lastBalanceInMonth = balances[accountId][lastDateInMonth];
 
-                        console.log(`- ${accountInfo.name} (${accountId}): ${formatCurrency(lastBalanceInMonth?.amount || 0)} (last entry in month: ${lastDateInMonth})`);
                     } else {
-                        console.log(`- ${accountInfo.name} (${accountId}): No data for selected month`);
                     }
                 });
             } else {
@@ -14544,7 +14368,6 @@ margin-right: 0.5rem;
                     const latestBalance = getLastBalanceForAccount(accountId);
                     const accountInfo = savingsAccounts.find(acc => acc.id === accountId) || { name: 'Unknown Account' };
                     if (latestBalance && typeof latestBalance.amount === 'number') {
-                        console.log(`- ${accountInfo.name} (${accountId}): ${formatCurrency(latestBalance.amount)}`);
                     }
                 });
             }
@@ -14553,7 +14376,6 @@ margin-right: 0.5rem;
             const saveTotalAccountBalance = document.getElementById('saveTotalAccountBalance');
             if (saveTotalAccountBalance) {
                 saveTotalAccountBalance.textContent = formatCurrency(actualTotalBalance);
-                console.log(`Updating total balance display to: ${formatCurrency(actualTotalBalance)}`);
             }
 
             // For comparison and change calculation
@@ -14579,7 +14401,6 @@ margin-right: 0.5rem;
                     saveBalanceDate.textContent = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
                 }
 
-                console.log('Today total:', { actualTotalBalance, previousTotal, balanceChange });
             } else {
                 // For monthly mode, use selected month data
                 const { currentTotal, previousTotal, lastDate } = getSaveBalanceComparison();
@@ -14596,7 +14417,6 @@ margin-right: 0.5rem;
                     saveTotalBalanceChange.className = balanceChange >= 0 ?
                         'balance-change-modern positive' : 'balance-change-modern negative';
 
-                    console.log(`Monthly comparison: ${formatCurrency(actualTotalBalance)} vs ${formatCurrency(previousTotal)} from ${prevMonthName}`);
                 }
 
                 // Update the date display
@@ -14606,7 +14426,6 @@ margin-right: 0.5rem;
                     saveBalanceDate.textContent = selectedMonthName;
                 }
 
-                console.log('Month total:', { actualTotalBalance, currentTotal, previousTotal, balanceChange });
             }
 
             // Update save screen balance history
@@ -15393,8 +15212,6 @@ margin-right: 0.5rem;
                 'other': { title: 'Other Accounts', accounts: [] }
             };
 
-            console.log('savingsAccounts:', savingsAccounts);
-            console.log('balances:', balances);
 
             // Prepare grouped data
             const grouped = {};
@@ -15469,7 +15286,6 @@ margin-right: 0.5rem;
 
                     // Latest value for the selected month (should be first in the array since we sorted by date descending)
                     const latest = monthUpdates[0];
-                    console.log(`Latest balance for ${name} (${accountId}): ${formatCurrency(latest.amount)} on ${latest.date}`);
 
                     // Calculate all-time percent (from first ever value)
                     const accountBalances = balances[accountId] || {};
@@ -15483,7 +15299,6 @@ margin-right: 0.5rem;
                     const isDebt = accountType === 'liability';
                     const debtClass = isDebt ? ' debt' : '';
                     const formatAmount = (amount) => isDebt ? `(${formatCurrency(amount)})` : formatCurrency(amount);
-                    console.log(`Account ${name} - Type: ${accountType}, IsDebt: ${isDebt}, Class: '${debtClass}'`);
                     // Account header: account name, latest value
                     html += `<div class="modern-account-accordion" data-account-id="${accountId}">
                         <div class="modern-account-accordion-header" onclick="toggleAccountAccordion('${accountId}')">
@@ -15661,7 +15476,6 @@ margin-right: 0.5rem;
             const lastBalance = accountBalances[dates[0]];
 
             // Log for debugging
-            console.log(`Latest balance for account ${accountId}: ${JSON.stringify(lastBalance)} on date ${dates[0]}`);
 
             // Handle both old format (direct number) and new format (object with amount)
             if (lastBalance === null || lastBalance === undefined) {
@@ -15686,7 +15500,6 @@ margin-right: 0.5rem;
             };
 
             // Process accounts using API data only
-            console.log('Home page asset chart - Processing API-only accounts:', savingsAccounts.length);
             savingsAccounts.forEach((account, index) => {
                 // Determine account type from API data
                 let accountType;
@@ -15708,13 +15521,10 @@ margin-right: 0.5rem;
                 let balance = 0;
                 if (account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
                     balance = account.currentBalance;
-                    console.log(`${account.name} (API): Using balance ${balance}, type: ${accountType}`);
                 } else if (account.type === 'plaid' || account.name) {
                     // For accounts that exist but don't have balance data yet, use a sample balance
                     balance = accountType === 'liability' ? -2500 : 5000; // Sample balances for demo
-                    console.log(`${account.name} (Sample): Using default balance ${balance}, type: ${accountType}`);
                 } else {
-                    console.log(`Skipping ${account.name} - no balance data available`);
                     return;
                 }
 
@@ -15722,9 +15532,7 @@ margin-right: 0.5rem;
                     // For liability accounts, use absolute value since debt should show as positive amounts in the chart
                     const absBalance = Math.abs(balance);
                     accountTypes[accountType].total += absBalance;
-                    console.log(`Added ${absBalance} to ${accountType} total (now ${accountTypes[accountType].total})`);
                 } else {
-                    console.log(`Unknown account type: ${accountType} for account ${account.name}`);
                 }
             });
 
@@ -15740,8 +15548,6 @@ margin-right: 0.5rem;
 
             // Calculate total for percentage
             const totalValue = accountData.reduce((sum, account) => sum + account.amount, 0);
-            console.log('Home page asset chart - Final account data:', accountData);
-            console.log('Home page asset chart - Total value:', totalValue);
 
             // If no accounts with balances, show placeholder
             if (accountData.length === 0 || totalValue === 0) {
@@ -16176,7 +15982,6 @@ margin-right: 0.5rem;
                 discretionaryExpenses: parseFloat(document.getElementById('discretionaryExpenses').value) || 0
             };
 
-            console.log('Saving settings:', settings);
             localStorage.setItem('simpleBudgetSettings', JSON.stringify(settings));
 
             // Update all displays to reflect new settings
@@ -16622,12 +16427,10 @@ margin-right: 0.5rem;
             // Confirm before clearing all data
             if (confirm("Are you sure you want to clear all data? This action cannot be undone and will remove all your accounts, transactions, and settings.")) {
                 try {
-                    console.log('Starting data clearing process...');
                     
                     // Clear database data first (if user is authenticated)
                     if (window.plaidService) {
                         try {
-                            console.log('Clearing database data...');
                             const sessionToken = await window.plaidService.getClerkSessionToken();
                             
                             const response = await fetch(`${window.plaidService.baseUrl}/api/user/data`, {
@@ -16640,7 +16443,6 @@ margin-right: 0.5rem;
 
                             if (response.ok) {
                                 const result = await response.json();
-                                console.log('Database data cleared successfully:', result);
                             } else {
                                 console.warn('Failed to clear database data:', response.status);
                                 // Continue with localStorage clearing even if database clearing fails
@@ -16664,7 +16466,6 @@ margin-right: 0.5rem;
 
                     // Clear each key
                     keysToRemove.forEach(key => {
-                        console.log(`Removing localStorage key: ${key}`);
                         localStorage.removeItem(key);
                     });
 
@@ -16674,7 +16475,6 @@ margin-right: 0.5rem;
                     }
 
                     // For additional safety, clear all localStorage
-                    console.log('Clearing all localStorage');
                     localStorage.clear();
 
                     // Reload the page to reflect changes
@@ -16866,7 +16666,6 @@ margin-right: 0.5rem;
                 evt.stopPropagation();
             }
 
-            console.log('handleExpenseDelete called');
 
             // Find the parent swipe-container and get its data attributes
             const container = element.closest('.swipe-container');
@@ -16879,7 +16678,6 @@ margin-right: 0.5rem;
             const date = container.dataset.date;
             const timestamp = container.dataset.timestamp;
 
-            console.log('Expense data from container:', { date, timestamp });
 
             if (!date || !timestamp) {
                 console.error('Missing date or timestamp for expense deletion');
@@ -16905,7 +16703,6 @@ margin-right: 0.5rem;
                 evt.stopPropagation();
             }
 
-            console.log('handleBalanceDelete called');
 
             // Find the parent swipe-container and get its data attributes
             const container = element.closest('.swipe-container');
@@ -16918,7 +16715,6 @@ margin-right: 0.5rem;
             const accountId = container.dataset.accountId;
             const date = container.dataset.date;
 
-            console.log('Balance data from container:', { accountId, date });
 
             if (!accountId || !date) {
                 console.error('Missing accountId or date for balance deletion');

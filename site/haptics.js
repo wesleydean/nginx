@@ -177,7 +177,6 @@ window.Haptics = Haptics;
 
 // Export a test function
 window.testHapticFeedback = function() {
-    console.log('Testing haptic feedback...');
     Haptics.impact('medium');
     
     // Test all intensities with delay
@@ -187,6 +186,4 @@ window.testHapticFeedback = function() {
     
     // Test notifications
     setTimeout(() => Haptics.notification('success'), 4000);
-    
-    console.log('Haptic test sequence initiated');
 };
