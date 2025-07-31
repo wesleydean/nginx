@@ -6248,6 +6248,7 @@ margin-right: 0.5rem;
       align-items: center;
       gap: 1rem;
       padding: 0.8rem 0;
+      margin: 0 1rem;
       border-bottom: 1px solid #f0f0f0;
     }
     .transaction-skeleton-row .skeleton-icon,
@@ -6268,6 +6269,23 @@ margin-right: 0.5rem;
       border-radius: 8px;
       height: 16px;
     }
+
+    /* Skeleton fade animations */
+    .skeleton-fade-in {
+      opacity: 0;
+      animation: skeletonFadeIn 0.3s ease-out forwards;
+    }
+    .skeleton-fade-out {
+      opacity: 1;
+      animation: skeletonFadeOut 0.2s ease-in forwards;
+    }
+    @keyframes skeletonFadeIn {
+      to { opacity: 1; }
+    }
+    @keyframes skeletonFadeOut {
+      to { opacity: 0; }
+    }
+
     .fade-in {
       opacity: 0;
       animation: fadeIn 0.5s ease-in forwards;
@@ -11061,9 +11079,14 @@ margin-right: 0.5rem;
             
             if (loadingContainer) {
                 loadingContainer.style.display = 'block';
+                loadingContainer.classList.remove('skeleton-fade-out');
+                loadingContainer.classList.add('skeleton-fade-in');
             }
             if (accountsContainer) {
-                accountsContainer.style.display = 'none';
+                accountsContainer.classList.add('skeleton-fade-out');
+                setTimeout(() => {
+                    accountsContainer.style.display = 'none';
+                }, 200);
             }
         }
 
@@ -11075,10 +11098,17 @@ margin-right: 0.5rem;
             const accountsContainer = document.getElementById('accountsList');
             
             if (loadingContainer) {
-                loadingContainer.style.display = 'none';
+                loadingContainer.classList.remove('skeleton-fade-in');
+                loadingContainer.classList.add('skeleton-fade-out');
+                setTimeout(() => {
+                    loadingContainer.style.display = 'none';
+                    loadingContainer.classList.remove('skeleton-fade-out');
+                }, 200);
             }
             if (accountsContainer) {
                 accountsContainer.style.display = 'block';
+                accountsContainer.classList.remove('skeleton-fade-out');
+                accountsContainer.classList.add('skeleton-fade-in');
             }
         }
 
@@ -11090,7 +11120,7 @@ margin-right: 0.5rem;
             
             if (listContainer) {
                 listContainer.innerHTML = `
-                    <div id="transactionsListLoading">
+                    <div id="transactionsListLoading" class="skeleton-fade-in">
                         <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
                             <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
                             <div style="flex: 1;">
@@ -11143,7 +11173,11 @@ margin-right: 0.5rem;
             const loadingContainer = document.getElementById('transactionsListLoading');
             
             if (loadingContainer) {
-                loadingContainer.remove();
+                loadingContainer.classList.remove('skeleton-fade-in');
+                loadingContainer.classList.add('skeleton-fade-out');
+                setTimeout(() => {
+                    loadingContainer.remove();
+                }, 200);
             }
         }
 
