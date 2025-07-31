@@ -65,19 +65,69 @@
             setTimeout(initializeLucideIcons, 1000);
         });
         
+        // Debounced icon initialization to prevent conflicts
+        let iconInitTimeout = null;
+        let iconInitInProgress = false;
+        
         function initializeLucideIcons() {
+            // Clear any pending initialization
+            if (iconInitTimeout) {
+                clearTimeout(iconInitTimeout);
+            }
+            
+            // Debounce the actual initialization
+            iconInitTimeout = setTimeout(() => {
+                if (iconInitInProgress) return;
+                
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    try {
+                        iconInitInProgress = true;
+                        window.lucide.createIcons();
+                        console.log('Lucide icons initialized successfully');
+                    } catch (error) {
+                        console.error('Error initializing Lucide icons:', error);
+                    } finally {
+                        iconInitInProgress = false;
+                    }
+                } else {
+                    console.warn('Lucide not loaded yet, retrying...');
+                    setTimeout(initializeLucideIcons, 100);
+                }
+            }, 50); // 50ms debounce
+        }
+        
+        // Global function for safe icon initialization
+        window.safeInitLucideIcons = initializeLucideIcons;
+        
+        // Special function for transaction/expense lists that need immediate icon rendering
+        function initializeTransactionIcons() {
+            // For transaction lists, we need more immediate rendering
             if (window.lucide && typeof window.lucide.createIcons === 'function') {
                 try {
-                    window.lucide.createIcons();
-                    console.log('Lucide icons initialized successfully');
+                    // Use requestAnimationFrame to ensure DOM is ready
+                    requestAnimationFrame(() => {
+                        // Double-check that lucide is still available
+                        if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                            window.lucide.createIcons();
+                            console.log('Transaction icons initialized');
+                        }
+                    });
                 } catch (error) {
-                    console.error('Error initializing Lucide icons:', error);
+                    console.error('Error initializing transaction icons:', error);
+                    // Fallback to safe method
+                    if (window.safeInitLucideIcons) {
+                        window.safeInitLucideIcons();
+                    }
                 }
             } else {
-                console.warn('Lucide not loaded yet, retrying...');
-                setTimeout(initializeLucideIcons, 100);
+                // Fallback to safe method if lucide not immediately available
+                if (window.safeInitLucideIcons) {
+                    window.safeInitLucideIcons();
+                }
             }
         }
+        
+        window.initializeTransactionIcons = initializeTransactionIcons;
     </script>
     
     <style>
@@ -9216,8 +9266,8 @@ margin-right: 0.5rem;
             await updateSelectedCategoryTotal();
 
             // Initialize Lucide icons for the new category icons
-            if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                window.lucide.createIcons();
+            if (window.safeInitLucideIcons) {
+                window.safeInitLucideIcons();
             }
         }
 
@@ -10863,8 +10913,8 @@ margin-right: 0.5rem;
                     // For category selection, use icon + text
                     valueSpan.innerHTML = getCategoryEmoji(value) + text.replace(/^[^\w\s]*\s*/, '');
                     // Initialize Lucide icons for the new content
-                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                        window.lucide.createIcons();
+                    if (window.safeInitLucideIcons) {
+                        window.safeInitLucideIcons();
                     }
                 } else {
                     valueSpan.textContent = text;
@@ -11517,14 +11567,8 @@ margin-right: 0.5rem;
             contextMenuContainer.appendChild(dropdownContainer);
 
             // Ensure Lucide icons are rendered
-            if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                window.lucide.createIcons();
-            } else {
-                setTimeout(() => {
-                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                        window.lucide.createIcons();
-                    }
-                }, 100);
+            if (window.safeInitLucideIcons) {
+                window.safeInitLucideIcons();
             }
         }
         function getMonthYearString(date) {
@@ -11805,8 +11849,8 @@ margin-right: 0.5rem;
                 listContainer.innerHTML = html;
 
                 // Re-initialize Lucide icons and swipe functionality
-                if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                    window.lucide.createIcons();
+                if (window.initializeTransactionIcons) {
+                    window.initializeTransactionIcons();
                 }
                 initializeSwipeToDelete();
             }
@@ -12403,8 +12447,8 @@ margin-right: 0.5rem;
             }).join('');
 
             // Initialize Lucide icons for the new transaction icons
-            if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                window.lucide.createIcons();
+            if (window.initializeTransactionIcons) {
+                window.initializeTransactionIcons();
             }
         }
 
@@ -13025,8 +13069,8 @@ margin-right: 0.5rem;
                     `;
 
                 // Reinitialize lucide icons
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
+                if (window.safeInitLucideIcons) {
+                    window.safeInitLucideIcons();
                 }
             }
         }
@@ -13659,8 +13703,8 @@ margin-right: 0.5rem;
                     `;
 
                 // Re-initialize Lucide icons
-                if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                    window.lucide.createIcons();
+                if (window.safeInitLucideIcons) {
+                    window.safeInitLucideIcons();
                 }
             }
         }
@@ -14603,8 +14647,8 @@ margin-right: 0.5rem;
             container.innerHTML = html;
 
             // Reinitialize Lucide icons
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
+            if (window.safeInitLucideIcons) {
+                window.safeInitLucideIcons();
             }
         }
 
@@ -15425,8 +15469,8 @@ margin-right: 0.5rem;
             }
             historyContainer.innerHTML = html;
             // Ensure Lucide icons are rendered
-            if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                window.lucide.createIcons();
+            if (window.safeInitLucideIcons) {
+                window.safeInitLucideIcons();
             }
         }
 
@@ -15581,11 +15625,9 @@ margin-right: 0.5rem;
                 accountTypeChart.classList.add('home-section');
 
                 // Ensure Lucide icons are rendered
-                setTimeout(() => {
-                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                        window.lucide.createIcons();
-                    }
-                }, 50);
+                if (window.safeInitLucideIcons) {
+                    window.safeInitLucideIcons();
+                }
                 return;
             }
 
@@ -15646,11 +15688,9 @@ margin-right: 0.5rem;
             });
 
             // Ensure Lucide icons are rendered
-            setTimeout(() => {
-                if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                    window.lucide.createIcons();
-                }
-            }, 50);
+            if (window.safeInitLucideIcons) {
+                window.safeInitLucideIcons();
+            }
         }
 
         function formatAccountTypeAmount(amount) {
@@ -15734,14 +15774,8 @@ margin-right: 0.5rem;
             container.appendChild(btn);
 
             // Ensure Lucide icons are rendered
-            if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                window.lucide.createIcons();
-            } else {
-                setTimeout(() => {
-                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
-                        window.lucide.createIcons();
-                    }
-                }, 100);
+            if (window.safeInitLucideIcons) {
+                window.safeInitLucideIcons();
             }
         }
 
