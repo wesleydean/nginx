@@ -11119,50 +11119,57 @@ margin-right: 0.5rem;
             const listContainer = document.getElementById('expensesList');
             
             if (listContainer) {
-                listContainer.innerHTML = `
-                    <div id="transactionsListLoading" class="skeleton-fade-in">
-                        <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
-                            <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
-                            <div style="flex: 1;">
-                                <div class="skeleton-line" style="width: 70%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
-                                <div class="skeleton-line" style="width: 45%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                // First fade out existing content
+                listContainer.classList.add('skeleton-fade-out');
+                
+                // After fade out completes, show skeleton
+                setTimeout(() => {
+                    listContainer.classList.remove('skeleton-fade-out');
+                    listContainer.innerHTML = `
+                        <div id="transactionsListLoading" class="skeleton-fade-in">
+                            <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
+                                <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
+                                <div style="flex: 1;">
+                                    <div class="skeleton-line" style="width: 70%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
+                                    <div class="skeleton-line" style="width: 45%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                                </div>
+                                <div class="skeleton-amount" style="width: 50px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
                             </div>
-                            <div class="skeleton-amount" style="width: 50px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
-                        </div>
-                        <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
-                            <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
-                            <div style="flex: 1;">
-                                <div class="skeleton-line" style="width: 60%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
-                                <div class="skeleton-line" style="width: 35%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                            <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
+                                <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
+                                <div style="flex: 1;">
+                                    <div class="skeleton-line" style="width: 60%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
+                                    <div class="skeleton-line" style="width: 35%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                                </div>
+                                <div class="skeleton-amount" style="width: 45px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
                             </div>
-                            <div class="skeleton-amount" style="width: 45px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
-                        </div>
-                        <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
-                            <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
-                            <div style="flex: 1;">
-                                <div class="skeleton-line" style="width: 65%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
-                                <div class="skeleton-line" style="width: 40%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                            <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
+                                <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
+                                <div style="flex: 1;">
+                                    <div class="skeleton-line" style="width: 65%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
+                                    <div class="skeleton-line" style="width: 40%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                                </div>
+                                <div class="skeleton-amount" style="width: 55px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
                             </div>
-                            <div class="skeleton-amount" style="width: 55px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
-                        </div>
-                        <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
-                            <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
-                            <div style="flex: 1;">
-                                <div class="skeleton-line" style="width: 55%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
-                                <div class="skeleton-line" style="width: 30%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                            <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
+                                <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
+                                <div style="flex: 1;">
+                                    <div class="skeleton-line" style="width: 55%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
+                                    <div class="skeleton-line" style="width: 30%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                                </div>
+                                <div class="skeleton-amount" style="width: 48px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
                             </div>
-                            <div class="skeleton-amount" style="width: 48px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
-                        </div>
-                        <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0;">
-                            <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
-                            <div style="flex: 1;">
-                                <div class="skeleton-line" style="width: 75%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
-                                <div class="skeleton-line" style="width: 50%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                            <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0;">
+                                <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
+                                <div style="flex: 1;">
+                                    <div class="skeleton-line" style="width: 75%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
+                                    <div class="skeleton-line" style="width: 50%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
+                                </div>
+                                <div class="skeleton-amount" style="width: 52px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
                             </div>
-                            <div class="skeleton-amount" style="width: 52px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }, 200); // Wait for fade-out animation to complete
             }
         }
 
@@ -11171,12 +11178,21 @@ margin-right: 0.5rem;
          */
         function hideTransactionsLoadingPlaceholder() {
             const loadingContainer = document.getElementById('transactionsListLoading');
+            const listContainer = document.getElementById('expensesList');
             
             if (loadingContainer) {
                 loadingContainer.classList.remove('skeleton-fade-in');
                 loadingContainer.classList.add('skeleton-fade-out');
                 setTimeout(() => {
                     loadingContainer.remove();
+                    // Add fade-in to the updated transaction list content
+                    if (listContainer) {
+                        listContainer.classList.add('skeleton-fade-in');
+                        // Remove fade-in class after animation completes
+                        setTimeout(() => {
+                            listContainer.classList.remove('skeleton-fade-in');
+                        }, 300);
+                    }
                 }, 200);
             }
         }
