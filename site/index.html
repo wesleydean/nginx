@@ -7843,6 +7843,12 @@ margin-right: 0.5rem;
                     // Update the rest of the display
                     await updatePeriodView();
                     updateChart();
+                    
+                    // Update monthly spending chart
+                    if (typeof generateMonthlyChart === 'function') {
+                        await generateMonthlyChart();
+                    }
+
 
 
                 } else {
@@ -10104,6 +10110,24 @@ margin-right: 0.5rem;
 
             // Load accounts with recent transactions from API
             await loadAccountsWithTransactions();
+
+            // DEBUG: Log all account data for debugging balance issues
+            console.log('=== ACCOUNT BALANCE DEBUG ===');
+            console.log('Total accounts:', savingsAccounts.length);
+            savingsAccounts.forEach((account, index) => {
+                console.log(`Account ${index + 1}:`, {
+                    id: account.id,
+                    name: account.name,
+                    type: account.type,
+                    institutionName: account.institutionName,
+                    currentBalance: account.currentBalance,
+                    hasBalance: account.currentBalance !== undefined,
+                    balanceType: typeof account.currentBalance,
+                    plaidType: account.plaidType,
+                    currency: account.currency
+                });
+            });
+            console.log('==========================');
 
             listContainer.innerHTML = savingsAccounts.map(account => {
                 const balanceDisplay = account.currentBalance !== undefined
