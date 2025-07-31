@@ -101,15 +101,20 @@
         
         // Special function for transaction/expense lists that need immediate icon rendering
         function initializeTransactionIcons() {
+            console.log('initializeTransactionIcons called');
+            
             // For transaction lists, we need more immediate rendering
             if (window.lucide && typeof window.lucide.createIcons === 'function') {
                 try {
+                    console.log('Lucide available, initializing icons immediately');
                     // Use requestAnimationFrame to ensure DOM is ready
                     requestAnimationFrame(() => {
                         // Double-check that lucide is still available
                         if (window.lucide && typeof window.lucide.createIcons === 'function') {
                             window.lucide.createIcons();
-                            console.log('Transaction icons initialized');
+                            console.log('✅ Transaction icons initialized successfully');
+                        } else {
+                            console.warn('Lucide became unavailable during requestAnimationFrame');
                         }
                     });
                 } catch (error) {
@@ -120,14 +125,46 @@
                     }
                 }
             } else {
-                // Fallback to safe method if lucide not immediately available
-                if (window.safeInitLucideIcons) {
-                    window.safeInitLucideIcons();
-                }
+                console.warn('Lucide not immediately available, trying fallbacks');
+                // Try multiple fallback strategies
+                
+                // Strategy 1: Wait a bit and try again
+                setTimeout(() => {
+                    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                        console.log('Lucide became available after timeout, initializing');
+                        window.lucide.createIcons();
+                        console.log('✅ Transaction icons initialized after delay');
+                    } else {
+                        console.warn('Lucide still not available after timeout');
+                        // Strategy 2: Use the safe method
+                        if (window.safeInitLucideIcons) {
+                            window.safeInitLucideIcons();
+                        }
+                    }
+                }, 100);
             }
         }
         
         window.initializeTransactionIcons = initializeTransactionIcons;
+        
+        // Emergency fix function to find and initialize any missed icons
+        function emergencyIconFix() {
+            const uninitialized = document.querySelectorAll('[data-lucide]:not([data-lucide-initialized])');
+            if (uninitialized.length > 0) {
+                console.log(`Found ${uninitialized.length} uninitialized icons, fixing...`);
+                if (window.lucide && typeof window.lucide.createIcons === 'function') {
+                    window.lucide.createIcons();
+                    console.log('✅ Emergency icon fix applied');
+                } else {
+                    console.warn('Emergency icon fix failed - Lucide not available');
+                }
+            }
+        }
+        
+        window.emergencyIconFix = emergencyIconFix;
+        
+        // Run emergency fix periodically to catch any missed icons
+        setInterval(emergencyIconFix, 2000);
     </script>
     
     <style>
@@ -7285,6 +7322,14 @@ margin-right: 0.5rem;
                 updateCashflowPeriodDisplay();
                 await updateBudgetDisplay();
                 await updateExpensesList();
+                
+                // Ensure icons are initialized after all content is loaded
+                setTimeout(() => {
+                    console.log('Final icon initialization for spending screen');
+                    if (window.initializeTransactionIcons) {
+                        window.initializeTransactionIcons();
+                    }
+                }, 200);
             } else {
                 // Remove chart click listener when not on spending screen
                 if (typeof window.removeChartClickListener === 'function') {
@@ -7665,6 +7710,11 @@ margin-right: 0.5rem;
                 });
 
                 listContainer.innerHTML = html;
+                
+                // Initialize icons for the newly inserted expense items
+                if (window.initializeTransactionIcons) {
+                    window.initializeTransactionIcons();
+                }
             }
         }
 
