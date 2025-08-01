@@ -7415,12 +7415,8 @@ margin-right: 0.5rem;
         // Savings tracking variables
         savingsAccounts = [];
 
-        // Default accounts
-        const defaultAccounts = [
-            { id: 'checking', name: 'Checking', type: 'cash' },
-            { id: 'savings', name: 'Savings', type: 'cash' },
-            { id: 'investment', name: 'Investment', type: 'investment' }
-        ];
+        // No default accounts - empty array
+        const defaultAccounts = [];
 
         async function goToScreen(screenIndex) {
             // If we're already on this screen, just scroll to top
@@ -8719,11 +8715,7 @@ margin-right: 0.5rem;
 
         // Global variables
         currentPeriodMode = 'month'; // or 'month'
-        savingsAccounts = [
-            { id: 'checking', name: 'Checking' },
-            { id: 'savings', name: 'Savings' },
-            { id: 'emergency', name: 'Emergency Fund' }
-        ];
+        savingsAccounts = [];
 
         async function updateCategoryChart() {
             // Get expenses and filter by time range
@@ -9863,15 +9855,7 @@ margin-right: 0.5rem;
                 balanceAccountContent.innerHTML = '';
                 slideOutBalanceAccount.innerHTML = '';
 
-                // Ensure we have at least one account
-                if (savingsAccounts.length === 0) {
-                    savingsAccounts = [
-                        { id: 'checking', name: 'Checking', type: 'cash' },
-                        { id: 'savings', name: 'Savings', type: 'cash' },
-                        { id: 'emergency', name: 'Emergency Fund', type: 'cash' }
-                    ];
-                    saveSavingsAccounts(savingsAccounts);
-                }
+                // No default accounts - user must add accounts manually or use sample data
 
                 // Add account options
                 savingsAccounts.forEach((account, index) => {
