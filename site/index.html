@@ -5267,6 +5267,22 @@
 }
 .settings-menu-btn-item {
   padding: 1rem 0.5rem 0rem 0.5rem;
+}
+
+/* Loading spinner for settings menu items */
+.settings-menu-arrow .spinner-circle {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e0e0e0;
+  border-top: 2px solid #111;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
   border-bottom: none;
 }
 .settings-menu-btn {
@@ -6605,17 +6621,15 @@ margin-right: 0.5rem;
                         <span class="settings-menu-label">Support</span>
                         <span class="settings-menu-arrow"><i data-lucide="chevron-right" class="w-5 h-5"></i></span>
                     </li>
-                    <li class="settings-menu-item settings-menu-btn-item">
-                      <div class="quick-action-card" style="width:100%;box-sizing:border-box;" onclick="loadSampleBudget()">
-                        <span class="quick-action-icon"><i data-lucide="database" class="w-5 h-5"></i></span>
-                        <span class="quick-action-title">Load Sample Budget</span>
-                      </div>
+                    <li class="settings-menu-item" onclick="loadSampleBudget()">
+                        <span class="settings-menu-icon"><i data-lucide="database" class="w-5 h-5"></i></span>
+                        <span class="settings-menu-label">Load Sample Data</span>
+                        <span class="settings-menu-arrow"><i data-lucide="chevron-right" class="w-5 h-5"></i></span>
                     </li>
-                    <li class="settings-menu-item settings-menu-btn-item">
-                      <div class="quick-action-card" style="width:100%;box-sizing:border-box;" onclick="clearAllData()">
-                        <span class="quick-action-icon"><i data-lucide="trash-2" class="w-5 h-5"></i></span>
-                        <span class="quick-action-title">Clear All Data</span>
-                      </div>
+                    <li class="settings-menu-item" onclick="clearAllData()">
+                        <span class="settings-menu-icon"><i data-lucide="trash-2" class="w-5 h-5"></i></span>
+                        <span class="settings-menu-label">Clear All Data</span>
+                        <span class="settings-menu-arrow"><i data-lucide="chevron-right" class="w-5 h-5"></i></span>
                     </li>
                   </ul>
             </div>
@@ -12125,9 +12139,7 @@ margin-right: 0.5rem;
         document.addEventListener('DOMContentLoaded', async function () {
             renderBudgetTitle();
             renderSaveTitle();
-            updateHomeScreen().catch(error => {
-                console.error('Error loading home page data:', error);
-            }); // Load home page data by default
+            // App starts clean - no default data loading
 
             // Check if carousel container exists
             const carouselCheck = document.querySelector('.chart-carousel-container');
@@ -12349,13 +12361,22 @@ margin-right: 0.5rem;
                 // Get Clerk session token
                 const sessionToken = await window.plaidService.getClerkSessionToken();
                 
-                // Call the seed sample data API endpoint
+                // Call the seed sample data API endpoint with balance data request
                 const response = await fetch(`${window.plaidService.baseUrl}/api/seed/sample-data`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${sessionToken}`,
-                    }
+                    },
+                    body: JSON.stringify({
+                        includeBalances: true,
+                        accountBalances: {
+                            'Checking': 5000,
+                            'Savings': 15000,
+                            'Brokerage Account': 25000,
+                            'Credit Card': -2500
+                        }
+                    })
                 });
 
                 if (!response.ok) {
@@ -12389,11 +12410,11 @@ margin-right: 0.5rem;
                     await updateExpensesList();
                 }
 
-                alert(`Sample data loaded successfully! Added ${result.accounts} accounts and ${result.transactions} transactions.`);
+                console.log(`Sample data loaded successfully! Added ${result.accounts} accounts and ${result.transactions} transactions.`);
                 
             } catch (error) {
                 console.error('Error loading sample data:', error);
-                alert('Failed to load sample data. Please make sure you are signed in and try again.');
+                // Error will be handled by the calling function
             }
         }
 
@@ -12436,7 +12457,37 @@ margin-right: 0.5rem;
                     padding: 40px 20px;
                     height: 200px;
                 `;
-                placeholder.textContent = 'No account data';
+                placeholder.textContent = 'No account balance data available. Click "Load Sample Data" in settings to populate with test data.';
+                canvas.parentNode.insertBefore(placeholder, canvas);
+            }
+            placeholder.style.display = 'flex';
+        }
+
+        /**
+         * Show placeholder for accounts net worth chart when no data is available
+         */
+        function showAccountsNetWorthPlaceholder() {
+            const canvas = document.getElementById('accountsNetWorthCanvas');
+            if (!canvas) return;
+            
+            // Hide the canvas and show basic placeholder text
+            canvas.style.display = 'none';
+            
+            // Find or create placeholder element
+            let placeholder = document.getElementById('accountsNetWorthPlaceholder');
+            if (!placeholder) {
+                placeholder = document.createElement('div');
+                placeholder.id = 'accountsNetWorthPlaceholder';
+                placeholder.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                    color: #7f8c8d;
+                    padding: 40px 20px;
+                    height: 200px;
+                `;
+                placeholder.textContent = 'No account balance data available. Click "Load Sample Data" in settings to populate with test data.';
                 canvas.parentNode.insertBefore(placeholder, canvas);
             }
             placeholder.style.display = 'flex';
@@ -13001,27 +13052,46 @@ margin-right: 0.5rem;
                 }
             });
 
-                // Include Plaid account balances (which have currentBalance field)
+                // Include API account balances (only use real data, no fallbacks)
+                let hasRealBalanceData = false;
                 accountsData.forEach(account => {
-                if (account.currentBalance && typeof account.currentBalance === 'number') {
-                    // Check if this account is a liability
-                    const isLiability = account.type === 'liability' || 
-                                       account.type === 'credit_card' || 
-                                       account.type === 'mortgage' || 
-                                       account.type === 'student_loan';
-
-                    if (isLiability) {
-                        totalLiabilities += account.currentBalance;
-                    } else {
-                        totalAssets += account.currentBalance;
+                    let balance = 0;
+                    let hasBalance = false;
+                    
+                    // Use current_balance if available (from API)
+                    if (account.current_balance !== null && account.current_balance !== undefined && typeof account.current_balance === 'number') {
+                        balance = account.current_balance;
+                        hasBalance = true;
+                        hasRealBalanceData = true;
                     }
-                }
-            });
+                    // Fallback to currentBalance field (legacy)
+                    else if (account.currentBalance !== null && account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
+                        balance = account.currentBalance;
+                        hasBalance = true;
+                        hasRealBalanceData = true;
+                    }
+                    
+                    // Only process accounts with actual balance data
+                    if (hasBalance) {
+                        // Check if this account is a liability
+                        const isLiability = account.type === 'liability' || 
+                                           account.type === 'credit' || 
+                                           account.subtype === 'credit_card' || 
+                                           account.type === 'mortgage' || 
+                                           account.type === 'student_loan';
+
+                        if (isLiability) {
+                            totalLiabilities += Math.abs(balance); // Ensure liabilities are positive for calculation
+                        } else {
+                            totalAssets += balance;
+                        }
+                    }
+                });
 
                 const totalNetWorth = totalAssets - totalLiabilities;
 
                 // Check if we have any real account data or balances
-                if (totalNetWorth === 0 && accountsData.length === 0) {
+                if (!hasRealBalanceData || (totalNetWorth === 0 && accountsData.length === 0)) {
                     showHomeNetWorthPlaceholder();
                     return;
                 }
@@ -13882,31 +13952,32 @@ margin-right: 0.5rem;
             // Process all accounts from API data
             savingsAccounts.forEach((account, index) => {
 
-                // Use API balance data if available, otherwise use sample data
+                // Use API balance data only (no fallbacks or sample data)
                 let balance = 0;
                 let hasRealBalance = false;
                 
-                if (account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
+                // Check current_balance first (from API)
+                if (account.current_balance !== null && account.current_balance !== undefined && typeof account.current_balance === 'number') {
+                    balance = account.current_balance;
+                    hasRealBalance = true;
+                }
+                // Fallback to currentBalance field (legacy)
+                else if (account.currentBalance !== null && account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
                     balance = account.currentBalance;
                     hasRealBalance = true;
-                } else if (account.name) {
-                    // For accounts that exist but don't have balance data yet, use sample balance
-                    const isLiability = account.type === 'liability' || 
-                                       account.type === 'credit_card' || 
-                                       account.type === 'mortgage' || 
-                                       account.type === 'student_loan' ||
-                                       account.subtype === 'credit card';
-                    balance = isLiability ? -2500 : 5000; // Sample balances
-                } else {
+                }
+                
+                // Skip accounts without real balance data
+                if (!hasRealBalance) {
                     return;
                 }
 
                 // Determine if this is a liability based on type/subtype
                 const isLiability = account.type === 'liability' || 
-                                   account.type === 'credit_card' || 
+                                   account.type === 'credit' || 
+                                   account.subtype === 'credit_card' || 
                                    account.type === 'mortgage' || 
-                                   account.type === 'student_loan' ||
-                                   account.subtype === 'credit card';
+                                   account.type === 'student_loan';
 
 
                 // Only count assets, not liabilities
@@ -13919,7 +13990,14 @@ margin-right: 0.5rem;
                 // Use the actual total assets (no demo values)
                 const displayAssets = totalAssets;
 
-                // Generate sample assets history for chart with more variation
+                // Check if we have any real balance data
+                if (displayAssets === 0) {
+                    // Show placeholder when no balance data is available
+                    showAccountsNetWorthPlaceholder();
+                    return;
+                }
+
+                // Generate assets history for chart
                 const assetsHistory = await generateAssetsHistory(displayAssets, range);
 
                 // Draw the assets chart
@@ -16839,8 +16917,37 @@ margin-right: 0.5rem;
             // Show success message
             alert('Budget settings saved successfully!');
         }
-        function loadSampleBudget() {
-            loadTestData();
+        async function loadSampleBudget() {
+            const button = event?.currentTarget;
+            if (!button) return;
+            
+            // Get the arrow element and label
+            const arrow = button.querySelector('.settings-menu-arrow');
+            const label = button.querySelector('.settings-menu-label');
+            
+            if (!arrow || !label) return;
+            
+            // Save original state
+            const originalArrowHTML = arrow.innerHTML;
+            const originalLabelText = label.textContent;
+            
+            try {
+                // Set loading state
+                button.style.pointerEvents = 'none';
+                arrow.innerHTML = '<div class="spinner-circle"></div>';
+                label.textContent = 'Loading...';
+                
+                // Load the data
+                await loadTestData();
+                
+            } catch (error) {
+                console.error('Error loading sample data:', error);
+            } finally {
+                // Restore original state
+                button.style.pointerEvents = 'auto';
+                arrow.innerHTML = originalArrowHTML;
+                label.textContent = originalLabelText;
+            }
         }
 
         async function clearAllData() {
