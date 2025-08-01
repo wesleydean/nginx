@@ -12381,26 +12381,13 @@ margin-right: 0.5rem;
                 // Get Clerk session token
                 const sessionToken = await window.plaidService.getClerkSessionToken();
                 
-                // Call the seed sample data API endpoint with balance data request
+                // Call the seed sample data API endpoint
                 const response = await fetch(`${window.plaidService.baseUrl}/api/seed/sample-data`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${sessionToken}`,
-                    },
-                    body: JSON.stringify({
-                        includeBalances: true,
-                        includeTransactions: true,
-                        includeNetWorth: true,
-                        accountBalances: {
-                            'Checking': 5000,
-                            'Savings': 15000,
-                            'Brokerage Account': 25000,
-                            'Credit Card': -2500
-                        },
-                        generateTransactions: true,
-                        transactionCount: 50
-                    })
+                    }
                 });
 
                 if (!response.ok) {

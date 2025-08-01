@@ -503,7 +503,7 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
     // Ensure user exists in database
     await database.createUser(clerkUserId);
     
-    // Define sample accounts
+    // Define sample accounts with predefined balances
     const sampleAccounts = [
       { 
         account_id: `sample_checking_${clerkUserId}`,
@@ -513,7 +513,7 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
         subtype: 'checking',
         institution_name: 'Sample Bank',
         mask: '0000',
-        current_balance: 2500.00,
+        current_balance: 5000.00,
         currency: 'USD',
         access_token: 'sample_token_checking'
       },
@@ -537,7 +537,7 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
         subtype: 'brokerage',
         institution_name: 'Sample Investment',
         mask: '0002',
-        current_balance: 45000.00,
+        current_balance: 25000.00,
         currency: 'USD',
         access_token: 'sample_token_investment'
       },
@@ -549,7 +549,7 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
         subtype: 'credit_card',
         institution_name: 'Sample Credit',
         mask: '0003',
-        current_balance: -1250.00,
+        current_balance: -2500.00,
         currency: 'USD',
         access_token: 'sample_token_credit'
       }

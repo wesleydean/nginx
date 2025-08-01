@@ -189,8 +189,8 @@ class Database {
         accountData.subtype,
         accountData.institution_name,
         accountData.mask,
-        balances.current,
-        accountData.iso_currency_code || 'USD',
+        accountData.current_balance || balances.current,
+        accountData.iso_currency_code || accountData.currency || 'USD',
         accountData.access_token
       ], function(err) {
         if (err) {
