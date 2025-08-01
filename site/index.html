@@ -7423,9 +7423,15 @@ margin-right: 0.5rem;
             updateHeaderTitle();
 
             if (screenIndex === 0) {
-                // Home screen
-                updateHomeScreen().catch(error => {
+                // Home screen - show spinner while updating
+                showGlobalSpinner();
+                
+                // Use the same exact logic as DOMContentLoaded
+                updateHomeScreen().then(() => {
+                    hideGlobalSpinner();
+                }).catch(error => {
                     console.error('Error updating home screen:', error);
+                    hideGlobalSpinner();
                 });
             } else if (screenIndex === 1) {
                 // Cashflow screen (formerly Spend)
@@ -12568,34 +12574,59 @@ margin-right: 0.5rem;
         }
 
         async function updateHomeScreen() {
-            await updateHomeTransactions();
-            await updateHomeCashflow();
-            updateHomeNetWorth();
-            initializeHomeRangePickers();
+            console.log('🏠 Updating home screen data...');
+            
+            // Force complete refresh of home screen components
+            try {
+                // Clear any existing timers or intervals that might interfere
+                
+                // Force fresh data load and update all components
+                await updateHomeTransactions();
+                await updateHomeCashflow();
+                updateHomeNetWorth();
+                initializeHomeRangePickers();
+                
+                // Force canvas refresh for charts
+                const cashflowCanvas = document.getElementById('homeCashflowCanvas');
+                const netWorthCanvas = document.getElementById('homeNetWorthCanvas');
+                
+                if (cashflowCanvas) {
+                    // Force canvas to redraw by triggering a resize event
+                    const event = new Event('resize');
+                    window.dispatchEvent(event);
+                }
+                
+                // Force re-render of Lucide icons in case new content was added
+                if (window.lucide && window.lucide.createIcons) {
+                    window.lucide.createIcons();
+                }
+                
+                console.log('🏠 Home screen update complete');
+            } catch (error) {
+                console.error('🏠 Error updating home screen:', error);
+                throw error;
+            }
         }
 
         async function updateHomeTransactions() {
+            console.log('📊 Loading fresh transaction data for home screen...');
             const expenses = await loadExpenses();
-            let monthlyTransactions = [];
+            console.log('📊 Loaded expenses:', Object.keys(expenses).length, 'dates');
+            let allTransactions = [];
 
-            // Always get current month's transactions regardless of toggle state
-            const today = new Date();
-            const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-
+            // Get ALL transactions from all dates (not just current month)
             Object.keys(expenses).forEach(date => {
-                if (date.startsWith(currentMonthKey)) {
-                    const dayExpenses = expenses[date] || [];
-                    dayExpenses.forEach(expense => {
-                        monthlyTransactions.push({
-                            ...expense,
-                            date: date
-                        });
+                const dayExpenses = expenses[date] || [];
+                dayExpenses.forEach(expense => {
+                    allTransactions.push({
+                        ...expense,
+                        date: date
                     });
-                }
+                });
             });
 
-            // Sort: by date (desc), then by created (asc), then by timestamp for stability (same as cashflow page)
-            monthlyTransactions.sort((a, b) => {
+            // Sort: by date (desc), then by created (desc), then by timestamp for stability (most recent first)
+            allTransactions.sort((a, b) => {
                 if (a.date !== b.date) {
                     return new Date(b.date) - new Date(a.date); // latest date first
                 }
@@ -12603,22 +12634,38 @@ margin-right: 0.5rem;
                 const createdA = a.created || a.timestamp;
                 const createdB = b.created || b.timestamp;
                 if (createdA !== createdB) {
-                    return createdB - createdA; // Reversed order
+                    return createdB - createdA; // Newest created first
                 }
                 // If created timestamps are the same, use timestamp for stable ordering
                 return b.timestamp - a.timestamp;
             });
 
-            // Take last 4 transactions from current month
-            const recentTransactions = monthlyTransactions.slice(0, 4);
+            // Take most recent 5 transactions from ALL transactions
+            const recentTransactions = allTransactions.slice(0, 5);
+            console.log('📊 Found', allTransactions.length, 'total transactions, showing', recentTransactions.length, 'most recent');
+            
+            // Debug: log the selected transactions
+            if (recentTransactions.length > 0) {
+                console.log('📊 Most recent transactions:', recentTransactions.map(t => ({ 
+                    date: t.date, 
+                    description: t.description, 
+                    amount: t.amount 
+                })));
+            }
 
             const listContainer = document.getElementById('homeTransactionsList');
-            if (!listContainer) return;
+            if (!listContainer) {
+                console.error('❌ homeTransactionsList container not found!');
+                return;
+            }
 
             if (recentTransactions.length === 0) {
+                console.log('📊 No recent transactions to display');
                 listContainer.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 20px;">No recent transactions</div>';
                 return;
             }
+            
+            console.log('📊 Rendering', recentTransactions.length, 'recent transactions to home screen');
 
             listContainer.innerHTML = recentTransactions.map(transaction => {
                 // Parse date manually to avoid timezone issues (same as cashflow page)
@@ -13302,7 +13349,9 @@ margin-right: 0.5rem;
         }
 
         async function updateHomeCashflowWithRange(range) {
+            console.log('💰 Updating home cashflow chart with range:', range);
             const expenses = await loadExpenses();
+            console.log('💰 Loaded expenses for cashflow:', Object.keys(expenses).length, 'dates');
             const today = new Date();
             const currentYear = today.getFullYear();
             const currentMonth = today.getMonth();
