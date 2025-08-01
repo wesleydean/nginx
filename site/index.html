@@ -852,6 +852,11 @@
             opacity: 1 !important;
         }
         
+        .monthly-spending-chart .chart-bar.selected .bar-visual.zero-or-negative {
+            border: 2px solid #6b7280 !important;
+            background: linear-gradient(to bottom, rgba(107, 114, 128, 0.9) 0%, rgba(107, 114, 128, 0.6) 100%) !important;
+        }
+        
         /* Push button effect for chart bars */
         .monthly-spending-chart .chart-bar .bar-visual {
             transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -864,6 +869,10 @@
         
         .monthly-spending-chart .chart-bar.current-month .bar-visual {
             background: #e7743c3d;
+        }
+        
+        .monthly-spending-chart .chart-bar.current-month .bar-visual.zero-or-negative {
+            background: rgba(107, 114, 128, 0.4);
         }
         
         .monthly-spending-chart .chart-bar:not(.current-month):not(.selected) .bar-visual {
@@ -885,6 +894,11 @@
             border: 1px solid #ea580c;
             background: linear-gradient(to bottom, rgba(234, 88, 12, 0.8) 0%, rgba(234, 88, 12, 0.4) 100%);
             border-radius: 4px;
+        }
+        
+        .monthly-spending-chart .bar-visual.zero-or-negative {
+            border: 1px solid #d1d5db;
+            background: linear-gradient(to bottom, rgba(156, 163, 175, 0.6) 0%, rgba(156, 163, 175, 0.3) 100%);
         }
         
         .selected-month-total {
@@ -1076,7 +1090,7 @@
             width: 100%;
             border-radius: 4px;
             transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            min-height: 24px;
+            /* min-height: 24px; */
             height: 0px;
             /* position: absolute; */
             /* bottom: 0;
@@ -9189,6 +9203,9 @@ margin-right: 0.5rem;
                 // Bar visual
                 const barVisual = document.createElement('div');
                 barVisual.className = 'bar-visual spending-visual';
+                if (amount <= 0) {
+                    barVisual.classList.add('zero-or-negative');
+                }
                 barVisual.style.height = `${height}px`;
 
                 // Click handler for month selection
