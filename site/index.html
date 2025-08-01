@@ -11998,9 +11998,13 @@ margin-right: 0.5rem;
 
             let periodExpenses = [];
 
-            // Convert dates to YYYY-MM-DD format for comparison
-            const startDateStr = startDate.toISOString().split('T')[0];
-            const endDateStr = endDate.toISOString().split('T')[0];
+            // Convert dates to YYYY-MM-DD format for comparison (using local time to avoid timezone issues)
+            const startDateStr = startDate.getFullYear() + '-' + 
+                String(startDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(startDate.getDate()).padStart(2, '0');
+            const endDateStr = endDate.getFullYear() + '-' + 
+                String(endDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(endDate.getDate()).padStart(2, '0');
 
             // Filter expenses by date range
             Object.keys(expenses).forEach(date => {
@@ -12715,8 +12719,8 @@ margin-right: 0.5rem;
         }
 
         async function updateHomeCashflow() {
-            // Initialize with 1M view by default
-            await updateHomeCashflowWithRange('1m');
+            // Initialize with week view by default (this wk vs last wk)
+            await updateHomeCashflowWithRange('week');
         }
 
         function calculateCumulativeSpending(expenses, monthKey, isCurrentMonth) {
