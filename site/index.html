@@ -7481,11 +7481,11 @@ margin-right: 0.5rem;
                         initializeChartSwipe();
                     }
                     // Also refresh the expenses list to ensure fresh data
-                    await updateExpensesList();
+                    updateTransactionsForTimeRange();
                 }, 100);
                 // updateCashflowPeriodDisplay(); // Function not defined - commented out to fix ReferenceError
                 await updateBudgetDisplay();
-                await updateExpensesList();
+                updateTransactionsForTimeRange();
                 
                 // Ensure icons are initialized after all content is loaded
                 setTimeout(() => {
@@ -12410,7 +12410,7 @@ margin-right: 0.5rem;
                 // If we're on the cashflow screen, refresh it
                 if (currentScreen === 1) {
                     await updateBudgetDisplay();
-                    await updateExpensesList();
+                    updateTransactionsForTimeRange();
                 }
 
                 console.log(`Sample data loaded successfully! Added ${result.accounts} accounts and ${result.transactions} transactions.`);
