@@ -17017,21 +17017,8 @@ margin-right: 0.5rem;
                     }
                 }
 
-                // Clear all application-related data from localStorage
-                const keysToRemove = [
-                    'accountBalances',
-                    'dailyExpenses', 
-                    'expenses',
-                    'simpleBudgetSettings',
-                    'savingsAccounts',
-                    'budgetSettings',
-                    'plaid_institutions'
-                ];
-
-                // Clear each key
-                keysToRemove.forEach(key => {
-                    localStorage.removeItem(key);
-                });
+                // Clear all localStorage data
+                localStorage.clear();
 
                 // Clear API cache
                 if (typeof clearAccountsCache === 'function') {
