@@ -924,8 +924,12 @@
             flex: 1;
             text-align: right;
             font-variant-numeric: tabular-nums;
-            color: #ce5a2a;
+            color: #8b5cf6;
             font-size: 1.3rem;
+        }
+        
+        .selected-month-total .month-amount.zero-or-negative {
+            color: #000000;
         }
         
         .chart-carousel-container {
@@ -9223,7 +9227,7 @@ margin-right: 0.5rem;
                 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
                 totalElement.innerHTML = `
                         <span class="month-name">${monthNames[currentMonth]} ${currentYear}</span>
-                        <span class="month-amount">$${currentMonthTotal.toFixed(2)}</span>
+                        <span class="month-amount ${currentMonthTotal <= 0 ? 'zero-or-negative' : ''}">$${currentMonthTotal.toFixed(2)}</span>
                     `;
             }
 
@@ -9287,7 +9291,7 @@ margin-right: 0.5rem;
                 // Update the month name immediately
                 totalElement.innerHTML = `
                         <span class="month-name">${monthNames[selectedMonth]} ${selectedYear}</span>
-                        <span class="month-amount" id="animatedAmount">$${previousTotal.toFixed(2)}</span>
+                        <span class="month-amount ${total <= 0 ? 'zero-or-negative' : ''}" id="animatedAmount">$${previousTotal.toFixed(2)}</span>
                     `;
 
                 // Animate the amount
@@ -9565,7 +9569,7 @@ margin-right: 0.5rem;
                 const categoryName = category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ');
                 totalElement.innerHTML = `
                         <span class="month-name">${categoryName}</span>
-                        <span class="month-amount" id="animatedCategoryAmount">$${previousCategoryAmount.toFixed(2)}</span>
+                        <span class="month-amount ${amount <= 0 ? 'zero-or-negative' : ''}" id="animatedCategoryAmount">$${previousCategoryAmount.toFixed(2)}</span>
                     `;
 
                 // Animate the amount
@@ -9637,7 +9641,7 @@ margin-right: 0.5rem;
 
                     totalElement.innerHTML = `
                             <span class="month-name">${monthNames[currentMonth]} ${currentYear}</span>
-                            <span class="month-amount" id="animatedAmount">$${previousTotal.toFixed(2)}</span>
+                            <span class="month-amount ${currentMonthTotal <= 0 ? 'zero-or-negative' : ''}" id="animatedAmount">$${previousTotal.toFixed(2)}</span>
                         `;
 
                     // Animate to current month total
@@ -9689,7 +9693,7 @@ margin-right: 0.5rem;
 
                     totalElement.innerHTML = `
                             <span class="month-name">Total Spend</span>
-                            <span class="month-amount" id="animatedCategoryAmount">$${previousCategoryAmount.toFixed(2)}</span>
+                            <span class="month-amount ${totalCategorySpend <= 0 ? 'zero-or-negative' : ''}" id="animatedCategoryAmount">$${previousCategoryAmount.toFixed(2)}</span>
                         `;
 
                     // Animate to total category spend
@@ -9731,7 +9735,7 @@ margin-right: 0.5rem;
 
                 totalElement.innerHTML = `
                         <span class="month-name">Total Spend</span>
-                        <span class="month-amount">$${totalCategorySpend.toFixed(2)}</span>
+                        <span class="month-amount ${totalCategorySpend <= 0 ? 'zero-or-negative' : ''}">$${totalCategorySpend.toFixed(2)}</span>
                     `;
 
                 // Initialize previous amount for animations
