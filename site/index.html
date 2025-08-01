@@ -13075,14 +13075,8 @@ margin-right: 0.5rem;
                     let balance = 0;
                     let hasBalance = false;
                     
-                    // Use current_balance if available (from API)
-                    if (account.current_balance !== null && account.current_balance !== undefined && typeof account.current_balance === 'number') {
-                        balance = account.current_balance;
-                        hasBalance = true;
-                        hasRealBalanceData = true;
-                    }
-                    // Fallback to currentBalance field (legacy)
-                    else if (account.currentBalance !== null && account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
+                    // Use currentBalance from processed account data
+                    if (account.currentBalance !== null && account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
                         balance = account.currentBalance;
                         hasBalance = true;
                         hasRealBalanceData = true;
@@ -13969,17 +13963,12 @@ margin-right: 0.5rem;
             // Process all accounts from API data
             savingsAccounts.forEach((account, index) => {
 
-                // Use API balance data only (no fallbacks or sample data)
+                // Use currentBalance from processed account data
                 let balance = 0;
                 let hasRealBalance = false;
                 
-                // Check current_balance first (from API)
-                if (account.current_balance !== null && account.current_balance !== undefined && typeof account.current_balance === 'number') {
-                    balance = account.current_balance;
-                    hasRealBalance = true;
-                }
-                // Fallback to currentBalance field (legacy)
-                else if (account.currentBalance !== null && account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
+                // Check currentBalance field from processed account data
+                if (account.currentBalance !== null && account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
                     balance = account.currentBalance;
                     hasRealBalance = true;
                 }
