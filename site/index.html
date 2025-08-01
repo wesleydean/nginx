@@ -6286,6 +6286,55 @@ margin-right: 0.5rem;
       to { opacity: 0; }
     }
 
+    /* Modern Loading Spinner */
+    .global-spinner {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    .global-spinner.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .spinner-content {
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .spinner-circle {
+      width: 24px;
+      height: 24px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top: 2px solid rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      animation: spinnerRotate 1s linear infinite;
+    }
+
+    @keyframes spinnerRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Animation for spinner appearing from bottom */
+    .global-spinner:not(.show) {
+      transform: translateX(-50%) translateY(20px);
+    }
+
     .fade-in {
       opacity: 0;
       animation: fadeIn 0.5s ease-in forwards;
@@ -11098,166 +11147,72 @@ margin-right: 0.5rem;
          * Shows the accounts loading skeleton placeholder
          */
         function showAccountsLoadingPlaceholder() {
-            const loadingContainer = document.getElementById('accountsListLoading');
-            const accountsContainer = document.getElementById('accountsList');
-            
-            if (loadingContainer) {
-                loadingContainer.style.display = 'block';
-                loadingContainer.classList.remove('skeleton-fade-out');
-                loadingContainer.classList.add('skeleton-fade-in');
-            }
-            if (accountsContainer) {
-                accountsContainer.classList.add('skeleton-fade-out');
-                setTimeout(() => {
-                    accountsContainer.style.display = 'none';
-                }, 200);
-            }
+            showGlobalSpinner();
         }
 
         /**
          * Hides the accounts loading skeleton placeholder
          */
         function hideAccountsLoadingPlaceholder() {
-            const loadingContainer = document.getElementById('accountsListLoading');
-            const accountsContainer = document.getElementById('accountsList');
-            
-            if (loadingContainer) {
-                loadingContainer.classList.remove('skeleton-fade-in');
-                loadingContainer.classList.add('skeleton-fade-out');
-                setTimeout(() => {
-                    loadingContainer.style.display = 'none';
-                    loadingContainer.classList.remove('skeleton-fade-out');
-                }, 200);
-            }
-            if (accountsContainer) {
-                accountsContainer.style.display = 'block';
-                accountsContainer.classList.remove('skeleton-fade-out');
-                accountsContainer.classList.add('skeleton-fade-in');
-            }
+            hideGlobalSpinner();
         }
 
         /**
-         * Shows the transactions loading skeleton placeholder
+         * Global Spinner Functions - Modern replacement for skeleton loading
          */
-        // Add state tracking for skeleton
-        let transactionSkeletonState = {
+        let globalSpinnerState = {
             isShowing: false,
             showTimeout: null,
             hideTimeout: null
         };
 
-        function showTransactionsLoadingPlaceholder() {
-            const listContainer = document.getElementById('expensesList');
-            
-            if (listContainer) {
-                // Clear any existing timeouts
-                if (transactionSkeletonState.hideTimeout) {
-                    clearTimeout(transactionSkeletonState.hideTimeout);
-                    transactionSkeletonState.hideTimeout = null;
-                }
-                
-                // Mark as showing
-                transactionSkeletonState.isShowing = true;
-                
-                // First fade out existing content
-                listContainer.classList.add('skeleton-fade-out');
-                
-                // After fade out completes, show skeleton
-                transactionSkeletonState.showTimeout = setTimeout(() => {
-                    // Only proceed if still in showing state
-                    if (!transactionSkeletonState.isShowing) return;
-                    
-                    listContainer.classList.remove('skeleton-fade-out');
-                    listContainer.innerHTML = `
-                        <div id="transactionsListLoading" class="skeleton-fade-in">
-                            <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
-                                <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
-                                <div style="flex: 1;">
-                                    <div class="skeleton-line" style="width: 70%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
-                                    <div class="skeleton-line" style="width: 45%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
-                                </div>
-                                <div class="skeleton-amount" style="width: 50px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
-                            </div>
-                            <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
-                                <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
-                                <div style="flex: 1;">
-                                    <div class="skeleton-line" style="width: 60%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
-                                    <div class="skeleton-line" style="width: 35%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
-                                </div>
-                                <div class="skeleton-amount" style="width: 45px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
-                            </div>
-                            <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
-                                <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
-                                <div style="flex: 1;">
-                                    <div class="skeleton-line" style="width: 65%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
-                                    <div class="skeleton-line" style="width: 40%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
-                                </div>
-                                <div class="skeleton-amount" style="width: 55px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
-                            </div>
-                            <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0; border-bottom: 1px solid #f0f0f0;">
-                                <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
-                                <div style="flex: 1;">
-                                    <div class="skeleton-line" style="width: 55%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
-                                    <div class="skeleton-line" style="width: 30%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
-                                </div>
-                                <div class="skeleton-amount" style="width: 48px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
-                            </div>
-                            <div class="transaction-skeleton-row" style="display: flex; align-items: center; gap: 1rem; padding: 0.8rem 0;">
-                                <div class="skeleton-icon" style="width: 32px; height: 32px; border-radius: 6px; background: #f3f4f6;"></div>
-                                <div style="flex: 1;">
-                                    <div class="skeleton-line" style="width: 75%; height: 14px; border-radius: 7px; background: #f3f4f6; margin-bottom: 0.4rem;"></div>
-                                    <div class="skeleton-line" style="width: 50%; height: 12px; border-radius: 6px; background: #f3f4f6;"></div>
-                                </div>
-                                <div class="skeleton-amount" style="width: 52px; height: 16px; border-radius: 8px; background: #f3f4f6;"></div>
-                            </div>
-                        </div>
-                    `;
-                    transactionSkeletonState.showTimeout = null;
-                }, 200); // Wait for fade-out animation to complete
+        function showGlobalSpinner() {
+            const spinner = document.getElementById('globalSpinner');
+            if (!spinner) return;
+
+            // Clear any existing timeouts
+            if (globalSpinnerState.hideTimeout) {
+                clearTimeout(globalSpinnerState.hideTimeout);
+                globalSpinnerState.hideTimeout = null;
             }
+
+            // Mark as showing and show immediately
+            globalSpinnerState.isShowing = true;
+            
+            // Add show class for animation
+            spinner.classList.add('show');
+        }
+
+        function hideGlobalSpinner() {
+            const spinner = document.getElementById('globalSpinner');
+            if (!spinner) return;
+
+            // Clear any pending show timeouts
+            if (globalSpinnerState.showTimeout) {
+                clearTimeout(globalSpinnerState.showTimeout);
+                globalSpinnerState.showTimeout = null;
+            }
+
+            // Mark as not showing
+            globalSpinnerState.isShowing = false;
+
+            // Hide with animation
+            spinner.classList.remove('show');
+        }
+
+        /**
+         * Legacy skeleton placeholder functions - now use global spinner
+         */
+
+        function showTransactionsLoadingPlaceholder() {
+            showGlobalSpinner();
         }
 
         /**
          * Hides the transactions loading skeleton placeholder
          */
         function hideTransactionsLoadingPlaceholder() {
-            // Clear any pending show timeouts
-            if (transactionSkeletonState.showTimeout) {
-                clearTimeout(transactionSkeletonState.showTimeout);
-                transactionSkeletonState.showTimeout = null;
-            }
-            
-            // Mark as not showing
-            transactionSkeletonState.isShowing = false;
-            
-            const loadingContainer = document.getElementById('transactionsListLoading');
-            const listContainer = document.getElementById('expensesList');
-            
-            // If skeleton is not yet shown, just clear the fade-out class from listContainer
-            if (!loadingContainer && listContainer) {
-                listContainer.classList.remove('skeleton-fade-out');
-                return;
-            }
-            
-            if (loadingContainer) {
-                loadingContainer.classList.remove('skeleton-fade-in');
-                loadingContainer.classList.add('skeleton-fade-out');
-                transactionSkeletonState.hideTimeout = setTimeout(() => {
-                    if (loadingContainer.parentNode) {
-                        loadingContainer.remove();
-                    }
-                    // Add fade-in to the updated transaction list content
-                    if (listContainer) {
-                        listContainer.classList.remove('skeleton-fade-out');
-                        listContainer.classList.add('skeleton-fade-in');
-                        // Remove fade-in class after animation completes
-                        setTimeout(() => {
-                            listContainer.classList.remove('skeleton-fade-in');
-                        }, 300);
-                    }
-                    transactionSkeletonState.hideTimeout = null;
-                }, 200);
-            }
+            hideGlobalSpinner();
         }
 
         // Make skeleton functions globally available
@@ -11431,6 +11386,23 @@ margin-right: 0.5rem;
                 }
 
                 const data = await response.json();
+
+                // DEBUG: Log raw API response for balance debugging
+                console.log('=== API RESPONSE DEBUG ===');
+                console.log('Raw API response:', JSON.stringify(data, null, 2));
+                if (data.accounts) {
+                    data.accounts.forEach((account, index) => {
+                        console.log(`API Account ${index + 1}:`, {
+                            account_id: account.account_id,
+                            name: account.name,
+                            current_balance: account.current_balance,
+                            type: account.type,
+                            subtype: account.subtype,
+                            institution_name: account.institution_name
+                        });
+                    });
+                }
+                console.log('========================');
 
             if (data.accounts && Array.isArray(data.accounts)) {
                 // Update the global savingsAccounts with the API data
@@ -16992,5 +16964,13 @@ margin-right: 0.5rem;
 
 
     </script>
+
+    <!-- Global Loading Spinner -->
+    <div id="globalSpinner" class="global-spinner">
+        <div class="spinner-content">
+            <div class="spinner-circle"></div>
+        </div>
+    </div>
+
     </body>
 </html>
