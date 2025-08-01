@@ -12608,7 +12608,7 @@ margin-right: 0.5rem;
                 // Force fresh data load and update all components
                 await updateHomeTransactions();
                 await updateHomeCashflow();
-                updateHomeNetWorth();
+                await updateHomeNetWorth();
                 initializeHomeRangePickers();
                 
                 // Force canvas refresh for charts
@@ -12941,16 +12941,49 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateHomeNetWorthWithChart(range) {
-            const balances = loadAccountBalances();
-            const today = getCurrentDate();
+        // Spinner functions for net worth charts
+        function showNetWorthSpinner() {
+            const container = document.getElementById('homeNetWorthChart');
+            if (container) {
+                container.classList.add('loading');
+            }
+        }
 
-            // Calculate current net worth (assets - liabilities)
-            let totalAssets = 0;
-            let totalLiabilities = 0;
+        function hideNetWorthSpinner() {
+            const container = document.getElementById('homeNetWorthChart');
+            if (container) {
+                container.classList.remove('loading');
+            }
+        }
 
-            // Load account types to distinguish between assets and liabilities
-            const savingsAccounts = JSON.parse(localStorage.getItem('savingsAccounts')) || [];
+        function showAccountsNetWorthSpinner() {
+            const container = document.getElementById('accountsNetWorthChart');
+            if (container) {
+                container.classList.add('loading');
+            }
+        }
+
+        function hideAccountsNetWorthSpinner() {
+            const container = document.getElementById('accountsNetWorthChart');
+            if (container) {
+                container.classList.remove('loading');
+            }
+        }
+
+        async function updateHomeNetWorthWithChart(range) {
+            // Show loading spinner
+            showNetWorthSpinner();
+            
+            try {
+                const balances = await loadAccountBalances();
+                const today = getCurrentDate();
+
+                // Calculate current net worth (assets - liabilities)
+                let totalAssets = 0;
+                let totalLiabilities = 0;
+
+                // Use global savingsAccounts (already loaded from API)
+                const accountsData = savingsAccounts || [];
 
             // Include balance history data (for manually entered accounts)
             Object.keys(balances).forEach(accountName => {
@@ -12958,7 +12991,7 @@ margin-right: 0.5rem;
                 const currentBalance = getTotalBalanceForDate(accountBalances, today);
 
                 // Check if this account is a liability
-                const accountInfo = savingsAccounts.find(acc => acc.id === accountName);
+                const accountInfo = accountsData.find(acc => acc.id === accountName);
                 const isLiability = accountInfo && accountInfo.type === 'liability';
 
                 if (isLiability) {
@@ -12968,8 +13001,8 @@ margin-right: 0.5rem;
                 }
             });
 
-            // Include Plaid account balances (which have currentBalance field)
-            savingsAccounts.forEach(account => {
+                // Include Plaid account balances (which have currentBalance field)
+                accountsData.forEach(account => {
                 if (account.currentBalance && typeof account.currentBalance === 'number') {
                     // Check if this account is a liability
                     const isLiability = account.type === 'liability' || 
@@ -12985,88 +13018,39 @@ margin-right: 0.5rem;
                 }
             });
 
-            const totalNetWorth = totalAssets - totalLiabilities;
+                const totalNetWorth = totalAssets - totalLiabilities;
 
-            // Check if we have any real account data or balances
-            if (totalNetWorth === 0 && savingsAccounts.length === 0) {
+                // Check if we have any real account data or balances
+                if (totalNetWorth === 0 && accountsData.length === 0) {
+                    showHomeNetWorthPlaceholder();
+                    return;
+                }
+
+                // Hide placeholders and show chart
+                hideChartPlaceholders();
+
+                // Use the actual net worth (no demo values)
+                const displayNetWorth = totalNetWorth;
+
+                // Generate net worth history for chart
+                const netWorthHistory = await generateNetWorthHistory(displayNetWorth, range);
+
+                // Draw the net worth chart
+                drawHomeNetWorthChart(netWorthHistory);
+
+                // Update the title and change indicator
+                updateHomeNetWorthDisplay(displayNetWorth, range);
+            } catch (error) {
+                console.error('Error updating home net worth chart:', error);
                 showHomeNetWorthPlaceholder();
-                return;
+            } finally {
+                hideNetWorthSpinner();
             }
-
-            // Hide placeholders and show chart
-            hideChartPlaceholders();
-
-            // Use the actual net worth (no demo values)
-            const displayNetWorth = totalNetWorth;
-
-            // Generate net worth history for chart
-            const netWorthHistory = generateNetWorthHistory(displayNetWorth, range);
-
-            // Draw the net worth chart
-            drawHomeNetWorthChart(netWorthHistory);
-
-            // Update the title and change indicator
-            updateHomeNetWorthDisplay(displayNetWorth, range);
         }
 
-        function generateNetWorthHistory(currentValue, range) {
-            const history = [];
-            let totalDays = 30;
-            let sampleEveryNDays = 1; // Sample every day by default
-
-            switch (range) {
-                case '1m':
-                    totalDays = 30;
-                    sampleEveryNDays = 1;
-                    break;
-                case '3m':
-                    totalDays = 90;
-                    sampleEveryNDays = 2; // Sample every 2 days
-                    break;
-                case '6m':
-                    totalDays = 180;
-                    sampleEveryNDays = 3; // Sample every 3 days
-                    break;
-                case 'ytd':
-                    const now = new Date();
-                    const startOfYear = new Date(now.getFullYear(), 0, 1);
-                    totalDays = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
-                    sampleEveryNDays = totalDays > 180 ? 7 : 3; // Weekly for long YTD periods
-                    break;
-                case '1y':
-                    totalDays = 365;
-                    sampleEveryNDays = 7; // Sample weekly
-                    break;
-                case 'all':
-                    totalDays = 1095; // 3 years
-                    sampleEveryNDays = 14; // Sample bi-weekly
-                    break;
-            }
-
-            // Use the actual current value (no demo data)
-            const baseValue = currentValue;
-
-            for (let i = totalDays; i >= 0; i -= sampleEveryNDays) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-
-                // Generate realistic fluctuation with overall upward trend
-                const trendFactor = 0.85 + (0.3 * (totalDays - i) / totalDays); // Enhanced upward trend with more variation
-                const fluctuation = (Math.random() - 0.5) * 0.001; // ±0.05% change for ultra-smooth curve
-                const dayValue = baseValue * trendFactor * (1 + fluctuation);
-
-                history.push({
-                    date: date.toISOString().split('T')[0],
-                    value: Math.max(0, dayValue)
-                });
-            }
-
-            return history;
-        }
-
-        function generateAssetsHistory(currentValue, range) {
-            const balances = loadAccountBalances();
-            const savingsAccounts = JSON.parse(localStorage.getItem('savingsAccounts')) || [];
+        async function generateNetWorthHistory(currentValue, range) {
+            const balances = await loadAccountBalances();
+            const accountsData = savingsAccounts || [];
 
             // Get all available dates with balance data
             const availableDates = getAllAvailableDates(balances).sort();
@@ -13110,11 +13094,132 @@ margin-right: 0.5rem;
                     break;
             }
 
-            // Calculate cutoff date
+            // Calculate cutoff date using local time to avoid timezone issues
             const today = new Date();
             const cutoffDate = new Date();
             cutoffDate.setDate(today.getDate() - maxDaysBack);
-            const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+            const cutoffDateStr = cutoffDate.getFullYear() + '-' + 
+                String(cutoffDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(cutoffDate.getDate()).padStart(2, '0');
+
+            // Filter dates within range
+            const relevantDates = availableDates.filter(date => date >= cutoffDateStr);
+
+            if (relevantDates.length === 0) {
+                // Return minimal data if no data in range
+                return [{ date: new Date().toISOString().split('T')[0], value: currentValue }];
+            }
+
+            // Sample dates based on frequency
+            const sampledDates = [];
+            let lastSampledIndex = -sampleEveryNDays; // Start so first date gets included
+
+            for (let i = 0; i < relevantDates.length; i++) {
+                if (i - lastSampledIndex >= sampleEveryNDays || i === relevantDates.length - 1) {
+                    sampledDates.push(relevantDates[i]);
+                    lastSampledIndex = i;
+                }
+            }
+
+            // Calculate real net worth (assets - liabilities) for each sampled date
+            const history = [];
+
+            sampledDates.forEach(date => {
+                let assetsTotal = 0;
+                let liabilitiesTotal = 0;
+
+                // Sum up all accounts for this date
+                Object.keys(balances).forEach(accountId => {
+                    const accountBalances = balances[accountId] || {};
+                    const accountInfo = accountsData.find(acc => acc.id === accountId);
+                    const isLiability = accountInfo && accountInfo.type === 'liability';
+
+                    // Get balance for this date, or closest previous date
+                    let balance = 0;
+                    if (accountBalances[date]) {
+                        const balanceData = accountBalances[date];
+                        balance = balanceData && typeof balanceData === 'object' ? balanceData.amount : balanceData;
+                    } else {
+                        // Find closest previous date with balance
+                        const accountDates = Object.keys(accountBalances).filter(d => d <= date).sort();
+                        if (accountDates.length > 0) {
+                            const closestDate = accountDates[accountDates.length - 1];
+                            const balanceData = accountBalances[closestDate];
+                            balance = balanceData && typeof balanceData === 'object' ? balanceData.amount : balanceData;
+                        }
+                    }
+
+                    if (isLiability) {
+                        liabilitiesTotal += balance || 0;
+                    } else {
+                        assetsTotal += balance || 0;
+                    }
+                });
+
+                const netWorth = assetsTotal - liabilitiesTotal;
+
+                history.push({
+                    date: date,
+                    value: Math.max(0, netWorth)
+                });
+            });
+
+            return history;
+        }
+
+        async function generateAssetsHistory(currentValue, range) {
+            const balances = await loadAccountBalances();
+            const accountsData = savingsAccounts || [];
+
+            // Get all available dates with balance data
+            const availableDates = getAllAvailableDates(balances).sort();
+
+            if (availableDates.length === 0) {
+                // Return minimal data if no historical data exists
+                return [{ date: new Date().toISOString().split('T')[0], value: currentValue }];
+            }
+
+            // Determine sampling frequency based on range
+            let sampleEveryNDays = 1;
+            let maxDaysBack = 30;
+
+            switch (range) {
+                case '1m':
+                    maxDaysBack = 30;
+                    sampleEveryNDays = 1; // Daily if available
+                    break;
+                case '3m':
+                    maxDaysBack = 90;
+                    sampleEveryNDays = 3; // Every 3 days
+                    break;
+                case '6m':
+                    maxDaysBack = 180;
+                    sampleEveryNDays = 7; // Weekly
+                    break;
+                case 'ytd':
+                    const now = new Date();
+                    const startOfYear = new Date(now.getFullYear(), 0, 1);
+                    maxDaysBack = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+                    sampleEveryNDays = maxDaysBack > 180 ? 14 : 7; // Bi-weekly or weekly
+                    break;
+                case '1y':
+                    maxDaysBack = 365;
+                    sampleEveryNDays = 14; // Bi-weekly
+                    break;
+                case 'all':
+                default:
+                    maxDaysBack = 1095; // 3 years
+                    sampleEveryNDays = 30; // Monthly
+                    break;
+            }
+
+            // Calculate cutoff date using local time to avoid timezone issues
+            const today = new Date();
+            const cutoffDate = new Date();
+            cutoffDate.setDate(today.getDate() - maxDaysBack);
+            const cutoffDateStr = cutoffDate.getFullYear() + '-' + 
+                String(cutoffDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(cutoffDate.getDate()).padStart(2, '0');
 
             // Filter dates within range
             const relevantDates = availableDates.filter(date => date >= cutoffDateStr);
@@ -13144,7 +13249,7 @@ margin-right: 0.5rem;
                 // Sum up all asset accounts (exclude liabilities) for this date
                 Object.keys(balances).forEach(accountId => {
                     const accountBalances = balances[accountId] || {};
-                    const accountInfo = savingsAccounts.find(acc => acc.id === accountId);
+                    const accountInfo = accountsData.find(acc => acc.id === accountId);
                     const isLiability = accountInfo && accountInfo.type === 'liability';
 
                     // Only count assets, not liabilities
@@ -13339,8 +13444,8 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateHomeNetWorth() {
-            updateHomeNetWorthWithChart('all'); // Default to all time view to match active button
+        async function updateHomeNetWorth() {
+            await updateHomeNetWorthWithChart('all'); // Default to all time view to match active button
         }
 
         function scrollToTransactions() {
@@ -13732,7 +13837,7 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateNetWorthRange(rangeType) {
+        async function updateNetWorthRange(rangeType) {
             // Close dropdown
             const dropdown = document.getElementById('netWorthDropdown');
             if (dropdown) {
@@ -13752,19 +13857,23 @@ margin-right: 0.5rem;
             }
 
             // Update the net worth chart with new range
-            updateHomeNetWorthWithChart(rangeType);
+            await updateHomeNetWorthWithChart(rangeType);
         }
 
         // Accounts Assets functions (showing total assets instead of net worth)
-        function updateAccountsNetWorthWithChart(range) {
-            // Calculate total assets from API data only
-            let totalAssets = 0;
+        async function updateAccountsNetWorthWithChart(range) {
+            // Show loading spinner
+            showAccountsNetWorthSpinner();
+            
+            try {
+                // Calculate total assets from API data only
+                let totalAssets = 0;
 
-            // Use global savingsAccounts variable (loaded from API)
+                // Use global savingsAccounts variable (loaded from API)
             
             if (!savingsAccounts || savingsAccounts.length === 0) {
                 const displayAssets = 0;
-                const assetsHistory = generateAssetsHistory(displayAssets, range);
+                const assetsHistory = await generateAssetsHistory(displayAssets, range);
                 drawAccountsNetWorthChart(assetsHistory);
                 updateAccountsNetWorthDisplay(displayAssets, range);
                 return;
@@ -13807,17 +13916,22 @@ margin-right: 0.5rem;
                 }
             });
 
-            // Use the actual total assets (no demo values)
-            const displayAssets = totalAssets;
+                // Use the actual total assets (no demo values)
+                const displayAssets = totalAssets;
 
-            // Generate sample assets history for chart with more variation
-            const assetsHistory = generateAssetsHistory(displayAssets, range);
+                // Generate sample assets history for chart with more variation
+                const assetsHistory = await generateAssetsHistory(displayAssets, range);
 
-            // Draw the assets chart
-            drawAccountsNetWorthChart(assetsHistory);
+                // Draw the assets chart
+                drawAccountsNetWorthChart(assetsHistory);
 
-            // Update the title and change indicator
-            updateAccountsNetWorthDisplay(displayAssets, range);
+                // Update the title and change indicator
+                updateAccountsNetWorthDisplay(displayAssets, range);
+            } catch (error) {
+                console.error('Error updating accounts net worth chart:', error);
+            } finally {
+                hideAccountsNetWorthSpinner();
+            }
         }
 
         function drawAccountsNetWorthChart(data) {
@@ -13982,8 +14096,8 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateAccountsNetWorth() {
-            updateAccountsNetWorthWithChart('all'); // Default to all time view to match active button
+        async function updateAccountsNetWorth() {
+            await updateAccountsNetWorthWithChart('all'); // Default to all time view to match active button
         }
 
         function handleAccountsNetWorthCardClick(event) {
@@ -14029,7 +14143,7 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateAccountsNetWorthRange(rangeType, event) {
+        async function updateAccountsNetWorthRange(rangeType, event) {
             // Close dropdown
             const dropdown = document.getElementById('accountsNetWorthDropdown');
             if (dropdown) {
@@ -14051,7 +14165,7 @@ margin-right: 0.5rem;
             }
 
             // Update the assets chart with new range
-            updateAccountsNetWorthWithChart(rangeType);
+            await updateAccountsNetWorthWithChart(rangeType);
         }
 
         function calculateCumulativeSpendingForMonths(expenses, monthCount, offsetMonths) {
@@ -15974,7 +16088,7 @@ margin-right: 0.5rem;
             await loadAccountsWithTransactions();
             
             updateAccountsView();
-            updateAccountsNetWorth(); // Initialize accounts networth chart
+            await updateAccountsNetWorth(); // Initialize accounts networth chart
         }
 
         /**
