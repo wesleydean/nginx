@@ -11433,9 +11433,12 @@ margin-right: 0.5rem;
                             account_id: account.account_id,
                             name: account.name,
                             current_balance: account.current_balance,
+                            balance: account.balance,
+                            balances: account.balances,
                             type: account.type,
                             subtype: account.subtype,
-                            institution_name: account.institution_name
+                            institution_name: account.institution_name,
+                            all_fields: Object.keys(account)
                         });
                     });
                 }
