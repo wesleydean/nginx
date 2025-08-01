@@ -2140,6 +2140,13 @@
             height: 1em;
             width: 1em;
             color: hsl(var(--foreground)); /* Set icons to use the foreground color by default */
+            opacity: 0; /* Start hidden */
+            transition: opacity 0.3s ease-in-out; /* Smooth fade-in */
+        }
+        
+        /* Show icons once they're initialized */
+        [data-lucide-initialized] {
+            opacity: 1;
         }
         
         /* Icon color handling for specific icons */
@@ -2164,10 +2171,9 @@
             color: #ffffff;
         }
         
-        /* Fallback text for when icons don't load */
+        /* Remove the jarring dot fallback - icons will fade in smoothly instead */
         [data-lucide]:empty::before {
-            content: '•';
-            font-size: 1.2em;
+            content: '';
         }
         
         .text-foreground { color: hsl(var(--foreground)); }
@@ -7450,7 +7456,7 @@ margin-right: 0.5rem;
                     // Also refresh the expenses list to ensure fresh data
                     await updateExpensesList();
                 }, 100);
-                updateCashflowPeriodDisplay();
+                // updateCashflowPeriodDisplay(); // Function not defined - commented out to fix ReferenceError
                 await updateBudgetDisplay();
                 await updateExpensesList();
                 
