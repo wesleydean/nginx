@@ -5871,7 +5871,7 @@ margin-right: 0.5rem;
                             </div>
                         </div>
                         <div class="card-content">
-                            <div id="homeTransactionsList">Loading...</div>
+                            <div id="homeTransactionsList">No recent transactions</div>
                         </div>
                     </div>
                     
@@ -16940,8 +16940,17 @@ margin-right: 0.5rem;
                 arrow.innerHTML = '<div class="spinner-circle"></div>';
                 label.textContent = 'Loading...';
                 
+                // Show loading in transaction list too
+                const transactionsList = document.getElementById('homeTransactionsList');
+                const originalTransactionsHTML = transactionsList?.innerHTML;
+                if (transactionsList) {
+                    transactionsList.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 20px;">Loading transactions...</div>';
+                }
+                
                 // Load the data
                 await loadTestData();
+                
+                // Transaction list will be updated by updateHomeScreen() called from loadTestData()
                 
             } catch (error) {
                 console.error('Error loading sample data:', error);
