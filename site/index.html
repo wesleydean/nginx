@@ -13039,6 +13039,10 @@ margin-right: 0.5rem;
         }
 
         async function updateHomeNetWorthWithChart(range) {
+            console.log('=== HOME NET WORTH DEBUG ===');
+            console.log('Range:', range);
+            console.log('Savings accounts:', savingsAccounts);
+            
             // Show loading spinner
             showNetWorthSpinner();
             
@@ -13052,6 +13056,7 @@ margin-right: 0.5rem;
 
                 // Use global savingsAccounts (already loaded from API)
                 const accountsData = savingsAccounts || [];
+                console.log('Accounts data:', accountsData);
 
             // Include balance history data (for manually entered accounts)
             Object.keys(balances).forEach(accountName => {
@@ -13075,11 +13080,16 @@ margin-right: 0.5rem;
                     let balance = 0;
                     let hasBalance = false;
                     
+                    console.log('Processing account:', account.name, 'currentBalance:', account.currentBalance);
+                    
                     // Use currentBalance from processed account data
                     if (account.currentBalance !== null && account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
                         balance = account.currentBalance;
                         hasBalance = true;
                         hasRealBalanceData = true;
+                        console.log('Found balance for', account.name, ':', balance);
+                    } else {
+                        console.log('No balance found for', account.name);
                     }
                     
                     // Only process accounts with actual balance data
@@ -13112,15 +13122,20 @@ margin-right: 0.5rem;
 
                 // Use the actual net worth (no demo values)
                 const displayNetWorth = totalNetWorth;
+                console.log('Calculated net worth:', displayNetWorth);
+                console.log('Total assets:', totalAssets);
+                console.log('Total liabilities:', totalLiabilities);
 
                 // Generate net worth history for chart
                 const netWorthHistory = await generateNetWorthHistory(displayNetWorth, range);
+                console.log('Net worth history:', netWorthHistory);
 
                 // Draw the net worth chart
                 drawHomeNetWorthChart(netWorthHistory);
 
                 // Update the title and change indicator
                 updateHomeNetWorthDisplay(displayNetWorth, range);
+                console.log('================================');
             } catch (error) {
                 console.error('Error updating home net worth chart:', error);
                 showHomeNetWorthPlaceholder();
@@ -13943,6 +13958,10 @@ margin-right: 0.5rem;
 
         // Accounts Assets functions (showing total assets instead of net worth)
         async function updateAccountsNetWorthWithChart(range) {
+            console.log('=== ACCOUNTS NET WORTH DEBUG ===');
+            console.log('Range:', range);
+            console.log('Savings accounts:', savingsAccounts);
+            
             // Show loading spinner
             showAccountsNetWorthSpinner();
             
@@ -13967,14 +13986,20 @@ margin-right: 0.5rem;
                 let balance = 0;
                 let hasRealBalance = false;
                 
+                console.log('Processing account for assets:', account.name, 'currentBalance:', account.currentBalance);
+                
                 // Check currentBalance field from processed account data
                 if (account.currentBalance !== null && account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
                     balance = account.currentBalance;
                     hasRealBalance = true;
+                    console.log('Found balance for', account.name, ':', balance);
+                } else {
+                    console.log('No balance found for', account.name);
                 }
                 
                 // Skip accounts without real balance data
                 if (!hasRealBalance) {
+                    console.log('Skipping account due to no balance:', account.name);
                     return;
                 }
 
@@ -13995,9 +14020,11 @@ margin-right: 0.5rem;
 
                 // Use the actual total assets (no demo values)
                 const displayAssets = totalAssets;
+                console.log('Calculated total assets:', displayAssets);
 
                 // Check if we have any real balance data
                 if (displayAssets === 0) {
+                    console.log('No assets found, showing placeholder');
                     // Show placeholder when no balance data is available
                     showAccountsNetWorthPlaceholder();
                     return;
@@ -14005,12 +14032,14 @@ margin-right: 0.5rem;
 
                 // Generate assets history for chart
                 const assetsHistory = await generateAssetsHistory(displayAssets, range);
+                console.log('Assets history:', assetsHistory);
 
                 // Draw the assets chart
                 drawAccountsNetWorthChart(assetsHistory);
 
                 // Update the title and change indicator
                 updateAccountsNetWorthDisplay(displayAssets, range);
+                console.log('=====================================');
             } catch (error) {
                 console.error('Error updating accounts net worth chart:', error);
             } finally {
