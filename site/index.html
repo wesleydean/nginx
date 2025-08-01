@@ -15018,9 +15018,9 @@ margin-right: 0.5rem;
             let html = '';
             savingsAccounts.forEach(account => {
                 const accountType = account.type || 'cash';
-                // Use API balance for Plaid accounts, otherwise use local balance
+                // Use currentBalance from API data if available, otherwise use local balance
                 let balance;
-                if (account.type === 'plaid' && account.currentBalance !== undefined) {
+                if (account.currentBalance !== undefined && typeof account.currentBalance === 'number') {
                     balance = account.currentBalance;
                 } else {
                     const currentBalance = getLastBalanceForAccount(account.id);
