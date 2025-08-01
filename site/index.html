@@ -898,7 +898,7 @@
         
         .monthly-spending-chart .bar-visual.zero-or-negative {
             border: 1px solid #d1d5db;
-            background: linear-gradient(to bottom, rgba(156, 163, 175, 0.6) 0%, rgba(156, 163, 175, 0.3) 100%);
+            background: #d8d8d8;
         }
         
         .selected-month-total {
@@ -11459,6 +11459,22 @@ margin-right: 0.5rem;
                 // Update localStorage
                 saveSavingsAccounts(savingsAccounts);
 
+                // DEBUG: Log processed accounts with balances
+                console.log('=== PROCESSED ACCOUNTS DEBUG ===');
+                console.log('Total processed accounts:', savingsAccounts.length);
+                savingsAccounts.forEach((account, index) => {
+                    console.log(`Processed Account ${index + 1}:`, {
+                        id: account.id,
+                        name: account.name,
+                        type: account.type,
+                        currentBalance: account.currentBalance,
+                        plaidType: account.plaidType,
+                        plaidSubtype: account.plaidSubtype,
+                        institutionName: account.institutionName
+                    });
+                });
+                console.log('===================================');
+
                 // Update account type chart if on home page
                 if (document.getElementById('accountTypeChart')) {
                     generateAccountTypeChart();
@@ -12367,12 +12383,16 @@ margin-right: 0.5rem;
                     },
                     body: JSON.stringify({
                         includeBalances: true,
+                        includeTransactions: true,
+                        includeNetWorth: true,
                         accountBalances: {
                             'Checking': 5000,
                             'Savings': 15000,
                             'Brokerage Account': 25000,
                             'Credit Card': -2500
-                        }
+                        },
+                        generateTransactions: true,
+                        transactionCount: 50
                     })
                 });
 
@@ -12381,6 +12401,12 @@ margin-right: 0.5rem;
                 }
 
                 const result = await response.json();
+                
+                // DEBUG: Log sample data seeding result
+                console.log('=== SAMPLE DATA SEEDING RESULT ===');
+                console.log('Sample data API response:', result);
+                console.log('Response status:', response.status);
+                console.log('==================================');
 
                 // Clear any existing accounts cache to force refresh
                 if (typeof clearAccountsCache === 'function') {
