@@ -5880,7 +5880,7 @@ margin-right: 0.5rem;
                         <div class="card-header">
                             <div class="home-section-header">
                                 <h3 class="section-title">Spending</h3>
-                                <div class="section-subtitle" id="cashflowSubtitle">This month vs. average month</div>
+                                <div class="section-subtitle" id="cashflowSubtitle">This week vs. last week</div>
                             </div>
                             <div class="cashflow-menu-container">
                                 <button class="dot-menu-btn" onclick="toggleCashflowDropdown()" id="cashflowMenuBtn">
@@ -5888,10 +5888,10 @@ margin-right: 0.5rem;
                                 </button>
                                 <div class="dropdown-menu dropdown-right" id="cashflowDropdown">
                                     <div class="dropdown-header">Select date range</div>
-                                    <div class="dropdown-item" onclick="updateCashflowRange('week')">This week vs. last week</div>
+                                    <div class="dropdown-item active" onclick="updateCashflowRange('week')">This week vs. last week</div>
                                     <div class="dropdown-item" onclick="updateCashflowRange('month')">This month vs. last month</div>
                                     <div class="dropdown-item" onclick="updateCashflowRange('year')">This month vs. last year</div>
-                                    <div class="dropdown-item active" onclick="updateCashflowRange('average')">This month vs. average month</div>
+                                    <div class="dropdown-item" onclick="updateCashflowRange('average')">This month vs. average month</div>
                                     <div class="dropdown-item" onclick="updateCashflowRange('ytd')">This year vs. last year</div>
                                 </div>
                             </div>
