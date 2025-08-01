@@ -11146,19 +11146,12 @@ margin-right: 0.5rem;
                         throw new Error('Invalid savingsAccounts data');
                     }
                 } catch (e) {
-                    // If parsing fails, fall back to defaults
-                    savingsAccounts = [
-                        { id: 'checking', name: 'Checking' },
-                        { id: 'savings', name: 'Savings' },
-                        { id: 'emergency', name: 'Emergency Fund' }
-                    ];
+                    // If parsing fails, initialize with empty array
+                    savingsAccounts = [];
                 }
             } else {
-                savingsAccounts = [
-                    { id: 'checking', name: 'Checking' },
-                    { id: 'savings', name: 'Savings' },
-                    { id: 'emergency', name: 'Emergency Fund' }
-                ];
+                // Initialize with empty array - no default accounts
+                savingsAccounts = [];
             }
         }
 
