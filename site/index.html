@@ -13382,8 +13382,10 @@ margin-right: 0.5rem;
 
 
         function drawHomeNetWorthChart(data) {
+            console.log('🎨 Drawing home net worth chart with data:', data);
             const canvas = document.getElementById('homeNetWorthCanvas');
             if (!canvas) {
+                console.log('❌ Home net worth canvas not found');
                 return;
             }
 
@@ -13481,6 +13483,27 @@ margin-right: 0.5rem;
                     lineWidth: 2,
                     duration: 1000
                 });
+            } else if (data.length === 1) {
+                // Handle single data point - draw a circle/dot
+                console.log('⭕ Drawing single data point at value:', data[0].value);
+                const pointX = xScale(0);
+                const pointY = yScale(data[0].value);
+                console.log('📍 Home chart point coordinates:', { x: pointX, y: pointY });
+                
+                // Draw a circle for the single data point
+                ctx.fillStyle = '#5fa42e';
+                ctx.beginPath();
+                ctx.arc(pointX, pointY, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Add a subtle glow effect
+                ctx.shadowColor = '#5fa42e';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(pointX, pointY, 3, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                console.log('✅ Home net worth chart single point drawn successfully');
             }
         }
 
@@ -14048,8 +14071,10 @@ margin-right: 0.5rem;
         }
 
         function drawAccountsNetWorthChart(data) {
+            console.log('🎨 Drawing accounts net worth chart with data:', data);
             const canvas = document.getElementById('accountsNetWorthCanvas');
             if (!canvas) {
+                console.log('❌ Accounts net worth canvas not found');
                 return;
             }
 
@@ -14149,6 +14174,27 @@ margin-right: 0.5rem;
                     lineWidth: 2.5,
                     duration: 1000
                 });
+            } else if (data.length === 1) {
+                // Handle single data point - draw a circle/dot
+                console.log('⭕ Drawing single data point at value:', data[0].value);
+                const pointX = xScale(0);
+                const pointY = yScale(data[0].value);
+                console.log('📍 Accounts chart point coordinates:', { x: pointX, y: pointY });
+                
+                // Draw a circle for the single data point
+                ctx.fillStyle = '#5fa42e';
+                ctx.beginPath();
+                ctx.arc(pointX, pointY, 4, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Add a subtle glow effect
+                ctx.shadowColor = '#5fa42e';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(pointX, pointY, 3, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                console.log('✅ Accounts net worth chart single point drawn successfully');
             }
         }
 
