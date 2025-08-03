@@ -12896,6 +12896,104 @@ margin-right: 0.5rem;
             requestAnimationFrame(animate);
         }
 
+        // Function for animating smooth curves using bezier curves
+        function animateSmoothCurvePath(ctx, points, options = {}) {
+            const {
+                duration = 800,
+                strokeStyle = '#8b5cf6',
+                lineWidth = 2.5,
+                onComplete = null,
+                startDelay = 0,
+                smoothness = 0.3 // Control point distance factor
+            } = options;
+
+            if (points.length < 2) {
+                if (onComplete) onComplete();
+                return;
+            }
+
+            // Calculate control points for smooth bezier curves
+            function getControlPoints(p0, p1, p2, smoothness) {
+                const dx1 = p1.x - p0.x;
+                const dy1 = p1.y - p0.y;
+                const dx2 = p2.x - p1.x;
+                const dy2 = p2.y - p1.y;
+                
+                const cp1x = p1.x - dx1 * smoothness;
+                const cp1y = p1.y - dy1 * smoothness;
+                const cp2x = p1.x + dx2 * smoothness;
+                const cp2y = p1.y + dy2 * smoothness;
+                
+                return { cp1: { x: cp1x, y: cp1y }, cp2: { x: cp2x, y: cp2y } };
+            }
+
+            let startTime = null;
+            const totalLength = points.length - 1;
+
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp + startDelay;
+                const elapsed = timestamp - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Use easing function for smoother animation
+                const easedProgress = 1 - Math.pow(1 - progress, 3); // cubic easing out
+
+                const segmentsToShow = easedProgress * totalLength;
+                const fullSegments = Math.floor(segmentsToShow);
+                const partialSegment = segmentsToShow - fullSegments;
+
+                // Draw curve up to current progress
+                ctx.strokeStyle = strokeStyle;
+                ctx.lineWidth = lineWidth;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+
+                // Draw complete segments
+                for (let i = 0; i < fullSegments && i < points.length - 1; i++) {
+                    const p0 = i > 0 ? points[i - 1] : points[i];
+                    const p1 = points[i];
+                    const p2 = points[i + 1];
+                    const p3 = i < points.length - 2 ? points[i + 2] : p2;
+
+                    const { cp1, cp2 } = getControlPoints(p0, p1, p2, smoothness);
+                    
+                    ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+                }
+
+                // Draw partial segment if needed
+                if (partialSegment > 0 && fullSegments < points.length - 1) {
+                    const i = fullSegments;
+                    const p0 = i > 0 ? points[i - 1] : points[i];
+                    const p1 = points[i];
+                    const p2 = points[i + 1];
+                    const p3 = i < points.length - 2 ? points[i + 2] : p2;
+
+                    const { cp1, cp2 } = getControlPoints(p0, p1, p2, smoothness);
+                    
+                    // Calculate intermediate point on bezier curve
+                    const t = partialSegment;
+                    const x = Math.pow(1-t, 3) * p1.x + 3 * Math.pow(1-t, 2) * t * cp1.x + 3 * (1-t) * Math.pow(t, 2) * cp2.x + Math.pow(t, 3) * p2.x;
+                    const y = Math.pow(1-t, 3) * p1.y + 3 * Math.pow(1-t, 2) * t * cp1.y + 3 * (1-t) * Math.pow(t, 2) * cp2.y + Math.pow(t, 3) * p2.y;
+                    
+                    ctx.bezierCurveTo(cp1.x, cp1.y, 
+                                    cp1.x + (cp2.x - cp1.x) * t, cp1.y + (cp2.y - cp1.y) * t, 
+                                    x, y);
+                }
+
+                ctx.stroke();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else if (onComplete) {
+                    onComplete();
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
         function drawHomeCashflowChart(currentMonthData, lastMonthData, yAxisMax) {
             const canvas = document.getElementById('homeCashflowCanvas');
             if (!canvas) return;
@@ -13530,150 +13628,84 @@ margin-right: 0.5rem;
         }
 
         async function generateAssetsHistory(currentValue, range) {
-            // Try snapshot-based history first (most efficient) - same as net worth
+            console.log('🎯 generateAssetsHistory called with:', { currentValue, range });
+            
+            // Tier 1: Try snapshot-based API first (most efficient)
             try {
-                console.log('🎯 Attempting snapshot-based assets history');
-                const snapshotHistory = await generateSnapshotBasedNetWorth(currentValue, range);
+                console.log('📊 Attempting snapshot-based assets history via API');
                 
-                // If we got more than one data point, use snapshot-based history
-                if (snapshotHistory.length > 1) {
-                    console.log('✅ Using snapshot-based assets history with', snapshotHistory.length, 'points');
-                    return snapshotHistory;
+                // Calculate date range based on selection
+                let days = 30;
+                switch (range) {
+                    case '1m': days = 30; break;
+                    case '3m': days = 90; break;
+                    case '6m': days = 180; break;
+                    case 'ytd':
+                        const now = new Date();
+                        const startOfYear = new Date(now.getFullYear(), 0, 1);
+                        days = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+                        break;
+                    case '1y': days = 365; break;
+                    case 'all': days = 1095; break;
+                    default: days = 30;
                 }
-            } catch (error) {
-                console.log('⚠️ Snapshot-based assets history failed, trying transaction-based');
                 
-                // Fallback to transaction-based history
-                try {
-                    console.log('🎯 Attempting transaction-based assets history');
-                    const transactionHistory = await generateTransactionBasedNetWorth(currentValue, range);
-                    
-                    // If we got more than one data point, use transaction-based history
-                    if (transactionHistory.length > 1) {
-                        console.log('✅ Using transaction-based assets history with', transactionHistory.length, 'points');
-                        return transactionHistory;
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - days);
+                const startDateStr = startDate.toISOString().split('T')[0];
+                
+                console.log('📅 Fetching snapshots from', startDateStr, 'for', days, 'days');
+                
+                const sessionToken = await window.plaidService.getClerkSessionToken();
+                
+                // Get net worth snapshots from API (assets are part of net worth calculation)
+                const response = await fetch(`/api/snapshots/net-worth?start_date=${startDateStr}&days=${days}`, {
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`,
+                        'Content-Type': 'application/json'
                     }
-                } catch (error) {
-                    console.log('⚠️ Transaction-based assets history failed, falling back to balance-based');
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('🎯 API response:', data);
+                    
+                    if (data.snapshots && data.snapshots.length > 0) {
+                        // Use assets portion of net worth data
+                        const assetsHistory = data.snapshots.map(snapshot => ({
+                            date: snapshot.date,
+                            value: snapshot.assets || 0 // Use assets, not net worth
+                        }));
+                        
+                        console.log('✅ Using snapshot-based assets history with', assetsHistory.length, 'points');
+                        console.log('📈 Assets range:', Math.min(...assetsHistory.map(h => h.value)), 'to', Math.max(...assetsHistory.map(h => h.value)));
+                        return assetsHistory;
+                    }
                 }
+                
+                console.log('⚠️ Snapshot-based API returned no data, trying transaction-based fallback');
+                
+            } catch (error) {
+                console.log('⚠️ Snapshot-based assets history failed:', error, 'trying transaction-based');
             }
             
-            // Fallback to balance-based history
-            console.log('📊 Using balance-based assets history');
-            const balances = await loadAccountBalances();
-            const accountsData = savingsAccounts || [];
-
-            // Get all available dates with balance data
-            const availableDates = getAllAvailableDates(balances).sort();
-
-            if (availableDates.length === 0) {
-                // Return minimal data if no historical data exists
-                return [{ date: new Date().toISOString().split('T')[0], value: currentValue }];
-            }
-
-            // Determine sampling frequency based on range
-            let sampleEveryNDays = 1;
-            let maxDaysBack = 30;
-
-            switch (range) {
-                case '1m':
-                    maxDaysBack = 30;
-                    sampleEveryNDays = 1; // Daily if available
-                    break;
-                case '3m':
-                    maxDaysBack = 90;
-                    sampleEveryNDays = 3; // Every 3 days
-                    break;
-                case '6m':
-                    maxDaysBack = 180;
-                    sampleEveryNDays = 7; // Weekly
-                    break;
-                case 'ytd':
-                    const now = new Date();
-                    const startOfYear = new Date(now.getFullYear(), 0, 1);
-                    maxDaysBack = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
-                    sampleEveryNDays = maxDaysBack > 180 ? 14 : 7; // Bi-weekly or weekly
-                    break;
-                case '1y':
-                    maxDaysBack = 365;
-                    sampleEveryNDays = 14; // Bi-weekly
-                    break;
-                case 'all':
-                default:
-                    maxDaysBack = 1095; // 3 years
-                    sampleEveryNDays = 30; // Monthly
-                    break;
-            }
-
-            // Calculate cutoff date using local time to avoid timezone issues
-            const today = new Date();
-            const cutoffDate = new Date();
-            cutoffDate.setDate(today.getDate() - maxDaysBack);
-            const cutoffDateStr = cutoffDate.getFullYear() + '-' + 
-                String(cutoffDate.getMonth() + 1).padStart(2, '0') + '-' + 
-                String(cutoffDate.getDate()).padStart(2, '0');
-
-            // Filter dates within range
-            const relevantDates = availableDates.filter(date => date >= cutoffDateStr);
-
-            if (relevantDates.length === 0) {
-                // Return minimal data if no data in range
-                return [{ date: new Date().toISOString().split('T')[0], value: currentValue }];
-            }
-
-            // Sample dates based on frequency
-            const sampledDates = [];
-            let lastSampledIndex = -sampleEveryNDays; // Start so first date gets included
-
-            for (let i = 0; i < relevantDates.length; i++) {
-                if (i - lastSampledIndex >= sampleEveryNDays || i === relevantDates.length - 1) {
-                    sampledDates.push(relevantDates[i]);
-                    lastSampledIndex = i;
+            // Tier 2: Try transaction-based history (fallback)
+            try {
+                console.log('🎯 Attempting transaction-based assets history');
+                const transactionHistory = await generateTransactionBasedNetWorth(currentValue, range);
+                
+                // If we got more than one data point, use transaction-based history
+                if (transactionHistory.length > 1) {
+                    console.log('✅ Using transaction-based assets history with', transactionHistory.length, 'points');
+                    return transactionHistory;
                 }
+            } catch (error) {
+                console.log('⚠️ Transaction-based assets history failed, using single point');
             }
-
-            // Calculate real asset totals for each sampled date
-            const history = [];
-
-            sampledDates.forEach(date => {
-                let assetsTotal = 0;
-
-                // Sum up all asset accounts (exclude liabilities) for this date
-                Object.keys(balances).forEach(accountId => {
-                    const accountBalances = balances[accountId] || {};
-                    const accountInfo = accountsData.find(acc => acc.id === accountId);
-                    const isLiability = accountInfo && accountInfo.type === 'liability';
-
-                    // Only count assets, not liabilities
-                    if (!isLiability) {
-                        // Get balance for this date, or closest previous date
-                        let balance = 0;
-                        if (accountBalances[date]) {
-                            const balanceData = accountBalances[date];
-                            balance = balanceData && typeof balanceData === 'object' ? balanceData.amount : balanceData;
-                        } else {
-                            // Find closest previous date with balance
-                            const accountDates = Object.keys(accountBalances).filter(d => d <= date).sort();
-                            if (accountDates.length > 0) {
-                                const lastDate = accountDates[accountDates.length - 1];
-                                const balanceData = accountBalances[lastDate];
-                                balance = balanceData && typeof balanceData === 'object' ? balanceData.amount : balanceData;
-                            }
-                        }
-
-                        if (typeof balance === 'number' && !isNaN(balance)) {
-                            assetsTotal += balance;
-                        }
-                    }
-                });
-
-                history.push({
-                    date: date,
-                    value: Math.max(0, assetsTotal)
-                });
-            });
-
-            return history.length > 0 ? history : [{ date: new Date().toISOString().split('T')[0], value: currentValue }];
+            
+            // Tier 3: Fallback to single current value
+            console.log('📊 Using single point fallback for assets');
+            return [{ date: new Date().toISOString().split('T')[0], value: currentValue }];
         }
 
 
@@ -13776,17 +13808,18 @@ margin-right: 0.5rem;
 
             // Draw smooth line using bezier curves with animation
             if (data.length > 1) {
-                // Convert data to points for animation (simplified to linear for now)
+                // Convert data to points for animation
                 const points = data.map((point, index) => ({
                     x: xScale(index),
                     y: yScale(point.value)
                 }));
 
-                // Animate the line from left to right
-                animateLinePath(ctx, points, {
+                // Use smooth curve animation for better visual appeal
+                animateSmoothCurvePath(ctx, points, {
                     strokeStyle: '#5fa42e',
                     lineWidth: 2,
-                    duration: 1000
+                    duration: 1000,
+                    smoothness: 0.25 // Gentle curve smoothing
                 });
             } else if (data.length === 1) {
                 // Handle single data point - draw a circle/dot
@@ -14489,11 +14522,12 @@ margin-right: 0.5rem;
                     y: yScale(point.value)
                 }));
 
-                // Animate only the line from left to right
-                animateLinePath(ctx, points, {
+                // Use smooth curve animation for better visual appeal
+                animateSmoothCurvePath(ctx, points, {
                     strokeStyle: '#5fa42e',
                     lineWidth: 2.5,
-                    duration: 1000
+                    duration: 1000,
+                    smoothness: 0.25 // Gentle curve smoothing
                 });
             } else if (data.length === 1) {
                 // Handle single data point - draw a circle/dot
