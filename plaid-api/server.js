@@ -565,27 +565,37 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
       }
     }
     
-    // Generate sample transactions for the past 30 days
+    // Generate sample transactions for the past 90 days (3 months)
     const sampleTransactions = [];
     const today = new Date();
     
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 90; i++) {
       const transactionDate = new Date(today);
       transactionDate.setDate(transactionDate.getDate() - i);
       const dateStr = transactionDate.toISOString().split('T')[0];
       
-      // Generate 1-3 transactions per day
-      const transactionsToday = Math.floor(Math.random() * 3) + 1;
+      // Generate 1-4 transactions per day
+      const transactionsToday = Math.floor(Math.random() * 4) + 1;
       
       for (let j = 0; j < transactionsToday; j++) {
-        const categories = ['FOOD_AND_DRINK', 'TRANSPORTATION', 'SHOPPING', 'ENTERTAINMENT', 'UTILITIES'];
+        // Mix of expense and income categories
+        const expenseCategories = ['FOOD_AND_DRINK', 'TRANSPORTATION', 'SHOPPING', 'ENTERTAINMENT', 'UTILITIES'];
+        const incomeCategories = ['PAYROLL', 'DEPOSIT', 'INTEREST_EARNED'];
+        
+        // 85% chance of expense, 15% chance of income
+        const isIncome = Math.random() < 0.15;
+        const categories = isIncome ? incomeCategories : expenseCategories;
         const category = categories[Math.floor(Math.random() * categories.length)];
-        const amount = Math.round((Math.random() * 100 + 10) * 100) / 100; // $10-110
+        
+        // Income: $500-3000, Expenses: $10-200  
+        const amount = isIncome 
+          ? Math.round((Math.random() * 2500 + 500) * 100) / 100
+          : Math.round((Math.random() * 190 + 10) * 100) / 100;
         
         const transaction = {
           transaction_id: `sample_txn_${clerkUserId}_${i}_${j}`,
           account_id: sampleAccounts[0].account_id, // Use checking account
-          amount: amount,
+          amount: isIncome ? -amount : amount, // Negative for income, positive for expenses
           iso_currency_code: 'USD',
           name: `Sample ${category.toLowerCase().replace('_', ' ')} transaction`,
           merchant_name: `Sample Merchant ${j + 1}`,

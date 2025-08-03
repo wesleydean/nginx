@@ -13358,6 +13358,19 @@ margin-right: 0.5rem;
                 const transactions = data.transactions || [];
                 console.log('💳 Fetched', transactions.length, 'transactions');
                 
+                if (transactions.length > 0) {
+                    console.log('📊 Transaction date range:', 
+                        Math.min(...transactions.map(t => new Date(t.date))).toISOString().split('T')[0], 
+                        'to',
+                        Math.max(...transactions.map(t => new Date(t.date))).toISOString().split('T')[0]
+                    );
+                    console.log('💰 Sample transactions:', transactions.slice(0, 3).map(t => ({
+                        date: t.date,
+                        amount: t.amount,
+                        name: t.name
+                    })));
+                }
+                
                 if (transactions.length === 0) {
                     console.log('⚠️ No transactions found, falling back to current value only');
                     return [{ date: endDate.toISOString().split('T')[0], value: currentNetWorth }];
@@ -13388,14 +13401,16 @@ margin-right: 0.5rem;
                         });
                         
                         // Apply transaction impacts to calculate historical balance
+                        // Since we're working backwards, we need to reverse transaction effects
                         let periodImpact = 0;
                         periodTransactions.forEach(txn => {
+                            // Working backwards: remove the effect of transactions that happened after this date
                             // Positive amounts are expenses (money out), negative are income (money in)
-                            // For net worth calculation, expenses reduce net worth, income increases it
-                            periodImpact -= txn.amount; // Reverse the transaction impact
+                            // To go back in time: add back expenses, subtract income
+                            periodImpact += txn.amount; 
                         });
                         
-                        runningNetWorth += periodImpact;
+                        runningNetWorth -= periodImpact; // Subtract the period impact to go backwards
                         history.unshift({ date: dateStr, value: Math.max(0, runningNetWorth) });
                     }
                 }
