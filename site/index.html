@@ -13530,18 +13530,32 @@ margin-right: 0.5rem;
         }
 
         async function generateAssetsHistory(currentValue, range) {
-            // Try transaction-based history first (for assets calculation)
+            // Try snapshot-based history first (most efficient) - same as net worth
             try {
-                console.log('🎯 Attempting transaction-based assets history');
-                const transactionHistory = await generateTransactionBasedNetWorth(currentValue, range);
+                console.log('🎯 Attempting snapshot-based assets history');
+                const snapshotHistory = await generateSnapshotBasedNetWorth(currentValue, range);
                 
-                // If we got more than one data point, use transaction-based history
-                if (transactionHistory.length > 1) {
-                    console.log('✅ Using transaction-based assets history with', transactionHistory.length, 'points');
-                    return transactionHistory;
+                // If we got more than one data point, use snapshot-based history
+                if (snapshotHistory.length > 1) {
+                    console.log('✅ Using snapshot-based assets history with', snapshotHistory.length, 'points');
+                    return snapshotHistory;
                 }
             } catch (error) {
-                console.log('⚠️ Transaction-based assets history failed, falling back to balance-based');
+                console.log('⚠️ Snapshot-based assets history failed, trying transaction-based');
+                
+                // Fallback to transaction-based history
+                try {
+                    console.log('🎯 Attempting transaction-based assets history');
+                    const transactionHistory = await generateTransactionBasedNetWorth(currentValue, range);
+                    
+                    // If we got more than one data point, use transaction-based history
+                    if (transactionHistory.length > 1) {
+                        console.log('✅ Using transaction-based assets history with', transactionHistory.length, 'points');
+                        return transactionHistory;
+                    }
+                } catch (error) {
+                    console.log('⚠️ Transaction-based assets history failed, falling back to balance-based');
+                }
             }
             
             // Fallback to balance-based history
