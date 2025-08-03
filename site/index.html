@@ -13436,7 +13436,13 @@ margin-right: 0.5rem;
             const adjustedRange = roundedMax - minValue;
 
             // Helper functions
-            const xScale = (index) => margin.left + (index / (data.length - 1)) * chartWidth;
+            const xScale = (index) => {
+                if (data.length === 1) {
+                    // Center single data point
+                    return margin.left + chartWidth / 2;
+                }
+                return margin.left + (index / (data.length - 1)) * chartWidth;
+            };
             const yScale = (value) => margin.top + chartHeight - ((value - minValue) / adjustedRange) * chartHeight;
 
             // Draw reference line at current (latest) value
@@ -14135,7 +14141,13 @@ margin-right: 0.5rem;
             const adjustedRange = roundedMax - minValue;
 
             // Helper functions
-            const xScale = (index) => margin.left + (index / (data.length - 1)) * chartWidth;
+            const xScale = (index) => {
+                if (data.length === 1) {
+                    // Center single data point
+                    return margin.left + chartWidth / 2;
+                }
+                return margin.left + (index / (data.length - 1)) * chartWidth;
+            };
             const yScale = (value) => margin.top + chartHeight - ((value - minValue) / adjustedRange) * chartHeight;
 
             // Draw reference line at current (latest) value
@@ -15452,7 +15464,13 @@ margin-right: 0.5rem;
             const roundedMax = Math.ceil(maxValue / 1000) * 1000;
             const adjustedRange = roundedMax - minValue;
 
-            const xScale = (index) => margin.left + (index / (data.length - 1)) * chartWidth;
+            const xScale = (index) => {
+                if (data.length === 1) {
+                    // Center single data point
+                    return margin.left + chartWidth / 2;
+                }
+                return margin.left + (index / (data.length - 1)) * chartWidth;
+            };
             const yScale = (value) => margin.top + chartHeight - ((value - minValue) / adjustedRange) * chartHeight;
 
             // Current value reference line
