@@ -71,19 +71,41 @@ class Database {
       )
     `;
 
+    const createAccountBalanceSnapshotsTable = `
+      CREATE TABLE IF NOT EXISTS account_balance_snapshots (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        account_id TEXT NOT NULL,
+        date DATE NOT NULL,
+        balance REAL NOT NULL,
+        account_type TEXT NOT NULL,
+        currency TEXT DEFAULT 'USD',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (clerk_user_id),
+        FOREIGN KEY (account_id) REFERENCES accounts (account_id),
+        UNIQUE(user_id, account_id, date)
+      )
+    `;
+
     const createIndexes = [
       'CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts (user_id)',
       'CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions (user_id)',
       'CREATE INDEX IF NOT EXISTS idx_transactions_account_id ON transactions (account_id)',
       'CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions (date DESC)',
       'CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions (category)',
-      'CREATE INDEX IF NOT EXISTS idx_transactions_pending ON transactions (pending)'
+      'CREATE INDEX IF NOT EXISTS idx_transactions_pending ON transactions (pending)',
+      'CREATE INDEX IF NOT EXISTS idx_snapshots_user_id ON account_balance_snapshots (user_id)',
+      'CREATE INDEX IF NOT EXISTS idx_snapshots_account_id ON account_balance_snapshots (account_id)',
+      'CREATE INDEX IF NOT EXISTS idx_snapshots_date ON account_balance_snapshots (date DESC)',
+      'CREATE INDEX IF NOT EXISTS idx_snapshots_user_date ON account_balance_snapshots (user_id, date DESC)',
+      'CREATE INDEX IF NOT EXISTS idx_snapshots_account_date ON account_balance_snapshots (account_id, date DESC)'
     ];
 
     this.db.serialize(() => {
       this.db.run(createUsersTable);
       this.db.run(createAccountsTable);
       this.db.run(createTransactionsTable);
+      this.db.run(createAccountBalanceSnapshotsTable);
       
       // Add subtype column if it doesn't exist (for existing databases)
       this.db.run(`
@@ -248,12 +270,18 @@ class Database {
       this.db.serialize(() => {
         this.db.run('BEGIN TRANSACTION');
         
+        const deleteSnapshots = this.db.prepare('DELETE FROM account_balance_snapshots WHERE user_id = ?');
         const deleteTransactions = this.db.prepare('DELETE FROM transactions WHERE user_id = ?');
         const deleteAccounts = this.db.prepare('DELETE FROM accounts WHERE user_id = ?');
         const deleteUser = this.db.prepare('DELETE FROM users WHERE clerk_user_id = ?');
         
         try {
-          // Delete transactions first (due to foreign key constraints)
+          // Delete snapshots first
+          deleteSnapshots.run([clerkUserId], function(err) {
+            if (err) throw err;
+          });
+          
+          // Delete transactions (due to foreign key constraints)
           deleteTransactions.run([clerkUserId], function(err) {
             if (err) throw err;
           });
@@ -283,6 +311,7 @@ class Database {
           this.db.run('ROLLBACK');
           reject(error);
         } finally {
+          deleteSnapshots.finalize();
           deleteTransactions.finalize();
           deleteAccounts.finalize();
           deleteUser.finalize();
@@ -631,6 +660,102 @@ class Database {
           resolve(formattedCategories);
         }
       });
+    });
+  }
+
+  // Account Balance Snapshots operations
+  addAccountBalanceSnapshot(clerkUserId, accountId, date, balance, accountType, currency = 'USD') {
+    return new Promise((resolve, reject) => {
+      const stmt = this.db.prepare(`
+        INSERT OR REPLACE INTO account_balance_snapshots 
+        (user_id, account_id, date, balance, account_type, currency) 
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      
+      stmt.run([clerkUserId, accountId, date, balance, accountType, currency], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ snapshotId: this.lastID, changes: this.changes });
+        }
+      });
+      
+      stmt.finalize();
+    });
+  }
+
+  getAccountBalanceSnapshots(clerkUserId, accountId, startDate, endDate) {
+    return new Promise((resolve, reject) => {
+      this.db.all(`
+        SELECT * FROM account_balance_snapshots 
+        WHERE user_id = ? AND account_id = ? AND date >= ? AND date <= ?
+        ORDER BY date ASC
+      `, [clerkUserId, accountId, startDate, endDate], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
+  getNetWorthSnapshots(clerkUserId, startDate, endDate) {
+    return new Promise((resolve, reject) => {
+      this.db.all(`
+        SELECT 
+          date,
+          SUM(CASE WHEN account_type IN ('cash', 'investment') THEN balance ELSE 0 END) as total_assets,
+          SUM(CASE WHEN account_type IN ('credit_card', 'liability') THEN ABS(balance) ELSE 0 END) as total_liabilities,
+          SUM(CASE WHEN account_type IN ('cash', 'investment') THEN balance ELSE -ABS(balance) END) as net_worth
+        FROM account_balance_snapshots 
+        WHERE user_id = ? AND date >= ? AND date <= ?
+        GROUP BY date
+        ORDER BY date ASC
+      `, [clerkUserId, startDate, endDate], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
+  getAccountTypeSnapshots(clerkUserId, accountType, startDate, endDate) {
+    return new Promise((resolve, reject) => {
+      this.db.all(`
+        SELECT 
+          date,
+          SUM(balance) as total_balance,
+          COUNT(*) as account_count
+        FROM account_balance_snapshots 
+        WHERE user_id = ? AND account_type = ? AND date >= ? AND date <= ?
+        GROUP BY date
+        ORDER BY date ASC
+      `, [clerkUserId, accountType, startDate, endDate], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
+  clearUserAccountSnapshots(clerkUserId) {
+    return new Promise((resolve, reject) => {
+      const stmt = this.db.prepare('DELETE FROM account_balance_snapshots WHERE user_id = ?');
+      
+      stmt.run([clerkUserId], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ deletedCount: this.changes });
+        }
+      });
+      
+      stmt.finalize();
     });
   }
 

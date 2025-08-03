@@ -495,6 +495,85 @@ app.put('/api/transactions/:transactionId', clerkAuth, async (req, res) => {
   }
 });
 
+// Helper function to generate account balance snapshots
+async function generateAccountSnapshots(clerkUserId, accounts, transactions) {
+  const snapshotsCount = { total: 0, accounts: {} };
+  
+  for (const account of accounts) {
+    console.log(`Generating snapshots for account: ${account.name}`);
+    
+    // Get transactions for this account
+    const accountTransactions = transactions
+      .filter(txn => txn.account_id === account.account_id)
+      .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort newest first
+    
+    // Start with current balance and work backwards
+    let runningBalance = account.current_balance;
+    const snapshots = [];
+    
+    // Generate daily snapshots for past 90 days
+    const today = new Date();
+    for (let i = 0; i < 90; i++) {
+      const snapshotDate = new Date(today);
+      snapshotDate.setDate(today.getDate() - i);
+      const dateStr = snapshotDate.toISOString().split('T')[0];
+      
+      if (i === 0) {
+        // Today - use current balance
+        snapshots.push({
+          date: dateStr,
+          balance: runningBalance
+        });
+      } else {
+        // Calculate balance for this historical date
+        // Find transactions that occurred on this day
+        const dayTransactions = accountTransactions.filter(txn => txn.date === dateStr);
+        
+        // Apply transaction impacts to go backwards in time
+        dayTransactions.forEach(txn => {
+          // To go backwards: reverse the transaction effect
+          // Positive amounts (expenses) were money out, so add them back
+          // Negative amounts (income) were money in, so subtract them
+          runningBalance -= txn.amount;
+        });
+        
+        snapshots.push({
+          date: dateStr,
+          balance: Math.max(0, runningBalance) // Ensure non-negative balance
+        });
+      }
+    }
+    
+    // Store snapshots in database (reverse order so oldest first)
+    snapshots.reverse();
+    let accountSnapshotsCount = 0;
+    
+    for (const snapshot of snapshots) {
+      try {
+        await database.addAccountBalanceSnapshot(
+          clerkUserId,
+          account.account_id,
+          snapshot.date,
+          snapshot.balance,
+          account.type,
+          account.currency
+        );
+        accountSnapshotsCount++;
+      } catch (error) {
+        console.error('Error adding snapshot:', error);
+      }
+    }
+    
+    snapshotsCount.accounts[account.name] = accountSnapshotsCount;
+    snapshotsCount.total += accountSnapshotsCount;
+    
+    console.log(`Generated ${accountSnapshotsCount} snapshots for ${account.name}`);
+  }
+  
+  console.log(`Total snapshots generated: ${snapshotsCount.total}`);
+  return snapshotsCount;
+}
+
 // Seed sample data for testing/demo purposes
 app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
   try {
@@ -619,12 +698,16 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
     // Add sample transactions to database
     const addedTransactions = await database.addTransactions(clerkUserId, sampleTransactions);
     
+    // Generate account balance snapshots for the past 90 days
+    console.log('Generating account balance snapshots...');
+    const snapshotsGenerated = await generateAccountSnapshots(clerkUserId, sampleAccounts, sampleTransactions);
     
     res.json({
       success: true,
       message: 'Sample data seeded successfully',
       accounts: addedAccounts.length,
-      transactions: addedTransactions.length
+      transactions: addedTransactions.length,
+      snapshots: snapshotsGenerated
     });
     
   } catch (error) {
@@ -632,6 +715,120 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
       error: 'Failed to seed sample data',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
+  }
+});
+
+// Get net worth snapshots
+app.get('/api/snapshots/net-worth', clerkAuth, async (req, res) => {
+  try {
+    const clerkUserId = req.auth.userId;
+    const { start_date, days = 30 } = req.query;
+    
+    if (!start_date) {
+      return res.status(400).json({ error: 'start_date parameter is required' });
+    }
+    
+    const startDate = new Date(start_date);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + parseInt(days));
+    
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+    
+    const snapshots = await database.getNetWorthSnapshots(clerkUserId, startDateStr, endDateStr);
+    
+    // Format for frontend
+    const formattedSnapshots = snapshots.map(snapshot => ({
+      date: snapshot.date,
+      value: snapshot.net_worth,
+      assets: snapshot.total_assets,
+      liabilities: snapshot.total_liabilities
+    }));
+    
+    res.json({ 
+      snapshots: formattedSnapshots,
+      count: formattedSnapshots.length,
+      period: { start_date: startDateStr, end_date: endDateStr, days: parseInt(days) }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get account balance snapshots
+app.get('/api/snapshots/account/:accountId', clerkAuth, async (req, res) => {
+  try {
+    const clerkUserId = req.auth.userId;
+    const { accountId } = req.params;
+    const { start_date, days = 30 } = req.query;
+    
+    if (!start_date) {
+      return res.status(400).json({ error: 'start_date parameter is required' });
+    }
+    
+    const startDate = new Date(start_date);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + parseInt(days));
+    
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+    
+    const snapshots = await database.getAccountBalanceSnapshots(clerkUserId, accountId, startDateStr, endDateStr);
+    
+    // Format for frontend
+    const formattedSnapshots = snapshots.map(snapshot => ({
+      date: snapshot.date,
+      value: snapshot.balance,
+      account_type: snapshot.account_type,
+      currency: snapshot.currency
+    }));
+    
+    res.json({ 
+      snapshots: formattedSnapshots,
+      account_id: accountId,
+      count: formattedSnapshots.length,
+      period: { start_date: startDateStr, end_date: endDateStr, days: parseInt(days) }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get account type snapshots (assets, liabilities, etc.)
+app.get('/api/snapshots/account-type/:accountType', clerkAuth, async (req, res) => {
+  try {
+    const clerkUserId = req.auth.userId;
+    const { accountType } = req.params;
+    const { start_date, days = 30 } = req.query;
+    
+    if (!start_date) {
+      return res.status(400).json({ error: 'start_date parameter is required' });
+    }
+    
+    const startDate = new Date(start_date);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + parseInt(days));
+    
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+    
+    const snapshots = await database.getAccountTypeSnapshots(clerkUserId, accountType, startDateStr, endDateStr);
+    
+    // Format for frontend
+    const formattedSnapshots = snapshots.map(snapshot => ({
+      date: snapshot.date,
+      value: snapshot.total_balance,
+      account_count: snapshot.account_count
+    }));
+    
+    res.json({ 
+      snapshots: formattedSnapshots,
+      account_type: accountType,
+      count: formattedSnapshots.length,
+      period: { start_date: startDateStr, end_date: endDateStr, days: parseInt(days) }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

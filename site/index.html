@@ -13152,18 +13152,32 @@ margin-right: 0.5rem;
         }
 
         async function generateNetWorthHistory(currentValue, range) {
-            // Try transaction-based history first
+            // Try snapshot-based history first (most efficient)
             try {
-                console.log('🎯 Attempting transaction-based net worth history');
-                const transactionHistory = await generateTransactionBasedNetWorth(currentValue, range);
+                console.log('🎯 Attempting snapshot-based net worth history');
+                const snapshotHistory = await generateSnapshotBasedNetWorth(currentValue, range);
                 
-                // If we got more than one data point, use transaction-based history
-                if (transactionHistory.length > 1) {
-                    console.log('✅ Using transaction-based net worth history with', transactionHistory.length, 'points');
-                    return transactionHistory;
+                // If we got more than one data point, use snapshot-based history
+                if (snapshotHistory.length > 1) {
+                    console.log('✅ Using snapshot-based net worth history with', snapshotHistory.length, 'points');
+                    return snapshotHistory;
                 }
             } catch (error) {
-                console.log('⚠️ Transaction-based history failed, falling back to balance-based');
+                console.log('⚠️ Snapshot-based history failed, trying transaction-based');
+                
+                // Fallback to transaction-based history
+                try {
+                    console.log('🎯 Attempting transaction-based net worth history');
+                    const transactionHistory = await generateTransactionBasedNetWorth(currentValue, range);
+                    
+                    // If we got more than one data point, use transaction-based history
+                    if (transactionHistory.length > 1) {
+                        console.log('✅ Using transaction-based net worth history with', transactionHistory.length, 'points');
+                        return transactionHistory;
+                    }
+                } catch (error) {
+                    console.log('⚠️ Transaction-based history failed, falling back to balance-based');
+                }
             }
             
             // Fallback to balance-based history
@@ -13284,6 +13298,93 @@ margin-right: 0.5rem;
             });
 
             return history;
+        }
+
+        /**
+         * Generate net worth history based on stored snapshots
+         */
+        async function generateSnapshotBasedNetWorth(currentNetWorth, range) {
+            console.log('🔄 Generating snapshot-based net worth for range:', range);
+            
+            // Determine how many days to fetch based on range
+            let totalDays = 30;
+            
+            switch (range) {
+                case '1m':
+                    totalDays = 30;
+                    break;
+                case '3m':
+                    totalDays = 90;
+                    break;
+                case '6m':
+                    totalDays = 180;
+                    break;
+                case 'ytd':
+                    const now = new Date();
+                    const startOfYear = new Date(now.getFullYear(), 0, 1);
+                    totalDays = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+                    break;
+                case '1y':
+                    totalDays = 365;
+                    break;
+                case 'all':
+                default:
+                    totalDays = 365;
+                    break;
+            }
+            
+            try {
+                // Calculate start date
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(endDate.getDate() - totalDays);
+                
+                console.log('📅 Fetching snapshots from', startDate.toISOString().split('T')[0], 'for', totalDays, 'days');
+                
+                // Fetch snapshots from API
+                const sessionToken = localStorage.getItem('clerk_session_token');
+                if (!sessionToken) {
+                    console.log('⚠️ No session token, falling back to current value only');
+                    return [{ date: endDate.toISOString().split('T')[0], value: currentNetWorth }];
+                }
+                
+                const response = await fetch(`${window.plaidService.baseUrl}/api/snapshots/net-worth?start_date=${startDate.toISOString().split('T')[0]}&days=${totalDays}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.log('⚠️ Failed to fetch snapshots, status:', response.status);
+                    return [{ date: endDate.toISOString().split('T')[0], value: currentNetWorth }];
+                }
+                
+                const data = await response.json();
+                const snapshots = data.snapshots || [];
+                console.log('📊 Fetched', snapshots.length, 'snapshots');
+                
+                if (snapshots.length === 0) {
+                    console.log('⚠️ No snapshots found, falling back to current value only');
+                    return [{ date: endDate.toISOString().split('T')[0], value: currentNetWorth }];
+                }
+                
+                // Return snapshots in the expected format
+                const history = snapshots.map(snapshot => ({
+                    date: snapshot.date,
+                    value: snapshot.value
+                }));
+                
+                console.log('📈 Snapshot range:', Math.min(...history.map(h => h.value)), 'to', Math.max(...history.map(h => h.value)));
+                
+                return history;
+                
+            } catch (error) {
+                console.error('❌ Error generating snapshot-based net worth:', error);
+                // Fallback to current value only
+                return [{ date: new Date().toISOString().split('T')[0], value: currentNetWorth }];
+            }
         }
 
         /**
