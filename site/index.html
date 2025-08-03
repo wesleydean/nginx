@@ -13661,7 +13661,7 @@ margin-right: 0.5rem;
                 const sessionToken = await window.plaidService.getClerkSessionToken();
                 
                 // Get net worth snapshots from API (assets are part of net worth calculation)
-                const response = await fetch(`/api/snapshots/net-worth?start_date=${startDateStr}&days=${days}`, {
+                const response = await fetch(`${window.plaidService.baseUrl}/api/snapshots/net-worth?start_date=${startDateStr}&days=${days}`, {
                     headers: {
                         'Authorization': `Bearer ${sessionToken}`,
                         'Content-Type': 'application/json'
@@ -13835,7 +13835,7 @@ margin-right: 0.5rem;
                         strokeStyle: '#5fa42e',
                         lineWidth: 2,
                         duration: 1000,
-                        smoothness: 0.4 // Nice curvy smoothing
+                        smoothness: 0.6 // More curvy smoothing
                     });
                 } catch (error) {
                     console.log('⚠️ Smooth curve failed, using linear animation:', error);
@@ -14565,7 +14565,7 @@ margin-right: 0.5rem;
                         strokeStyle: '#5fa42e',
                         lineWidth: 2.5,
                         duration: 1000,
-                        smoothness: 0.4 // Nice curvy smoothing
+                        smoothness: 0.6 // More curvy smoothing
                     });
                 } catch (error) {
                     console.log('⚠️ Smooth curve failed, using linear animation:', error);
