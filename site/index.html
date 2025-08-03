@@ -13679,7 +13679,20 @@ margin-right: 0.5rem;
                         
                         console.log('✅ Using snapshot-based assets history with', assetsHistory.length, 'points');
                         console.log('📈 Assets range:', Math.min(...assetsHistory.map(h => h.value)), 'to', Math.max(...assetsHistory.map(h => h.value)));
-                        return assetsHistory;
+                        console.log('💰 Sample assets data:', assetsHistory.slice(0, 3));
+                        
+                        // Check if we have meaningful assets data
+                        const maxAssets = Math.max(...assetsHistory.map(h => h.value));
+                        if (maxAssets > 0) {
+                            return assetsHistory;
+                        } else {
+                            console.log('⚠️ All assets values are 0, falling back to net worth for assets chart');
+                            // Fallback to using net worth data for assets chart
+                            return data.snapshots.map(snapshot => ({
+                                date: snapshot.date,
+                                value: Math.max(0, snapshot.value || 0) // Use net worth as fallback
+                            }));
+                        }
                     }
                 }
                 
@@ -13814,13 +13827,23 @@ margin-right: 0.5rem;
                     y: yScale(point.value)
                 }));
 
-                // Use smooth curve animation for better visual appeal
-                animateSmoothCurvePath(ctx, points, {
-                    strokeStyle: '#5fa42e',
-                    lineWidth: 2,
-                    duration: 1000,
-                    smoothness: 0.25 // Gentle curve smoothing
-                });
+                // Use smooth curve animation for better visual appeal (with fallback)
+                try {
+                    animateSmoothCurvePath(ctx, points, {
+                        strokeStyle: '#5fa42e',
+                        lineWidth: 2,
+                        duration: 1000,
+                        smoothness: 0.1 // Subtle curve smoothing
+                    });
+                } catch (error) {
+                    console.log('⚠️ Smooth curve failed, using linear animation:', error);
+                    // Fallback to linear animation
+                    animateLinePath(ctx, points, {
+                        strokeStyle: '#5fa42e',
+                        lineWidth: 2,
+                        duration: 1000
+                    });
+                }
             } else if (data.length === 1) {
                 // Handle single data point - draw a circle/dot
                 console.log('⭕ Drawing single data point at value:', data[0].value);
@@ -14522,13 +14545,23 @@ margin-right: 0.5rem;
                     y: yScale(point.value)
                 }));
 
-                // Use smooth curve animation for better visual appeal
-                animateSmoothCurvePath(ctx, points, {
-                    strokeStyle: '#5fa42e',
-                    lineWidth: 2.5,
-                    duration: 1000,
-                    smoothness: 0.25 // Gentle curve smoothing
-                });
+                // Use smooth curve animation for better visual appeal (with fallback)
+                try {
+                    animateSmoothCurvePath(ctx, points, {
+                        strokeStyle: '#5fa42e',
+                        lineWidth: 2.5,
+                        duration: 1000,
+                        smoothness: 0.1 // Subtle curve smoothing
+                    });
+                } catch (error) {
+                    console.log('⚠️ Smooth curve failed, using linear animation:', error);
+                    // Fallback to linear animation
+                    animateLinePath(ctx, points, {
+                        strokeStyle: '#5fa42e',
+                        lineWidth: 2.5,
+                        duration: 1000
+                    });
+                }
             } else if (data.length === 1) {
                 // Handle single data point - draw a circle/dot
                 console.log('⭕ Drawing single data point at value:', data[0].value);
