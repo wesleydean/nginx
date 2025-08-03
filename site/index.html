@@ -12912,17 +12912,19 @@ margin-right: 0.5rem;
                 return;
             }
 
-            // Calculate control points for smooth bezier curves
-            function getControlPoints(p0, p1, p2, smoothness) {
-                const dx1 = p1.x - p0.x;
-                const dy1 = p1.y - p0.y;
-                const dx2 = p2.x - p1.x;
-                const dy2 = p2.y - p1.y;
+            // Calculate control points for smooth bezier curves using Catmull-Rom spline approach
+            function getControlPoints(p0, p1, p2, p3, smoothness) {
+                // Calculate tangent vectors for smooth curves
+                const t1x = (p2.x - p0.x) * smoothness;
+                const t1y = (p2.y - p0.y) * smoothness;
+                const t2x = (p3.x - p1.x) * smoothness;
+                const t2y = (p3.y - p1.y) * smoothness;
                 
-                const cp1x = p1.x - dx1 * smoothness;
-                const cp1y = p1.y - dy1 * smoothness;
-                const cp2x = p1.x + dx2 * smoothness;
-                const cp2y = p1.y + dy2 * smoothness;
+                // Control points positioned along tangent lines
+                const cp1x = p1.x + t1x / 3;
+                const cp1y = p1.y + t1y / 3;
+                const cp2x = p2.x - t2x / 3;
+                const cp2y = p2.y - t2y / 3;
                 
                 return { cp1: { x: cp1x, y: cp1y }, cp2: { x: cp2x, y: cp2y } };
             }
@@ -12957,7 +12959,7 @@ margin-right: 0.5rem;
                     const p2 = points[i + 1];
                     const p3 = i < points.length - 2 ? points[i + 2] : p2;
 
-                    const { cp1, cp2 } = getControlPoints(p0, p1, p2, smoothness);
+                    const { cp1, cp2 } = getControlPoints(p0, p1, p2, p3, smoothness);
                     
                     ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
                 }
@@ -12970,7 +12972,7 @@ margin-right: 0.5rem;
                     const p2 = points[i + 1];
                     const p3 = i < points.length - 2 ? points[i + 2] : p2;
 
-                    const { cp1, cp2 } = getControlPoints(p0, p1, p2, smoothness);
+                    const { cp1, cp2 } = getControlPoints(p0, p1, p2, p3, smoothness);
                     
                     // Calculate intermediate point on bezier curve
                     const t = partialSegment;
@@ -13833,7 +13835,7 @@ margin-right: 0.5rem;
                         strokeStyle: '#5fa42e',
                         lineWidth: 2,
                         duration: 1000,
-                        smoothness: 0.1 // Subtle curve smoothing
+                        smoothness: 0.4 // Nice curvy smoothing
                     });
                 } catch (error) {
                     console.log('⚠️ Smooth curve failed, using linear animation:', error);
@@ -14346,6 +14348,13 @@ margin-right: 0.5rem;
             console.log('Range:', range);
             console.log('Savings accounts:', savingsAccounts);
             
+            // Check if canvas exists
+            const canvas = document.getElementById('accountsNetWorthCanvas');
+            console.log('📊 Canvas element found:', !!canvas);
+            if (canvas) {
+                console.log('📐 Canvas dimensions:', { width: canvas.width, height: canvas.height, clientWidth: canvas.clientWidth, clientHeight: canvas.clientHeight });
+            }
+            
             // Show loading spinner
             showAccountsNetWorthSpinner();
             
@@ -14440,6 +14449,9 @@ margin-right: 0.5rem;
 
         function drawAccountsNetWorthChart(data) {
             console.log('🎨 Drawing accounts net worth chart with data:', data);
+            console.log('📊 Data length:', data?.length);
+            console.log('📈 Data sample:', data?.slice(0, 3));
+            
             const canvas = document.getElementById('accountsNetWorthCanvas');
             if (!canvas) {
                 console.log('❌ Accounts net worth canvas not found');
@@ -14448,6 +14460,8 @@ margin-right: 0.5rem;
             console.log('✅ Canvas found:', canvas);
             console.log('📐 Canvas dimensions:', { width: canvas.width, height: canvas.height });
             console.log('👁️ Canvas style display:', canvas.style.display);
+            console.log('📏 Canvas client dimensions:', { clientWidth: canvas.clientWidth, clientHeight: canvas.clientHeight });
+            console.log('🖼️ Canvas parent:', canvas.parentElement);
 
             // Set canvas size to match container (same as home chart)
             const container = canvas.parentElement;
@@ -14551,7 +14565,7 @@ margin-right: 0.5rem;
                         strokeStyle: '#5fa42e',
                         lineWidth: 2.5,
                         duration: 1000,
-                        smoothness: 0.1 // Subtle curve smoothing
+                        smoothness: 0.4 // Nice curvy smoothing
                     });
                 } catch (error) {
                     console.log('⚠️ Smooth curve failed, using linear animation:', error);
@@ -14644,7 +14658,13 @@ margin-right: 0.5rem;
         }
 
         async function updateAccountsNetWorth() {
-            await updateAccountsNetWorthWithChart('all'); // Default to all time view to match active button
+            console.log('🎯 updateAccountsNetWorth() called');
+            try {
+                await updateAccountsNetWorthWithChart('all'); // Default to all time view to match active button
+                console.log('✅ updateAccountsNetWorth() completed');
+            } catch (error) {
+                console.error('❌ updateAccountsNetWorth() failed:', error);
+            }
         }
 
         function handleAccountsNetWorthCardClick(event) {
