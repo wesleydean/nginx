@@ -14365,10 +14365,10 @@ margin-right: 0.5rem;
                 // Use global savingsAccounts variable (loaded from API)
             
             if (!savingsAccounts || savingsAccounts.length === 0) {
-                const displayAssets = 0;
-                const assetsHistory = await generateAssetsHistory(displayAssets, range);
-                drawAccountsNetWorthChart(assetsHistory);
-                updateAccountsNetWorthDisplay(displayAssets, range);
+                const displayNetWorth = 0;
+                const netWorthHistory = await generateSnapshotBasedNetWorth(displayNetWorth, range);
+                drawAccountsNetWorthChart(netWorthHistory);
+                updateAccountsNetWorthDisplay(displayNetWorth, range);
                 return;
             }
 
@@ -14423,15 +14423,15 @@ margin-right: 0.5rem;
                     return;
                 }
 
-                // Generate assets history for chart
-                const assetsHistory = await generateAssetsHistory(displayAssets, range);
-                console.log('Assets history:', assetsHistory);
+                // Generate net worth history for chart (same as home page)
+                const netWorthHistory = await generateSnapshotBasedNetWorth(displayAssets, range);
+                console.log('Net worth history:', netWorthHistory);
 
-                // Draw the assets chart
-                console.log('🚀 About to call drawAccountsNetWorthChart with data:', assetsHistory);
+                // Draw the net worth chart
+                console.log('🚀 About to call drawAccountsNetWorthChart with data:', netWorthHistory);
                 console.log('🔍 Function exists:', typeof drawAccountsNetWorthChart);
                 try {
-                    drawAccountsNetWorthChart(assetsHistory);
+                    drawAccountsNetWorthChart(netWorthHistory);
                     console.log('✅ drawAccountsNetWorthChart call completed');
                 } catch (error) {
                     console.error('❌ Error in drawAccountsNetWorthChart:', error);
