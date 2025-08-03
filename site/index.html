@@ -13152,6 +13152,22 @@ margin-right: 0.5rem;
         }
 
         async function generateNetWorthHistory(currentValue, range) {
+            // Try transaction-based history first
+            try {
+                console.log('🎯 Attempting transaction-based net worth history');
+                const transactionHistory = await generateTransactionBasedNetWorth(currentValue, range);
+                
+                // If we got more than one data point, use transaction-based history
+                if (transactionHistory.length > 1) {
+                    console.log('✅ Using transaction-based net worth history with', transactionHistory.length, 'points');
+                    return transactionHistory;
+                }
+            } catch (error) {
+                console.log('⚠️ Transaction-based history failed, falling back to balance-based');
+            }
+            
+            // Fallback to balance-based history
+            console.log('📊 Using balance-based net worth history');
             const balances = await loadAccountBalances();
             const accountsData = savingsAccounts || [];
 
@@ -13270,7 +13286,149 @@ margin-right: 0.5rem;
             return history;
         }
 
+        /**
+         * Generate net worth history based on transaction data
+         */
+        async function generateTransactionBasedNetWorth(currentNetWorth, range) {
+            console.log('🔄 Generating transaction-based net worth for range:', range);
+            
+            // Determine sampling parameters based on range
+            let totalDays = 30;
+            let sampleEveryNDays = 1;
+            
+            switch (range) {
+                case '1m':
+                    totalDays = 30;
+                    sampleEveryNDays = 1; // Daily
+                    break;
+                case '3m':
+                    totalDays = 90;
+                    sampleEveryNDays = 3; // Every 3 days
+                    break;
+                case '6m':
+                    totalDays = 180;
+                    sampleEveryNDays = 7; // Weekly
+                    break;
+                case 'ytd':
+                    const now = new Date();
+                    const startOfYear = new Date(now.getFullYear(), 0, 1);
+                    totalDays = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
+                    sampleEveryNDays = totalDays > 180 ? 14 : 7; // Bi-weekly or weekly
+                    break;
+                case '1y':
+                    totalDays = 365;
+                    sampleEveryNDays = 14; // Bi-weekly
+                    break;
+                case 'all':
+                default:
+                    totalDays = 365;
+                    sampleEveryNDays = 30; // Monthly
+                    break;
+            }
+            
+            try {
+                // Fetch transaction data for the date range
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(endDate.getDate() - totalDays);
+                
+                console.log('📅 Fetching transactions from', startDate.toISOString().split('T')[0], 'to', endDate.toISOString().split('T')[0]);
+                
+                // Use the plaid service to fetch transactions
+                const sessionToken = localStorage.getItem('clerk_session_token');
+                if (!sessionToken) {
+                    console.log('⚠️ No session token, falling back to current value only');
+                    return [{ date: endDate.toISOString().split('T')[0], value: currentNetWorth }];
+                }
+                
+                const response = await fetch(`${window.plaidService.baseUrl}/api/transactions/range?start_date=${startDate.toISOString().split('T')[0]}&days=${totalDays}&category_summary=false`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.log('⚠️ Failed to fetch transactions, falling back to current value only');
+                    return [{ date: endDate.toISOString().split('T')[0], value: currentNetWorth }];
+                }
+                
+                const data = await response.json();
+                const transactions = data.transactions || [];
+                console.log('💳 Fetched', transactions.length, 'transactions');
+                
+                if (transactions.length === 0) {
+                    console.log('⚠️ No transactions found, falling back to current value only');
+                    return [{ date: endDate.toISOString().split('T')[0], value: currentNetWorth }];
+                }
+                
+                // Generate historical net worth points
+                const history = [];
+                let runningNetWorth = currentNetWorth;
+                
+                // Create sample points going backwards in time
+                for (let dayOffset = 0; dayOffset <= totalDays; dayOffset += sampleEveryNDays) {
+                    const currentDate = new Date(endDate);
+                    currentDate.setDate(endDate.getDate() - dayOffset);
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    
+                    if (dayOffset === 0) {
+                        // Current date - use current net worth
+                        history.unshift({ date: dateStr, value: currentNetWorth });
+                    } else {
+                        // Calculate net worth for this historical date
+                        // Find transactions between this date and the next sample point
+                        const nextDate = new Date(currentDate);
+                        nextDate.setDate(currentDate.getDate() + sampleEveryNDays);
+                        
+                        const periodTransactions = transactions.filter(txn => {
+                            const txnDate = new Date(txn.date);
+                            return txnDate >= currentDate && txnDate < nextDate;
+                        });
+                        
+                        // Apply transaction impacts to calculate historical balance
+                        let periodImpact = 0;
+                        periodTransactions.forEach(txn => {
+                            // Positive amounts are expenses (money out), negative are income (money in)
+                            // For net worth calculation, expenses reduce net worth, income increases it
+                            periodImpact -= txn.amount; // Reverse the transaction impact
+                        });
+                        
+                        runningNetWorth += periodImpact;
+                        history.unshift({ date: dateStr, value: Math.max(0, runningNetWorth) });
+                    }
+                }
+                
+                console.log('📊 Generated', history.length, 'net worth data points');
+                console.log('📈 Net worth range:', Math.min(...history.map(h => h.value)), 'to', Math.max(...history.map(h => h.value)));
+                
+                return history;
+                
+            } catch (error) {
+                console.error('❌ Error generating transaction-based net worth:', error);
+                // Fallback to current value only
+                return [{ date: new Date().toISOString().split('T')[0], value: currentNetWorth }];
+            }
+        }
+
         async function generateAssetsHistory(currentValue, range) {
+            // Try transaction-based history first (for assets calculation)
+            try {
+                console.log('🎯 Attempting transaction-based assets history');
+                const transactionHistory = await generateTransactionBasedNetWorth(currentValue, range);
+                
+                // If we got more than one data point, use transaction-based history
+                if (transactionHistory.length > 1) {
+                    console.log('✅ Using transaction-based assets history with', transactionHistory.length, 'points');
+                    return transactionHistory;
+                }
+            } catch (error) {
+                console.log('⚠️ Transaction-based assets history failed, falling back to balance-based');
+            }
+            
+            // Fallback to balance-based history
+            console.log('📊 Using balance-based assets history');
             const balances = await loadAccountBalances();
             const accountsData = savingsAccounts || [];
 
