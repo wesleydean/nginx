@@ -6172,7 +6172,7 @@ margin-right: 0.5rem;
                         <div class="card home-section" onclick="handleAccountsNetWorthCardClick(event)">
                             <div class="card-header home-section-header">
                                 <div class="section-header-left">
-                                    <h3 class="section-title" id="accountsNetWorthTitle">$85,000 total assets</h3>
+                                    <h3 class="section-title" id="accountsNetWorthTitle">$85,000 net worth</h3>
                                     <div class="section-change" id="accountsNetWorthChange">
                                         <i data-lucide="arrow-up" class="w-4 h-4 inline"></i>
                                         <span>$210.32 (0.3%)</span>
@@ -13629,99 +13629,6 @@ margin-right: 0.5rem;
             }
         }
 
-        async function generateAssetsHistory(currentValue, range) {
-            console.log('🎯 generateAssetsHistory called with:', { currentValue, range });
-            
-            // Tier 1: Try snapshot-based API first (most efficient)
-            try {
-                console.log('📊 Attempting snapshot-based assets history via API');
-                
-                // Calculate date range based on selection
-                let days = 30;
-                switch (range) {
-                    case '1m': days = 30; break;
-                    case '3m': days = 90; break;
-                    case '6m': days = 180; break;
-                    case 'ytd':
-                        const now = new Date();
-                        const startOfYear = new Date(now.getFullYear(), 0, 1);
-                        days = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24));
-                        break;
-                    case '1y': days = 365; break;
-                    case 'all': days = 1095; break;
-                    default: days = 30;
-                }
-                
-                const startDate = new Date();
-                startDate.setDate(startDate.getDate() - days);
-                const startDateStr = startDate.toISOString().split('T')[0];
-                
-                console.log('📅 Fetching snapshots from', startDateStr, 'for', days, 'days');
-                
-                const sessionToken = await window.plaidService.getClerkSessionToken();
-                
-                // Get net worth snapshots from API (assets are part of net worth calculation)
-                const response = await fetch(`${window.plaidService.baseUrl}/api/snapshots/net-worth?start_date=${startDateStr}&days=${days}`, {
-                    headers: {
-                        'Authorization': `Bearer ${sessionToken}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('🎯 API response:', data);
-                    
-                    if (data.snapshots && data.snapshots.length > 0) {
-                        // Use assets portion of net worth data
-                        const assetsHistory = data.snapshots.map(snapshot => ({
-                            date: snapshot.date,
-                            value: snapshot.assets || 0 // Use assets, not net worth
-                        }));
-                        
-                        console.log('✅ Using snapshot-based assets history with', assetsHistory.length, 'points');
-                        console.log('📈 Assets range:', Math.min(...assetsHistory.map(h => h.value)), 'to', Math.max(...assetsHistory.map(h => h.value)));
-                        console.log('💰 Sample assets data:', assetsHistory.slice(0, 3));
-                        
-                        // Check if we have meaningful assets data
-                        const maxAssets = Math.max(...assetsHistory.map(h => h.value));
-                        if (maxAssets > 0) {
-                            return assetsHistory;
-                        } else {
-                            console.log('⚠️ All assets values are 0, falling back to net worth for assets chart');
-                            // Fallback to using net worth data for assets chart
-                            return data.snapshots.map(snapshot => ({
-                                date: snapshot.date,
-                                value: Math.max(0, snapshot.value || 0) // Use net worth as fallback
-                            }));
-                        }
-                    }
-                }
-                
-                console.log('⚠️ Snapshot-based API returned no data, trying transaction-based fallback');
-                
-            } catch (error) {
-                console.log('⚠️ Snapshot-based assets history failed:', error, 'trying transaction-based');
-            }
-            
-            // Tier 2: Try transaction-based history (fallback)
-            try {
-                console.log('🎯 Attempting transaction-based assets history');
-                const transactionHistory = await generateTransactionBasedNetWorth(currentValue, range);
-                
-                // If we got more than one data point, use transaction-based history
-                if (transactionHistory.length > 1) {
-                    console.log('✅ Using transaction-based assets history with', transactionHistory.length, 'points');
-                    return transactionHistory;
-                }
-            } catch (error) {
-                console.log('⚠️ Transaction-based assets history failed, using single point');
-            }
-            
-            // Tier 3: Fallback to single current value
-            console.log('📊 Using single point fallback for assets');
-            return [{ date: new Date().toISOString().split('T')[0], value: currentValue }];
-        }
 
 
         function drawHomeNetWorthChart(data) {
@@ -14342,7 +14249,7 @@ margin-right: 0.5rem;
             await updateHomeNetWorthWithChart(rangeType);
         }
 
-        // Accounts Assets functions (showing total assets instead of net worth)
+        // Accounts Net Worth functions (showing net worth same as home page)
         async function updateAccountsNetWorthWithChart(range) {
             console.log('=== ACCOUNTS NET WORTH DEBUG ===');
             console.log('Range:', range);
@@ -14359,8 +14266,9 @@ margin-right: 0.5rem;
             showAccountsNetWorthSpinner();
             
             try {
-                // Calculate total assets from API data only
+                // Calculate net worth (assets - liabilities) from API data
                 let totalAssets = 0;
+                let totalLiabilities = 0;
 
                 // Use global savingsAccounts variable (loaded from API)
             
@@ -14404,27 +14312,30 @@ margin-right: 0.5rem;
                                    account.type === 'student_loan';
 
 
-                // Only count assets, not liabilities
+                // Separate assets and liabilities
                 if (!isLiability) {
                     totalAssets += balance;
                 } else {
+                    totalLiabilities += Math.abs(balance); // Ensure liabilities are positive
                 }
             });
 
-                // Use the actual total assets (no demo values)
-                const displayAssets = totalAssets;
-                console.log('Calculated total assets:', displayAssets);
+                // Calculate net worth (assets - liabilities)
+                const displayNetWorth = totalAssets - totalLiabilities;
+                console.log('Calculated net worth:', displayNetWorth);
+                console.log('Total assets:', totalAssets);
+                console.log('Total liabilities:', totalLiabilities);
 
                 // Check if we have any real balance data
-                if (displayAssets === 0) {
-                    console.log('No assets found, showing placeholder');
+                if (displayNetWorth === 0 && totalAssets === 0) {
+                    console.log('No net worth data found, showing placeholder');
                     // Show placeholder when no balance data is available
                     showAccountsNetWorthPlaceholder();
                     return;
                 }
 
                 // Generate net worth history for chart (same as home page)
-                const netWorthHistory = await generateSnapshotBasedNetWorth(displayAssets, range);
+                const netWorthHistory = await generateSnapshotBasedNetWorth(displayNetWorth, range);
                 console.log('Net worth history:', netWorthHistory);
 
                 // Draw the net worth chart
@@ -14438,7 +14349,7 @@ margin-right: 0.5rem;
                 }
 
                 // Update the title and change indicator
-                updateAccountsNetWorthDisplay(displayAssets, range);
+                updateAccountsNetWorthDisplay(displayNetWorth, range);
                 console.log('=====================================');
             } catch (error) {
                 console.error('Error updating accounts net worth chart:', error);
@@ -14600,7 +14511,7 @@ margin-right: 0.5rem;
             }
         }
 
-        function updateAccountsNetWorthDisplay(totalAssets, range) {
+        function updateAccountsNetWorthDisplay(netWorth, range) {
             // Calculate change percentage based on range (mock data for now)
             let changePercent = 0;
             let rangeLabel = '';
@@ -14637,14 +14548,14 @@ margin-right: 0.5rem;
             const assetsChange = document.getElementById('accountsNetWorthChange');
 
             if (assetsTitle) {
-                assetsTitle.textContent = `${formatCurrency(totalAssets)} total assets`;
+                assetsTitle.textContent = `${formatCurrency(netWorth)} net worth`;
             }
 
             if (assetsChange) {
                 const isPositive = changePercent > 0;
                 const arrow = isPositive ? 'arrow-up' : 'arrow-down';
                 const color = isPositive ? '#5fa42e' : '#ef4444';
-                const changeAmount = (totalAssets * changePercent / 100).toFixed(2);
+                const changeAmount = (netWorth * changePercent / 100).toFixed(2);
                 assetsChange.innerHTML = `
                         <i data-lucide="${arrow}" class="w-4 h-4 inline" style="color: ${color}"></i>
                         <span style="color: ${color}">$${Math.abs(changeAmount)} (${Math.abs(changePercent).toFixed(1)}%)</span>
