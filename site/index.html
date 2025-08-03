@@ -13131,7 +13131,14 @@ margin-right: 0.5rem;
                 console.log('Net worth history:', netWorthHistory);
 
                 // Draw the net worth chart
-                drawHomeNetWorthChart(netWorthHistory);
+                console.log('🚀 About to call drawHomeNetWorthChart with data:', netWorthHistory);
+                console.log('🔍 Function exists:', typeof drawHomeNetWorthChart);
+                try {
+                    drawHomeNetWorthChart(netWorthHistory);
+                    console.log('✅ drawHomeNetWorthChart call completed');
+                } catch (error) {
+                    console.error('❌ Error in drawHomeNetWorthChart:', error);
+                }
 
                 // Update the title and change indicator
                 updateHomeNetWorthDisplay(displayNetWorth, range);
@@ -13388,6 +13395,9 @@ margin-right: 0.5rem;
                 console.log('❌ Home net worth canvas not found');
                 return;
             }
+            console.log('✅ Canvas found:', canvas);
+            console.log('📐 Canvas dimensions:', { width: canvas.width, height: canvas.height });
+            console.log('👁️ Canvas style display:', canvas.style.display);
 
             // Set canvas size to match container (same height as cashflow chart)
             const container = canvas.parentElement;
@@ -14058,7 +14068,14 @@ margin-right: 0.5rem;
                 console.log('Assets history:', assetsHistory);
 
                 // Draw the assets chart
-                drawAccountsNetWorthChart(assetsHistory);
+                console.log('🚀 About to call drawAccountsNetWorthChart with data:', assetsHistory);
+                console.log('🔍 Function exists:', typeof drawAccountsNetWorthChart);
+                try {
+                    drawAccountsNetWorthChart(assetsHistory);
+                    console.log('✅ drawAccountsNetWorthChart call completed');
+                } catch (error) {
+                    console.error('❌ Error in drawAccountsNetWorthChart:', error);
+                }
 
                 // Update the title and change indicator
                 updateAccountsNetWorthDisplay(displayAssets, range);
@@ -14077,6 +14094,9 @@ margin-right: 0.5rem;
                 console.log('❌ Accounts net worth canvas not found');
                 return;
             }
+            console.log('✅ Canvas found:', canvas);
+            console.log('📐 Canvas dimensions:', { width: canvas.width, height: canvas.height });
+            console.log('👁️ Canvas style display:', canvas.style.display);
 
             // Set canvas size to match container (same as home chart)
             const container = canvas.parentElement;
