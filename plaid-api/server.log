@@ -1,0 +1,6 @@
+
+> plaid-api@1.0.0 start
+> node bin/www
+
+Starting October 8, 2024, the Node SDK is entering a three-month notice period. We encourage everyone to migrate to @clerk/express. For full details, please see our changelog: https://clerk.com/changelog/2024-10-08-express-sdk
+[dotenv@17.2.0] injecting env (8) from .env (tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`)

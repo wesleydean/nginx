@@ -13342,7 +13342,8 @@ margin-right: 0.5rem;
                 console.log('📅 Fetching snapshots from', startDate.toISOString().split('T')[0], 'for', totalDays, 'days');
                 
                 // Fetch snapshots from API
-                const sessionToken = localStorage.getItem('clerk_session_token');
+                const sessionToken = await window.plaidService.getClerkSessionToken();
+                console.log('🔑 Session token check:', sessionToken ? 'Found' : 'Missing');
                 if (!sessionToken) {
                     console.log('⚠️ No session token, falling back to current value only');
                     return [{ date: endDate.toISOString().split('T')[0], value: currentNetWorth }];
@@ -13436,7 +13437,7 @@ margin-right: 0.5rem;
                 console.log('📅 Fetching transactions from', startDate.toISOString().split('T')[0], 'to', endDate.toISOString().split('T')[0]);
                 
                 // Use the plaid service to fetch transactions
-                const sessionToken = localStorage.getItem('clerk_session_token');
+                const sessionToken = await window.plaidService.getClerkSessionToken();
                 if (!sessionToken) {
                     console.log('⚠️ No session token, falling back to current value only');
                     return [{ date: endDate.toISOString().split('T')[0], value: currentNetWorth }];

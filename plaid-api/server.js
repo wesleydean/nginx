@@ -624,7 +624,7 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
         account_id: `sample_credit_${clerkUserId}`,
         name: 'Credit Card',
         original_name: 'Credit Card',
-        type: 'credit',
+        type: 'credit_card',
         subtype: 'credit_card',
         institution_name: 'Sample Credit',
         mask: '0003',
@@ -699,8 +699,11 @@ app.post('/api/seed/sample-data', clerkAuth, async (req, res) => {
     const addedTransactions = await database.addTransactions(clerkUserId, sampleTransactions);
     
     // Generate account balance snapshots for the past 90 days
-    console.log('Generating account balance snapshots...');
+    console.log('🔄 Starting account balance snapshots generation...');
+    console.log('📊 Sample accounts to process:', sampleAccounts.length);
+    console.log('💳 Sample transactions to use:', sampleTransactions.length);
     const snapshotsGenerated = await generateAccountSnapshots(clerkUserId, sampleAccounts, sampleTransactions);
+    console.log('✅ Snapshots generation completed:', snapshotsGenerated);
     
     res.json({
       success: true,
