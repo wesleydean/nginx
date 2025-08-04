@@ -1256,7 +1256,6 @@
             text-align: center;
             margin-bottom: 0;
             position: relative;
-            min-height: 120px;
             height: auto;
         }
 
@@ -1293,6 +1292,8 @@
             position: relative;
             z-index: 2;
             white-space: nowrap;
+            min-height: 0;
+            height: auto;
         }
         
         .timerange-btn.active {
@@ -6176,8 +6177,8 @@ margin-right: 0.5rem;
                                 <div class="section-subtitle" id="budgetSubtitle">Monthly overview</div>
                             </div>
                             <div class="budget-timerange-toggle">
-                                <button class="timerange-btn active" data-range="monthly" onclick="event.stopPropagation(); toggleBudgetTimeRange('monthly')">Monthly</button>
-                                <button class="timerange-btn" data-range="yearly" onclick="event.stopPropagation(); toggleBudgetTimeRange('yearly')">Yearly</button>
+                                <button class="timerange-btn active" data-range="monthly" onclick="event.stopPropagation(); toggleBudgetTimeRange('monthly')">Month</button>
+                                <button class="timerange-btn" data-range="yearly" onclick="event.stopPropagation(); toggleBudgetTimeRange('yearly')">Year</button>
                             </div>
                         </div>
                         <div class="card-content">
