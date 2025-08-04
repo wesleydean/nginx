@@ -13720,7 +13720,9 @@ margin-right: 0.5rem;
                         y: {
                             grid: { display: false },
                             border: { display: false },
-                            ticks: { display: false }
+                            ticks: { display: false },
+                            min: yMin,
+                            max: yMax
                         }
                     },
                     interaction: { intersect: false, mode: 'nearest' },
@@ -14455,6 +14457,14 @@ margin-right: 0.5rem;
             // Prepare data for Chart.js
             const labels = data.map(d => d.date);
             const netWorthData = data.map(d => d.value);
+            
+            // Calculate fixed scale bounds to prevent auto-scaling
+            const minValue = Math.min(...netWorthData);
+            const maxValue = Math.max(...netWorthData);
+            const range = maxValue - minValue;
+            const padding = range * 0.1; // 10% padding
+            const yMin = minValue - padding;
+            const yMax = maxValue + padding;
 
             accountsNetWorthChart = new Chart(ctx, {
                 type: 'line',
@@ -14505,7 +14515,9 @@ margin-right: 0.5rem;
                         y: {
                             grid: { display: false },
                             border: { display: false },
-                            ticks: { display: false }
+                            ticks: { display: false },
+                            min: yMin,
+                            max: yMax
                         }
                     },
                     interaction: { intersect: false, mode: 'nearest' },
