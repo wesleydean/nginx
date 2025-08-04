@@ -13662,13 +13662,6 @@ margin-right: 0.5rem;
             const labels = data.map(d => d.date);
             const netWorthData = data.map(d => d.value);
 
-            // Create gradient for net worth fill (bottom-up fade from chart bottom)
-            const netWorthGradient = ctx.createLinearGradient(0, 0, 0, 400);
-            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at top
-            netWorthGradient.addColorStop(0.2, 'rgba(16, 185, 129, 0.02)');
-            netWorthGradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
-            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // More opaque at bottom
-
             homeNetWorthChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -13677,9 +13670,9 @@ margin-right: 0.5rem;
                         label: 'Net Worth',
                         data: netWorthData,
                         borderColor: 'rgb(16, 185, 129)', // Green theme
-                        backgroundColor: netWorthGradient,
+                        backgroundColor: 'transparent',
                         tension: 0.6,
-                        fill: 'origin',
+                        fill: false,
                         pointRadius: 0,
                         borderWidth: 3,
                         pointHitRadius: 20,
@@ -13722,6 +13715,51 @@ margin-right: 0.5rem;
                     }
                 },
                 plugins: [{
+                    id: 'absoluteGradient',
+                    beforeDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const chartArea = chart.chartArea;
+                        const yAxis = chart.scales.y;
+                        const xAxis = chart.scales.x;
+                        
+                        if (!chart.data.datasets[0].data.length) return;
+                        
+                        // Create absolute gradient from chart bottom to top
+                        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                        gradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at bottom
+                        gradient.addColorStop(0.2, 'rgba(16, 185, 129, 0.02)');
+                        gradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
+                        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // Opaque at top
+                        
+                        // Get data points and zero line position
+                        const dataset = chart.data.datasets[0];
+                        const zeroY = yAxis.getPixelForValue(0);
+                        
+                        // Draw filled area from data line to zero line (chart bottom baseline)
+                        ctx.save();
+                        ctx.fillStyle = gradient;
+                        
+                        ctx.beginPath();
+                        // Start at zero line for first point
+                        const firstX = xAxis.getPixelForValue(0);
+                        ctx.moveTo(firstX, zeroY);
+                        
+                        // Draw line following the data
+                        dataset.data.forEach((value, index) => {
+                            const x = xAxis.getPixelForValue(index);
+                            const y = yAxis.getPixelForValue(value);
+                            ctx.lineTo(x, y);
+                        });
+                        
+                        // Complete the fill back to zero line
+                        const lastX = xAxis.getPixelForValue(dataset.data.length - 1);
+                        ctx.lineTo(lastX, zeroY);
+                        ctx.closePath();
+                        
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                }, {
                     id: 'horizontalLine',
                     afterDraw: function(chart) {
                         const ctx = chart.ctx;
@@ -14368,13 +14406,6 @@ margin-right: 0.5rem;
             const labels = data.map(d => d.date);
             const netWorthData = data.map(d => d.value);
 
-            // Create gradient for net worth fill (bottom-up fade from chart bottom)
-            const netWorthGradient = ctx.createLinearGradient(0, 0, 0, 400);
-            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at top
-            netWorthGradient.addColorStop(0.2, 'rgba(16, 185, 129, 0.02)');
-            netWorthGradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
-            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // More opaque at bottom
-
             accountsNetWorthChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -14383,9 +14414,9 @@ margin-right: 0.5rem;
                         label: 'Net Worth',
                         data: netWorthData,
                         borderColor: 'rgb(16, 185, 129)', // Green theme
-                        backgroundColor: netWorthGradient,
+                        backgroundColor: 'transparent',
                         tension: 0.6,
-                        fill: 'origin',
+                        fill: false,
                         pointRadius: 0,
                         borderWidth: 3,
                         pointHitRadius: 20,
@@ -14428,6 +14459,51 @@ margin-right: 0.5rem;
                     }
                 },
                 plugins: [{
+                    id: 'absoluteGradient',
+                    beforeDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const chartArea = chart.chartArea;
+                        const yAxis = chart.scales.y;
+                        const xAxis = chart.scales.x;
+                        
+                        if (!chart.data.datasets[0].data.length) return;
+                        
+                        // Create absolute gradient from chart bottom to top
+                        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                        gradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at bottom
+                        gradient.addColorStop(0.2, 'rgba(16, 185, 129, 0.02)');
+                        gradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
+                        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // Opaque at top
+                        
+                        // Get data points and zero line position
+                        const dataset = chart.data.datasets[0];
+                        const zeroY = yAxis.getPixelForValue(0);
+                        
+                        // Draw filled area from data line to zero line (chart bottom baseline)
+                        ctx.save();
+                        ctx.fillStyle = gradient;
+                        
+                        ctx.beginPath();
+                        // Start at zero line for first point
+                        const firstX = xAxis.getPixelForValue(0);
+                        ctx.moveTo(firstX, zeroY);
+                        
+                        // Draw line following the data
+                        dataset.data.forEach((value, index) => {
+                            const x = xAxis.getPixelForValue(index);
+                            const y = yAxis.getPixelForValue(value);
+                            ctx.lineTo(x, y);
+                        });
+                        
+                        // Complete the fill back to zero line
+                        const lastX = xAxis.getPixelForValue(dataset.data.length - 1);
+                        ctx.lineTo(lastX, zeroY);
+                        ctx.closePath();
+                        
+                        ctx.fill();
+                        ctx.restore();
+                    }
+                }, {
                     id: 'horizontalLine',
                     afterDraw: function(chart) {
                         const ctx = chart.ctx;
