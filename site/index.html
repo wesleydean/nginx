@@ -13749,8 +13749,11 @@ margin-right: 0.5rem;
                         
                         if (!chart.data.datasets[0].data.length) return;
                         
-                        // Get animation progress (0 to 1) from stored value
-                        const animationProgress = chart.gradientProgress !== undefined ? chart.gradientProgress : 1;
+                        // Skip gradient animation if chart is being interacted with
+                        let animationProgress = 1;
+                        if (!chart.isInteracting) {
+                            animationProgress = chart.gradientProgress !== undefined ? chart.gradientProgress : 1;
+                        }
                         
                         // Calculate visible width based on animation progress
                         const chartWidth = chartArea.right - chartArea.left;
@@ -14544,8 +14547,11 @@ margin-right: 0.5rem;
                         
                         if (!chart.data.datasets[0].data.length) return;
                         
-                        // Get animation progress (0 to 1) from stored value
-                        const animationProgress = chart.gradientProgress !== undefined ? chart.gradientProgress : 1;
+                        // Skip gradient animation if chart is being interacted with
+                        let animationProgress = 1;
+                        if (!chart.isInteracting) {
+                            animationProgress = chart.gradientProgress !== undefined ? chart.gradientProgress : 1;
+                        }
                         
                         // Calculate visible width based on animation progress
                         const chartWidth = chartArea.right - chartArea.left;
@@ -14706,6 +14712,9 @@ margin-right: 0.5rem;
 
                 // Store active index for horizontal line plugin
                 chart.activeIndex = activeIndex;
+                
+                // Mark chart as actively being interacted with to prevent gradient animation
+                chart.isInteracting = true;
 
                 // Show active point with hollow green circle
                 chart.data.datasets.forEach((dataset, datasetIndex) => {
@@ -14740,6 +14749,9 @@ margin-right: 0.5rem;
 
                 // Clear active index for horizontal line plugin
                 chart.activeIndex = undefined;
+                
+                // Clear interaction flag to allow gradient animations again
+                chart.isInteracting = false;
 
                 // Hide all points
                 chart.data.datasets.forEach(dataset => {
