@@ -8499,9 +8499,8 @@ margin-right: 0.5rem;
                 }
             });
 
-            // --- INTERACTION: LONG PRESS THEN DRAG ---
+            // --- INTERACTION: IMMEDIATE RESPONSIVE CROSSHAIR ---
             let interactionEnabled = false;
-            let longPressTimeout = null;
             let lastActiveIndex = null;
 
             /**
@@ -8539,13 +8538,10 @@ margin-right: 0.5rem;
             chartCanvas.ontouchend = null;
             chartCanvas.ontouchcancel = null;
 
-            // Mouse events: require 1-second long press before enabling drag
+            // Mouse events: immediate interaction on mouse down
             chartCanvas.addEventListener('mousedown', function (e) {
-                if (longPressTimeout) clearTimeout(longPressTimeout);
-                longPressTimeout = setTimeout(() => {
-                    const x = e.clientX - chartCanvas.getBoundingClientRect().left;
-                    enableChartInteraction(x);
-                }, 200); // 1 second long press required
+                const x = e.clientX - chartCanvas.getBoundingClientRect().left;
+                enableChartInteraction(x);
             });
             chartCanvas.addEventListener('mousemove', function (e) {
                 if (!interactionEnabled) return;
@@ -8558,22 +8554,18 @@ margin-right: 0.5rem;
                 }
             });
             chartCanvas.addEventListener('mouseup', function () {
-                if (longPressTimeout) clearTimeout(longPressTimeout);
                 if (interactionEnabled) disableChartInteraction();
             });
             chartCanvas.addEventListener('mouseleave', function () {
-                if (longPressTimeout) clearTimeout(longPressTimeout);
                 if (interactionEnabled) disableChartInteraction();
             });
 
-            // Touch events: require 1-second long press before enabling drag
-            // Use initial touch position to detect direction
+            // Touch events: immediate interaction with direction detection
             let initialTouchY = 0;
             let initialTouchX = 0;
             let touchDirection = null; // 'vertical' or 'horizontal'
 
             chartCanvas.addEventListener('touchstart', function (e) {
-                if (longPressTimeout) clearTimeout(longPressTimeout);
                 if (!e.touches || e.touches.length === 0) return;
 
                 // Store initial touch position
@@ -8581,10 +8573,9 @@ margin-right: 0.5rem;
                 initialTouchY = e.touches[0].clientY;
                 touchDirection = null; // Reset direction on new touch
 
-                longPressTimeout = setTimeout(() => {
-                    const x = e.touches[0].clientX - chartCanvas.getBoundingClientRect().left;
-                    enableChartInteraction(x);
-                }, 200); // 1 second long press required
+                // Enable interaction immediately on touch
+                const x = e.touches[0].clientX - chartCanvas.getBoundingClientRect().left;
+                enableChartInteraction(x);
             });
 
             chartCanvas.addEventListener('touchmove', function (e) {
@@ -8598,7 +8589,6 @@ margin-right: 0.5rem;
                     // If moving more vertically than horizontally, allow normal scroll
                     if (deltaY > deltaX && deltaY > 10) {
                         touchDirection = 'vertical';
-                        if (longPressTimeout) clearTimeout(longPressTimeout);
                         return;
                     } else if (deltaX > 10) {
                         touchDirection = 'horizontal';
@@ -8633,11 +8623,9 @@ margin-right: 0.5rem;
                 }
             }, { passive: false }); // Need to set passive: false to call preventDefault
             chartCanvas.addEventListener('touchend', function () {
-                if (longPressTimeout) clearTimeout(longPressTimeout);
                 if (interactionEnabled) disableChartInteraction();
             });
             chartCanvas.addEventListener('touchcancel', function () {
-                if (longPressTimeout) clearTimeout(longPressTimeout);
                 if (interactionEnabled) disableChartInteraction();
             });
 
@@ -13653,150 +13641,92 @@ margin-right: 0.5rem;
 
 
 
+        let homeNetWorthChart = null;
+        
         function drawHomeNetWorthChart(data) {
-            console.log('🎨 Drawing home net worth chart with data:', data);
-            const canvas = document.getElementById('homeNetWorthCanvas');
-            if (!canvas) {
+            console.log('🎨 Drawing home net worth chart with Chart.js, data:', data);
+            const ctx = document.getElementById('homeNetWorthCanvas').getContext('2d');
+            if (!ctx) {
                 console.log('❌ Home net worth canvas not found');
                 return;
             }
-            console.log('✅ Canvas found:', canvas);
-            console.log('📐 Canvas dimensions:', { width: canvas.width, height: canvas.height });
-            console.log('👁️ Canvas style display:', canvas.style.display);
 
-            // Set canvas size to match container (same height as cashflow chart)
-            const container = canvas.parentElement;
-            const rect = container.getBoundingClientRect();
-            const containerHeight = Math.max(rect.height, 250); // Minimum 250px height like cashflow
-
-            canvas.width = rect.width * window.devicePixelRatio;
-            canvas.height = containerHeight * window.devicePixelRatio;
-            canvas.style.width = rect.width + 'px';
-            canvas.style.height = containerHeight + 'px';
-
-            const ctx = canvas.getContext('2d');
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-            const width = rect.width;
-            const height = containerHeight;
-
-            // Clear canvas
-            ctx.clearRect(0, 0, width, height);
+            // Destroy existing chart if it exists
+            if (homeNetWorthChart) {
+                homeNetWorthChart.destroy();
+            }
 
             if (!data.length) return;
 
-            // Chart dimensions (increased left margin for Y-axis labels)
-            const margin = { top: 20, right: 20, bottom: 20, left: 60 };
-            const chartWidth = width - margin.left - margin.right;
-            const chartHeight = height - margin.top - margin.bottom;
+            // Prepare data for Chart.js
+            const labels = data.map(d => d.date);
+            const netWorthData = data.map(d => d.value);
 
-            // Find min/max values
-            const values = data.map(d => d.value);
-            const minValue = Math.min(...values);
-            const maxValue = Math.max(...values);
-            const valueRange = maxValue - minValue;
+            // Create gradient for net worth fill
+            const netWorthGradient = ctx.createLinearGradient(0, 0, 0, 400);
+            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0.25)'); // Green with transparency
+            netWorthGradient.addColorStop(0.6, 'rgba(16, 185, 129, 0.05)');
+            netWorthGradient.addColorStop(0.8, 'rgba(16, 185, 129, 0.02)');
+            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
 
-            // Round maxValue to nearest appropriate value for cleaner labels
-            const roundedMax = Math.ceil(maxValue / 10000) * 10000;
-            const adjustedRange = roundedMax - minValue;
-
-            // Helper functions
-            const xScale = (index) => {
-                if (data.length === 1) {
-                    // Center single data point
-                    return margin.left + chartWidth / 2;
+            homeNetWorthChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Net Worth',
+                        data: netWorthData,
+                        borderColor: 'rgb(16, 185, 129)', // Green theme
+                        backgroundColor: netWorthGradient,
+                        tension: 0.6,
+                        fill: true,
+                        pointRadius: 0,
+                        borderWidth: 3,
+                        pointHitRadius: 20,
+                        pointBackgroundColor: 'transparent',
+                        pointBorderColor: 'transparent',
+                        pointBorderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { display: false },
+                            border: { display: false }
+                        },
+                        y: {
+                            grid: { display: false },
+                            border: { display: false },
+                            ticks: { display: false }
+                        }
+                    },
+                    interaction: { intersect: false, mode: 'nearest' },
+                    hover: { intersect: false, mode: 'nearest', enabled: false },
+                    elements: {
+                        point: {
+                            hitRadius: 30,
+                            hoverRadius: 0,
+                            radius: 0,
+                            hoverBackgroundColor: 'transparent',
+                            hoverBorderColor: 'transparent',
+                            hoverBorderWidth: 0
+                        },
+                        line: { tension: 0.6 }
+                    }
                 }
-                return margin.left + (index / (data.length - 1)) * chartWidth;
-            };
-            const yScale = (value) => margin.top + chartHeight - ((value - minValue) / adjustedRange) * chartHeight;
-
-            // Draw reference line at current (latest) value
-            const currentValue = data.length > 0 ? data[data.length - 1].value : 0;
-            const currentY = yScale(currentValue);
-
-            ctx.strokeStyle = '#9ca3af';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([4, 4]); // Dashed line
-            ctx.beginPath();
-            ctx.moveTo(margin.left, currentY);
-            ctx.lineTo(margin.left + chartWidth, currentY);
-            ctx.stroke();
-
-            // Current amount label
-            ctx.fillStyle = '#6b7280';
-            ctx.font = '12px sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(`$${(currentValue / 1000).toFixed(1)}k`, 10, currentY - 8);
-
-            // Reset line dash for chart lines
-            ctx.setLineDash([]);
-
-            // Create gradient
-            const gradient = ctx.createLinearGradient(0, 0, 0, height);
-            gradient.addColorStop(0, '#5fa42e');
-            gradient.addColorStop(1, '#4a7c23');
-
-            // Draw area fill
-            ctx.globalAlpha = 0.1;
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.moveTo(xScale(0), yScale(data[0].value));
-            data.forEach((point, index) => {
-                ctx.lineTo(xScale(index), yScale(point.value));
             });
-            ctx.lineTo(xScale(data.length - 1), margin.top + chartHeight);
-            ctx.lineTo(xScale(0), margin.top + chartHeight);
-            ctx.closePath();
-            ctx.fill();
-            ctx.globalAlpha = 1;
 
-            // Draw smooth line using bezier curves with animation
-            if (data.length > 1) {
-                // Convert data to points for animation
-                const points = data.map((point, index) => ({
-                    x: xScale(index),
-                    y: yScale(point.value)
-                }));
-
-                // Use smooth curve animation for better visual appeal (with fallback)
-                try {
-                    animateSmoothCurvePath(ctx, points, {
-                        strokeStyle: '#5fa42e',
-                        lineWidth: 2,
-                        duration: 1000,
-                        smoothness: 0.6 // More curvy smoothing
-                    });
-                } catch (error) {
-                    console.log('⚠️ Smooth curve failed, using linear animation:', error);
-                    // Fallback to linear animation
-                    animateLinePath(ctx, points, {
-                        strokeStyle: '#5fa42e',
-                        lineWidth: 2,
-                        duration: 1000
-                    });
-                }
-            } else if (data.length === 1) {
-                // Handle single data point - draw a circle/dot
-                console.log('⭕ Drawing single data point at value:', data[0].value);
-                const pointX = xScale(0);
-                const pointY = yScale(data[0].value);
-                console.log('📍 Home chart point coordinates:', { x: pointX, y: pointY });
-                
-                // Draw a circle for the single data point
-                ctx.fillStyle = '#5fa42e';
-                ctx.beginPath();
-                ctx.arc(pointX, pointY, 4, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                // Add a subtle glow effect
-                ctx.shadowColor = '#5fa42e';
-                ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.arc(pointX, pointY, 3, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                console.log('✅ Home net worth chart single point drawn successfully');
-            }
+            // Add interactive crosshair system (will be implemented in unified system)
+            setupNetWorthChartInteraction(homeNetWorthChart, 'homeNetWorthOverlay', 'homeNetWorthCrosshair');
+            
+            console.log('✅ Home net worth Chart.js chart created successfully');
         }
 
         function updateHomeNetWorthDisplay(totalNetWorth, range) {
@@ -14380,157 +14310,268 @@ margin-right: 0.5rem;
             }
         }
 
+        let accountsNetWorthChart = null;
+        
         function drawAccountsNetWorthChart(data) {
-            console.log('🎨 Drawing accounts net worth chart with data:', data);
-            console.log('📊 Data length:', data?.length);
-            console.log('📈 Data sample:', data?.slice(0, 3));
-            
-            const canvas = document.getElementById('accountsNetWorthCanvas');
-            if (!canvas) {
+            console.log('🎨 Drawing accounts net worth chart with Chart.js, data:', data);
+            const ctx = document.getElementById('accountsNetWorthCanvas').getContext('2d');
+            if (!ctx) {
                 console.log('❌ Accounts net worth canvas not found');
                 return;
             }
-            console.log('✅ Canvas found:', canvas);
-            console.log('📐 Canvas dimensions:', { width: canvas.width, height: canvas.height });
-            console.log('👁️ Canvas style display:', canvas.style.display);
-            console.log('📏 Canvas client dimensions:', { clientWidth: canvas.clientWidth, clientHeight: canvas.clientHeight });
-            console.log('🖼️ Canvas parent:', canvas.parentElement);
 
-            // Set canvas size to match container (same as home chart)
-            const container = canvas.parentElement;
-            const rect = container.getBoundingClientRect();
-            const containerHeight = Math.max(rect.height, 250); // Minimum 250px height
-
-            canvas.width = rect.width * window.devicePixelRatio;
-            canvas.height = containerHeight * window.devicePixelRatio;
-            canvas.style.width = rect.width + 'px';
-            canvas.style.height = containerHeight + 'px';
-
-            const ctx = canvas.getContext('2d');
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-            const width = rect.width;
-            const height = containerHeight;
-
-            // Clear canvas
-            ctx.clearRect(0, 0, width, height);
+            // Destroy existing chart if it exists
+            if (accountsNetWorthChart) {
+                accountsNetWorthChart.destroy();
+            }
 
             if (!data.length) return;
 
-            // Chart dimensions (proper margins for edge-to-edge feel)
-            const margin = { top: 20, right: 20, bottom: 20, left: 60 };
-            const chartWidth = width - margin.left - margin.right;
-            const chartHeight = height - margin.top - margin.bottom;
+            // Prepare data for Chart.js
+            const labels = data.map(d => d.date);
+            const netWorthData = data.map(d => d.value);
 
-            // Find min/max values
-            const values = data.map(d => d.value);
-            const minValue = Math.min(...values);
-            const maxValue = Math.max(...values);
-            const valueRange = maxValue - minValue;
+            // Create gradient for net worth fill
+            const netWorthGradient = ctx.createLinearGradient(0, 0, 0, 400);
+            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0.25)'); // Green with transparency
+            netWorthGradient.addColorStop(0.6, 'rgba(16, 185, 129, 0.05)');
+            netWorthGradient.addColorStop(0.8, 'rgba(16, 185, 129, 0.02)');
+            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
 
-            // Round maxValue to nearest appropriate value for cleaner labels
-            const roundedMax = Math.ceil(maxValue / 10000) * 10000;
-            const adjustedRange = roundedMax - minValue;
-
-            // Helper functions
-            const xScale = (index) => {
-                if (data.length === 1) {
-                    // Center single data point
-                    return margin.left + chartWidth / 2;
+            accountsNetWorthChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Net Worth',
+                        data: netWorthData,
+                        borderColor: 'rgb(16, 185, 129)', // Green theme
+                        backgroundColor: netWorthGradient,
+                        tension: 0.6,
+                        fill: true,
+                        pointRadius: 0,
+                        borderWidth: 3,
+                        pointHitRadius: 20,
+                        pointBackgroundColor: 'transparent',
+                        pointBorderColor: 'transparent',
+                        pointBorderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { display: false },
+                            border: { display: false }
+                        },
+                        y: {
+                            grid: { display: false },
+                            border: { display: false },
+                            ticks: { display: false }
+                        }
+                    },
+                    interaction: { intersect: false, mode: 'nearest' },
+                    hover: { intersect: false, mode: 'nearest', enabled: false },
+                    elements: {
+                        point: {
+                            hitRadius: 30,
+                            hoverRadius: 0,
+                            radius: 0,
+                            hoverBackgroundColor: 'transparent',
+                            hoverBorderColor: 'transparent',
+                            hoverBorderWidth: 0
+                        },
+                        line: { tension: 0.6 }
+                    }
                 }
-                return margin.left + (index / (data.length - 1)) * chartWidth;
-            };
-            const yScale = (value) => margin.top + chartHeight - ((value - minValue) / adjustedRange) * chartHeight;
+            });
 
-            // Draw reference line at current (latest) value
-            const currentValue = data.length > 0 ? data[data.length - 1].value : 0;
-            const currentY = yScale(currentValue);
+            // Add interactive crosshair system (will be implemented in unified system)
+            setupNetWorthChartInteraction(accountsNetWorthChart, 'accountsNetWorthOverlay', 'accountsNetWorthCrosshair');
+            
+            console.log('✅ Accounts net worth Chart.js chart created successfully');
+        }
 
-            ctx.strokeStyle = '#9ca3af';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([4, 4]); // Dashed line
-            ctx.beginPath();
-            ctx.moveTo(margin.left, currentY);
-            ctx.lineTo(margin.left + chartWidth, currentY);
-            ctx.stroke();
+        /**
+         * Sets up unified crosshair interaction system for Chart.js charts
+         */
+        function setupNetWorthChartInteraction(chart, overlayId, crosshairId) {
+            if (!chart || !chart.canvas) return;
 
-            // Current amount label
-            ctx.fillStyle = '#6b7280';
-            ctx.font = '12px sans-serif';
-            ctx.textAlign = 'left';
-            ctx.fillText(`$${(currentValue / 1000).toFixed(1)}k`, 10, currentY - 8);
-
-            // Reset line dash for chart lines
-            ctx.setLineDash([]);
-
-            // Create correct gradient (matching home chart)
-            const gradient = ctx.createLinearGradient(0, 0, 0, height);
-            gradient.addColorStop(0, '#5fa42e');
-            gradient.addColorStop(1, '#4a7c23');
-
-            // Draw area fill
-            ctx.globalAlpha = 0.1;
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            ctx.moveTo(xScale(0), yScale(data[0].value));
-
-            for (let i = 1; i < data.length; i++) {
-                ctx.lineTo(xScale(i), yScale(data[i].value));
+            const chartCanvas = chart.canvas;
+            const chartOverlay = document.getElementById(overlayId);
+            const chartCrosshair = document.getElementById(crosshairId);
+            
+            if (!chartOverlay || !chartCrosshair) {
+                console.log('⚠️ Chart overlay or crosshair not found for', overlayId);
+                return;
             }
 
-            ctx.lineTo(xScale(data.length - 1), height - margin.bottom);
-            ctx.lineTo(xScale(0), height - margin.bottom);
-            ctx.closePath();
-            ctx.fill();
+            let interactionEnabled = false;
+            let lastActiveIndex = null;
 
-            // Draw main line with animation
-            ctx.globalAlpha = 1;
-            if (data.length > 1) {
-                // Convert data to points for animation
-                const points = data.map((point, index) => ({
-                    x: xScale(index),
-                    y: yScale(point.value)
-                }));
-
-                // Use smooth curve animation for better visual appeal (with fallback)
-                try {
-                    animateSmoothCurvePath(ctx, points, {
-                        strokeStyle: '#5fa42e',
-                        lineWidth: 2.5,
-                        duration: 1000,
-                        smoothness: 0.6 // More curvy smoothing
-                    });
-                } catch (error) {
-                    console.log('⚠️ Smooth curve failed, using linear animation:', error);
-                    // Fallback to linear animation
-                    animateLinePath(ctx, points, {
-                        strokeStyle: '#5fa42e',
-                        lineWidth: 2.5,
-                        duration: 1000
-                    });
+            // Helper function to get nearest data index
+            function getNearestIndex(x) {
+                if (!chart.data || !chart.data.labels) return 0;
+                const points = chart.getElementsAtEventForMode({ x: x, y: 0 }, 'nearest', { intersect: false }, true);
+                if (points.length > 0) {
+                    return points[0].index;
                 }
-            } else if (data.length === 1) {
-                // Handle single data point - draw a circle/dot
-                console.log('⭕ Drawing single data point at value:', data[0].value);
-                const pointX = xScale(0);
-                const pointY = yScale(data[0].value);
-                console.log('📍 Accounts chart point coordinates:', { x: pointX, y: pointY });
                 
-                // Draw a circle for the single data point
-                ctx.fillStyle = '#5fa42e';
-                ctx.beginPath();
-                ctx.arc(pointX, pointY, 4, 0, 2 * Math.PI);
-                ctx.fill();
-                
-                // Add a subtle glow effect
-                ctx.shadowColor = '#5fa42e';
-                ctx.shadowBlur = 8;
-                ctx.beginPath();
-                ctx.arc(pointX, pointY, 3, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                console.log('✅ Accounts net worth chart single point drawn successfully');
+                // Fallback calculation
+                const xScale = chart.scales.x;
+                const chartArea = chart.chartArea;
+                const relativeX = (x - chartArea.left) / (chartArea.right - chartArea.left);
+                const dataCount = chart.data.labels.length;
+                return Math.max(0, Math.min(dataCount - 1, Math.round(relativeX * (dataCount - 1))));
             }
+
+            // Enable interaction and show crosshair
+            function enableChartInteraction(x) {
+                interactionEnabled = true;
+                const index = getNearestIndex(x);
+                showChartInteraction(index);
+                lastActiveIndex = index;
+            }
+
+            // Disable interaction and hide crosshair
+            function disableChartInteraction() {
+                interactionEnabled = false;
+                hideChartInteraction();
+                lastActiveIndex = null;
+            }
+
+            // Show crosshair and highlight active point
+            function showChartInteraction(activeIndex) {
+                if (!chart.data || !chart.data.datasets) return;
+
+                // Show active point with hollow green circle
+                chart.data.datasets.forEach((dataset, datasetIndex) => {
+                    // Reset all point properties
+                    dataset.pointRadius = new Array(dataset.data.length).fill(0);
+                    dataset.pointBackgroundColor = new Array(dataset.data.length).fill('transparent');
+                    dataset.pointBorderColor = new Array(dataset.data.length).fill('transparent');
+                    dataset.pointBorderWidth = new Array(dataset.data.length).fill(0);
+
+                    // Show only the active point with hollow green circle
+                    if (activeIndex >= 0 && activeIndex < dataset.data.length) {
+                        dataset.pointRadius[activeIndex] = 8;
+                        dataset.pointBackgroundColor[activeIndex] = '#fff';
+                        dataset.pointBorderColor[activeIndex] = 'rgb(16, 185, 129)'; // Green
+                        dataset.pointBorderWidth[activeIndex] = 3;
+                    }
+                });
+
+                // Position crosshair
+                const xScale = chart.scales.x;
+                const pixelX = xScale.getPixelForValue(activeIndex);
+                chartCrosshair.style.left = `${pixelX}px`;
+                chartOverlay.classList.add('visible');
+
+                chart.update('none');
+            }
+
+            // Hide crosshair
+            function hideChartInteraction() {
+                if (!chart.data || !chart.data.datasets) return;
+
+                // Hide all points
+                chart.data.datasets.forEach(dataset => {
+                    dataset.pointRadius = new Array(dataset.data.length).fill(0);
+                    dataset.pointBackgroundColor = new Array(dataset.data.length).fill('transparent');
+                    dataset.pointBorderColor = new Array(dataset.data.length).fill('transparent');
+                    dataset.pointBorderWidth = new Array(dataset.data.length).fill(0);
+                });
+
+                // Hide crosshair with delay
+                setTimeout(() => {
+                    chartOverlay.classList.remove('visible');
+                }, 200);
+                
+                chart.update('none');
+            }
+
+            // Mouse events - immediate interaction
+            chartCanvas.addEventListener('mousedown', function (e) {
+                const x = e.clientX - chartCanvas.getBoundingClientRect().left;
+                enableChartInteraction(x);
+            });
+
+            chartCanvas.addEventListener('mousemove', function (e) {
+                if (!interactionEnabled) return;
+                const x = e.clientX - chartCanvas.getBoundingClientRect().left;
+                const index = getNearestIndex(x);
+                if (index !== lastActiveIndex) {
+                    showChartInteraction(index);
+                    lastActiveIndex = index;
+                }
+            });
+
+            chartCanvas.addEventListener('mouseup', function () {
+                if (interactionEnabled) disableChartInteraction();
+            });
+
+            chartCanvas.addEventListener('mouseleave', function () {
+                if (interactionEnabled) disableChartInteraction();
+            });
+
+            // Touch events - immediate interaction with direction detection
+            let initialTouchX = 0;
+            let initialTouchY = 0;
+            let touchDirection = null;
+
+            chartCanvas.addEventListener('touchstart', function (e) {
+                if (!e.touches || e.touches.length === 0) return;
+
+                initialTouchX = e.touches[0].clientX;
+                initialTouchY = e.touches[0].clientY;
+                touchDirection = null;
+
+                const x = e.touches[0].clientX - chartCanvas.getBoundingClientRect().left;
+                enableChartInteraction(x);
+            });
+
+            chartCanvas.addEventListener('touchmove', function (e) {
+                if (!e.touches || e.touches.length === 0) return;
+
+                // Direction detection for scroll vs chart interaction
+                if (touchDirection === null) {
+                    const deltaX = Math.abs(e.touches[0].clientX - initialTouchX);
+                    const deltaY = Math.abs(e.touches[0].clientY - initialTouchY);
+
+                    if (deltaY > deltaX && deltaY > 10) {
+                        touchDirection = 'vertical';
+                        return;
+                    } else if (deltaX > 10) {
+                        touchDirection = 'horizontal';
+                    }
+                }
+
+                // Only interact if horizontal movement
+                if (touchDirection === 'horizontal' && interactionEnabled) {
+                    e.preventDefault();
+                    const x = e.touches[0].clientX - chartCanvas.getBoundingClientRect().left;
+                    const index = getNearestIndex(x);
+                    if (index !== lastActiveIndex) {
+                        showChartInteraction(index);
+                        lastActiveIndex = index;
+                    }
+                }
+            }, { passive: false });
+
+            chartCanvas.addEventListener('touchend', function () {
+                if (interactionEnabled) disableChartInteraction();
+            });
+
+            chartCanvas.addEventListener('touchcancel', function () {
+                if (interactionEnabled) disableChartInteraction();
+            });
         }
 
         function updateAccountsNetWorthDisplay(netWorth, range) {
