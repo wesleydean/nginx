@@ -2260,7 +2260,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px;
+            padding: 10px 20px;
             background: hsl(36deg 55.56% 98.24%);
             position: fixed;
             top: 0;
@@ -2320,7 +2320,7 @@
             overflow-y: auto;
             overflow-x: hidden; /* Prevent horizontal scrolling */
             padding: 1rem;
-            padding-top: 86px; /* Account for fixed header height */
+            padding-top: 66px; /* Account for fixed header height */
             background-color: rgba(200, 160, 61, 0.04);
             scroll-behavior: smooth;
         }
@@ -13662,12 +13662,13 @@ margin-right: 0.5rem;
             const labels = data.map(d => d.date);
             const netWorthData = data.map(d => d.value);
 
-            // Create gradient for net worth fill
-            const netWorthGradient = ctx.createLinearGradient(0, 0, 0, 400);
-            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0.25)'); // Green with transparency
-            netWorthGradient.addColorStop(0.6, 'rgba(16, 185, 129, 0.05)');
-            netWorthGradient.addColorStop(0.8, 'rgba(16, 185, 129, 0.02)');
-            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+            // Create gradient for net worth fill (bottom-up fade)
+            const chartArea = ctx.canvas.getBoundingClientRect();
+            const netWorthGradient = ctx.createLinearGradient(0, chartArea.height, 0, 0);
+            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at bottom
+            netWorthGradient.addColorStop(0.2, 'rgba(16, 185, 129, 0.02)');
+            netWorthGradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
+            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // More opaque at top
 
             homeNetWorthChart = new Chart(ctx, {
                 type: 'line',
@@ -13720,7 +13721,44 @@ margin-right: 0.5rem;
                         },
                         line: { tension: 0.6 }
                     }
-                }
+                },
+                plugins: [{
+                    id: 'horizontalLine',
+                    afterDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const yAxis = chart.scales.y;
+                        
+                        if (!chart.data.datasets[0].data.length) return;
+                        
+                        // Get the latest (current) value
+                        const currentValue = chart.data.datasets[0].data[chart.data.datasets[0].data.length - 1];
+                        const yPosition = yAxis.getPixelForValue(currentValue);
+                        
+                        // Draw dashed horizontal line edge-to-edge
+                        ctx.save();
+                        ctx.strokeStyle = '#9ca3af';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([4, 4]);
+                        ctx.globalAlpha = 0.8;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(chart.chartArea.left, yPosition);
+                        ctx.lineTo(chart.chartArea.right, yPosition);
+                        ctx.stroke();
+                        
+                        // Draw amount label above the line
+                        ctx.setLineDash([]);
+                        ctx.fillStyle = '#6b7280';
+                        ctx.font = '12px system-ui, -apple-system, sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'bottom';
+                        
+                        const formattedValue = `$${(currentValue / 1000).toFixed(1)}k`;
+                        ctx.fillText(formattedValue, chart.chartArea.left + 8, yPosition - 8);
+                        
+                        ctx.restore();
+                    }
+                }]
             });
 
             // Add interactive crosshair system (will be implemented in unified system)
@@ -14331,12 +14369,13 @@ margin-right: 0.5rem;
             const labels = data.map(d => d.date);
             const netWorthData = data.map(d => d.value);
 
-            // Create gradient for net worth fill
-            const netWorthGradient = ctx.createLinearGradient(0, 0, 0, 400);
-            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0.25)'); // Green with transparency
-            netWorthGradient.addColorStop(0.6, 'rgba(16, 185, 129, 0.05)');
-            netWorthGradient.addColorStop(0.8, 'rgba(16, 185, 129, 0.02)');
-            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+            // Create gradient for net worth fill (bottom-up fade)
+            const chartArea = ctx.canvas.getBoundingClientRect();  
+            const netWorthGradient = ctx.createLinearGradient(0, chartArea.height, 0, 0);
+            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at bottom
+            netWorthGradient.addColorStop(0.2, 'rgba(16, 185, 129, 0.02)');
+            netWorthGradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
+            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // More opaque at top
 
             accountsNetWorthChart = new Chart(ctx, {
                 type: 'line',
@@ -14389,7 +14428,44 @@ margin-right: 0.5rem;
                         },
                         line: { tension: 0.6 }
                     }
-                }
+                },
+                plugins: [{
+                    id: 'horizontalLine',
+                    afterDraw: function(chart) {
+                        const ctx = chart.ctx;
+                        const yAxis = chart.scales.y;
+                        
+                        if (!chart.data.datasets[0].data.length) return;
+                        
+                        // Get the latest (current) value
+                        const currentValue = chart.data.datasets[0].data[chart.data.datasets[0].data.length - 1];
+                        const yPosition = yAxis.getPixelForValue(currentValue);
+                        
+                        // Draw dashed horizontal line edge-to-edge
+                        ctx.save();
+                        ctx.strokeStyle = '#9ca3af';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([4, 4]);
+                        ctx.globalAlpha = 0.8;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(chart.chartArea.left, yPosition);
+                        ctx.lineTo(chart.chartArea.right, yPosition);
+                        ctx.stroke();
+                        
+                        // Draw amount label above the line
+                        ctx.setLineDash([]);
+                        ctx.fillStyle = '#6b7280';
+                        ctx.font = '12px system-ui, -apple-system, sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'bottom';
+                        
+                        const formattedValue = `$${(currentValue / 1000).toFixed(1)}k`;
+                        ctx.fillText(formattedValue, chart.chartArea.left + 8, yPosition - 8);
+                        
+                        ctx.restore();
+                    }
+                }]
             });
 
             // Add interactive crosshair system (will be implemented in unified system)
