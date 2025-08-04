@@ -8465,7 +8465,14 @@ margin-right: 0.5rem;
                     maintainAspectRatio: false,
                     animation: {
                         duration: 1000,
-                        easing: 'easeInOutQuart'
+                        easing: 'easeInOutQuart',
+                        onProgress: function(animation) {
+                            // Store animation progress for gradient plugin
+                            this.gradientProgress = animation.currentStep / animation.numSteps;
+                        },
+                        onComplete: function() {
+                            this.gradientProgress = 1;
+                        }
                     },
                     plugins: {
                         legend: { display: false },
@@ -13690,7 +13697,14 @@ margin-right: 0.5rem;
                     maintainAspectRatio: false,
                     animation: {
                         duration: 1000,
-                        easing: 'easeInOutQuart'
+                        easing: 'easeInOutQuart',
+                        onProgress: function(animation) {
+                            // Store animation progress for gradient plugin
+                            this.gradientProgress = animation.currentStep / animation.numSteps;
+                        },
+                        onComplete: function() {
+                            this.gradientProgress = 1;
+                        }
                     },
                     plugins: {
                         legend: { display: false },
@@ -13724,13 +13738,26 @@ margin-right: 0.5rem;
                 },
                 plugins: [{
                     id: 'absoluteGradient',
-                    beforeDraw: function(chart) {
+                    beforeDraw: function(chart, args, options) {
                         const ctx = chart.ctx;
                         const chartArea = chart.chartArea;
                         const yAxis = chart.scales.y;
                         const xAxis = chart.scales.x;
                         
                         if (!chart.data.datasets[0].data.length) return;
+                        
+                        // Get animation progress (0 to 1) from stored value
+                        const animationProgress = chart.gradientProgress || 0;
+                        
+                        // Calculate visible width based on animation progress
+                        const chartWidth = chartArea.right - chartArea.left;
+                        const visibleWidth = chartWidth * animationProgress;
+                        
+                        // Set up clipping for progressive reveal
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.rect(chartArea.left, chartArea.top, visibleWidth, chartArea.bottom - chartArea.top);
+                        ctx.clip();
                         
                         // Create absolute gradient from chart bottom to top
                         const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
@@ -13743,8 +13770,13 @@ margin-right: 0.5rem;
                         const dataset = chart.data.datasets[0];
                         const chartBottom = chartArea.bottom;
                         
-                        // Draw filled area from data line to chart bottom (visual bottom)
+                        // Set up clipping for progressive reveal
                         ctx.save();
+                        ctx.beginPath();
+                        ctx.rect(chartArea.left, chartArea.top, visibleWidth, chartArea.bottom - chartArea.top);
+                        ctx.clip();
+                        
+                        // Draw filled area from data line to chart bottom (visual bottom)
                         ctx.fillStyle = gradient;
                         
                         ctx.beginPath();
@@ -14436,7 +14468,14 @@ margin-right: 0.5rem;
                     maintainAspectRatio: false,
                     animation: {
                         duration: 1000,
-                        easing: 'easeInOutQuart'
+                        easing: 'easeInOutQuart',
+                        onProgress: function(animation) {
+                            // Store animation progress for gradient plugin
+                            this.gradientProgress = animation.currentStep / animation.numSteps;
+                        },
+                        onComplete: function() {
+                            this.gradientProgress = 1;
+                        }
                     },
                     plugins: {
                         legend: { display: false },
@@ -14470,13 +14509,26 @@ margin-right: 0.5rem;
                 },
                 plugins: [{
                     id: 'absoluteGradient',
-                    beforeDraw: function(chart) {
+                    beforeDraw: function(chart, args, options) {
                         const ctx = chart.ctx;
                         const chartArea = chart.chartArea;
                         const yAxis = chart.scales.y;
                         const xAxis = chart.scales.x;
                         
                         if (!chart.data.datasets[0].data.length) return;
+                        
+                        // Get animation progress (0 to 1) from stored value
+                        const animationProgress = chart.gradientProgress || 0;
+                        
+                        // Calculate visible width based on animation progress
+                        const chartWidth = chartArea.right - chartArea.left;
+                        const visibleWidth = chartWidth * animationProgress;
+                        
+                        // Set up clipping for progressive reveal
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.rect(chartArea.left, chartArea.top, visibleWidth, chartArea.bottom - chartArea.top);
+                        ctx.clip();
                         
                         // Create absolute gradient from chart bottom to top
                         const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
@@ -14489,8 +14541,13 @@ margin-right: 0.5rem;
                         const dataset = chart.data.datasets[0];
                         const chartBottom = chartArea.bottom;
                         
-                        // Draw filled area from data line to chart bottom (visual bottom)
+                        // Set up clipping for progressive reveal
                         ctx.save();
+                        ctx.beginPath();
+                        ctx.rect(chartArea.left, chartArea.top, visibleWidth, chartArea.bottom - chartArea.top);
+                        ctx.clip();
+                        
+                        // Draw filled area from data line to chart bottom (visual bottom)
                         ctx.fillStyle = gradient;
                         
                         ctx.beginPath();
