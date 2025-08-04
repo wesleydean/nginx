@@ -13663,11 +13663,11 @@ margin-right: 0.5rem;
             const netWorthData = data.map(d => d.value);
 
             // Create gradient for net worth fill (bottom-up fade from chart bottom)
-            const netWorthGradient = ctx.createLinearGradient(0, 400, 0, 0);
-            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at bottom
+            const netWorthGradient = ctx.createLinearGradient(0, 0, 0, 400);
+            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at top
             netWorthGradient.addColorStop(0.2, 'rgba(16, 185, 129, 0.02)');
             netWorthGradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
-            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // More opaque at top
+            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // More opaque at bottom
 
             homeNetWorthChart = new Chart(ctx, {
                 type: 'line',
@@ -14369,11 +14369,11 @@ margin-right: 0.5rem;
             const netWorthData = data.map(d => d.value);
 
             // Create gradient for net worth fill (bottom-up fade from chart bottom)
-            const netWorthGradient = ctx.createLinearGradient(0, 400, 0, 0);
-            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at bottom
+            const netWorthGradient = ctx.createLinearGradient(0, 0, 0, 400);
+            netWorthGradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at top
             netWorthGradient.addColorStop(0.2, 'rgba(16, 185, 129, 0.02)');
             netWorthGradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
-            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // More opaque at top
+            netWorthGradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // More opaque at bottom
 
             accountsNetWorthChart = new Chart(ctx, {
                 type: 'line',
