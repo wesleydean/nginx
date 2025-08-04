@@ -13747,17 +13747,11 @@ margin-right: 0.5rem;
                         if (!chart.data.datasets[0].data.length) return;
                         
                         // Get animation progress (0 to 1) from stored value
-                        const animationProgress = chart.gradientProgress || 0;
+                        const animationProgress = chart.gradientProgress !== undefined ? chart.gradientProgress : 1;
                         
                         // Calculate visible width based on animation progress
                         const chartWidth = chartArea.right - chartArea.left;
                         const visibleWidth = chartWidth * animationProgress;
-                        
-                        // Set up clipping for progressive reveal
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.rect(chartArea.left, chartArea.top, visibleWidth, chartArea.bottom - chartArea.top);
-                        ctx.clip();
                         
                         // Create absolute gradient from chart bottom to top
                         const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
@@ -14518,17 +14512,11 @@ margin-right: 0.5rem;
                         if (!chart.data.datasets[0].data.length) return;
                         
                         // Get animation progress (0 to 1) from stored value
-                        const animationProgress = chart.gradientProgress || 0;
+                        const animationProgress = chart.gradientProgress !== undefined ? chart.gradientProgress : 1;
                         
                         // Calculate visible width based on animation progress
                         const chartWidth = chartArea.right - chartArea.left;
                         const visibleWidth = chartWidth * animationProgress;
-                        
-                        // Set up clipping for progressive reveal
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.rect(chartArea.left, chartArea.top, visibleWidth, chartArea.bottom - chartArea.top);
-                        ctx.clip();
                         
                         // Create absolute gradient from chart bottom to top
                         const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
