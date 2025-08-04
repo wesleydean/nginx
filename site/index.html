@@ -1272,29 +1272,37 @@
         
         /* Budget Overview Card Styles */
         .budget-timerange-toggle {
-            display: flex;
-            background: hsl(var(--muted));
-            border-radius: 6px;
-            padding: 2px;
-            gap: 2px;
+            display: inline-flex;
+            background: hsl(var(--muted) / 0.6);
+            border-radius: 20px;
+            padding: 3px;
+            position: relative;
+            border: 1px solid hsl(var(--border) / 0.5);
         }
         
         .timerange-btn {
-            padding: 6px 12px;
+            padding: 4px 14px;
             border: none;
             background: transparent;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 500;
+            border-radius: 16px;
+            font-size: 0.7rem;
+            font-weight: 600;
             color: hsl(var(--muted-foreground));
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
+            position: relative;
+            z-index: 2;
+            white-space: nowrap;
         }
         
         .timerange-btn.active {
             background: hsl(var(--background));
             color: hsl(var(--foreground));
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+        }
+        
+        .timerange-btn:hover:not(.active) {
+            color: hsl(var(--foreground) / 0.8);
         }
         
         .budget-bar-section {
@@ -1358,19 +1366,142 @@
         }
         
         .spending-segment.fixed {
-            background: linear-gradient(90deg, #1e40af 0%, #1e3a8a 100%);
+            background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
         }
         
         .spending-segment.essential {
-            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            background: linear-gradient(90deg, #ea580c 0%, #c2410c 100%);
         }
         
         .spending-segment.discretionary {
-            background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+            background: linear-gradient(90deg, #7c3aed 0%, #6d28d9 100%);
         }
         
         .spending-segment:hover {
             opacity: 0.8;
+        }
+        
+        .budget-legend {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: hsl(var(--muted-foreground));
+        }
+        
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .legend-dot.fixed {
+            background: #dc2626;
+        }
+        
+        .legend-dot.essential {
+            background: #ea580c;
+        }
+        
+        .legend-dot.discretionary {
+            background: #7c3aed;
+        }
+        
+        /* Budget Flow Styles */
+        .budget-progress-indicator {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid hsl(var(--border));
+            text-align: center;
+        }
+        
+        .progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: hsl(var(--muted));
+            transition: background-color 0.3s ease;
+        }
+        
+        .progress-dot.active {
+            background: hsl(var(--primary));
+        }
+        
+        .progress-dot.completed {
+            background: #5fa42e;
+        }
+        
+        .progress-label {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+        
+        .budget-flow-screens {
+            position: relative;
+        }
+        
+        .budget-flow-screen {
+            display: none;
+        }
+        
+        .budget-flow-screen.active {
+            display: block;
+        }
+        
+        .budget-flow-navigation {
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem;
+            border-top: 1px solid hsl(var(--border));
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            flex: 1;
+        }
+        
+        .nav-btn.primary {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+        
+        .nav-btn.primary:hover:not(:disabled) {
+            background: hsl(var(--primary) / 0.9);
+        }
+        
+        .nav-btn.secondary {
+            background: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+        
+        .nav-btn.secondary:hover:not(:disabled) {
+            background: hsl(var(--secondary) / 0.8);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         .change-arrow {
@@ -6072,6 +6203,20 @@ margin-right: 0.5rem;
                                     <div class="spending-segment essential" id="essentialSpending" style="width: 20.3%" title="Essential: $750"></div>
                                     <div class="spending-segment discretionary" id="discretionarySpending" style="width: 13.5%" title="Discretionary: $501"></div>
                                 </div>
+                                <div class="budget-legend">
+                                    <div class="legend-item">
+                                        <div class="legend-dot fixed"></div>
+                                        <span>Fixed</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-dot essential"></div>
+                                        <span>Essential</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-dot discretionary"></div>
+                                        <span>Discretionary</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -6962,49 +7107,122 @@ margin-right: 0.5rem;
                     </div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="text-xl font-semibold">Expenses</h3>
+                        </div>
                     </div>
-                    <div class="card-content">
-                        <div class="form-group">
-                            <label class="form-label" for="budgetFixedExpenses">Monthly Fixed Expenses</label>
-                            <input type="number" class="form-input" id="budgetFixedExpenses" placeholder="2450" min="0" step="0.01">
+                    
+                    <!-- Screen 2: Savings Goals -->
+                    <div class="budget-flow-screen" id="budgetScreen2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="text-xl font-semibold">Savings Goals</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-group">
+                                    <label class="form-label" for="budgetAnnualSavingsGoal">Annual Savings Goal</label>
+                                    <input type="number" class="form-input" id="budgetAnnualSavingsGoal" placeholder="52000" min="0" step="100">
+                                    <div class="form-help">How much do you want to save per year?</div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="budgetMonthlySavingsTarget">Monthly Savings Target</label>
+                                    <input type="number" class="form-input" id="budgetMonthlySavingsTarget" placeholder="4333" min="0" step="0.01" readonly>
+                                    <div class="form-help">Auto-calculated from annual savings goal.</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="budgetEssentialExpenses">Monthly Essential Expenses</label>
-                            <input type="number" class="form-input" id="budgetEssentialExpenses" placeholder="750" min="0" step="0.01">
+                    </div>
+                    
+                    <!-- Screen 3: Fixed Expenses -->
+                    <div class="budget-flow-screen" id="budgetScreen3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="text-xl font-semibold">Fixed Expenses</h3>
+                            </div>
+                            <div class="card-content">
+                                <p class="text-sm text-muted-foreground mb-4">Regular monthly expenses that don't change (rent, insurance, loan payments, etc.)</p>
+                                <div class="form-group">
+                                    <label class="form-label" for="budgetFixedExpenses">Monthly Fixed Expenses</label>
+                                    <input type="number" class="form-input" id="budgetFixedExpenses" placeholder="2450" min="0" step="0.01">
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label" for="budgetDiscretionaryExpenses">Monthly Discretionary Expenses</label>
-                            <input type="number" class="form-input" id="budgetDiscretionaryExpenses" placeholder="501" min="0" step="0.01">
+                    </div>
+                    
+                    <!-- Screen 4: Essential Expenses -->
+                    <div class="budget-flow-screen" id="budgetScreen4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="text-xl font-semibold">Essential Expenses</h3>
+                            </div>
+                            <div class="card-content">
+                                <p class="text-sm text-muted-foreground mb-4">Necessary variable expenses (groceries, utilities, gas, etc.)</p>
+                                <div class="form-group">
+                                    <label class="form-label" for="budgetEssentialExpenses">Monthly Essential Expenses</label>
+                                    <input type="number" class="form-input" id="budgetEssentialExpenses" placeholder="750" min="0" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Screen 5: Discretionary Expenses -->
+                    <div class="budget-flow-screen" id="budgetScreen5">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="text-xl font-semibold">Discretionary Expenses</h3>
+                            </div>
+                            <div class="card-content">
+                                <p class="text-sm text-muted-foreground mb-4">Optional spending (entertainment, dining out, hobbies, etc.)</p>
+                                <div class="form-group">
+                                    <label class="form-label" for="budgetDiscretionaryExpenses">Monthly Discretionary Expenses</label>
+                                    <input type="number" class="form-input" id="budgetDiscretionaryExpenses" placeholder="501" min="0" step="0.01">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Screen 6: Review & Summary -->
+                    <div class="budget-flow-screen" id="budgetScreen6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="text-xl font-semibold">Budget Summary</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="budget-summary">
+                                    <div class="budget-item">
+                                        <div class="budget-label">Net Monthly Income</div>
+                                        <div class="budget-value" id="budgetNetIncomeSummary">$0.00</div>
+                                    </div>
+                                    <div class="budget-item">
+                                        <div class="budget-label">Total Monthly Expenses</div>
+                                        <div class="budget-value" id="budgetTotalExpensesSummary">$0.00</div>
+                                    </div>
+                                    <div class="budget-item">
+                                        <div class="budget-label">Monthly Savings Target</div>
+                                        <div class="budget-value" id="budgetMonthlySavingsSummary">$0.00</div>
+                                    </div>
+                                    <div class="budget-item">
+                                        <div class="budget-label">Remaining Budget</div>
+                                        <div class="budget-value" id="budgetRemainingBudgetSummary">$0.00</div>
+                                    </div>
+                                    <div class="budget-item">
+                                        <div class="budget-label">Savings Rate</div>
+                                        <div class="budget-value" id="budgetSavingsRateSummary">0%</div>
+                                    </div>
+                                    <div class="budget-item">
+                                        <div class="budget-label">Validation</div>
+                                        <div class="budget-value" id="budgetValidationSummary">-</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="text-xl font-semibold">Budget Summary</h3>
-                    </div>
-                    <div class="card-content">
-                        <div class="budget-summary">
-                            <div class="budget-item">
-                                <div class="budget-label">Remaining Budget</div>
-                                <div class="budget-value" id="budgetRemainingBudgetSummary">$0.00</div>
-                            </div>
-                            <div class="budget-item">
-                                <div class="budget-label">Savings Rate</div>
-                                <div class="budget-value" id="budgetSavingsRateSummary">0%</div>
-                            </div>
-                            <div class="budget-item">
-                                <div class="budget-label">Validation</div>
-                                <div class="budget-value" id="budgetValidationSummary">-</div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Navigation Buttons -->
+                <div class="budget-flow-navigation">
+                    <button type="button" class="nav-btn secondary" id="budgetPrevBtn" onclick="previousBudgetStep()" disabled>Previous</button>
+                    <button type="button" class="nav-btn primary" id="budgetNextBtn" onclick="nextBudgetStep()">Next</button>
+                    <button type="button" class="nav-btn primary" id="budgetSaveBtn" onclick="saveBudgetSettings()" style="display: none;">Save Budget</button>
                 </div>
-                
-                <button type="button" class="add-btn" onclick="saveBudgetSettings()">Save Budget</button>
             </div>
         </div>
     </div>
@@ -12325,6 +12543,9 @@ margin-right: 0.5rem;
             renderBudgetTitle();
             renderSaveTitle();
             // App starts clean - no default data loading
+            
+            // Initialize budget overview card
+            updateBudgetOverview('monthly');
 
             // Check if carousel container exists
             const carouselCheck = document.querySelector('.chart-carousel-container');
@@ -17609,42 +17830,205 @@ margin-right: 0.5rem;
             });
         });
 
-        function openBudgetSetup() {
-            // Don't close settings, just slide to budget setup
+        // Budget Flow Management
+        let currentBudgetStep = 1;
+        const totalBudgetSteps = 6;
+        
+        function openBudgetFlow() {
             const budgetOverlay = document.getElementById('budgetOverlay');
             const budgetPanel = document.getElementById('budgetPanel');
-            const settingsPanel = document.getElementById('settingsPanel');
             const appContainer = document.querySelector('.app-container');
 
             // Show budget overlay and panel
             budgetOverlay.classList.add('active');
             budgetPanel.classList.add('active');
-
-            // Slide settings panel left
-            settingsPanel.classList.add('budget-open');
-
-            // Add slide transition to main content
             appContainer.classList.add('settings-open');
 
+            // Reset to first step
+            currentBudgetStep = 1;
+            showBudgetStep(1);
+            
             // Load existing settings into budget form
             loadBudgetSettings();
         }
 
-        function closeBudgetSetup() {
+        function closeBudgetFlow() {
             const budgetOverlay = document.getElementById('budgetOverlay');
             const budgetPanel = document.getElementById('budgetPanel');
-            const settingsPanel = document.getElementById('settingsPanel');
             const appContainer = document.querySelector('.app-container');
 
             // Hide budget overlay and panel
             budgetOverlay.classList.remove('active');
             budgetPanel.classList.remove('active');
-
-            // Slide settings panel back to center
-            settingsPanel.classList.remove('budget-open');
-
-            // Remove slide transition from main content
             appContainer.classList.remove('settings-open');
+        }
+        
+        function showBudgetStep(step) {
+            // Hide all screens
+            document.querySelectorAll('.budget-flow-screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show current screen
+            document.getElementById(`budgetScreen${step}`).classList.add('active');
+            
+            // Update progress indicators
+            updateBudgetProgress(step);
+            
+            // Update navigation buttons
+            updateBudgetNavigation(step);
+            
+            currentBudgetStep = step;
+        }
+        
+        function updateBudgetProgress(step) {
+            // Update progress dots
+            document.querySelectorAll('.progress-dot').forEach((dot, index) => {
+                dot.classList.remove('active', 'completed');
+                if (index + 1 < step) {
+                    dot.classList.add('completed');
+                } else if (index + 1 === step) {
+                    dot.classList.add('active');
+                }
+            });
+            
+            // Update progress label
+            const labels = [
+                'Income & Taxes',
+                'Savings Goals', 
+                'Fixed Expenses',
+                'Essential Expenses',
+                'Discretionary Expenses',
+                'Review & Summary'
+            ];
+            
+            document.getElementById('budgetProgressLabel').textContent = 
+                `Step ${step} of ${totalBudgetSteps}: ${labels[step - 1]}`;
+        }
+        
+        function updateBudgetNavigation(step) {
+            const prevBtn = document.getElementById('budgetPrevBtn');
+            const nextBtn = document.getElementById('budgetNextBtn');
+            const saveBtn = document.getElementById('budgetSaveBtn');
+            
+            // Previous button
+            prevBtn.disabled = step === 1;
+            
+            // Next/Save buttons
+            if (step === totalBudgetSteps) {
+                nextBtn.style.display = 'none';
+                saveBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'block';
+                saveBtn.style.display = 'none';
+            }
+        }
+        
+        function nextBudgetStep() {
+            if (currentBudgetStep < totalBudgetSteps) {
+                showBudgetStep(currentBudgetStep + 1);
+            }
+        }
+        
+        function previousBudgetStep() {
+            if (currentBudgetStep > 1) {
+                showBudgetStep(currentBudgetStep - 1);
+            }
+        }
+        
+        // Legacy function names for compatibility
+        function openBudgetSetup() {
+            openBudgetFlow();
+        }
+        
+        function closeBudgetSetup() {
+            closeBudgetFlow();
+        }
+        
+        // Budget Overview Card Functions
+        function toggleBudgetTimeRange(range) {
+            // Update button states
+            document.querySelectorAll('.timerange-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-range="${range}"]`).classList.add('active');
+            
+            // Update subtitle
+            const subtitle = document.getElementById('budgetSubtitle');
+            subtitle.textContent = range === 'monthly' ? 'Monthly overview' : 'Yearly overview';
+            
+            // Update budget bars
+            updateBudgetOverview(range);
+        }
+        
+        function updateBudgetOverview(timeRange = 'monthly') {
+            const settings = getSimpleBudgetSettings();
+            
+            if (!settings.netIncome) {
+                // Show placeholder data if no budget is set
+                return;
+            }
+            
+            const isMonthly = timeRange === 'monthly';
+            const multiplier = isMonthly ? 1 : 12;
+            
+            // Savings data
+            const savingsGoal = isMonthly ? settings.monthlySavingsTarget : settings.annualSavingsGoal;
+            const currentSavings = savingsGoal * 0.6; // Placeholder - would come from actual savings data
+            const savingsPercentage = Math.min((currentSavings / savingsGoal) * 100, 100);
+            
+            // Update savings bar
+            document.getElementById('savingsAmount').textContent = 
+                `$${Math.round(currentSavings).toLocaleString()} / $${Math.round(savingsGoal).toLocaleString()}`;
+            document.getElementById('savingsProgress').style.width = `${savingsPercentage}%`;
+            
+            // Spending data - budget limits
+            const fixedBudget = (settings.fixedExpenses || 0) * multiplier;
+            const essentialBudget = (settings.essentialExpenses || 0) * multiplier;
+            const discretionaryBudget = (settings.discretionaryExpenses || 0) * multiplier;
+            const totalBudget = fixedBudget + essentialBudget + discretionaryBudget;
+            
+            // Get actual spending data (placeholder - would come from actual expense tracking)
+            const fixedSpent = fixedBudget * 0.85; // 85% of budget spent
+            const essentialSpent = essentialBudget * 0.72; // 72% of budget spent  
+            const discretionarySpent = discretionaryBudget * 0.95; // 95% of budget spent
+            const totalSpent = fixedSpent + essentialSpent + discretionarySpent;
+            
+            // Calculate percentages for spending segments (based on budget, filled based on spent)
+            const fixedPercent = totalBudget > 0 ? (fixedBudget / totalBudget) * 100 : 0;
+            const essentialPercent = totalBudget > 0 ? (essentialBudget / totalBudget) * 100 : 0;
+            const discretionaryPercent = totalBudget > 0 ? (discretionaryBudget / totalBudget) * 100 : 0;
+            
+            // Calculate fill percentages (how much of each category budget is spent)
+            const fixedFillPercent = fixedBudget > 0 ? (fixedSpent / fixedBudget) * 100 : 0;
+            const essentialFillPercent = essentialBudget > 0 ? (essentialSpent / essentialBudget) * 100 : 0;
+            const discretionaryFillPercent = discretionaryBudget > 0 ? (discretionarySpent / discretionaryBudget) * 100 : 0;
+            
+            // Update spending bar header
+            document.getElementById('spendingAmount').textContent = 
+                `$${Math.round(totalSpent).toLocaleString()} / $${Math.round(totalBudget).toLocaleString()}`;
+            
+            // Update spending segments - width based on percentage of total spent
+            const fixedSegment = document.getElementById('fixedSpending');
+            const essentialSegment = document.getElementById('essentialSpending');  
+            const discretionarySegment = document.getElementById('discretionarySpending');
+            
+            // Calculate widths based on actual spending percentages
+            const fixedSpentPercent = totalSpent > 0 ? (fixedSpent / totalSpent) * 100 : 0;
+            const essentialSpentPercent = totalSpent > 0 ? (essentialSpent / totalSpent) * 100 : 0;
+            const discretionarySpentPercent = totalSpent > 0 ? (discretionarySpent / totalSpent) * 100 : 0;
+            
+            fixedSegment.style.width = `${fixedSpentPercent}%`;
+            fixedSegment.style.background = ''; // Clear any custom background, use CSS class
+            fixedSegment.title = `Fixed: $${Math.round(fixedSpent).toLocaleString()} / $${Math.round(fixedBudget).toLocaleString()}`;
+                
+            essentialSegment.style.width = `${essentialSpentPercent}%`;
+            essentialSegment.style.background = ''; // Clear any custom background, use CSS class
+            essentialSegment.title = `Essential: $${Math.round(essentialSpent).toLocaleString()} / $${Math.round(essentialBudget).toLocaleString()}`;
+                
+            discretionarySegment.style.width = `${discretionarySpentPercent}%`;
+            discretionarySegment.style.background = ''; // Clear any custom background, use CSS class
+            discretionarySegment.title = `Discretionary: $${Math.round(discretionarySpent).toLocaleString()} / $${Math.round(discretionaryBudget).toLocaleString()}`;
         }
 
         function loadBudgetSettings() {
@@ -17789,9 +18173,12 @@ margin-right: 0.5rem;
 
             // Update the main app's budget display
             updateBudgetDisplay();
+            
+            // Update the budget overview card
+            updateBudgetOverview('monthly');
 
             // Close the budget setup
-            closeBudgetSetup();
+            closeBudgetFlow();
 
             // Show success message
             alert('Budget settings saved successfully!');
