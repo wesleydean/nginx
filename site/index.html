@@ -2788,11 +2788,11 @@
         }
         
         .nav-item:hover:not(.active) {
-            color: hsl(var(--foreground) / 0.8); /* Slightly darker on hover */
+            color: hsl(var(--foreground) / 0.9); /* Slightly darker on hover */
         }
         
-        .nav-item:active {
-            transform: scale(0.92);
+        .nav-item:active .icon {
+            transform: scale(0.90);
         }
         
         .nav-item .icon {
@@ -2811,15 +2811,15 @@
             display: block;
             font-size: 0.75rem;
             font-weight: 500;
-            margin-top: 0.25rem;
+            margin-top: 5px;
             text-align: center;
-            color: hsl(var(--muted-foreground));
+            color: rgb(53, 53, 53);
             transition: color 150ms ease;
         }
 
         .nav-item.active .label {
             color: hsl(var(--foreground));
-            font-weight: 600;
+            /* font-weight: 600; */
         }
         
         .screen::-webkit-scrollbar {
@@ -3569,20 +3569,12 @@
         
         .chart-crosshair {
             position: absolute;
-            width: 2px;
+            width: 1px;
             height: 100%;
-            background: rgba(107, 114, 128, 0.7); /* Changed to gray color to match chart */
+            border-left: 1px dashed #9ca3af;
             opacity: 0;
             z-index: 20;
             pointer-events: none;
-            /* Dashed line effect */
-            background: repeating-linear-gradient(
-                to bottom,
-                rgba(107, 114, 128, 0.7) 0px,
-                rgba(107, 114, 128, 0.7) 6px,
-                transparent 6px,
-                transparent 12px
-            );
             transition: opacity 0.15s ease, left 0.05s linear;
         }
         .chart-overlay.visible {
@@ -3590,14 +3582,8 @@
         }
         @media (hover: none) and (pointer: coarse) {
             .chart-crosshair {
-                width: 3px;
-                background: repeating-linear-gradient(
-                    to bottom,
-                    rgba(107, 114, 128, 0.8) 0px, /* Slightly more opaque for better visibility */
-                    rgba(107, 114, 128, 0.8) 8px,  /* Larger segments for mobile visibility */
-                    transparent 8px,
-                    transparent 16px
-                );
+                width: 2px;
+                border-left: 2px dashed #9ca3af;
             }
         }
         
@@ -13680,7 +13666,7 @@ margin-right: 0.5rem;
                     datasets: [{
                         label: 'Net Worth',
                         data: netWorthData,
-                        borderColor: 'rgb(16, 185, 129)', // Green theme
+                        borderColor: '#5fa42e', // Green theme
                         backgroundColor: 'transparent',
                         tension: 0.6,
                         fill: false,
@@ -13695,6 +13681,9 @@ margin-right: 0.5rem;
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: 0
+                    },
                     animation: {
                         duration: 1000,
                         easing: 'easeInOutQuart',
@@ -13755,10 +13744,10 @@ margin-right: 0.5rem;
                         
                         // Create absolute gradient from chart bottom to top
                         const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                        gradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at bottom
-                        gradient.addColorStop(0.2, 'rgba(16, 185, 129, 0.02)');
-                        gradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
-                        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // Opaque at top
+                        gradient.addColorStop(0, 'rgba(95, 164, 46, 0)'); // Transparent at bottom
+                        gradient.addColorStop(0.2, 'rgba(95, 164, 46, 0.02)');
+                        gradient.addColorStop(0.4, 'rgba(95, 164, 46, 0.05)');
+                        gradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
                         
                         // Get data points and chart bottom position
                         const dataset = chart.data.datasets[0];
@@ -13799,8 +13788,20 @@ margin-right: 0.5rem;
                         
                         if (!chart.data.datasets[0].data.length) return;
                         
-                        // Get the latest (current) value
-                        const currentValue = chart.data.datasets[0].data[chart.data.datasets[0].data.length - 1];
+                        // Check if there's an active crosshair interaction
+                        let currentValue, currentIndex, displayDate = '';
+                        if (chart.activeIndex !== undefined && chart.activeIndex >= 0) {
+                            currentIndex = chart.activeIndex;
+                            currentValue = chart.data.datasets[0].data[currentIndex];
+                            // Format date from label
+                            const dateLabel = chart.data.labels[currentIndex];
+                            displayDate = ` (${dateLabel})`;
+                        } else {
+                            // Default to latest value
+                            currentIndex = chart.data.datasets[0].data.length - 1;
+                            currentValue = chart.data.datasets[0].data[currentIndex];
+                        }
+                        
                         const yPosition = yAxis.getPixelForValue(currentValue);
                         
                         // Draw dashed horizontal line edge-to-edge
@@ -13815,14 +13816,14 @@ margin-right: 0.5rem;
                         ctx.lineTo(chart.chartArea.right, yPosition);
                         ctx.stroke();
                         
-                        // Draw amount label above the line
+                        // Draw amount label above the line with date
                         ctx.setLineDash([]);
                         ctx.fillStyle = '#6b7280';
                         ctx.font = '12px system-ui, -apple-system, sans-serif';
                         ctx.textAlign = 'left';
                         ctx.textBaseline = 'bottom';
                         
-                        const formattedValue = `$${(currentValue / 1000).toFixed(1)}k`;
+                        const formattedValue = `$${(currentValue / 1000).toFixed(1)}k${displayDate}`;
                         ctx.fillText(formattedValue, chart.chartArea.left + 8, yPosition - 8);
                         
                         ctx.restore();
@@ -14445,7 +14446,7 @@ margin-right: 0.5rem;
                     datasets: [{
                         label: 'Net Worth',
                         data: netWorthData,
-                        borderColor: 'rgb(16, 185, 129)', // Green theme
+                        borderColor: '#5fa42e', // Green theme
                         backgroundColor: 'transparent',
                         tension: 0.6,
                         fill: false,
@@ -14460,6 +14461,9 @@ margin-right: 0.5rem;
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: 0
+                    },
                     animation: {
                         duration: 1000,
                         easing: 'easeInOutQuart',
@@ -14520,10 +14524,10 @@ margin-right: 0.5rem;
                         
                         // Create absolute gradient from chart bottom to top
                         const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                        gradient.addColorStop(0, 'rgba(16, 185, 129, 0)'); // Transparent at bottom
-                        gradient.addColorStop(0.2, 'rgba(16, 185, 129, 0.02)');
-                        gradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
-                        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // Opaque at top
+                        gradient.addColorStop(0, 'rgba(95, 164, 46, 0)'); // Transparent at bottom
+                        gradient.addColorStop(0.2, 'rgba(95, 164, 46, 0.02)');
+                        gradient.addColorStop(0.4, 'rgba(95, 164, 46, 0.05)');
+                        gradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
                         
                         // Get data points and chart bottom position
                         const dataset = chart.data.datasets[0];
@@ -14564,8 +14568,20 @@ margin-right: 0.5rem;
                         
                         if (!chart.data.datasets[0].data.length) return;
                         
-                        // Get the latest (current) value
-                        const currentValue = chart.data.datasets[0].data[chart.data.datasets[0].data.length - 1];
+                        // Check if there's an active crosshair interaction
+                        let currentValue, currentIndex, displayDate = '';
+                        if (chart.activeIndex !== undefined && chart.activeIndex >= 0) {
+                            currentIndex = chart.activeIndex;
+                            currentValue = chart.data.datasets[0].data[currentIndex];
+                            // Format date from label
+                            const dateLabel = chart.data.labels[currentIndex];
+                            displayDate = ` (${dateLabel})`;
+                        } else {
+                            // Default to latest value
+                            currentIndex = chart.data.datasets[0].data.length - 1;
+                            currentValue = chart.data.datasets[0].data[currentIndex];
+                        }
+                        
                         const yPosition = yAxis.getPixelForValue(currentValue);
                         
                         // Draw dashed horizontal line edge-to-edge
@@ -14580,14 +14596,14 @@ margin-right: 0.5rem;
                         ctx.lineTo(chart.chartArea.right, yPosition);
                         ctx.stroke();
                         
-                        // Draw amount label above the line
+                        // Draw amount label above the line with date
                         ctx.setLineDash([]);
                         ctx.fillStyle = '#6b7280';
                         ctx.font = '12px system-ui, -apple-system, sans-serif';
                         ctx.textAlign = 'left';
                         ctx.textBaseline = 'bottom';
                         
-                        const formattedValue = `$${(currentValue / 1000).toFixed(1)}k`;
+                        const formattedValue = `$${(currentValue / 1000).toFixed(1)}k${displayDate}`;
                         ctx.fillText(formattedValue, chart.chartArea.left + 8, yPosition - 8);
                         
                         ctx.restore();
@@ -14654,6 +14670,9 @@ margin-right: 0.5rem;
             function showChartInteraction(activeIndex) {
                 if (!chart.data || !chart.data.datasets) return;
 
+                // Store active index for horizontal line plugin
+                chart.activeIndex = activeIndex;
+
                 // Show active point with hollow green circle
                 chart.data.datasets.forEach((dataset, datasetIndex) => {
                     // Reset all point properties
@@ -14666,7 +14685,7 @@ margin-right: 0.5rem;
                     if (activeIndex >= 0 && activeIndex < dataset.data.length) {
                         dataset.pointRadius[activeIndex] = 8;
                         dataset.pointBackgroundColor[activeIndex] = '#fff';
-                        dataset.pointBorderColor[activeIndex] = 'rgb(16, 185, 129)'; // Green
+                        dataset.pointBorderColor[activeIndex] = '#5fa42e'; // Green
                         dataset.pointBorderWidth[activeIndex] = 3;
                     }
                 });
@@ -14683,6 +14702,9 @@ margin-right: 0.5rem;
             // Hide crosshair
             function hideChartInteraction() {
                 if (!chart.data || !chart.data.datasets) return;
+
+                // Clear active index for horizontal line plugin
+                chart.activeIndex = undefined;
 
                 // Hide all points
                 chart.data.datasets.forEach(dataset => {
