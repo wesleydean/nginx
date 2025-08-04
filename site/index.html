@@ -14690,10 +14690,11 @@ margin-right: 0.5rem;
                     }
                 });
 
-                // Position crosshair
+                // Position crosshair but hide the vertical line during interaction
                 const xScale = chart.scales.x;
                 const pixelX = xScale.getPixelForValue(activeIndex);
                 chartCrosshair.style.left = `${pixelX}px`;
+                chartCrosshair.style.opacity = '0'; // Hide vertical line during dragging
                 chartOverlay.classList.add('visible');
 
                 chart.update('none');
