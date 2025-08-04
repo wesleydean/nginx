@@ -8463,6 +8463,10 @@ margin-right: 0.5rem;
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: { enabled: false }
@@ -13684,6 +13688,10 @@ margin-right: 0.5rem;
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: { enabled: false }
@@ -13740,20 +13748,18 @@ margin-right: 0.5rem;
                         ctx.fillStyle = gradient;
                         
                         ctx.beginPath();
-                        // Start at chart bottom for first point
-                        const firstX = xAxis.getPixelForValue(0);
-                        ctx.moveTo(firstX, chartBottom);
+                        // Start at left edge of chart area, at bottom
+                        ctx.moveTo(chartArea.left, chartBottom);
                         
-                        // Draw line following the data
+                        // Draw line following the data from left edge
                         dataset.data.forEach((value, index) => {
                             const x = xAxis.getPixelForValue(index);
                             const y = yAxis.getPixelForValue(value);
                             ctx.lineTo(x, y);
                         });
                         
-                        // Complete the fill back to chart bottom
-                        const lastX = xAxis.getPixelForValue(dataset.data.length - 1);
-                        ctx.lineTo(lastX, chartBottom);
+                        // Complete the fill back to chart bottom at right edge
+                        ctx.lineTo(chartArea.right, chartBottom);
                         ctx.closePath();
                         
                         ctx.fill();
@@ -14428,6 +14434,10 @@ margin-right: 0.5rem;
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    },
                     plugins: {
                         legend: { display: false },
                         tooltip: { enabled: false }
@@ -14484,20 +14494,18 @@ margin-right: 0.5rem;
                         ctx.fillStyle = gradient;
                         
                         ctx.beginPath();
-                        // Start at chart bottom for first point
-                        const firstX = xAxis.getPixelForValue(0);
-                        ctx.moveTo(firstX, chartBottom);
+                        // Start at left edge of chart area, at bottom
+                        ctx.moveTo(chartArea.left, chartBottom);
                         
-                        // Draw line following the data
+                        // Draw line following the data from left edge
                         dataset.data.forEach((value, index) => {
                             const x = xAxis.getPixelForValue(index);
                             const y = yAxis.getPixelForValue(value);
                             ctx.lineTo(x, y);
                         });
                         
-                        // Complete the fill back to chart bottom
-                        const lastX = xAxis.getPixelForValue(dataset.data.length - 1);
-                        ctx.lineTo(lastX, chartBottom);
+                        // Complete the fill back to chart bottom at right edge
+                        ctx.lineTo(chartArea.right, chartBottom);
                         ctx.closePath();
                         
                         ctx.fill();
