@@ -13731,18 +13731,18 @@ margin-right: 0.5rem;
                         gradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
                         gradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // Opaque at top
                         
-                        // Get data points and zero line position
+                        // Get data points and chart bottom position
                         const dataset = chart.data.datasets[0];
-                        const zeroY = yAxis.getPixelForValue(0);
+                        const chartBottom = chartArea.bottom;
                         
-                        // Draw filled area from data line to zero line (chart bottom baseline)
+                        // Draw filled area from data line to chart bottom (visual bottom)
                         ctx.save();
                         ctx.fillStyle = gradient;
                         
                         ctx.beginPath();
-                        // Start at zero line for first point
+                        // Start at chart bottom for first point
                         const firstX = xAxis.getPixelForValue(0);
-                        ctx.moveTo(firstX, zeroY);
+                        ctx.moveTo(firstX, chartBottom);
                         
                         // Draw line following the data
                         dataset.data.forEach((value, index) => {
@@ -13751,9 +13751,9 @@ margin-right: 0.5rem;
                             ctx.lineTo(x, y);
                         });
                         
-                        // Complete the fill back to zero line
+                        // Complete the fill back to chart bottom
                         const lastX = xAxis.getPixelForValue(dataset.data.length - 1);
-                        ctx.lineTo(lastX, zeroY);
+                        ctx.lineTo(lastX, chartBottom);
                         ctx.closePath();
                         
                         ctx.fill();
@@ -14475,18 +14475,18 @@ margin-right: 0.5rem;
                         gradient.addColorStop(0.4, 'rgba(16, 185, 129, 0.05)');
                         gradient.addColorStop(1, 'rgba(16, 185, 129, 0.25)'); // Opaque at top
                         
-                        // Get data points and zero line position
+                        // Get data points and chart bottom position
                         const dataset = chart.data.datasets[0];
-                        const zeroY = yAxis.getPixelForValue(0);
+                        const chartBottom = chartArea.bottom;
                         
-                        // Draw filled area from data line to zero line (chart bottom baseline)
+                        // Draw filled area from data line to chart bottom (visual bottom)
                         ctx.save();
                         ctx.fillStyle = gradient;
                         
                         ctx.beginPath();
-                        // Start at zero line for first point
+                        // Start at chart bottom for first point
                         const firstX = xAxis.getPixelForValue(0);
-                        ctx.moveTo(firstX, zeroY);
+                        ctx.moveTo(firstX, chartBottom);
                         
                         // Draw line following the data
                         dataset.data.forEach((value, index) => {
@@ -14495,9 +14495,9 @@ margin-right: 0.5rem;
                             ctx.lineTo(x, y);
                         });
                         
-                        // Complete the fill back to zero line
+                        // Complete the fill back to chart bottom
                         const lastX = xAxis.getPixelForValue(dataset.data.length - 1);
-                        ctx.lineTo(lastX, zeroY);
+                        ctx.lineTo(lastX, chartBottom);
                         ctx.closePath();
                         
                         ctx.fill();
