@@ -8598,8 +8598,12 @@ margin-right: 0.5rem;
                 // Only prevent default for horizontal movements when interaction is enabled
                 if (interactionEnabled) {
                     e.preventDefault(); // Prevent scrolling when interacting with chart
-                    const x = e.touches[0].clientX - chartCanvas.getBoundingClientRect().left;
-                    const index = getNearestIndex(x);
+                    const rect = chartCanvas.getBoundingClientRect();
+                    const x = e.touches[0].clientX - rect.left;
+                    
+                    // Constrain to chart bounds to prevent edge effects
+                    const constrainedX = Math.max(0, Math.min(rect.width, x));
+                    const index = getNearestIndex(constrainedX);
                     if (index !== lastActiveIndex) {
                         updateChartHeader(index);
                         showChartInteraction(index);
@@ -13658,6 +13662,14 @@ margin-right: 0.5rem;
             // Prepare data for Chart.js
             const labels = data.map(d => d.date);
             const netWorthData = data.map(d => d.value);
+            
+            // Calculate fixed scale bounds to prevent auto-scaling
+            const minValue = Math.min(...netWorthData);
+            const maxValue = Math.max(...netWorthData);
+            const range = maxValue - minValue;
+            const padding = range * 0.1; // 10% padding
+            const yMin = minValue - padding;
+            const yMax = maxValue + padding;
 
             homeNetWorthChart = new Chart(ctx, {
                 type: 'line',
@@ -13793,9 +13805,14 @@ margin-right: 0.5rem;
                         if (chart.activeIndex !== undefined && chart.activeIndex >= 0) {
                             currentIndex = chart.activeIndex;
                             currentValue = chart.data.datasets[0].data[currentIndex];
-                            // Format date from label
+                            // Format date from label to friendly format
                             const dateLabel = chart.data.labels[currentIndex];
-                            displayDate = ` (${dateLabel})`;
+                            const date = new Date(dateLabel);
+                            const friendlyDate = date.toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric' 
+                            });
+                            displayDate = ` (${friendlyDate})`;
                         } else {
                             // Default to latest value
                             currentIndex = chart.data.datasets[0].data.length - 1;
@@ -14573,9 +14590,14 @@ margin-right: 0.5rem;
                         if (chart.activeIndex !== undefined && chart.activeIndex >= 0) {
                             currentIndex = chart.activeIndex;
                             currentValue = chart.data.datasets[0].data[currentIndex];
-                            // Format date from label
+                            // Format date from label to friendly format
                             const dateLabel = chart.data.labels[currentIndex];
-                            displayDate = ` (${dateLabel})`;
+                            const date = new Date(dateLabel);
+                            const friendlyDate = date.toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric' 
+                            });
+                            displayDate = ` (${friendlyDate})`;
                         } else {
                             // Default to latest value
                             currentIndex = chart.data.datasets[0].data.length - 1;
@@ -14766,6 +14788,9 @@ margin-right: 0.5rem;
             chartCanvas.addEventListener('touchmove', function (e) {
                 if (!e.touches || e.touches.length === 0) return;
 
+                // Always prevent default to stop zoom-out and browser navigation
+                e.preventDefault();
+
                 // Direction detection for scroll vs chart interaction
                 if (touchDirection === null) {
                     const deltaX = Math.abs(e.touches[0].clientX - initialTouchX);
@@ -14781,9 +14806,13 @@ margin-right: 0.5rem;
 
                 // Only interact if horizontal movement
                 if (touchDirection === 'horizontal' && interactionEnabled) {
-                    e.preventDefault();
-                    const x = e.touches[0].clientX - chartCanvas.getBoundingClientRect().left;
-                    const index = getNearestIndex(x);
+                    const rect = chartCanvas.getBoundingClientRect();
+                    const x = e.touches[0].clientX - rect.left;
+                    
+                    // Constrain to chart bounds to prevent edge effects
+                    const constrainedX = Math.max(0, Math.min(rect.width, x));
+                    const index = getNearestIndex(constrainedX);
+                    
                     if (index !== lastActiveIndex) {
                         showChartInteraction(index);
                         lastActiveIndex = index;
