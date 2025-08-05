@@ -1453,33 +1453,200 @@
         }
         
         .budget-flow-screens {
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 60vh;
+            padding: 0;
         }
         
         .budget-flow-screen {
             display: none;
+            animation: fadeIn 0.3s ease-in-out;
+            padding: 1.5rem 1.5rem 120px 1.5rem;
+            flex: 1;
         }
         
         .budget-flow-screen.active {
-            display: block;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .budget-flow-navigation {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 1.5rem;
             border-top: 1px solid hsl(var(--border));
             gap: 1rem;
+            background: hsl(var(--background));
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            margin: 0;
         }
         
-        .nav-btn {
-            padding: 12px 24px;
-            border-radius: 6px;
+        .budget-step-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.25rem;
+            background: hsl(var(--card));
+            border-radius: 0.75rem;
+            border: 1px solid hsl(var(--border));
+        }
+        
+        .budget-step-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: hsl(var(--accent));
+            color: hsl(var(--accent-foreground));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .budget-step-content h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+        
+        .budget-step-description {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+            margin: 0.25rem 0 0 0;
+        }
+        
+        .interactive-chart-container {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .budget-content-section {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .budget-content-section:last-child {
+            margin-bottom: 2rem;
+        }
+        
+        .budget-screen-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chart-title {
+            font-size: 0.875rem;
             font-weight: 500;
+            color: hsl(var(--muted-foreground));
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .savings-rate-display {
+            font-size: 2rem;
+            font-weight: 700;
+            color: hsl(var(--primary));
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .summary-card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px hsl(var(--shadow) / 0.15);
+        }
+        
+        .summary-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .summary-card-icon {
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .summary-card-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+            margin: 0;
+        }
+        
+        .summary-card-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+            margin-bottom: 0.5rem;
+        }
+        
+        .summary-card-chart {
+            height: 40px;
+            position: relative;
+        }
+        
+        .income-icon { background: hsl(var(--primary) / 0.1); color: hsl(var(--primary)); }
+        .expenses-icon { background: hsl(220 14% 96%); color: #ef4444; }
+        .savings-icon { background: hsl(142 76% 96%); color: #10b981; }
+        .remaining-icon { background: hsl(262 83% 96%); color: #8b5cf6; }
+        
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            border: none;
             cursor: pointer;
             transition: all 0.2s ease;
-            border: none;
             flex: 1;
+            max-width: 160px;
+            min-height: 44px;
         }
         
         .nav-btn.primary {
@@ -6110,6 +6277,59 @@ margin-right: 0.5rem;
             <div class="screens-wrapper" id="screensWrapper">
                 <!-- Screen 0: Home -->
                 <div class="screen">
+                    <!-- Budget Overview Section -->
+                    <div class="card home-section" onclick="openBudgetFlow()">
+                        <div class="card-header">
+                            <div class="home-section-header">
+                                <h3 class="section-title">Budget</h3>
+                                <div class="section-subtitle" id="budgetSubtitle">Monthly overview</div>
+                            </div>
+                            <div class="budget-timerange-toggle">
+                                <button class="timerange-btn active" data-range="monthly" onclick="event.stopPropagation(); toggleBudgetTimeRange('monthly')">Month</button>
+                                <button class="timerange-btn" data-range="yearly" onclick="event.stopPropagation(); toggleBudgetTimeRange('yearly')">Year</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <!-- Savings Progress Bar -->
+                            <div class="budget-bar-section">
+                                <div class="budget-bar-header">
+                                    <span class="budget-bar-label">Savings Goal</span>
+                                    <span class="budget-bar-amount" id="savingsAmount">$1,200 / $2,000</span>
+                                </div>
+                                <div class="budget-progress-bar">
+                                    <div class="budget-progress-fill savings-fill" id="savingsProgress" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Spending Breakdown Bar -->
+                            <div class="budget-bar-section">
+                                <div class="budget-bar-header">
+                                    <span class="budget-bar-label">Spending Breakdown</span>
+                                    <span class="budget-bar-amount" id="spendingAmount">$3,701 / $3,701</span>
+                                </div>
+                                <div class="budget-spending-bar">
+                                    <div class="spending-segment fixed" id="fixedSpending" style="width: 66.2%" title="Fixed: $2,450"></div>
+                                    <div class="spending-segment essential" id="essentialSpending" style="width: 20.3%" title="Essential: $750"></div>
+                                    <div class="spending-segment discretionary" id="discretionarySpending" style="width: 13.5%" title="Discretionary: $501"></div>
+                                </div>
+                                <div class="budget-legend">
+                                    <div class="legend-item">
+                                        <div class="legend-dot fixed"></div>
+                                        <span>Fixed</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-dot essential"></div>
+                                        <span>Essential</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-dot discretionary"></div>
+                                        <span>Discretionary</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Transactions Section -->
                     <div class="card home-section" onclick="goToScreen(1); scrollToTransactions()">
                         <div class="card-header home-section-header">
@@ -6169,58 +6389,7 @@ margin-right: 0.5rem;
                         </div>
                     </div>
                     
-                    <!-- Budget Overview Section -->
-                    <div class="card home-section" onclick="openBudgetFlow()">
-                        <div class="card-header">
-                            <div class="home-section-header">
-                                <h3 class="section-title">Budget</h3>
-                                <div class="section-subtitle" id="budgetSubtitle">Monthly overview</div>
-                            </div>
-                            <div class="budget-timerange-toggle">
-                                <button class="timerange-btn active" data-range="monthly" onclick="event.stopPropagation(); toggleBudgetTimeRange('monthly')">Month</button>
-                                <button class="timerange-btn" data-range="yearly" onclick="event.stopPropagation(); toggleBudgetTimeRange('yearly')">Year</button>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <!-- Savings Progress Bar -->
-                            <div class="budget-bar-section">
-                                <div class="budget-bar-header">
-                                    <span class="budget-bar-label">Savings Goal</span>
-                                    <span class="budget-bar-amount" id="savingsAmount">$1,200 / $2,000</span>
-                                </div>
-                                <div class="budget-progress-bar">
-                                    <div class="budget-progress-fill savings-fill" id="savingsProgress" style="width: 60%"></div>
-                                </div>
-                            </div>
-                            
-                            <!-- Spending Breakdown Bar -->
-                            <div class="budget-bar-section">
-                                <div class="budget-bar-header">
-                                    <span class="budget-bar-label">Spending Breakdown</span>
-                                    <span class="budget-bar-amount" id="spendingAmount">$3,701 / $3,701</span>
-                                </div>
-                                <div class="budget-spending-bar">
-                                    <div class="spending-segment fixed" id="fixedSpending" style="width: 66.2%" title="Fixed: $2,450"></div>
-                                    <div class="spending-segment essential" id="essentialSpending" style="width: 20.3%" title="Essential: $750"></div>
-                                    <div class="spending-segment discretionary" id="discretionarySpending" style="width: 13.5%" title="Discretionary: $501"></div>
-                                </div>
-                                <div class="budget-legend">
-                                    <div class="legend-item">
-                                        <div class="legend-dot fixed"></div>
-                                        <span>Fixed</span>
-                                    </div>
-                                    <div class="legend-item">
-                                        <div class="legend-dot essential"></div>
-                                        <span>Essential</span>
-                                    </div>
-                                    <div class="legend-item">
-                                        <div class="legend-dot discretionary"></div>
-                                        <span>Discretionary</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
                     
                     <!-- Net Worth Section -->
                     <div class="card home-section" onclick="handleNetWorthCardClick(event)">
@@ -6982,13 +7151,20 @@ margin-right: 0.5rem;
                 <div class="budget-flow-screens">
                     <!-- Screen 1: Income & Taxes -->
                     <div class="budget-flow-screen active" id="budgetScreen1">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="text-xl font-semibold">Income & Taxes</h3>
+                        <div class="budget-screen-content">
+                            <div class="budget-step-header">
+                                <div class="budget-step-icon">
+                                    <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+                                </div>
+                                <div class="budget-step-content">
+                                    <h3>Income & Taxes</h3>
+                                    <p class="budget-step-description">Tell us about your income to calculate your take-home pay</p>
+                                </div>
                             </div>
-                    <div class="card-content">
-                        <!-- Tax Calculator Section -->
-                        <div class="tax-calculator-section">
+                        
+                            <div class="budget-content-section">
+                                <!-- Tax Calculator Section -->
+                                <div class="tax-calculator-section">
                             <div class="tax-calculator-header">
                                 <h4 class="text-md font-semibold mb-3">Tax Calculator</h4>
                                 <p class="text-sm text-muted-foreground mb-4">Enter your gross yearly income and province to auto-calculate taxes (2024 rates)</p>
@@ -7086,41 +7262,38 @@ margin-right: 0.5rem;
                                         <div class="tax-value" id="budgetNetIncomeResult">$0.00</div>
                                     </div>
                                 </div>
+                                </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="text-xl font-semibold">Savings Goal</h3>
-                    </div>
-                    <div class="card-content">
-                        <div class="form-group">
-                            <label class="form-label" for="budgetAnnualSavingsGoal">Annual Savings Goal</label>
-                            <input type="number" class="form-input" id="budgetAnnualSavingsGoal" placeholder="52000" min="0" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="budgetMonthlySavingsTarget">Monthly Savings Target</label>
-                            <input type="number" class="form-input" id="budgetMonthlySavingsTarget" placeholder="4333" min="0" step="0.01" readonly>
-                            <div class="form-help">Auto-calculated from annual savings goal.</div>
-                        </div>
-                    </div>
-                </div>
-                
+                            
+                            <!-- Interactive Income Visualization -->
+                            <div class="interactive-chart-container" id="incomeVisualization" style="display: none;">
+                                <div class="chart-title">
+                                    <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                                    Income Breakdown
+                                </div>
+                                <canvas id="incomeBreakdownChart" width="300" height="150"></canvas>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- Screen 2: Savings Goals -->
                     <div class="budget-flow-screen" id="budgetScreen2">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="text-xl font-semibold">Savings Goals</h3>
+                        <div class="budget-screen-content">
+                            <div class="budget-step-header">
+                                <div class="budget-step-icon">
+                                    <i data-lucide="piggy-bank" class="w-5 h-5"></i>
+                                </div>
+                                <div class="budget-step-content">
+                                    <h3>Savings Goals</h3>
+                                    <p class="budget-step-description">Set your savings target to build your future</p>
+                                </div>
                             </div>
-                            <div class="card-content">
+                            
+                            <div class="budget-content-section">
                                 <div class="form-group">
                                     <label class="form-label" for="budgetAnnualSavingsGoal">Annual Savings Goal</label>
-                                    <input type="number" class="form-input" id="budgetAnnualSavingsGoal" placeholder="52000" min="0" step="100">
+                                    <input type="number" class="form-input" id="budgetAnnualSavingsGoal" placeholder="52000" min="0" step="100" oninput="updateSavingsVisualization()">
                                     <div class="form-help">How much do you want to save per year?</div>
                                 </div>
                                 <div class="form-group">
@@ -7128,21 +7301,48 @@ margin-right: 0.5rem;
                                     <input type="number" class="form-input" id="budgetMonthlySavingsTarget" placeholder="4333" min="0" step="0.01" readonly>
                                     <div class="form-help">Auto-calculated from annual savings goal.</div>
                                 </div>
+                                
+                                <!-- Savings Rate Display -->
+                                <div class="interactive-chart-container" id="savingsVisualization" style="display: none;">
+                                    <div class="chart-title">
+                                        <i data-lucide="trending-up" class="w-4 h-4"></i>
+                                        Savings Rate
+                                    </div>
+                                    <div class="savings-rate-display" id="savingsRateDisplay">0%</div>
+                                        <div class="text-center text-sm text-muted-foreground" id="savingsRateDescription">of your net income</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Screen 3: Fixed Expenses -->
                     <div class="budget-flow-screen" id="budgetScreen3">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="text-xl font-semibold">Fixed Expenses</h3>
+                        <div class="budget-screen-content">
+                            <div class="budget-step-header">
+                                <div class="budget-step-icon">
+                                    <i data-lucide="home" class="w-5 h-5"></i>
+                                </div>
+                                <div class="budget-step-content">
+                                    <h3>Fixed Expenses</h3>
+                                    <p class="budget-step-description">Regular expenses that stay the same each month</p>
+                                </div>
                             </div>
-                            <div class="card-content">
-                                <p class="text-sm text-muted-foreground mb-4">Regular monthly expenses that don't change (rent, insurance, loan payments, etc.)</p>
+                            
+                            <div class="budget-content-section">
                                 <div class="form-group">
                                     <label class="form-label" for="budgetFixedExpenses">Monthly Fixed Expenses</label>
-                                    <input type="number" class="form-input" id="budgetFixedExpenses" placeholder="2450" min="0" step="0.01">
+                                    <input type="number" class="form-input" id="budgetFixedExpenses" placeholder="2450" min="0" step="0.01" oninput="updateFixedExpenseVisualization()">
+                                    <div class="form-help">Rent, insurance, loan payments, subscriptions</div>
+                                </div>
+                                
+                                <!-- Fixed Expenses Percentage Display -->
+                                <div class="interactive-chart-container" id="fixedExpenseVisualization" style="display: none;">
+                                    <div class="chart-title">
+                                        <i data-lucide="home" class="w-4 h-4"></i>
+                                        Fixed Expenses Rate
+                                    </div>
+                                    <div class="savings-rate-display" id="fixedExpenseRateDisplay">0%</div>
+                                    <div class="text-center text-sm text-muted-foreground" id="fixedExpenseRateDescription">of your net income</div>
                                 </div>
                             </div>
                         </div>
@@ -7150,15 +7350,32 @@ margin-right: 0.5rem;
                     
                     <!-- Screen 4: Essential Expenses -->
                     <div class="budget-flow-screen" id="budgetScreen4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="text-xl font-semibold">Essential Expenses</h3>
+                        <div class="budget-screen-content">
+                            <div class="budget-step-header">
+                                <div class="budget-step-icon">
+                                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                                </div>
+                                <div class="budget-step-content">
+                                    <h3>Essential Expenses</h3>
+                                    <p class="budget-step-description">Necessary expenses that can vary month to month</p>
+                                </div>
                             </div>
-                            <div class="card-content">
-                                <p class="text-sm text-muted-foreground mb-4">Necessary variable expenses (groceries, utilities, gas, etc.)</p>
+                            
+                            <div class="budget-content-section">
                                 <div class="form-group">
                                     <label class="form-label" for="budgetEssentialExpenses">Monthly Essential Expenses</label>
-                                    <input type="number" class="form-input" id="budgetEssentialExpenses" placeholder="750" min="0" step="0.01">
+                                    <input type="number" class="form-input" id="budgetEssentialExpenses" placeholder="750" min="0" step="0.01" oninput="updateEssentialExpenseVisualization()">
+                                    <div class="form-help">Groceries, utilities, gas, phone, internet</div>
+                                </div>
+                                
+                                <!-- Essential Expenses Percentage Display -->
+                                <div class="interactive-chart-container" id="essentialExpenseVisualization" style="display: none;">
+                                    <div class="chart-title">
+                                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                                        Essential Expenses Rate
+                                    </div>
+                                    <div class="savings-rate-display" id="essentialExpenseRateDisplay">0%</div>
+                                    <div class="text-center text-sm text-muted-foreground" id="essentialExpenseRateDescription">of your net income</div>
                                 </div>
                             </div>
                         </div>
@@ -7166,15 +7383,32 @@ margin-right: 0.5rem;
                     
                     <!-- Screen 5: Discretionary Expenses -->
                     <div class="budget-flow-screen" id="budgetScreen5">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="text-xl font-semibold">Discretionary Expenses</h3>
+                        <div class="budget-screen-content">
+                            <div class="budget-step-header">
+                                <div class="budget-step-icon">
+                                    <i data-lucide="coffee" class="w-5 h-5"></i>
+                                </div>
+                                <div class="budget-step-content">
+                                    <h3>Discretionary Expenses</h3>
+                                    <p class="budget-step-description">Fun spending and lifestyle choices</p>
+                                </div>
                             </div>
-                            <div class="card-content">
-                                <p class="text-sm text-muted-foreground mb-4">Optional spending (entertainment, dining out, hobbies, etc.)</p>
+                            
+                            <div class="budget-content-section">
                                 <div class="form-group">
                                     <label class="form-label" for="budgetDiscretionaryExpenses">Monthly Discretionary Expenses</label>
-                                    <input type="number" class="form-input" id="budgetDiscretionaryExpenses" placeholder="501" min="0" step="0.01">
+                                    <input type="number" class="form-input" id="budgetDiscretionaryExpenses" placeholder="501" min="0" step="0.01" oninput="updateDiscretionaryExpenseVisualization()">
+                                    <div class="form-help">Entertainment, dining out, hobbies, shopping</div>
+                                </div>
+                                
+                                <!-- Discretionary Expenses Percentage Display -->
+                                <div class="interactive-chart-container" id="discretionaryExpenseVisualization" style="display: none;">
+                                    <div class="chart-title">
+                                        <i data-lucide="coffee" class="w-4 h-4"></i>
+                                        Discretionary Expenses Rate
+                                    </div>
+                                    <div class="savings-rate-display" id="discretionaryExpenseRateDisplay">0%</div>
+                                    <div class="text-center text-sm text-muted-foreground" id="discretionaryExpenseRateDescription">of your net income</div>
                                 </div>
                             </div>
                         </div>
@@ -7182,36 +7416,84 @@ margin-right: 0.5rem;
                     
                     <!-- Screen 6: Review & Summary -->
                     <div class="budget-flow-screen" id="budgetScreen6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="text-xl font-semibold">Budget Summary</h3>
+                        <div class="budget-screen-content">
+                            <div class="budget-step-header">
+                                <div class="budget-step-icon">
+                                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                                </div>
+                                <div class="budget-step-content">
+                                    <h3>Budget Summary</h3>
+                                    <p class="budget-step-description">Your complete financial picture at a glance</p>
+                                </div>
                             </div>
-                            <div class="card-content">
-                                <div class="budget-summary">
-                                    <div class="budget-item">
-                                        <div class="budget-label">Net Monthly Income</div>
-                                        <div class="budget-value" id="budgetNetIncomeSummary">$0.00</div>
+                            
+                            <!-- Summary Cards Grid -->
+                            <div class="summary-grid">
+                                <div class="summary-card">
+                                <div class="summary-card-header">
+                                    <div class="summary-card-icon income-icon">
+                                        <i data-lucide="dollar-sign" class="w-4 h-4"></i>
                                     </div>
-                                    <div class="budget-item">
-                                        <div class="budget-label">Total Monthly Expenses</div>
-                                        <div class="budget-value" id="budgetTotalExpensesSummary">$0.00</div>
+                                    <h4 class="summary-card-title">Net Income</h4>
+                                </div>
+                                <div class="summary-card-value" id="budgetNetIncomeSummary">$0</div>
+                                <div class="summary-card-chart">
+                                    <canvas id="incomeChart" width="200" height="60"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="summary-card">
+                                <div class="summary-card-header">
+                                    <div class="summary-card-icon expenses-icon">
+                                        <i data-lucide="credit-card" class="w-4 h-4"></i>
                                     </div>
-                                    <div class="budget-item">
-                                        <div class="budget-label">Monthly Savings Target</div>
-                                        <div class="budget-value" id="budgetMonthlySavingsSummary">$0.00</div>
+                                    <h4 class="summary-card-title">Total Expenses</h4>
+                                </div>
+                                <div class="summary-card-value" id="budgetTotalExpensesSummary">$0</div>
+                                <div class="summary-card-chart">
+                                    <canvas id="expensesChart" width="200" height="60"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="summary-card">
+                                <div class="summary-card-header">
+                                    <div class="summary-card-icon savings-icon">
+                                        <i data-lucide="piggy-bank" class="w-4 h-4"></i>
                                     </div>
-                                    <div class="budget-item">
-                                        <div class="budget-label">Remaining Budget</div>
-                                        <div class="budget-value" id="budgetRemainingBudgetSummary">$0.00</div>
+                                    <h4 class="summary-card-title">Savings Target</h4>
+                                </div>
+                                <div class="summary-card-value" id="budgetMonthlySavingsSummary">$0</div>
+                                <div class="summary-card-chart">
+                                    <canvas id="savingsChart" width="200" height="60"></canvas>
+                                </div>
+                            </div>
+                            
+                            <div class="summary-card">
+                                <div class="summary-card-header">
+                                    <div class="summary-card-icon remaining-icon">
+                                        <i data-lucide="wallet" class="w-4 h-4"></i>
                                     </div>
-                                    <div class="budget-item">
-                                        <div class="budget-label">Savings Rate</div>
-                                        <div class="budget-value" id="budgetSavingsRateSummary">0%</div>
-                                    </div>
-                                    <div class="budget-item">
-                                        <div class="budget-label">Validation</div>
-                                        <div class="budget-value" id="budgetValidationSummary">-</div>
-                                    </div>
+                                    <h4 class="summary-card-title">Remaining</h4>
+                                </div>
+                                <div class="summary-card-value" id="budgetRemainingBudgetSummary">$0</div>
+                                <div class="summary-card-chart">
+                                    <canvas id="remainingChart" width="200" height="60"></canvas>
+                                </div>
+                            </div>
+                            </div>
+                            
+                            <!-- Main Budget Visualization -->
+                            <div class="budget-content-section" style="margin-top: 1.5rem;">
+                                <div class="chart-title">
+                                    <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                                    Budget Breakdown
+                                </div>
+                                <canvas id="budgetSummaryChart" width="400" height="180"></canvas>
+                                
+                                <div style="text-align: center; margin-top: 0.75rem;">
+                                    <div class="savings-rate-display" id="budgetSavingsRateSummary">0%</div>
+                                    <div class="text-sm text-muted-foreground">Savings Rate</div>
+                                    <div class="text-sm font-medium" id="budgetValidationSummary" style="margin-top: 0.25rem;">-</div>
                                 </div>
                             </div>
                         </div>
@@ -7220,9 +7502,18 @@ margin-right: 0.5rem;
                 
                 <!-- Navigation Buttons -->
                 <div class="budget-flow-navigation">
-                    <button type="button" class="nav-btn secondary" id="budgetPrevBtn" onclick="previousBudgetStep()" disabled>Previous</button>
-                    <button type="button" class="nav-btn primary" id="budgetNextBtn" onclick="nextBudgetStep()">Next</button>
-                    <button type="button" class="nav-btn primary" id="budgetSaveBtn" onclick="saveBudgetSettings()" style="display: none;">Save Budget</button>
+                    <button type="button" class="nav-btn secondary" id="budgetPrevBtn" onclick="previousBudgetStep()" disabled>
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        Previous
+                    </button>
+                    <button type="button" class="nav-btn primary" id="budgetNextBtn" onclick="nextBudgetStep()">
+                        Next
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                    <button type="button" class="nav-btn primary" id="budgetSaveBtn" onclick="saveBudgetSettings()" style="display: none;">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        Save Budget
+                    </button>
                 </div>
             </div>
         </div>
@@ -17879,6 +18170,23 @@ margin-right: 0.5rem;
             // Update navigation buttons
             updateBudgetNavigation(step);
             
+            // Update interactive elements based on current step
+            setTimeout(() => {
+                if (step === 2) {
+                    updateSavingsVisualization();
+                } else if (step === 3) {
+                    updateFixedExpenseVisualization();
+                } else if (step === 4) {
+                    updateEssentialExpenseVisualization();
+                } else if (step === 5) {
+                    updateDiscretionaryExpenseVisualization();
+                } else if (step === 6) {
+                    updateSummaryCharts();
+                }
+                // Initialize icons for the new screen
+                safeInitLucideIcons();
+            }, 100);
+            
             currentBudgetStep = step;
         }
         
@@ -18099,6 +18407,9 @@ margin-right: 0.5rem;
 
             // Update budget summary
             updateBudgetSummary();
+            
+            // Show income visualization
+            updateIncomeVisualization();
         }
 
         function updateBudgetSummary() {
@@ -18145,6 +18456,248 @@ margin-right: 0.5rem;
             const validationElement = document.getElementById('budgetValidationSummary');
             validationElement.textContent = validationText;
             validationElement.className = 'budget-value ' + validationClass;
+            
+            // Update summary charts if on summary screen
+            if (document.getElementById('budgetScreen6').classList.contains('active')) {
+                updateSummaryCharts();
+            }
+        }
+
+        // Interactive chart functions
+        function updateSavingsVisualization() {
+            const annualSavings = parseFloat(document.getElementById('budgetAnnualSavingsGoal').value) || 0;
+            const netIncome = parseFloat(document.getElementById('budgetNetIncome').value) || 0;
+            const monthlySavings = annualSavings / 12;
+            
+            document.getElementById('budgetMonthlySavingsTarget').value = monthlySavings.toFixed(2);
+            
+            if (netIncome > 0 && annualSavings > 0) {
+                const savingsRate = (monthlySavings / netIncome) * 100;
+                document.getElementById('savingsRateDisplay').textContent = savingsRate.toFixed(1) + '%';
+                document.getElementById('savingsRateDescription').textContent = `$${monthlySavings.toFixed(0)} per month of your $${netIncome.toFixed(0)} net income`;
+                document.getElementById('savingsVisualization').style.display = 'block';
+            } else {
+                document.getElementById('savingsVisualization').style.display = 'none';
+            }
+        }
+
+        function updateFixedExpenseVisualization() {
+            const fixedExpenses = parseFloat(document.getElementById('budgetFixedExpenses').value) || 0;
+            const netIncome = parseFloat(document.getElementById('budgetNetIncome').value) || 0;
+            
+            if (netIncome > 0 && fixedExpenses > 0) {
+                const expenseRate = (fixedExpenses / netIncome) * 100;
+                document.getElementById('fixedExpenseRateDisplay').textContent = expenseRate.toFixed(1) + '%';
+                document.getElementById('fixedExpenseRateDescription').textContent = `$${fixedExpenses.toFixed(0)} per month of your $${netIncome.toFixed(0)} net income`;
+                document.getElementById('fixedExpenseVisualization').style.display = 'block';
+            } else {
+                document.getElementById('fixedExpenseVisualization').style.display = 'none';
+            }
+            updateBudgetSummary();
+        }
+
+        function updateEssentialExpenseVisualization() {
+            const essentialExpenses = parseFloat(document.getElementById('budgetEssentialExpenses').value) || 0;
+            const netIncome = parseFloat(document.getElementById('budgetNetIncome').value) || 0;
+            
+            if (netIncome > 0 && essentialExpenses > 0) {
+                const expenseRate = (essentialExpenses / netIncome) * 100;
+                document.getElementById('essentialExpenseRateDisplay').textContent = expenseRate.toFixed(1) + '%';
+                document.getElementById('essentialExpenseRateDescription').textContent = `$${essentialExpenses.toFixed(0)} per month of your $${netIncome.toFixed(0)} net income`;
+                document.getElementById('essentialExpenseVisualization').style.display = 'block';
+            } else {
+                document.getElementById('essentialExpenseVisualization').style.display = 'none';
+            }
+            updateBudgetSummary();
+        }
+
+        function updateDiscretionaryExpenseVisualization() {
+            const discretionaryExpenses = parseFloat(document.getElementById('budgetDiscretionaryExpenses').value) || 0;
+            const netIncome = parseFloat(document.getElementById('budgetNetIncome').value) || 0;
+            
+            if (netIncome > 0 && discretionaryExpenses > 0) {
+                const expenseRate = (discretionaryExpenses / netIncome) * 100;
+                document.getElementById('discretionaryExpenseRateDisplay').textContent = expenseRate.toFixed(1) + '%';
+                document.getElementById('discretionaryExpenseRateDescription').textContent = `$${discretionaryExpenses.toFixed(0)} per month of your $${netIncome.toFixed(0)} net income`;
+                document.getElementById('discretionaryExpenseVisualization').style.display = 'block';
+            } else {
+                document.getElementById('discretionaryExpenseVisualization').style.display = 'none';
+            }
+            updateBudgetSummary();
+        }
+
+        function updateExpenseVisualization() {
+            // Legacy function for backward compatibility
+            updateBudgetSummary();
+        }
+
+        function updateIncomeVisualization() {
+            const grossIncome = parseFloat(document.getElementById('budgetGrossIncome').value) || 0;
+            const federalTax = parseFloat(document.getElementById('budgetFederalTax').value) || 0;
+            const provincialTax = parseFloat(document.getElementById('budgetProvincialTax').value) || 0;
+            const cppEi = parseFloat(document.getElementById('budgetCppEi').value) || 0;
+            const netIncome = grossIncome - federalTax - provincialTax - cppEi;
+            
+            if (grossIncome > 0) {
+                document.getElementById('incomeVisualization').style.display = 'block';
+                createIncomeBreakdownChart();
+            } else {
+                document.getElementById('incomeVisualization').style.display = 'none';
+            }
+        }
+
+        function createIncomeBreakdownChart() {
+            const canvas = document.getElementById('incomeBreakdownChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const grossIncome = parseFloat(document.getElementById('budgetGrossIncome').value) || 0;
+            const federalTax = parseFloat(document.getElementById('budgetFederalTax').value) || 0;
+            const provincialTax = parseFloat(document.getElementById('budgetProvincialTax').value) || 0;
+            const cppEi = parseFloat(document.getElementById('budgetCppEi').value) || 0;
+            const netIncome = grossIncome - federalTax - provincialTax - cppEi;
+
+            if (window.incomeChart) {
+                window.incomeChart.destroy();
+            }
+
+            window.incomeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Take Home', 'Federal Tax', 'Provincial Tax', 'CPP/EI'],
+                    datasets: [{
+                        data: [netIncome, federalTax, provincialTax, cppEi],
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#8b5cf6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSummaryCharts() {
+            const netIncome = parseFloat(document.getElementById('budgetNetIncome').value) || 0;
+            const fixedExpenses = parseFloat(document.getElementById('budgetFixedExpenses').value) || 0;
+            const essentialExpenses = parseFloat(document.getElementById('budgetEssentialExpenses').value) || 0;
+            const discretionaryExpenses = parseFloat(document.getElementById('budgetDiscretionaryExpenses').value) || 0;
+            const annualSavingsGoal = parseFloat(document.getElementById('budgetAnnualSavingsGoal').value) || 0;
+            const monthlySavingsTarget = annualSavingsGoal / 12;
+            const totalExpenses = fixedExpenses + essentialExpenses + discretionaryExpenses;
+            const remainingBudget = netIncome - totalExpenses - monthlySavingsTarget;
+
+            // Update summary values
+            document.getElementById('budgetNetIncomeSummary').textContent = formatCurrency(netIncome);
+            document.getElementById('budgetTotalExpensesSummary').textContent = formatCurrency(totalExpenses);
+            document.getElementById('budgetMonthlySavingsSummary').textContent = formatCurrency(monthlySavingsTarget);
+            document.getElementById('budgetRemainingBudgetSummary').textContent = formatCurrency(remainingBudget);
+
+            // Create main budget breakdown chart
+            createBudgetSummaryChart(netIncome, fixedExpenses, essentialExpenses, discretionaryExpenses, monthlySavingsTarget, remainingBudget);
+            
+            // Create mini charts for each card
+            createMiniChart('incomeChart', [netIncome], ['#3b82f6']);
+            createMiniChart('expensesChart', [fixedExpenses, essentialExpenses, discretionaryExpenses], ['#ef4444', '#f59e0b', '#8b5cf6']);
+            createMiniChart('savingsChart', [monthlySavingsTarget], ['#10b981']);
+            createMiniChart('remainingChart', [Math.max(0, remainingBudget)], remainingBudget >= 0 ? ['#10b981'] : ['#ef4444']);
+        }
+
+        function createBudgetSummaryChart(netIncome, fixed, essential, discretionary, savings, remaining) {
+            const canvas = document.getElementById('budgetSummaryChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            if (window.budgetSummaryChart) {
+                window.budgetSummaryChart.destroy();
+            }
+
+            const data = [];
+            const labels = [];
+            const colors = [];
+
+            if (fixed > 0) { data.push(fixed); labels.push('Fixed Expenses'); colors.push('#ef4444'); }
+            if (essential > 0) { data.push(essential); labels.push('Essential Expenses'); colors.push('#f59e0b'); }
+            if (discretionary > 0) { data.push(discretionary); labels.push('Discretionary'); colors.push('#8b5cf6'); }
+            if (savings > 0) { data.push(savings); labels.push('Savings Target'); colors.push('#10b981'); }
+            if (remaining > 0) { data.push(remaining); labels.push('Remaining'); colors.push('#6b7280'); }
+
+            window.budgetSummaryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: { size: 12 }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateScale: true,
+                        duration: 1000
+                    }
+                }
+            });
+        }
+
+        function createMiniChart(canvasId, data, colors) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            if (window[canvasId + 'Instance']) {
+                window[canvasId + 'Instance'].destroy();
+            }
+
+            window[canvasId + 'Instance'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [''],
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 0,
+                        barThickness: 20
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    },
+                    animation: {
+                        duration: 800,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
         }
 
         async function saveBudgetSettings() {
@@ -18180,6 +18733,9 @@ margin-right: 0.5rem;
 
             // Close the budget setup
             closeBudgetFlow();
+
+            // Redirect to home page (screen 0)
+            goToScreen(0);
 
             // Show success message
             alert('Budget settings saved successfully!');
