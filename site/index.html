@@ -1422,29 +1422,46 @@
             padding: 1rem 1.5rem;
             border-bottom: 1px solid hsl(var(--border));
             text-align: center;
+            background: hsl(var(--background));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         .progress-dots {
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: 14px;
             margin-bottom: 8px;
         }
         
         .progress-dot {
-            width: 8px;
-            height: 8px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             background: hsl(var(--muted));
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            border: 2px solid hsl(var(--border));
+            box-sizing: border-box;
+            cursor: pointer;
         }
         
         .progress-dot.active {
             background: #8b5cf6;
+            border-color: #8b5cf6;
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
         }
         
         .progress-dot.completed {
             background: #5fa42e;
+            border-color: #5fa42e;
+            transform: scale(1.1);
         }
         
         .progress-label {
@@ -1500,7 +1517,7 @@
             padding: 1rem 1.25rem;
             background: hsl(var(--card));
             border-radius: 0.75rem;
-            border: 1px solid hsl(var(--border));
+
         }
         
         .budget-step-icon {
@@ -1552,6 +1569,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            padding: 1rem;
         }
         
         .chart-title {
@@ -18671,7 +18689,7 @@ margin-right: 0.5rem;
                     }
                 }
             });
-        }
+make         }
 
         function createMiniChart(canvasId, data, colors) {
             const canvas = document.getElementById(canvasId);
