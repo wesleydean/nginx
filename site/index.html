@@ -1440,7 +1440,7 @@
         }
         
         .progress-dot.active {
-            background: hsl(var(--primary));
+            background: #8b5cf6;
         }
         
         .progress-dot.completed {
@@ -1649,23 +1649,6 @@
             min-height: 44px;
         }
         
-        .nav-btn.primary {
-            background: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
-        }
-        
-        .nav-btn.primary:hover:not(:disabled) {
-            background: hsl(var(--primary) / 0.9);
-        }
-        
-        .nav-btn.secondary {
-            background: hsl(var(--secondary));
-            color: hsl(var(--secondary-foreground));
-        }
-        
-        .nav-btn.secondary:hover:not(:disabled) {
-            background: hsl(var(--secondary) / 0.8);
-        }
         
         .nav-btn:disabled {
             opacity: 0.5;
@@ -7502,15 +7485,15 @@ margin-right: 0.5rem;
                 
                 <!-- Navigation Buttons -->
                 <div class="budget-flow-navigation">
-                    <button type="button" class="nav-btn secondary" id="budgetPrevBtn" onclick="previousBudgetStep()" disabled>
+                    <button type="button" class="btn btn-secondary" id="budgetPrevBtn" onclick="previousBudgetStep()" disabled style="gap: 0.5rem; padding: 10px 16px;">
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
                         Previous
                     </button>
-                    <button type="button" class="nav-btn primary" id="budgetNextBtn" onclick="nextBudgetStep()">
+                    <button type="button" class="add-btn" id="budgetNextBtn" onclick="nextBudgetStep()" style="display: flex; align-items: center; gap: 0.5rem; width: auto; padding: 10px 16px;">
                         Next
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
-                    <button type="button" class="nav-btn primary" id="budgetSaveBtn" onclick="saveBudgetSettings()" style="display: none;">
+                    <button type="button" class="add-btn" id="budgetSaveBtn" onclick="saveBudgetSettings()" style="display: none; align-items: center; gap: 0.5rem; width: auto; padding: 10px 16px;">
                         <i data-lucide="check" class="w-4 h-4"></i>
                         Save Budget
                     </button>
@@ -18654,10 +18637,10 @@ margin-right: 0.5rem;
             const labels = [];
             const colors = [];
 
-            if (fixed > 0) { data.push(fixed); labels.push('Fixed Expenses'); colors.push('#ef4444'); }
-            if (essential > 0) { data.push(essential); labels.push('Essential Expenses'); colors.push('#f59e0b'); }
+            if (fixed > 0) { data.push(fixed); labels.push('Fixed Expenses'); colors.push('#9333ea'); }
+            if (essential > 0) { data.push(essential); labels.push('Essential Expenses'); colors.push('#7c3aed'); }
             if (discretionary > 0) { data.push(discretionary); labels.push('Discretionary'); colors.push('#8b5cf6'); }
-            if (savings > 0) { data.push(savings); labels.push('Savings Target'); colors.push('#10b981'); }
+            if (savings > 0) { data.push(savings); labels.push('Savings Target'); colors.push('#5fa42e'); }
             if (remaining > 0) { data.push(remaining); labels.push('Remaining'); colors.push('#6b7280'); }
 
             window.budgetSummaryChart = new Chart(ctx, {
