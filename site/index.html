@@ -1334,7 +1334,7 @@
         }
         
         .budget-progress-bar {
-            height: 8px;
+            height: 12px;
             background: hsl(var(--muted));
             border-radius: 4px;
             overflow: hidden;
@@ -1352,7 +1352,7 @@
         }
         
         .budget-spending-bar {
-            height: 8px;
+            height: 12px;
             background: hsl(var(--muted));
             border-radius: 4px;
             overflow: hidden;
@@ -1507,8 +1507,8 @@
             width: 2.5rem;
             height: 2.5rem;
             border-radius: 50%;
-            background: hsl(var(--accent));
-            color: hsl(var(--accent-foreground));
+            background: #5fa42e;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1567,7 +1567,7 @@
         .savings-rate-display {
             font-size: 2rem;
             font-weight: 700;
-            color: hsl(var(--primary));
+            color: #5fa42e;
             text-align: center;
             margin: 1rem 0;
         }
@@ -14343,14 +14343,18 @@ margin-right: 0.5rem;
             const yMin = minValue - padding;
             const yMax = maxValue + padding;
 
+            // Create separate datasets for positive and negative sections
+            const positiveData = netWorthData.map(value => value >= 0 ? value : null);
+            const negativeData = netWorthData.map(value => value < 0 ? value : null);
+
             homeNetWorthChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Net Worth',
-                        data: netWorthData,
-                        borderColor: '#5fa42e', // Green theme
+                        label: 'Net Worth (Positive)',
+                        data: positiveData,
+                        borderColor: '#5fa42e', // Green for positive
                         backgroundColor: 'transparent',
                         tension: 0.6,
                         fill: false,
@@ -14359,7 +14363,30 @@ margin-right: 0.5rem;
                         pointHitRadius: 20,
                         pointBackgroundColor: 'transparent',
                         pointBorderColor: 'transparent',
-                        pointBorderWidth: 0
+                        pointBorderWidth: 0,
+                        spanGaps: false,
+                        segment: {
+                            borderColor: (ctx) => ctx.p0.parsed.y >= 0 ? '#5fa42e' : 'transparent'
+                        }
+                    }, {
+                        label: 'Net Worth (Negative)',
+                        data: negativeData,
+                        borderColor: '#9ca3af', // Gray for negative
+                        backgroundColor: 'transparent',
+                        tension: 0.6,
+                        fill: false,
+                        pointRadius: 0,
+                        borderWidth: 3,
+                        pointHitRadius: 20,
+                        pointBackgroundColor: 'transparent',
+                        pointBorderColor: 'transparent',
+                        pointBorderWidth: 0,
+                        borderDash: [5, 5], // Dashed line for negative
+                        spanGaps: false,
+                        segment: {
+                            borderColor: (ctx) => ctx.p0.parsed.y < 0 ? '#9ca3af' : 'transparent',
+                            borderDash: (ctx) => ctx.p0.parsed.y < 0 ? [5, 5] : []
+                        }
                     }]
                 },
                 options: {
