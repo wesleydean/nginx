@@ -1334,10 +1334,14 @@
             font-weight: 500;
         }
         
+        .budget-bar-amount .upper-amount {
+            font-weight: 700;
+        }
+        
         .budget-progress-bar {
             height: 12px;
             background: hsl(var(--muted));
-            border-radius: 4px;
+            border-radius: 1rem;
             overflow: hidden;
             position: relative;
         }
@@ -1349,13 +1353,14 @@
         }
         
         .savings-fill {
-            background: linear-gradient(90deg, #5fa42e 0%, #4a7c23 100%);
+            background: #56c646;
+            border-radius: 1rem;
         }
         
         .budget-spending-bar {
             height: 12px;
             background: hsl(var(--muted));
-            border-radius: 4px;
+            border-radius: 1rem;
             overflow: hidden;
             display: flex;
         }
@@ -1368,15 +1373,19 @@
         }
         
         .spending-segment.fixed {
-            background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+            background: #cac14a;
         }
         
         .spending-segment.essential {
-            background: linear-gradient(90deg, #ea580c 0%, #c2410c 100%);
+            background: #995cdb;
         }
         
         .spending-segment.discretionary {
-            background: linear-gradient(90deg, #7c3aed 0%, #6d28d9 100%);
+            background: #74c8cb;
+        }
+        
+        .spending-segment.remaining {
+            background: #e5e7eb;
         }
         
         .spending-segment:hover {
@@ -1407,15 +1416,15 @@
         }
         
         .legend-dot.fixed {
-            background: #dc2626;
+            background: #cac14a;
         }
         
         .legend-dot.essential {
-            background: #ea580c;
+            background: #995cdb;
         }
         
         .legend-dot.discretionary {
-            background: #7c3aed;
+            background: #74c8cb;
         }
         
         /* Budget Flow Styles */
@@ -1518,8 +1527,125 @@
             padding: 1rem 1.25rem;
             background: hsl(var(--card));
             border-radius: 0.75rem;
-
         }
+        
+        .budget-step-header-new {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+        }
+        
+        .budget-step-header-new h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+            margin: 0 0 0.5rem 0;
+        }
+        
+        .budget-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem auto;
+            max-width: 400px;
+        }
+        
+        .budget-input-large {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 1rem 1rem 1rem 3rem;
+            border: none;
+            background: transparent;
+            color: #2d7d32;
+            width: 100%;
+            outline: none;
+            min-height: 4rem;
+        }
+
+        .budget-input-xl {
+            font-size: 4rem;
+            font-weight: 700;
+            text-align: right;
+            padding: 1rem 1rem 1rem 4rem;
+            border: none;
+            background: transparent;
+            color: #2d7d32;
+            width: 100%;
+            outline: none;
+            min-height: 5rem;
+        }
+        
+        .budget-input-large::placeholder {
+            color: #2d7d32;
+            opacity: 0.3;
+        }
+        
+        .budget-input-xl::placeholder {
+            color: #2d7d32;
+            opacity: 0.3;
+        }
+        
+        .budget-input-large:focus {
+            color: #2d7d32;
+        }
+
+        .budget-input-xl:focus {
+            color: #2d7d32;
+        }
+        
+        .budget-dollar-sign {
+            position: absolute;
+            left: 1rem;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2d7d32;
+            pointer-events: none;
+        }
+
+        .budget-dollar-sign-xl {
+            position: absolute;
+            right: calc(100% - 0.2rem);
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 4rem;
+            font-weight: 700;
+            color: #2d7d32;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Removed caret-blink animation */
+        
+        .budget-form-group-large {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .budget-form-label-large {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .budget-header-bubble {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #1b5e20;
+            background-color: #e8f5e8;
+            padding: 0.5rem 1rem;
+            border-radius: 1.5rem;
+            text-align: center;
+            display: inline-block;
+            margin: 0 auto 1rem auto;
+            border: 1px solid #c8e6c9;
+        }
+
         
         .budget-step-icon {
             width: 2.5rem;
@@ -1555,10 +1681,7 @@
         }
         
         .budget-content-section {
-            background: hsl(var(--card));
-            border: 1px solid hsl(var(--border));
-            border-radius: 0.75rem;
-            padding: 1.5rem;
+            /* background: hsl(var(--card)); */
             margin-bottom: 1.5rem;
         }
         
@@ -2830,7 +2953,7 @@
         
         .add-btn {
             background: linear-gradient(135deg, hsl(260deg 58.02% 57.98%), hsl(260deg 54.55% 69.74%));
-            border-radius: 1rem;
+            border-radius: 2rem;
             color: #ffffff;
             border: none;
             padding: 10px 16px;
@@ -6329,6 +6452,7 @@ margin-right: 0.5rem;
                                     <div class="spending-segment fixed" id="fixedSpending" style="width: 66.2%" title="Fixed: $2,450"></div>
                                     <div class="spending-segment essential" id="essentialSpending" style="width: 20.3%" title="Essential: $750"></div>
                                     <div class="spending-segment discretionary" id="discretionarySpending" style="width: 13.5%" title="Discretionary: $501"></div>
+                                    <div class="spending-segment remaining" id="remainingBudget" style="width: 0%" title="Remaining: $0"></div>
                                 </div>
                                 <div class="budget-legend">
                                     <div class="legend-item">
@@ -7156,28 +7280,22 @@ margin-right: 0.5rem;
                     <!-- Screen 1: Income & Taxes -->
                     <div class="budget-flow-screen active" id="budgetScreen1">
                         <div class="budget-screen-content">
-                            <div class="budget-step-header">
-                                <div class="budget-step-icon">
-                                    <i data-lucide="dollar-sign" class="w-5 h-5"></i>
-                                </div>
-                                <div class="budget-step-content">
-                                    <h3>Income & Taxes</h3>
-                                    <p class="budget-step-description">Tell us about your income to calculate your take-home pay</p>
-                                </div>
+                            <div class="budget-step-header-new">
+                                <h2>Income & Taxes</h2>
+                                <p class="budget-step-description">Tell us about your income to calculate your take-home pay</p>
                             </div>
                         
                             <div class="budget-content-section">
-                                <!-- Tax Calculator Section -->
+                                <!-- Income Input Section -->
                                 <div class="tax-calculator-section">
-                            <div class="tax-calculator-header">
-                                <h4 class="text-md font-semibold mb-3">Tax Calculator</h4>
-                                <p class="text-sm text-muted-foreground mb-4">Enter your gross yearly income and province to auto-calculate taxes (2024 rates)</p>
-                            </div>
                             
                             <div class="tax-calculator-inputs">
-                                <div class="form-group">
-                                    <label class="form-label" for="budgetGrossYearlyIncome">Gross Yearly Income</label>
-                                    <input type="number" class="form-input" id="budgetGrossYearlyIncome" placeholder="140000" min="0" step="1000">
+                                <div class="budget-form-group-large">
+                                    <div class="budget-header-bubble">Gross Yearly Income</div>
+                                    <div style="position: relative;">
+                                        <span class="budget-dollar-sign-xl">$</span>
+                                        <input type="text" class="budget-input-xl" id="budgetGrossYearlyIncome" placeholder="140,000" min="0" step="1000" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    </div>
                                 </div>
                                 
                                 <div class="form-group">
@@ -7219,23 +7337,23 @@ margin-right: 0.5rem;
                                     
                                     <div class="form-group">
                                         <label class="form-label" for="budgetGrossIncome">Gross Monthly Income</label>
-                                        <input type="number" class="form-input" id="budgetGrossIncome" placeholder="11667" min="0" step="0.01">
+                                        <input type="text" class="budget-input-large" id="budgetGrossIncome" placeholder="11,667" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label" for="budgetFederalTax">Federal Tax</label>
-                                        <input type="number" class="form-input" id="budgetFederalTax" placeholder="2500" min="0" step="0.01">
+                                        <input type="text" class="budget-input-large" id="budgetFederalTax" placeholder="2,500" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label" for="budgetProvincialTax">Provincial Tax</label>
-                                        <input type="number" class="form-input" id="budgetProvincialTax" placeholder="750" min="0" step="0.01">
+                                        <input type="text" class="budget-input-large" id="budgetProvincialTax" placeholder="750" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label" for="budgetCppEi">CPP/EI</label>
-                                        <input type="number" class="form-input" id="budgetCppEi" placeholder="333" min="0" step="0.01">
+                                        <input type="text" class="budget-input-large" id="budgetCppEi" placeholder="333" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label" for="budgetNetIncome">Net Monthly Income</label>
-                                        <input type="number" class="form-input" id="budgetNetIncome" placeholder="8084" min="0" step="0.01">
+                                        <input type="text" class="budget-input-large" id="budgetNetIncome" placeholder="8,084" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                                         <div class="form-help">Auto-calculated, but you can override if needed.</div>
                                     </div>
                                 </div>
@@ -7284,25 +7402,23 @@ margin-right: 0.5rem;
                     <!-- Screen 2: Savings Goals -->
                     <div class="budget-flow-screen" id="budgetScreen2">
                         <div class="budget-screen-content">
-                            <div class="budget-step-header">
-                                <div class="budget-step-icon">
-                                    <i data-lucide="piggy-bank" class="w-5 h-5"></i>
-                                </div>
-                                <div class="budget-step-content">
-                                    <h3>Savings Goals</h3>
-                                    <p class="budget-step-description">Set your savings target to build your future</p>
-                                </div>
+                            <div class="budget-step-header-new">
+                                <h2>Savings Goals</h2>
+                                <p class="budget-step-description">Set your savings target to build your future</p>
                             </div>
                             
                             <div class="budget-content-section">
-                                <div class="form-group">
-                                    <label class="form-label" for="budgetAnnualSavingsGoal">Annual Savings Goal</label>
-                                    <input type="number" class="form-input" id="budgetAnnualSavingsGoal" placeholder="52000" min="0" step="100" oninput="updateSavingsVisualization()">
+                                <div class="budget-form-group-large">
+                                    <div class="budget-header-bubble">Annual Savings Goal</div>
+                                    <div class="budget-input-container">
+                                        <span class="budget-dollar-sign">$</span>
+                                        <input type="number" class="budget-input-large" id="budgetAnnualSavingsGoal" placeholder="0.00" min="0" step="100" oninput="updateSavingsVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    </div>
                                     <div class="form-help">How much do you want to save per year?</div>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label" for="budgetMonthlySavingsTarget">Monthly Savings Target</label>
-                                    <input type="number" class="form-input" id="budgetMonthlySavingsTarget" placeholder="4333" min="0" step="0.01" readonly>
+                                    <input type="text" class="budget-input-large" id="budgetMonthlySavingsTarget" placeholder="4,333" min="0" step="0.01" readonly>
                                     <div class="form-help">Auto-calculated from annual savings goal.</div>
                                 </div>
                                 
@@ -7322,20 +7438,18 @@ margin-right: 0.5rem;
                     <!-- Screen 3: Fixed Expenses -->
                     <div class="budget-flow-screen" id="budgetScreen3">
                         <div class="budget-screen-content">
-                            <div class="budget-step-header">
-                                <div class="budget-step-icon">
-                                    <i data-lucide="home" class="w-5 h-5"></i>
-                                </div>
-                                <div class="budget-step-content">
-                                    <h3>Fixed Expenses</h3>
-                                    <p class="budget-step-description">Regular expenses that stay the same each month</p>
-                                </div>
+                            <div class="budget-step-header-new">
+                                <h2>Fixed Expenses</h2>
+                                <p class="budget-step-description">Regular expenses that stay the same each month</p>
                             </div>
                             
                             <div class="budget-content-section">
-                                <div class="form-group">
-                                    <label class="form-label" for="budgetFixedExpenses">Monthly Fixed Expenses</label>
-                                    <input type="number" class="form-input" id="budgetFixedExpenses" placeholder="2450" min="0" step="0.01" oninput="updateFixedExpenseVisualization()">
+                                <div class="budget-form-group-large">
+                                    <div class="budget-header-bubble">Monthly Fixed Expenses</div>
+                                    <div class="budget-input-container">
+                                        <span class="budget-dollar-sign">$</span>
+                                        <input type="number" class="budget-input-large" id="budgetFixedExpenses" placeholder="0.00" min="0" step="0.01" oninput="updateFixedExpenseVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    </div>
                                     <div class="form-help">Rent, insurance, loan payments, subscriptions</div>
                                 </div>
                                 
@@ -7355,20 +7469,18 @@ margin-right: 0.5rem;
                     <!-- Screen 4: Essential Expenses -->
                     <div class="budget-flow-screen" id="budgetScreen4">
                         <div class="budget-screen-content">
-                            <div class="budget-step-header">
-                                <div class="budget-step-icon">
-                                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                                </div>
-                                <div class="budget-step-content">
-                                    <h3>Essential Expenses</h3>
-                                    <p class="budget-step-description">Necessary expenses that can vary month to month</p>
-                                </div>
+                            <div class="budget-step-header-new">
+                                <h2>Essential Expenses</h2>
+                                <p class="budget-step-description">Necessary expenses that can vary month to month</p>
                             </div>
                             
                             <div class="budget-content-section">
-                                <div class="form-group">
-                                    <label class="form-label" for="budgetEssentialExpenses">Monthly Essential Expenses</label>
-                                    <input type="number" class="form-input" id="budgetEssentialExpenses" placeholder="750" min="0" step="0.01" oninput="updateEssentialExpenseVisualization()">
+                                <div class="budget-form-group-large">
+                                    <div class="budget-header-bubble">Monthly Essential Expenses</div>
+                                    <div class="budget-input-container">
+                                        <span class="budget-dollar-sign">$</span>
+                                        <input type="number" class="budget-input-large" id="budgetEssentialExpenses" placeholder="0.00" min="0" step="0.01" oninput="updateEssentialExpenseVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    </div>
                                     <div class="form-help">Groceries, utilities, gas, phone, internet</div>
                                 </div>
                                 
@@ -7388,20 +7500,18 @@ margin-right: 0.5rem;
                     <!-- Screen 5: Discretionary Expenses -->
                     <div class="budget-flow-screen" id="budgetScreen5">
                         <div class="budget-screen-content">
-                            <div class="budget-step-header">
-                                <div class="budget-step-icon">
-                                    <i data-lucide="coffee" class="w-5 h-5"></i>
-                                </div>
-                                <div class="budget-step-content">
-                                    <h3>Discretionary Expenses</h3>
-                                    <p class="budget-step-description">Fun spending and lifestyle choices</p>
-                                </div>
+                            <div class="budget-step-header-new">
+                                <h2>Discretionary Expenses</h2>
+                                <p class="budget-step-description">Fun spending and lifestyle choices</p>
                             </div>
                             
                             <div class="budget-content-section">
-                                <div class="form-group">
-                                    <label class="form-label" for="budgetDiscretionaryExpenses">Monthly Discretionary Expenses</label>
-                                    <input type="number" class="form-input" id="budgetDiscretionaryExpenses" placeholder="501" min="0" step="0.01" oninput="updateDiscretionaryExpenseVisualization()">
+                                <div class="budget-form-group-large">
+                                    <div class="budget-header-bubble">Monthly Discretionary Expenses</div>
+                                    <div class="budget-input-container">
+                                        <span class="budget-dollar-sign">$</span>
+                                        <input type="number" class="budget-input-large" id="budgetDiscretionaryExpenses" placeholder="0.00" min="0" step="0.01" oninput="updateDiscretionaryExpenseVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    </div>
                                     <div class="form-help">Entertainment, dining out, hobbies, shopping</div>
                                 </div>
                                 
@@ -7421,14 +7531,9 @@ margin-right: 0.5rem;
                     <!-- Screen 6: Review & Summary -->
                     <div class="budget-flow-screen" id="budgetScreen6">
                         <div class="budget-screen-content">
-                            <div class="budget-step-header">
-                                <div class="budget-step-icon">
-                                    <i data-lucide="check-circle" class="w-5 h-5"></i>
-                                </div>
-                                <div class="budget-step-content">
-                                    <h3>Budget Summary</h3>
-                                    <p class="budget-step-description">Your complete financial picture at a glance</p>
-                                </div>
+                            <div class="budget-step-header-new">
+                                <h2>Budget Summary</h2>
+                                <p class="budget-step-description">Your complete financial picture at a glance</p>
                             </div>
                             
                             <!-- Summary Cards Grid -->
@@ -7486,13 +7591,35 @@ margin-right: 0.5rem;
                             </div>
                             </div>
                             
-                            <!-- Main Budget Visualization -->
+                            <!-- Spending Breakdown Chart -->
                             <div class="budget-content-section" style="margin-top: 1.5rem;">
-                                <div class="chart-title">
-                                    <i data-lucide="pie-chart" class="w-4 h-4"></i>
-                                    Budget Breakdown
+                                <div class="budget-bar-section">
+                                    <div class="budget-bar-header">
+                                        <span class="budget-bar-label">Spending Breakdown</span>
+                                        <span class="budget-bar-amount" id="budgetSpendingAmount">$0 / $0</span>
+                                    </div>
+                                    <div class="budget-spending-bar">
+                                        <div class="spending-segment fixed" id="budgetFixedSpending" style="width: 0%" title="Fixed: $0"></div>
+                                        <div class="spending-segment essential" id="budgetEssentialSpending" style="width: 0%" title="Essential: $0"></div>
+                                        <div class="spending-segment discretionary" id="budgetDiscretionarySpending" style="width: 0%" title="Discretionary: $0"></div>
+                                        <div class="spending-segment remaining" id="budgetRemainingBudget" style="width: 100%" title="Remaining: $0"></div>
+                                    </div>
+                                    <div class="budget-legend">
+                                        <div class="legend-item">
+                                            <div class="legend-dot fixed"></div>
+                                            <span>Fixed</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <div class="legend-dot essential"></div>
+                                            <span>Essential</span>
+                                        </div>
+                                        <div class="legend-item">
+                                            <div class="legend-dot discretionary"></div>
+                                            <span>Discretionary</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <canvas id="budgetSummaryChart" width="400" height="180"></canvas>
+                            </div>
                                 
                                 <div style="text-align: center; margin-top: 0.75rem;">
                                     <div class="savings-rate-display" id="budgetSavingsRateSummary">0%</div>
@@ -17928,6 +18055,9 @@ margin-right: 0.5rem;
             // Hide bottom navigation
             document.querySelector('.bottom-nav').style.display = 'none';
         }
+        
+        // Make function globally accessible
+        window.openSettings = openSettings;
 
         function closeSettings() {
             const overlay = document.getElementById('settingsOverlay');
@@ -18331,6 +18461,9 @@ margin-right: 0.5rem;
             // Load existing settings into budget form
             loadBudgetSettings();
         }
+        
+        // Make function globally accessible
+        window.openBudgetFlow = openBudgetFlow;
 
         function closeBudgetFlow() {
             const budgetOverlay = document.getElementById('budgetOverlay');
@@ -18438,6 +18571,9 @@ margin-right: 0.5rem;
             openBudgetFlow();
         }
         
+        // Make functions globally accessible
+        window.openBudgetSetup = openBudgetSetup;
+        
         function closeBudgetSetup() {
             closeBudgetFlow();
         }
@@ -18475,8 +18611,8 @@ margin-right: 0.5rem;
             const savingsPercentage = Math.min((currentSavings / savingsGoal) * 100, 100);
             
             // Update savings bar
-            document.getElementById('savingsAmount').textContent = 
-                `$${Math.round(currentSavings).toLocaleString()} / $${Math.round(savingsGoal).toLocaleString()}`;
+            document.getElementById('savingsAmount').innerHTML = 
+                `$${Math.round(currentSavings).toLocaleString()} / <span class="upper-amount">$${Math.round(savingsGoal).toLocaleString()}</span>`;
             document.getElementById('savingsProgress').style.width = `${savingsPercentage}%`;
             
             // Spending data - budget limits
@@ -18492,9 +18628,9 @@ margin-right: 0.5rem;
             const totalSpent = fixedSpent + essentialSpent + discretionarySpent;
             
             // Calculate percentages for spending segments (based on budget, filled based on spent)
-            const fixedPercent = totalBudget > 0 ? (fixedBudget / totalBudget) * 100 : 0;
-            const essentialPercent = totalBudget > 0 ? (essentialBudget / totalBudget) * 100 : 0;
-            const discretionaryPercent = totalBudget > 0 ? (discretionaryBudget / totalBudget) * 100 : 0;
+            const fixedBudgetPercent = totalBudget > 0 ? (fixedBudget / totalBudget) * 100 : 0;
+            const essentialBudgetPercent = totalBudget > 0 ? (essentialBudget / totalBudget) * 100 : 0;
+            const discretionaryBudgetPercent = totalBudget > 0 ? (discretionaryBudget / totalBudget) * 100 : 0;
             
             // Calculate fill percentages (how much of each category budget is spent)
             const fixedFillPercent = fixedBudget > 0 ? (fixedSpent / fixedBudget) * 100 : 0;
@@ -18502,54 +18638,59 @@ margin-right: 0.5rem;
             const discretionaryFillPercent = discretionaryBudget > 0 ? (discretionarySpent / discretionaryBudget) * 100 : 0;
             
             // Update spending bar header
-            document.getElementById('spendingAmount').textContent = 
-                `$${Math.round(totalSpent).toLocaleString()} / $${Math.round(totalBudget).toLocaleString()}`;
+            document.getElementById('spendingAmount').innerHTML = 
+                `$${Math.round(totalSpent).toLocaleString()} / <span class="upper-amount">$${Math.round(totalBudget).toLocaleString()}</span>`;
             
-            // Update spending segments - width based on percentage of total spent
+            // Update spending segments - width based on percentage of total budget
             const fixedSegment = document.getElementById('fixedSpending');
             const essentialSegment = document.getElementById('essentialSpending');  
             const discretionarySegment = document.getElementById('discretionarySpending');
+            const remainingSegment = document.getElementById('remainingBudget');
             
-            // Calculate widths based on actual spending percentages
-            const fixedSpentPercent = totalSpent > 0 ? (fixedSpent / totalSpent) * 100 : 0;
-            const essentialSpentPercent = totalSpent > 0 ? (essentialSpent / totalSpent) * 100 : 0;
-            const discretionarySpentPercent = totalSpent > 0 ? (discretionarySpent / totalSpent) * 100 : 0;
+            // Calculate remaining budget
+            const remainingBudget = Math.max(0, totalBudget - totalSpent);
+            
+            // Calculate widths based on budget percentages (all segments should add up to 100%)
+            const fixedSpentPercent = totalBudget > 0 ? (fixedSpent / totalBudget) * 100 : 0;
+            const essentialSpentPercent = totalBudget > 0 ? (essentialSpent / totalBudget) * 100 : 0;
+            const discretionarySpentPercent = totalBudget > 0 ? (discretionarySpent / totalBudget) * 100 : 0;
+            const remainingPercent = totalBudget > 0 ? (remainingBudget / totalBudget) * 100 : 0;
             
             fixedSegment.style.width = `${fixedSpentPercent}%`;
-            fixedSegment.style.background = ''; // Clear any custom background, use CSS class
             fixedSegment.title = `Fixed: $${Math.round(fixedSpent).toLocaleString()} / $${Math.round(fixedBudget).toLocaleString()}`;
                 
             essentialSegment.style.width = `${essentialSpentPercent}%`;
-            essentialSegment.style.background = ''; // Clear any custom background, use CSS class
             essentialSegment.title = `Essential: $${Math.round(essentialSpent).toLocaleString()} / $${Math.round(essentialBudget).toLocaleString()}`;
                 
             discretionarySegment.style.width = `${discretionarySpentPercent}%`;
-            discretionarySegment.style.background = ''; // Clear any custom background, use CSS class
             discretionarySegment.title = `Discretionary: $${Math.round(discretionarySpent).toLocaleString()} / $${Math.round(discretionaryBudget).toLocaleString()}`;
+            
+            remainingSegment.style.width = `${remainingPercent}%`;
+            remainingSegment.title = `Remaining: $${Math.round(remainingBudget).toLocaleString()}`;
         }
 
         function loadBudgetSettings() {
             const settings = getSimpleBudgetSettings();
 
             // Populate form fields with existing settings
-            document.getElementById('budgetGrossYearlyIncome').value = settings.grossYearlyIncome || '';
+            document.getElementById('budgetGrossYearlyIncome').value = formatNumberForDisplay(settings.grossYearlyIncome);
             document.getElementById('budgetProvinceValue').textContent = settings.province || 'Ontario';
-            document.getElementById('budgetGrossIncome').value = settings.grossIncome || '';
-            document.getElementById('budgetFederalTax').value = settings.federalTax || '';
-            document.getElementById('budgetProvincialTax').value = settings.provincialTax || '';
-            document.getElementById('budgetCppEi').value = settings.cppEi || '';
-            document.getElementById('budgetNetIncome').value = settings.netIncome || '';
-            document.getElementById('budgetAnnualSavingsGoal').value = settings.annualSavingsGoal || '';
-            document.getElementById('budgetFixedExpenses').value = settings.fixedExpenses || '';
-            document.getElementById('budgetEssentialExpenses').value = settings.essentialExpenses || '';
-            document.getElementById('budgetDiscretionaryExpenses').value = settings.discretionaryExpenses || '';
+            document.getElementById('budgetGrossIncome').value = formatNumberForDisplay(settings.grossIncome);
+            document.getElementById('budgetFederalTax').value = formatNumberForDisplay(settings.federalTax);
+            document.getElementById('budgetProvincialTax').value = formatNumberForDisplay(settings.provincialTax);
+            document.getElementById('budgetCppEi').value = formatNumberForDisplay(settings.cppEi);
+            document.getElementById('budgetNetIncome').value = formatNumberForDisplay(settings.netIncome);
+            document.getElementById('budgetAnnualSavingsGoal').value = formatNumberForDisplay(settings.annualSavingsGoal);
+            document.getElementById('budgetFixedExpenses').value = formatNumberForDisplay(settings.fixedExpenses);
+            document.getElementById('budgetEssentialExpenses').value = formatNumberForDisplay(settings.essentialExpenses);
+            document.getElementById('budgetDiscretionaryExpenses').value = formatNumberForDisplay(settings.discretionaryExpenses);
 
             // Update budget summary
             updateBudgetSummary();
         }
 
         function calculateBudgetTaxes() {
-            const yearlyIncome = parseFloat(document.getElementById('budgetGrossYearlyIncome').value) || 0;
+            const yearlyIncome = parseFormattedNumber(document.getElementById('budgetGrossYearlyIncome').value);
             const province = document.getElementById('budgetProvinceValue').textContent;
             const provinceCode = getProvinceCode(province);
 
@@ -18587,11 +18728,11 @@ margin-right: 0.5rem;
             document.getElementById('budgetTaxResults').style.display = 'block';
 
             // Auto-populate manual override fields
-            document.getElementById('budgetGrossIncome').value = monthlyGross.toFixed(2);
-            document.getElementById('budgetFederalTax').value = monthlyFederalTax.toFixed(2);
-            document.getElementById('budgetProvincialTax').value = monthlyProvincialTax.toFixed(2);
-            document.getElementById('budgetCppEi').value = monthlyCppEi.toFixed(2);
-            document.getElementById('budgetNetIncome').value = monthlyNet.toFixed(2);
+            document.getElementById('budgetGrossIncome').value = formatNumberForDisplay(monthlyGross);
+            document.getElementById('budgetFederalTax').value = formatNumberForDisplay(monthlyFederalTax);
+            document.getElementById('budgetProvincialTax').value = formatNumberForDisplay(monthlyProvincialTax);
+            document.getElementById('budgetCppEi').value = formatNumberForDisplay(monthlyCppEi);
+            document.getElementById('budgetNetIncome').value = formatNumberForDisplay(monthlyNet);
 
             // Update budget summary
             updateBudgetSummary();
@@ -18601,19 +18742,19 @@ margin-right: 0.5rem;
         }
 
         function updateBudgetSummary() {
-            const grossIncome = parseFloat(document.getElementById('budgetGrossIncome').value) || 0;
-            const federalTax = parseFloat(document.getElementById('budgetFederalTax').value) || 0;
-            const provincialTax = parseFloat(document.getElementById('budgetProvincialTax').value) || 0;
-            const cppEi = parseFloat(document.getElementById('budgetCppEi').value) || 0;
-            const netIncome = parseFloat(document.getElementById('budgetNetIncome').value) || 0;
-            const annualSavingsGoal = parseFloat(document.getElementById('budgetAnnualSavingsGoal').value) || 0;
-            const fixedExpenses = parseFloat(document.getElementById('budgetFixedExpenses').value) || 0;
-            const essentialExpenses = parseFloat(document.getElementById('budgetEssentialExpenses').value) || 0;
-            const discretionaryExpenses = parseFloat(document.getElementById('budgetDiscretionaryExpenses').value) || 0;
+            const grossIncome = parseFormattedNumber(document.getElementById('budgetGrossIncome').value);
+            const federalTax = parseFormattedNumber(document.getElementById('budgetFederalTax').value);
+            const provincialTax = parseFormattedNumber(document.getElementById('budgetProvincialTax').value);
+            const cppEi = parseFormattedNumber(document.getElementById('budgetCppEi').value);
+            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
+            const annualSavingsGoal = parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal').value);
+            const fixedExpenses = parseFormattedNumber(document.getElementById('budgetFixedExpenses').value);
+            const essentialExpenses = parseFormattedNumber(document.getElementById('budgetEssentialExpenses').value);
+            const discretionaryExpenses = parseFormattedNumber(document.getElementById('budgetDiscretionaryExpenses').value);
 
             // Calculate monthly savings target
             const monthlySavingsTarget = annualSavingsGoal / 12;
-            document.getElementById('budgetMonthlySavingsTarget').value = monthlySavingsTarget.toFixed(2);
+            document.getElementById('budgetMonthlySavingsTarget').value = formatNumberForDisplay(monthlySavingsTarget);
 
             // Calculate remaining budget
             const totalExpenses = fixedExpenses + essentialExpenses + discretionaryExpenses + monthlySavingsTarget;
@@ -18645,16 +18786,107 @@ margin-right: 0.5rem;
             validationElement.textContent = validationText;
             validationElement.className = 'budget-value ' + validationClass;
             
+            // Update budget flow spending chart
+            updateBudgetFlowSpendingChart(fixedExpenses, essentialExpenses, discretionaryExpenses, remainingBudget, totalExpenses);
+            
             // Update summary charts if on summary screen
             if (document.getElementById('budgetScreen6').classList.contains('active')) {
                 updateSummaryCharts();
             }
         }
 
+        function updateBudgetFlowSpendingChart(fixedExpenses, essentialExpenses, discretionaryExpenses, remainingBudget, totalBudget) {
+            // Update budget flow spending chart
+            const budgetFixedSegment = document.getElementById('budgetFixedSpending');
+            const budgetEssentialSegment = document.getElementById('budgetEssentialSpending');
+            const budgetDiscretionarySegment = document.getElementById('budgetDiscretionarySpending');
+            const budgetRemainingSegment = document.getElementById('budgetRemainingBudget');
+            const budgetSpendingAmount = document.getElementById('budgetSpendingAmount');
+            
+            if (budgetFixedSegment && budgetEssentialSegment && budgetDiscretionarySegment && budgetRemainingSegment) {
+                const totalSpent = fixedExpenses + essentialExpenses + discretionaryExpenses;
+                const actualRemainingBudget = Math.max(0, totalBudget - totalSpent);
+                
+                // Calculate percentages based on total budget
+                const fixedPercent = totalBudget > 0 ? (fixedExpenses / totalBudget) * 100 : 0;
+                const essentialPercent = totalBudget > 0 ? (essentialExpenses / totalBudget) * 100 : 0;
+                const discretionaryPercent = totalBudget > 0 ? (discretionaryExpenses / totalBudget) * 100 : 0;
+                const remainingPercent = totalBudget > 0 ? (actualRemainingBudget / totalBudget) * 100 : 100;
+                
+                // Update segment widths
+                budgetFixedSegment.style.width = `${fixedPercent}%`;
+                budgetFixedSegment.title = `Fixed: $${Math.round(fixedExpenses).toLocaleString()}`;
+                
+                budgetEssentialSegment.style.width = `${essentialPercent}%`;
+                budgetEssentialSegment.title = `Essential: $${Math.round(essentialExpenses).toLocaleString()}`;
+                
+                budgetDiscretionarySegment.style.width = `${discretionaryPercent}%`;
+                budgetDiscretionarySegment.title = `Discretionary: $${Math.round(discretionaryExpenses).toLocaleString()}`;
+                
+                budgetRemainingSegment.style.width = `${remainingPercent}%`;
+                budgetRemainingSegment.title = `Remaining: $${Math.round(actualRemainingBudget).toLocaleString()}`;
+                
+                // Update amount display
+                if (budgetSpendingAmount) {
+                    budgetSpendingAmount.innerHTML = `$${Math.round(totalSpent).toLocaleString()} / <span class="upper-amount">$${Math.round(totalBudget).toLocaleString()}</span>`;
+                }
+            }
+        }
+
+        // Helper function to parse comma-formatted numbers
+        function parseFormattedNumber(value) {
+            if (typeof value === 'string') {
+                return parseFloat(value.replace(/,/g, '')) || 0;
+            }
+            return parseFloat(value) || 0;
+        }
+
+        // Helper function to format numbers for display in inputs
+        function formatNumberForDisplay(value) {
+            if (!value || value === 0) return '';
+            const numericValue = parseFloat(value);
+            if (isNaN(numericValue)) return '';
+            
+            // Format with commas but no decimal places for whole numbers
+            return Math.floor(numericValue) === numericValue 
+                ? Math.floor(numericValue).toLocaleString('en-US')
+                : numericValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Budget input formatting function
+        function formatBudgetInput(input) {
+            // Get the raw numeric value
+            const rawValue = input.value.replace(/,/g, '');
+            const numericValue = parseFloat(rawValue);
+            
+            if (!isNaN(numericValue) && numericValue !== 0) {
+                // Format with commas but no decimal places for whole numbers
+                const formattedValue = Math.floor(numericValue) === numericValue 
+                    ? Math.floor(numericValue).toLocaleString('en-US')
+                    : numericValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                
+                input.value = formattedValue;
+            }
+            
+            // Move cursor to end after any input
+            setTimeout(() => {
+                const len = input.value.length;
+                input.setSelectionRange(len, len);
+            }, 0);
+        }
+        
+        // Add focus handler to move cursor to end
+        function handleBudgetInputFocus(input) {
+            setTimeout(() => {
+                const len = input.value.length;
+                input.setSelectionRange(len, len);
+            }, 0);
+        }
+
         // Interactive chart functions
         function updateSavingsVisualization() {
-            const annualSavings = parseFloat(document.getElementById('budgetAnnualSavingsGoal').value) || 0;
-            const netIncome = parseFloat(document.getElementById('budgetNetIncome').value) || 0;
+            const annualSavings = parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal').value);
+            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
             const monthlySavings = annualSavings / 12;
             
             document.getElementById('budgetMonthlySavingsTarget').value = monthlySavings.toFixed(2);
@@ -18670,8 +18902,8 @@ margin-right: 0.5rem;
         }
 
         function updateFixedExpenseVisualization() {
-            const fixedExpenses = parseFloat(document.getElementById('budgetFixedExpenses').value) || 0;
-            const netIncome = parseFloat(document.getElementById('budgetNetIncome').value) || 0;
+            const fixedExpenses = parseFormattedNumber(document.getElementById('budgetFixedExpenses').value);
+            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
             
             if (netIncome > 0 && fixedExpenses > 0) {
                 const expenseRate = (fixedExpenses / netIncome) * 100;
@@ -18685,8 +18917,8 @@ margin-right: 0.5rem;
         }
 
         function updateEssentialExpenseVisualization() {
-            const essentialExpenses = parseFloat(document.getElementById('budgetEssentialExpenses').value) || 0;
-            const netIncome = parseFloat(document.getElementById('budgetNetIncome').value) || 0;
+            const essentialExpenses = parseFormattedNumber(document.getElementById('budgetEssentialExpenses').value);
+            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
             
             if (netIncome > 0 && essentialExpenses > 0) {
                 const expenseRate = (essentialExpenses / netIncome) * 100;
@@ -18700,8 +18932,8 @@ margin-right: 0.5rem;
         }
 
         function updateDiscretionaryExpenseVisualization() {
-            const discretionaryExpenses = parseFloat(document.getElementById('budgetDiscretionaryExpenses').value) || 0;
-            const netIncome = parseFloat(document.getElementById('budgetNetIncome').value) || 0;
+            const discretionaryExpenses = parseFormattedNumber(document.getElementById('budgetDiscretionaryExpenses').value);
+            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
             
             if (netIncome > 0 && discretionaryExpenses > 0) {
                 const expenseRate = (discretionaryExpenses / netIncome) * 100;
@@ -18720,10 +18952,10 @@ margin-right: 0.5rem;
         }
 
         function updateIncomeVisualization() {
-            const grossIncome = parseFloat(document.getElementById('budgetGrossIncome').value) || 0;
-            const federalTax = parseFloat(document.getElementById('budgetFederalTax').value) || 0;
-            const provincialTax = parseFloat(document.getElementById('budgetProvincialTax').value) || 0;
-            const cppEi = parseFloat(document.getElementById('budgetCppEi').value) || 0;
+            const grossIncome = parseFormattedNumber(document.getElementById('budgetGrossIncome').value);
+            const federalTax = parseFormattedNumber(document.getElementById('budgetFederalTax').value);
+            const provincialTax = parseFormattedNumber(document.getElementById('budgetProvincialTax').value);
+            const cppEi = parseFormattedNumber(document.getElementById('budgetCppEi').value);
             const netIncome = grossIncome - federalTax - provincialTax - cppEi;
             
             if (grossIncome > 0) {
@@ -18739,10 +18971,10 @@ margin-right: 0.5rem;
             if (!canvas) return;
             
             const ctx = canvas.getContext('2d');
-            const grossIncome = parseFloat(document.getElementById('budgetGrossIncome').value) || 0;
-            const federalTax = parseFloat(document.getElementById('budgetFederalTax').value) || 0;
-            const provincialTax = parseFloat(document.getElementById('budgetProvincialTax').value) || 0;
-            const cppEi = parseFloat(document.getElementById('budgetCppEi').value) || 0;
+            const grossIncome = parseFormattedNumber(document.getElementById('budgetGrossIncome').value);
+            const federalTax = parseFormattedNumber(document.getElementById('budgetFederalTax').value);
+            const provincialTax = parseFormattedNumber(document.getElementById('budgetProvincialTax').value);
+            const cppEi = parseFormattedNumber(document.getElementById('budgetCppEi').value);
             const netIncome = grossIncome - federalTax - provincialTax - cppEi;
 
             if (window.incomeChart) {
@@ -18776,11 +19008,11 @@ margin-right: 0.5rem;
         }
 
         function updateSummaryCharts() {
-            const netIncome = parseFloat(document.getElementById('budgetNetIncome').value) || 0;
-            const fixedExpenses = parseFloat(document.getElementById('budgetFixedExpenses').value) || 0;
-            const essentialExpenses = parseFloat(document.getElementById('budgetEssentialExpenses').value) || 0;
-            const discretionaryExpenses = parseFloat(document.getElementById('budgetDiscretionaryExpenses').value) || 0;
-            const annualSavingsGoal = parseFloat(document.getElementById('budgetAnnualSavingsGoal').value) || 0;
+            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
+            const fixedExpenses = parseFormattedNumber(document.getElementById('budgetFixedExpenses').value);
+            const essentialExpenses = parseFormattedNumber(document.getElementById('budgetEssentialExpenses').value);
+            const discretionaryExpenses = parseFormattedNumber(document.getElementById('budgetDiscretionaryExpenses').value);
+            const annualSavingsGoal = parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal').value);
             const monthlySavingsTarget = annualSavingsGoal / 12;
             const totalExpenses = fixedExpenses + essentialExpenses + discretionaryExpenses;
             const remainingBudget = netIncome - totalExpenses - monthlySavingsTarget;
@@ -18890,22 +19122,22 @@ make         }
 
         async function saveBudgetSettings() {
             // Calculate monthly savings target first
-            const annualSavingsGoal = parseFloat(document.getElementById('budgetAnnualSavingsGoal').value) || 0;
+            const annualSavingsGoal = parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal').value);
             const monthlySavingsTarget = annualSavingsGoal / 12;
 
             const settings = {
-                grossYearlyIncome: parseFloat(document.getElementById('budgetGrossYearlyIncome').value) || 0,
+                grossYearlyIncome: parseFormattedNumber(document.getElementById('budgetGrossYearlyIncome').value),
                 province: document.getElementById('budgetProvinceValue').textContent,
-                grossIncome: parseFloat(document.getElementById('budgetGrossIncome').value) || 0,
-                federalTax: parseFloat(document.getElementById('budgetFederalTax').value) || 0,
-                provincialTax: parseFloat(document.getElementById('budgetProvincialTax').value) || 0,
-                cppEi: parseFloat(document.getElementById('budgetCppEi').value) || 0,
-                netIncome: parseFloat(document.getElementById('budgetNetIncome').value) || 0,
+                grossIncome: parseFormattedNumber(document.getElementById('budgetGrossIncome').value),
+                federalTax: parseFormattedNumber(document.getElementById('budgetFederalTax').value),
+                provincialTax: parseFormattedNumber(document.getElementById('budgetProvincialTax').value),
+                cppEi: parseFormattedNumber(document.getElementById('budgetCppEi').value),
+                netIncome: parseFormattedNumber(document.getElementById('budgetNetIncome').value),
                 annualSavingsGoal: annualSavingsGoal,
                 monthlySavingsTarget: monthlySavingsTarget, // Save monthly savings target
-                fixedExpenses: parseFloat(document.getElementById('budgetFixedExpenses').value) || 0,
-                essentialExpenses: parseFloat(document.getElementById('budgetEssentialExpenses').value) || 0,
-                discretionaryExpenses: parseFloat(document.getElementById('budgetDiscretionaryExpenses').value) || 0
+                fixedExpenses: parseFormattedNumber(document.getElementById('budgetFixedExpenses').value),
+                essentialExpenses: parseFormattedNumber(document.getElementById('budgetEssentialExpenses').value),
+                discretionaryExpenses: parseFormattedNumber(document.getElementById('budgetDiscretionaryExpenses').value)
             };
 
             localStorage.setItem('simpleBudgetSettings', JSON.stringify(settings));
@@ -19056,6 +19288,9 @@ make         }
             // Add slide transition to main content
             appContainer.classList.add('settings-open');
         }
+        
+        // Make function globally accessible
+        window.openSupport = openSupport;
 
         function closeSupport() {
             const supportOverlay = document.getElementById('supportOverlay');
