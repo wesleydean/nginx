@@ -14474,58 +14474,54 @@ margin-right: 0.5rem;
                         ctx.clip();
                         
                         // Create and draw positive area fill (above zero line)
-                        if (zeroLineY > chartArea.top) {
-                            const positiveGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.top);
-                            positiveGradient.addColorStop(0, 'rgba(95, 164, 46, 0)'); // Transparent at zero line
-                            positiveGradient.addColorStop(0.3, 'rgba(95, 164, 46, 0.05)');
-                            positiveGradient.addColorStop(0.6, 'rgba(95, 164, 46, 0.15)');
-                            positiveGradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
-                            
-                            ctx.fillStyle = positiveGradient;
-                            ctx.beginPath();
-                            
-                            // Start at left edge at zero line
-                            ctx.moveTo(chartArea.left, zeroLineY);
-                            
-                            // Follow the data line, but only plot points above zero
-                            allData.forEach((value, index) => {
-                                const x = xAxis.getPixelForValue(index);
-                                const y = Math.min(yAxis.getPixelForValue(value), zeroLineY); // Cap at zero line
-                                ctx.lineTo(x, y);
-                            });
-                            
-                            // Complete the fill back to zero line at right edge
-                            ctx.lineTo(chartArea.right, zeroLineY);
-                            ctx.closePath();
-                            ctx.fill();
-                        }
+                        const positiveGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.top);
+                        positiveGradient.addColorStop(0, 'rgba(95, 164, 46, 0.02)'); // Slight opacity at zero line
+                        positiveGradient.addColorStop(0.3, 'rgba(95, 164, 46, 0.08)');
+                        positiveGradient.addColorStop(0.6, 'rgba(95, 164, 46, 0.18)');
+                        positiveGradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
+                        
+                        ctx.fillStyle = positiveGradient;
+                        ctx.beginPath();
+                        
+                        // Start at left edge at zero line
+                        ctx.moveTo(chartArea.left, zeroLineY);
+                        
+                        // Follow the actual data line (positive sections will show above zero, negative below)
+                        allData.forEach((value, index) => {
+                            const x = xAxis.getPixelForValue(index);
+                            const y = yAxis.getPixelForValue(Math.max(value, 0)); // Use zero as minimum for positive fill
+                            ctx.lineTo(x, y);
+                        });
+                        
+                        // Complete the fill back to zero line at right edge
+                        ctx.lineTo(chartArea.right, zeroLineY);
+                        ctx.closePath();
+                        ctx.fill();
                         
                         // Create and draw negative area fill (below zero line)
-                        if (zeroLineY < chartArea.bottom) {
-                            const negativeGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.bottom);
-                            negativeGradient.addColorStop(0, 'rgba(156, 163, 175, 0)'); // Transparent at zero line
-                            negativeGradient.addColorStop(0.3, 'rgba(156, 163, 175, 0.05)');
-                            negativeGradient.addColorStop(0.6, 'rgba(156, 163, 175, 0.15)');
-                            negativeGradient.addColorStop(1, 'rgba(156, 163, 175, 0.25)'); // Opaque at bottom
-                            
-                            ctx.fillStyle = negativeGradient;
-                            ctx.beginPath();
-                            
-                            // Start at left edge at zero line
-                            ctx.moveTo(chartArea.left, zeroLineY);
-                            
-                            // Follow the data line, but only plot points below zero
-                            allData.forEach((value, index) => {
-                                const x = xAxis.getPixelForValue(index);
-                                const y = Math.max(yAxis.getPixelForValue(value), zeroLineY); // Cap at zero line
-                                ctx.lineTo(x, y);
-                            });
-                            
-                            // Complete the fill back to zero line at right edge
-                            ctx.lineTo(chartArea.right, zeroLineY);
-                            ctx.closePath();
-                            ctx.fill();
-                        }
+                        const negativeGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.bottom);
+                        negativeGradient.addColorStop(0, 'rgba(156, 163, 175, 0.02)'); // Slight opacity at zero line
+                        negativeGradient.addColorStop(0.3, 'rgba(156, 163, 175, 0.08)');
+                        negativeGradient.addColorStop(0.6, 'rgba(156, 163, 175, 0.18)');
+                        negativeGradient.addColorStop(1, 'rgba(156, 163, 175, 0.25)'); // Opaque at bottom
+                        
+                        ctx.fillStyle = negativeGradient;
+                        ctx.beginPath();
+                        
+                        // Start at left edge at zero line
+                        ctx.moveTo(chartArea.left, zeroLineY);
+                        
+                        // Follow the actual data line (negative sections will show below zero, positive above)
+                        allData.forEach((value, index) => {
+                            const x = xAxis.getPixelForValue(index);
+                            const y = yAxis.getPixelForValue(Math.min(value, 0)); // Use zero as maximum for negative fill
+                            ctx.lineTo(x, y);
+                        });
+                        
+                        // Complete the fill back to zero line at right edge
+                        ctx.lineTo(chartArea.right, zeroLineY);
+                        ctx.closePath();
+                        ctx.fill();
                         
                         ctx.restore();
                     }
@@ -15307,58 +15303,54 @@ margin-right: 0.5rem;
                         ctx.clip();
                         
                         // Create and draw positive area fill (above zero line)
-                        if (zeroLineY > chartArea.top) {
-                            const positiveGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.top);
-                            positiveGradient.addColorStop(0, 'rgba(95, 164, 46, 0)'); // Transparent at zero line
-                            positiveGradient.addColorStop(0.3, 'rgba(95, 164, 46, 0.05)');
-                            positiveGradient.addColorStop(0.6, 'rgba(95, 164, 46, 0.15)');
-                            positiveGradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
-                            
-                            ctx.fillStyle = positiveGradient;
-                            ctx.beginPath();
-                            
-                            // Start at left edge at zero line
-                            ctx.moveTo(chartArea.left, zeroLineY);
-                            
-                            // Follow the data line, but only plot points above zero
-                            allData.forEach((value, index) => {
-                                const x = xAxis.getPixelForValue(index);
-                                const y = Math.min(yAxis.getPixelForValue(value), zeroLineY); // Cap at zero line
-                                ctx.lineTo(x, y);
-                            });
-                            
-                            // Complete the fill back to zero line at right edge
-                            ctx.lineTo(chartArea.right, zeroLineY);
-                            ctx.closePath();
-                            ctx.fill();
-                        }
+                        const positiveGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.top);
+                        positiveGradient.addColorStop(0, 'rgba(95, 164, 46, 0.02)'); // Slight opacity at zero line
+                        positiveGradient.addColorStop(0.3, 'rgba(95, 164, 46, 0.08)');
+                        positiveGradient.addColorStop(0.6, 'rgba(95, 164, 46, 0.18)');
+                        positiveGradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
+                        
+                        ctx.fillStyle = positiveGradient;
+                        ctx.beginPath();
+                        
+                        // Start at left edge at zero line
+                        ctx.moveTo(chartArea.left, zeroLineY);
+                        
+                        // Follow the actual data line (positive sections will show above zero, negative below)
+                        allData.forEach((value, index) => {
+                            const x = xAxis.getPixelForValue(index);
+                            const y = yAxis.getPixelForValue(Math.max(value, 0)); // Use zero as minimum for positive fill
+                            ctx.lineTo(x, y);
+                        });
+                        
+                        // Complete the fill back to zero line at right edge
+                        ctx.lineTo(chartArea.right, zeroLineY);
+                        ctx.closePath();
+                        ctx.fill();
                         
                         // Create and draw negative area fill (below zero line)
-                        if (zeroLineY < chartArea.bottom) {
-                            const negativeGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.bottom);
-                            negativeGradient.addColorStop(0, 'rgba(156, 163, 175, 0)'); // Transparent at zero line
-                            negativeGradient.addColorStop(0.3, 'rgba(156, 163, 175, 0.05)');
-                            negativeGradient.addColorStop(0.6, 'rgba(156, 163, 175, 0.15)');
-                            negativeGradient.addColorStop(1, 'rgba(156, 163, 175, 0.25)'); // Opaque at bottom
-                            
-                            ctx.fillStyle = negativeGradient;
-                            ctx.beginPath();
-                            
-                            // Start at left edge at zero line
-                            ctx.moveTo(chartArea.left, zeroLineY);
-                            
-                            // Follow the data line, but only plot points below zero
-                            allData.forEach((value, index) => {
-                                const x = xAxis.getPixelForValue(index);
-                                const y = Math.max(yAxis.getPixelForValue(value), zeroLineY); // Cap at zero line
-                                ctx.lineTo(x, y);
-                            });
-                            
-                            // Complete the fill back to zero line at right edge
-                            ctx.lineTo(chartArea.right, zeroLineY);
-                            ctx.closePath();
-                            ctx.fill();
-                        }
+                        const negativeGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.bottom);
+                        negativeGradient.addColorStop(0, 'rgba(156, 163, 175, 0.02)'); // Slight opacity at zero line
+                        negativeGradient.addColorStop(0.3, 'rgba(156, 163, 175, 0.08)');
+                        negativeGradient.addColorStop(0.6, 'rgba(156, 163, 175, 0.18)');
+                        negativeGradient.addColorStop(1, 'rgba(156, 163, 175, 0.25)'); // Opaque at bottom
+                        
+                        ctx.fillStyle = negativeGradient;
+                        ctx.beginPath();
+                        
+                        // Start at left edge at zero line
+                        ctx.moveTo(chartArea.left, zeroLineY);
+                        
+                        // Follow the actual data line (negative sections will show below zero, positive above)
+                        allData.forEach((value, index) => {
+                            const x = xAxis.getPixelForValue(index);
+                            const y = yAxis.getPixelForValue(Math.min(value, 0)); // Use zero as maximum for negative fill
+                            ctx.lineTo(x, y);
+                        });
+                        
+                        // Complete the fill back to zero line at right edge
+                        ctx.lineTo(chartArea.right, zeroLineY);
+                        ctx.closePath();
+                        ctx.fill();
                         
                         ctx.restore();
                     }
@@ -15538,14 +15530,14 @@ margin-right: 0.5rem;
                         // Update title with current dragged value
                         titleElement.textContent = `${formatCurrency(currentValue)} net worth`;
                         
-                        // Show date as subtitle
-                        if (subtitleElement) {
-                            subtitleElement.textContent = friendlyDate;
-                            subtitleElement.style.display = '';
+                        // Replace change element content with date (keep it visible but change content)
+                        if (changeElement) {
+                            // Store original content if not already stored
+                            if (!chart.originalChangeContent) {
+                                chart.originalChangeContent = changeElement.innerHTML;
+                            }
+                            changeElement.innerHTML = `<span style="color: #6b7280;">${friendlyDate}</span>`;
                         }
-                        
-                        // Hide change element (use visibility to maintain layout)
-                        if (changeElement) changeElement.style.visibility = 'hidden';
                     }
                 } else if (overlayId === 'accountsNetWorthOverlay') {
                     const titleElement = document.getElementById('accountsNetWorthTitle');
@@ -15574,14 +15566,14 @@ margin-right: 0.5rem;
                         // Update title with current dragged value
                         titleElement.textContent = `${formatCurrency(currentValue)} net worth`;
                         
-                        // Show date as subtitle
-                        if (subtitleElement) {
-                            subtitleElement.textContent = friendlyDate;
-                            subtitleElement.style.display = '';
+                        // Replace change element content with date (keep it visible but change content)
+                        if (changeElement) {
+                            // Store original content if not already stored
+                            if (!chart.originalChangeContent) {
+                                chart.originalChangeContent = changeElement.innerHTML;
+                            }
+                            changeElement.innerHTML = `<span style="color: #6b7280;">${friendlyDate}</span>`;
                         }
-                        
-                        // Hide change element (use visibility to maintain layout)
-                        if (changeElement) changeElement.style.visibility = 'hidden';
                     }
                 }
 
@@ -15622,12 +15614,17 @@ margin-right: 0.5rem;
                         titleElement.textContent = chart.originalTitle;
                     }
                     
+                    // Restore original change content
+                    if (changeElement && chart.originalChangeContent) {
+                        changeElement.innerHTML = chart.originalChangeContent;
+                    }
+                    
                     // Restore original subtitle
                     if (subtitleElement && chart.originalSubtitle) {
                         subtitleElement.textContent = chart.originalSubtitle;
                     }
                     
-                    // Show hidden elements
+                    // Ensure elements are visible
                     if (changeElement) changeElement.style.visibility = '';
                     if (subtitleElement) subtitleElement.style.display = '';
                 } else if (overlayId === 'accountsNetWorthOverlay') {
@@ -15640,12 +15637,17 @@ margin-right: 0.5rem;
                         titleElement.textContent = chart.originalTitle;
                     }
                     
+                    // Restore original change content
+                    if (changeElement && chart.originalChangeContent) {
+                        changeElement.innerHTML = chart.originalChangeContent;
+                    }
+                    
                     // Restore original subtitle
                     if (subtitleElement && chart.originalSubtitle) {
                         subtitleElement.textContent = chart.originalSubtitle;
                     }
                     
-                    // Show hidden elements
+                    // Ensure elements are visible
                     if (changeElement) changeElement.style.visibility = '';
                     if (subtitleElement) subtitleElement.style.display = '';
                 }
