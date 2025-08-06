@@ -15455,9 +15455,12 @@ margin-right: 0.5rem;
                     const subtitleElement = document.getElementById('netWorthSubtitle');
                     
                     if (titleElement && chart.data && chart.data.datasets[0] && chart.data.labels) {
-                        // Store original title if not already stored
+                        // Store original title and subtitle if not already stored
                         if (!chart.originalTitle) {
                             chart.originalTitle = titleElement.textContent;
+                        }
+                        if (!chart.originalSubtitle && subtitleElement) {
+                            chart.originalSubtitle = subtitleElement.textContent;
                         }
                         
                         // Get the current value and date
@@ -15470,12 +15473,17 @@ margin-right: 0.5rem;
                             year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
                         });
                         
-                        // Update title with current dragged value and date
-                        titleElement.textContent = `${formatCurrency(currentValue)} net worth (${friendlyDate})`;
+                        // Update title with current dragged value
+                        titleElement.textContent = `${formatCurrency(currentValue)} net worth`;
                         
-                        // Hide change and subtitle elements
+                        // Show date as subtitle
+                        if (subtitleElement) {
+                            subtitleElement.textContent = friendlyDate;
+                            subtitleElement.style.display = '';
+                        }
+                        
+                        // Hide change element
                         if (changeElement) changeElement.style.display = 'none';
-                        if (subtitleElement) subtitleElement.style.display = 'none';
                     }
                 } else if (overlayId === 'accountsNetWorthOverlay') {
                     const titleElement = document.getElementById('accountsNetWorthTitle');
@@ -15483,9 +15491,12 @@ margin-right: 0.5rem;
                     const subtitleElement = document.getElementById('accountsNetWorthSubtitle');
                     
                     if (titleElement && chart.data && chart.data.datasets[0] && chart.data.labels) {
-                        // Store original title if not already stored
+                        // Store original title and subtitle if not already stored
                         if (!chart.originalTitle) {
                             chart.originalTitle = titleElement.textContent;
+                        }
+                        if (!chart.originalSubtitle && subtitleElement) {
+                            chart.originalSubtitle = subtitleElement.textContent;
                         }
                         
                         // Get the current value and date
@@ -15498,12 +15509,17 @@ margin-right: 0.5rem;
                             year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
                         });
                         
-                        // Update title with current dragged value and date
-                        titleElement.textContent = `${formatCurrency(currentValue)} net worth (${friendlyDate})`;
+                        // Update title with current dragged value
+                        titleElement.textContent = `${formatCurrency(currentValue)} net worth`;
                         
-                        // Hide change and subtitle elements
+                        // Show date as subtitle
+                        if (subtitleElement) {
+                            subtitleElement.textContent = friendlyDate;
+                            subtitleElement.style.display = '';
+                        }
+                        
+                        // Hide change element
                         if (changeElement) changeElement.style.display = 'none';
-                        if (subtitleElement) subtitleElement.style.display = 'none';
                     }
                 }
 
@@ -15544,6 +15560,11 @@ margin-right: 0.5rem;
                         titleElement.textContent = chart.originalTitle;
                     }
                     
+                    // Restore original subtitle
+                    if (subtitleElement && chart.originalSubtitle) {
+                        subtitleElement.textContent = chart.originalSubtitle;
+                    }
+                    
                     // Show hidden elements
                     if (changeElement) changeElement.style.display = '';
                     if (subtitleElement) subtitleElement.style.display = '';
@@ -15555,6 +15576,11 @@ margin-right: 0.5rem;
                     // Restore original title
                     if (titleElement && chart.originalTitle) {
                         titleElement.textContent = chart.originalTitle;
+                    }
+                    
+                    // Restore original subtitle
+                    if (subtitleElement && chart.originalSubtitle) {
+                        subtitleElement.textContent = chart.originalSubtitle;
                     }
                     
                     // Show hidden elements
