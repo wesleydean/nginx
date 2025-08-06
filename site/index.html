@@ -14461,16 +14461,13 @@ margin-right: 0.5rem;
                         const chartWidth = chartArea.right - chartArea.left;
                         const visibleWidth = chartWidth * animationProgress;
                         
-                        // Create absolute gradient from chart bottom to top
-                        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                        gradient.addColorStop(0, 'rgba(95, 164, 46, 0)'); // Transparent at bottom
-                        gradient.addColorStop(0.2, 'rgba(95, 164, 46, 0.02)');
-                        gradient.addColorStop(0.4, 'rgba(95, 164, 46, 0.05)');
-                        gradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
+                        // Calculate zero line position
+                        const zeroLineY = yAxis.getPixelForValue(0);
                         
-                        // Get data points and chart bottom position
-                        const dataset = chart.data.datasets[0];
-                        const chartBottom = chartArea.bottom;
+                        // Get both datasets for complete data
+                        const positiveDataset = chart.data.datasets[0];
+                        const negativeDataset = chart.data.datasets[1];
+                        const allData = positiveDataset.data.map((pos, i) => pos !== null ? pos : negativeDataset.data[i]);
                         
                         // Set up clipping for progressive reveal
                         ctx.save();
@@ -14478,25 +14475,60 @@ margin-right: 0.5rem;
                         ctx.rect(chartArea.left, chartArea.top, visibleWidth, chartArea.bottom - chartArea.top);
                         ctx.clip();
                         
-                        // Draw filled area from data line to chart bottom (visual bottom)
-                        ctx.fillStyle = gradient;
+                        // Create and draw positive area fill (above zero line)
+                        if (zeroLineY > chartArea.top) {
+                            const positiveGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.top);
+                            positiveGradient.addColorStop(0, 'rgba(95, 164, 46, 0)'); // Transparent at zero line
+                            positiveGradient.addColorStop(0.3, 'rgba(95, 164, 46, 0.05)');
+                            positiveGradient.addColorStop(0.6, 'rgba(95, 164, 46, 0.15)');
+                            positiveGradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
+                            
+                            ctx.fillStyle = positiveGradient;
+                            ctx.beginPath();
+                            
+                            // Start at left edge at zero line
+                            ctx.moveTo(chartArea.left, zeroLineY);
+                            
+                            // Follow the data line, but only plot points above zero
+                            allData.forEach((value, index) => {
+                                const x = xAxis.getPixelForValue(index);
+                                const y = Math.min(yAxis.getPixelForValue(value), zeroLineY); // Cap at zero line
+                                ctx.lineTo(x, y);
+                            });
+                            
+                            // Complete the fill back to zero line at right edge
+                            ctx.lineTo(chartArea.right, zeroLineY);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
                         
-                        ctx.beginPath();
-                        // Start at left edge of chart area, at bottom
-                        ctx.moveTo(chartArea.left, chartBottom);
+                        // Create and draw negative area fill (below zero line)
+                        if (zeroLineY < chartArea.bottom) {
+                            const negativeGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.bottom);
+                            negativeGradient.addColorStop(0, 'rgba(156, 163, 175, 0)'); // Transparent at zero line
+                            negativeGradient.addColorStop(0.3, 'rgba(156, 163, 175, 0.05)');
+                            negativeGradient.addColorStop(0.6, 'rgba(156, 163, 175, 0.15)');
+                            negativeGradient.addColorStop(1, 'rgba(156, 163, 175, 0.25)'); // Opaque at bottom
+                            
+                            ctx.fillStyle = negativeGradient;
+                            ctx.beginPath();
+                            
+                            // Start at left edge at zero line
+                            ctx.moveTo(chartArea.left, zeroLineY);
+                            
+                            // Follow the data line, but only plot points below zero
+                            allData.forEach((value, index) => {
+                                const x = xAxis.getPixelForValue(index);
+                                const y = Math.max(yAxis.getPixelForValue(value), zeroLineY); // Cap at zero line
+                                ctx.lineTo(x, y);
+                            });
+                            
+                            // Complete the fill back to zero line at right edge
+                            ctx.lineTo(chartArea.right, zeroLineY);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
                         
-                        // Draw line following the data from left edge
-                        dataset.data.forEach((value, index) => {
-                            const x = xAxis.getPixelForValue(index);
-                            const y = yAxis.getPixelForValue(value);
-                            ctx.lineTo(x, y);
-                        });
-                        
-                        // Complete the fill back to chart bottom at right edge
-                        ctx.lineTo(chartArea.right, chartBottom);
-                        ctx.closePath();
-                        
-                        ctx.fill();
                         ctx.restore();
                     }
                 }, {
@@ -15262,16 +15294,13 @@ margin-right: 0.5rem;
                         const chartWidth = chartArea.right - chartArea.left;
                         const visibleWidth = chartWidth * animationProgress;
                         
-                        // Create absolute gradient from chart bottom to top
-                        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                        gradient.addColorStop(0, 'rgba(95, 164, 46, 0)'); // Transparent at bottom
-                        gradient.addColorStop(0.2, 'rgba(95, 164, 46, 0.02)');
-                        gradient.addColorStop(0.4, 'rgba(95, 164, 46, 0.05)');
-                        gradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
+                        // Calculate zero line position
+                        const zeroLineY = yAxis.getPixelForValue(0);
                         
-                        // Get data points and chart bottom position
-                        const dataset = chart.data.datasets[0];
-                        const chartBottom = chartArea.bottom;
+                        // Get both datasets for complete data
+                        const positiveDataset = chart.data.datasets[0];
+                        const negativeDataset = chart.data.datasets[1];
+                        const allData = positiveDataset.data.map((pos, i) => pos !== null ? pos : negativeDataset.data[i]);
                         
                         // Set up clipping for progressive reveal
                         ctx.save();
@@ -15279,25 +15308,60 @@ margin-right: 0.5rem;
                         ctx.rect(chartArea.left, chartArea.top, visibleWidth, chartArea.bottom - chartArea.top);
                         ctx.clip();
                         
-                        // Draw filled area from data line to chart bottom (visual bottom)
-                        ctx.fillStyle = gradient;
+                        // Create and draw positive area fill (above zero line)
+                        if (zeroLineY > chartArea.top) {
+                            const positiveGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.top);
+                            positiveGradient.addColorStop(0, 'rgba(95, 164, 46, 0)'); // Transparent at zero line
+                            positiveGradient.addColorStop(0.3, 'rgba(95, 164, 46, 0.05)');
+                            positiveGradient.addColorStop(0.6, 'rgba(95, 164, 46, 0.15)');
+                            positiveGradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
+                            
+                            ctx.fillStyle = positiveGradient;
+                            ctx.beginPath();
+                            
+                            // Start at left edge at zero line
+                            ctx.moveTo(chartArea.left, zeroLineY);
+                            
+                            // Follow the data line, but only plot points above zero
+                            allData.forEach((value, index) => {
+                                const x = xAxis.getPixelForValue(index);
+                                const y = Math.min(yAxis.getPixelForValue(value), zeroLineY); // Cap at zero line
+                                ctx.lineTo(x, y);
+                            });
+                            
+                            // Complete the fill back to zero line at right edge
+                            ctx.lineTo(chartArea.right, zeroLineY);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
                         
-                        ctx.beginPath();
-                        // Start at left edge of chart area, at bottom
-                        ctx.moveTo(chartArea.left, chartBottom);
+                        // Create and draw negative area fill (below zero line)
+                        if (zeroLineY < chartArea.bottom) {
+                            const negativeGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.bottom);
+                            negativeGradient.addColorStop(0, 'rgba(156, 163, 175, 0)'); // Transparent at zero line
+                            negativeGradient.addColorStop(0.3, 'rgba(156, 163, 175, 0.05)');
+                            negativeGradient.addColorStop(0.6, 'rgba(156, 163, 175, 0.15)');
+                            negativeGradient.addColorStop(1, 'rgba(156, 163, 175, 0.25)'); // Opaque at bottom
+                            
+                            ctx.fillStyle = negativeGradient;
+                            ctx.beginPath();
+                            
+                            // Start at left edge at zero line
+                            ctx.moveTo(chartArea.left, zeroLineY);
+                            
+                            // Follow the data line, but only plot points below zero
+                            allData.forEach((value, index) => {
+                                const x = xAxis.getPixelForValue(index);
+                                const y = Math.max(yAxis.getPixelForValue(value), zeroLineY); // Cap at zero line
+                                ctx.lineTo(x, y);
+                            });
+                            
+                            // Complete the fill back to zero line at right edge
+                            ctx.lineTo(chartArea.right, zeroLineY);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
                         
-                        // Draw line following the data from left edge
-                        dataset.data.forEach((value, index) => {
-                            const x = xAxis.getPixelForValue(index);
-                            const y = yAxis.getPixelForValue(value);
-                            ctx.lineTo(x, y);
-                        });
-                        
-                        // Complete the fill back to chart bottom at right edge
-                        ctx.lineTo(chartArea.right, chartBottom);
-                        ctx.closePath();
-                        
-                        ctx.fill();
                         ctx.restore();
                     }
                 }, {
