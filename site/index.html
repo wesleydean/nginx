@@ -15186,7 +15186,10 @@ margin-right: 0.5rem;
                         pointHitRadius: 20,
                         pointBackgroundColor: 'transparent',
                         pointBorderColor: 'transparent',
-                        pointBorderWidth: 0
+                        pointBorderWidth: 0,
+                        segment: {
+                            borderColor: (ctx) => ctx.p0.parsed.y >= 0 ? '#5fa42e' : '#9ca3af'
+                        }
                     }]
                 },
                 options: {
