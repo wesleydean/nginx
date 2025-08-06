@@ -14465,7 +14465,18 @@ margin-right: 0.5rem;
                         // Get both datasets for complete data
                         const positiveDataset = chart.data.datasets[0];
                         const negativeDataset = chart.data.datasets[1];
-                        const allData = positiveDataset.data.map((pos, i) => pos !== null ? pos : negativeDataset.data[i]);
+                        
+                        // Safely combine data from both datasets
+                        const allData = [];
+                        for (let i = 0; i < positiveDataset.data.length; i++) {
+                            if (positiveDataset.data[i] !== null) {
+                                allData[i] = positiveDataset.data[i];
+                            } else if (negativeDataset && negativeDataset.data && negativeDataset.data[i] !== null) {
+                                allData[i] = negativeDataset.data[i];
+                            } else {
+                                allData[i] = 0; // fallback to zero
+                            }
+                        }
                         
                         // Set up clipping for progressive reveal
                         ctx.save();
@@ -15294,7 +15305,18 @@ margin-right: 0.5rem;
                         // Get both datasets for complete data
                         const positiveDataset = chart.data.datasets[0];
                         const negativeDataset = chart.data.datasets[1];
-                        const allData = positiveDataset.data.map((pos, i) => pos !== null ? pos : negativeDataset.data[i]);
+                        
+                        // Safely combine data from both datasets
+                        const allData = [];
+                        for (let i = 0; i < positiveDataset.data.length; i++) {
+                            if (positiveDataset.data[i] !== null) {
+                                allData[i] = positiveDataset.data[i];
+                            } else if (negativeDataset && negativeDataset.data && negativeDataset.data[i] !== null) {
+                                allData[i] = negativeDataset.data[i];
+                            } else {
+                                allData[i] = 0; // fallback to zero
+                            }
+                        }
                         
                         // Set up clipping for progressive reveal
                         ctx.save();
