@@ -6812,14 +6812,14 @@ margin-right: 0.5rem;
       to { opacity: 0; }
     }
 
-    /* Modern Sliding Loading Bar */
+    /* Modern Single Ping Pong Dot Loading Bar */
     .global-loading-bar {
       position: fixed;
-      top: 40px; /* Just below the header */
+      top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      width: 60px;
-      height: 20px;
+      width: 100px;
+      height: 30px;
       z-index: 1000;
       opacity: 0;
       visibility: hidden;
@@ -6835,12 +6835,23 @@ margin-right: 0.5rem;
       visibility: visible;
     }
     .global-loading-bar::before {
-      content: '••';
+      content: '•';
       position: absolute;
-      font-size: 16px;
+      font-size: 24px;
       color: #10b981;
-      letter-spacing: 28px;
-      animation: pingPongDots 1.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+      animation: singlePingPong 1.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    }
+
+    @keyframes singlePingPong {
+      0% {
+        transform: translateX(-40px) scale(1.2);
+      }
+      50% {
+        transform: translateX(40px) scale(1.2);
+      }
+      100% {
+        transform: translateX(-40px) scale(1.2);
+      }
     }
 
 
@@ -11906,11 +11917,14 @@ margin-right: 0.5rem;
                 globalSpinnerState.showTimeout = null;
             }
 
-            // Mark as not showing
-            globalSpinnerState.isShowing = false;
+            // Add a delay before hiding to show the animation longer
+            globalSpinnerState.hideTimeout = setTimeout(() => {
+                // Mark as not showing
+                globalSpinnerState.isShowing = false;
 
-            // Hide with animation
-            loadingBar.classList.remove('show');
+                // Hide with animation
+                loadingBar.classList.remove('show');
+            }, 800); // Show for 800ms longer
         }
 
         /**
@@ -19273,9 +19287,6 @@ make         }
 
     <!-- Global Loading Bar -->
     <div id="globalSpinner" class="global-loading-bar">
-        <div class="loading-bar-track">
-            <div class="loading-bar-fill"></div>
-        </div>
     </div>
 
     </body>
