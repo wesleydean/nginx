@@ -1508,6 +1508,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 1.5rem;
+            gap: 1rem;
+            width: 100%;
             border-top: 1px solid hsl(var(--border));
             gap: 1rem;
             background: hsl(var(--background));
@@ -1517,6 +1519,68 @@
             right: 0;
             z-index: 50;
             margin: 0;
+        }
+            
+        /* Budget navigation buttons */
+        .budget-nav-btn {
+            display: flex;
+            flex: 1 1 50%;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 12px 16px;
+            border-radius: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            border: none;
+            cursor: pointer;
+            min-width: 0;
+        }
+            
+        .budget-nav-btn.primary {
+            background-color: #8b5cf6;
+            color: white;
+        }
+
+        .budget-nav-btn.primary svg {
+            color: white;
+        }
+            
+        .budget-nav-btn.primary:hover:not(:disabled) {
+            background-color: #7c3aed;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+        }
+            
+        .budget-nav-btn.secondary {
+            background-color: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+            
+        .budget-nav-btn.secondary:hover:not(:disabled) {
+            background-color: #e5e7eb;
+        }
+            
+        .budget-nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .budget-nav-btn span {
+            display: inline-block;
+        }
+        
+        .budget-nav-btn i, .budget-nav-btn svg {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+        }
+        
+        .hidden {
+            display: none;
         }
         
         .budget-step-header {
@@ -1575,7 +1639,27 @@
             width: 100%;
             outline: none;
             min-height: 5rem;
-            text-indent: 50px;
+            padding-left: 3.5rem; /* Reduced space for the dollar sign to position it closer to text */
+        }
+        
+        /* Use pseudo-element for the dollar sign */
+        div[style="position: relative;"]::before {
+            content: "$";
+            position: absolute;
+            left: 2.5rem;  /* Position it closer to where the text starts */
+            top: 49%;
+            transform: translateY(-50%);
+            font-size: 4rem;
+            font-weight: 700;
+            color: #c8c8c8;
+            pointer-events: none;
+            z-index: 1;
+            transition: color 0s; /* Immediate color change */
+        }
+        
+        /* Style for when input has a valid value */
+        div[style="position: relative;"]:has(input:not(.default-value))::before {
+            color: #2d7d32;
         }
         
         .budget-input-large::placeholder {
@@ -1611,18 +1695,6 @@
             font-weight: 700;
             color: #2d7d32;
             pointer-events: none;
-        }
-
-        .budget-dollar-sign-xl {
-            position: absolute;
-            left: 1rem;
-            top: 49%;
-            transform: translateY(-50%);
-            font-size: 4rem;
-            font-weight: 700;
-            color: #c8c8c8;
-            pointer-events: none;
-            z-index: 1;
         }
         
         /* Removed caret-blink animation */
@@ -1791,14 +1863,7 @@
             align-items: center;
         }
 
-        .budget-dollar-sign-xl {
-            opacity: 0;
-            transition: opacity 0.3s ease-in;
-        }
 
-        .budget-dollar-sign-xl.fade-in {
-            opacity: 1;
-        }
 
         .budget-input-xl {
             caret-color: #2d7d32;
@@ -1841,24 +1906,21 @@
         }
 
         /* Adjust dollar sign position and size for longer inputs */
-        .budget-input-xl.length-5 ~ .budget-dollar-sign-xl,
-        .budget-input-xl.length-6 ~ .budget-dollar-sign-xl,
-        .budget-input-xl.length-7 ~ .budget-dollar-sign-xl {
+        div[style="position: relative;"]:has(.budget-input-xl.length-5)::before,
+        div[style="position: relative;"]:has(.budget-input-xl.length-6)::before,
+        div[style="position: relative;"]:has(.budget-input-xl.length-7)::before {
             font-size: 3.6rem;
-            left: 0.8rem;
         }
 
-        .budget-input-xl.length-8 ~ .budget-dollar-sign-xl,
-        .budget-input-xl.length-9 ~ .budget-dollar-sign-xl {
+        div[style="position: relative;"]:has(.budget-input-xl.length-8)::before,
+        div[style="position: relative;"]:has(.budget-input-xl.length-9)::before {
             font-size: 3.2rem;
-            left: 0.7rem;
         }
 
-        .budget-input-xl.length-10 ~ .budget-dollar-sign-xl,
-        .budget-input-xl.length-11 ~ .budget-dollar-sign-xl,
-        .budget-input-xl.length-12 ~ .budget-dollar-sign-xl {
+        div[style="position: relative;"]:has(.budget-input-xl.length-10)::before,
+        div[style="position: relative;"]:has(.budget-input-xl.length-11)::before,
+        div[style="position: relative;"]:has(.budget-input-xl.length-12)::before {
             font-size: 2.8rem;
-            left: 0.6rem;
         }
 
         
@@ -7508,7 +7570,6 @@ margin-right: 0.5rem;
                                 <div class="budget-form-group-large">
                                     <div class="budget-header-bubble">Gross Yearly Income</div>
                                     <div style="position: relative;">
-                                        <span class="budget-dollar-sign-xl">$</span>
                                         <input type="text" class="budget-input-xl" id="budgetGrossYearlyIncome" value="0,00" min="0" step="1000" oninput="formatBudgetInput(this); updateInputLengthClass(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this)" inputmode="numeric">
                                     </div>
                                 </div>
@@ -7626,7 +7687,6 @@ margin-right: 0.5rem;
                                 <div class="budget-form-group-large">
                                     <div class="budget-header-bubble">Annual Savings Goal</div>
                                     <div style="position: relative;">
-                                        <span class="budget-dollar-sign-xl">$</span>
                                         <input type="text" class="budget-input-xl" id="budgetAnnualSavingsGoal" value="0,00" min="0" step="100" oninput="updateSavingsVisualization(); formatBudgetInput(this); updateInputLengthClass(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this)" inputmode="numeric">
                                     </div>
                                 </div>
@@ -7667,7 +7727,6 @@ margin-right: 0.5rem;
                                         <div id="fixedExpensesInfo" class="info-popup">Rent, insurance, loan payments, subscriptions</div>
                                     </div>
                                     <div style="position: relative;">
-                                        <span class="budget-dollar-sign-xl">$</span>
                                         <input type="text" class="budget-input-xl" id="budgetFixedExpenses" value="0,00" min="0" step="0.01" oninput="updateFixedExpenseVisualization(); formatBudgetInput(this); updateInputLengthClass(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this)" inputmode="numeric">
                                     </div>
                                 </div>
@@ -7703,7 +7762,6 @@ margin-right: 0.5rem;
                                         <div id="essentialExpensesInfo" class="info-popup">Groceries, utilities, gas, phone, internet</div>
                                     </div>
                                     <div style="position: relative;">
-                                        <span class="budget-dollar-sign-xl">$</span>
                                         <input type="text" class="budget-input-xl" id="budgetEssentialExpenses" value="0,00" min="0" step="0.01" oninput="updateEssentialExpenseVisualization(); formatBudgetInput(this); updateInputLengthClass(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this)" inputmode="numeric">
                                     </div>
                                 </div>
@@ -7739,7 +7797,6 @@ margin-right: 0.5rem;
                                         <div id="discretionaryExpensesInfo" class="info-popup">Entertainment, dining out, hobbies, shopping</div>
                                     </div>
                                     <div style="position: relative;">
-                                        <span class="budget-dollar-sign-xl">$</span>
                                         <input type="text" class="budget-input-xl" id="budgetDiscretionaryExpenses" value="0,00" min="0" step="0.01" oninput="updateDiscretionaryExpenseVisualization(); formatBudgetInput(this); updateInputLengthClass(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this)" inputmode="numeric">
                                     </div>
                                 </div>
@@ -7862,17 +7919,17 @@ margin-right: 0.5rem;
                 
                 <!-- Navigation Buttons -->
                 <div class="budget-flow-navigation">
-                    <button type="button" class="btn btn-secondary" id="budgetPrevBtn" onclick="previousBudgetStep()" disabled style="gap: 0.5rem; padding: 10px 16px;">
+                    <button type="button" class="budget-nav-btn secondary" id="budgetPrevBtn" onclick="previousBudgetStep()" disabled>
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                        Previous
+                        <span>Previous</span>
                     </button>
-                    <button type="button" class="add-btn" id="budgetNextBtn" onclick="nextBudgetStep()" style="display: flex; align-items: center; gap: 0.5rem; width: auto; padding: 10px 16px;">
-                        Next
+                    <button type="button" class="budget-nav-btn primary" id="budgetNextBtn" onclick="nextBudgetStep()">
+                        <span>Next</span>
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
-                    <button type="button" class="add-btn" id="budgetSaveBtn" onclick="saveBudgetSettings()" style="display: none; align-items: center; gap: 0.5rem; width: auto; padding: 10px 16px;">
+                    <button type="button" class="budget-nav-btn primary hidden" id="budgetSaveBtn" onclick="saveBudgetSettings()">
                         <i data-lucide="check" class="w-4 h-4"></i>
-                        Save Budget
+                        <span>Save Budget</span>
                     </button>
                 </div>
             </div>
@@ -18798,11 +18855,11 @@ margin-right: 0.5rem;
             
             // Next/Save buttons
             if (step === totalBudgetSteps) {
-                nextBtn.style.display = 'none';
-                saveBtn.style.display = 'block';
+                nextBtn.classList.add('hidden');
+                saveBtn.classList.remove('hidden');
             } else {
-                nextBtn.style.display = 'block';
-                saveBtn.style.display = 'none';
+                nextBtn.classList.remove('hidden');
+                saveBtn.classList.add('hidden');
             }
         }
         
@@ -19161,49 +19218,23 @@ margin-right: 0.5rem;
             }, 0);
         }
         
-        // Function to position dollar sign flush with text
+        // Function to handle dollar sign styling through CSS class
         function positionDollarSign(input) {
-            const dollarSign = input.parentNode.querySelector('.budget-dollar-sign-xl');
-            if (!dollarSign) return;
-            
-            // Clear any existing timeout to debounce
-            if (input.positionTimeout) {
-                clearTimeout(input.positionTimeout);
-            }
-            
-            input.positionTimeout = setTimeout(() => {
-            
             // Use default "0,00" if input is empty
             const displayValue = input.value || "0,00";
             
             // Check if this is a real value or default
             const hasValue = input.value && parseFloat(input.value.replace(/,/g, '')) > 0;
             
-            // Update colors and classes immediately without delay
+            // Update classes immediately without delay
             if (hasValue) {
-                dollarSign.style.color = '#2d7d32';
                 input.classList.remove('default-value');
             } else {
-                dollarSign.style.color = '#c8c8c8';
                 input.classList.add('default-value');
             }
             
-            // Use improved positioning with better approximations
-            const inputWidth = input.offsetWidth;
-            const estimatedTextWidth = displayValue.length * 38; // Better approximation for 4rem font
-            const dollarWidth = 45; // Better approximation for dollar sign width
-            const gap = 15; // Smaller gap for better alignment
-            const totalWidth = dollarWidth + gap + estimatedTextWidth;
-            const centeredStart = (inputWidth - totalWidth) / 2;
-            
-            // Position with minimum left margin to prevent cutting off
-            dollarSign.style.transition = 'none';
-            dollarSign.style.left = Math.max(20, centeredStart) + 'px';
-            dollarSign.style.right = 'auto';
-            
-            // Add fade-in effect
-            dollarSign.classList.add('fade-in');
-            }, 50); // Small delay to debounce
+            // Apply any needed length-based adjustments through the CSS classes
+            updateInputLengthClass(input);
         }
 
         // Initialize dollar sign positions for all XL inputs on page load
@@ -19214,8 +19245,10 @@ margin-right: 0.5rem;
                 if (!input.value || input.value === "0,00") {
                     input.value = "0,00";
                     input.classList.add('default-value');
+                } else {
+                    input.classList.remove('default-value');
                 }
-                positionDollarSign(input);
+                updateInputLengthClass(input);
             });
         }
         
@@ -19252,6 +19285,7 @@ margin-right: 0.5rem;
 
         // Interactive chart functions
         function updateSavingsVisualization() {
+
             const annualSavings = parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal').value);
             const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
             const monthlySavings = annualSavings / 12;
