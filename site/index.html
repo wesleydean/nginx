@@ -14346,18 +14346,14 @@ margin-right: 0.5rem;
             const yMin = minValue - padding;
             const yMax = maxValue + padding;
 
-            // Create separate datasets for positive and negative sections
-            const positiveData = netWorthData.map(value => value >= 0 ? value : null);
-            const negativeData = netWorthData.map(value => value < 0 ? value : null);
-
             homeNetWorthChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Net Worth (Positive)',
-                        data: positiveData,
-                        borderColor: '#5fa42e', // Green for positive
+                        label: 'Net Worth',
+                        data: netWorthData,
+                        borderColor: '#5fa42e', // Green theme
                         backgroundColor: 'transparent',
                         tension: 0.6,
                         fill: false,
@@ -14367,26 +14363,8 @@ margin-right: 0.5rem;
                         pointBackgroundColor: 'transparent',
                         pointBorderColor: 'transparent',
                         pointBorderWidth: 0,
-                        spanGaps: false,
                         segment: {
-                            borderColor: (ctx) => ctx.p0.parsed.y >= 0 ? '#5fa42e' : 'transparent'
-                        }
-                    }, {
-                        label: 'Net Worth (Negative)',
-                        data: negativeData,
-                        borderColor: '#9ca3af', // Gray for negative
-                        backgroundColor: 'transparent',
-                        tension: 0.6,
-                        fill: false,
-                        pointRadius: 0,
-                        borderWidth: 3,
-                        pointHitRadius: 20,
-                        pointBackgroundColor: 'transparent',
-                        pointBorderColor: 'transparent',
-                        pointBorderWidth: 0,
-                        spanGaps: false,
-                        segment: {
-                            borderColor: (ctx) => ctx.p0.parsed.y < 0 ? '#9ca3af' : 'transparent'
+                            borderColor: (ctx) => ctx.p0.parsed.y >= 0 ? '#5fa42e' : '#9ca3af'
                         }
                     }]
                 },
@@ -14462,21 +14440,8 @@ margin-right: 0.5rem;
                         // Calculate zero line position
                         const zeroLineY = yAxis.getPixelForValue(0);
                         
-                        // Get combined data from both datasets
-                        const positiveData = chart.data.datasets[0].data;
-                        const negativeData = chart.data.datasets[1].data;
-                        
-                        // Combine data into single continuous array
-                        const allDataPoints = [];
-                        for (let i = 0; i < positiveData.length; i++) {
-                            if (positiveData[i] !== null) {
-                                allDataPoints[i] = positiveData[i];
-                            } else if (negativeData[i] !== null) {
-                                allDataPoints[i] = negativeData[i];
-                            } else {
-                                allDataPoints[i] = 0;
-                            }
-                        }
+                        // Get data from single dataset (same as accounts chart)
+                        const allDataPoints = chart.data.datasets[0].data;
                         
                         // Set up clipping region for animated width
                         ctx.save();
