@@ -3736,19 +3736,34 @@
         }
         
         .chart-container.loading::before {
-            content: '';
+            content: '••';
             position: absolute;
-            width: 30px;
-            height: 30px;
-            border: 3px solid rgba(16, 185, 129, 0.2);
-            border-radius: 50%;
-            border-top-color: hsl(var(--success));
-            animation: spin 0.8s linear infinite;
-            z-index: 6;
+            font-size: 16px;
+            color: #10b981;
+            letter-spacing: 28px;
+            z-index: 7;
             top: 50%;
             left: 50%;
-            margin-top: -15px;
-            margin-left: -15px;
+            transform: translateX(-50%) translateY(-50%);
+            animation: pingPongDots 1.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+        
+        @keyframes pingPongDots {
+            0% {
+                transform: translateX(-50%) translateY(-50%) translateX(-15px);
+            }
+            25% {
+                transform: translateX(-50%) translateY(-50%) translateX(-15px) scale(1.1);
+            }
+            50% {
+                transform: translateX(-50%) translateY(-50%) translateX(15px);
+            }
+            75% {
+                transform: translateX(-50%) translateY(-50%) translateX(15px) scale(1.1);
+            }
+            100% {
+                transform: translateX(-50%) translateY(-50%) translateX(-15px);
+            }
         }
         
         @keyframes spin {
