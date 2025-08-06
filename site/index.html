@@ -1631,7 +1631,7 @@
         .budget-input-xl {
             font-size: 4rem;
             font-weight: 700;
-            text-align: center;
+            text-align: left; /* Changed to left alignment */
             padding: 1rem;
             border: none;
             background: transparent;
@@ -1640,6 +1640,7 @@
             outline: none;
             min-height: 5rem;
             padding-left: 3.5rem; /* Reduced space for the dollar sign to position it closer to text */
+            padding-right: 1rem; /* Add some padding on the right side */
         }
         
         /* Use pseudo-element for the dollar sign */
@@ -1704,6 +1705,9 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
         }
         
         .budget-form-label-large {
@@ -1881,28 +1885,34 @@
         /* Responsive font sizing for longer inputs */
         .budget-input-xl.length-5 {
             font-size: 3.6rem;
+            padding-left: 2.5rem; /* Adjusted padding for better alignment with $ */
         }
 
         .budget-input-xl.length-6 {
             font-size: 3.4rem;
+            padding-left: 2.5rem;
         }
 
         .budget-input-xl.length-7 {
             font-size: 3.2rem;
+            padding-left: 2.5rem;
         }
 
         .budget-input-xl.length-8 {
             font-size: 3.0rem;
+            padding-left: 2.2rem;
         }
 
         .budget-input-xl.length-9 {
             font-size: 2.8rem;
+            padding-left: 2.2rem;
         }
 
         .budget-input-xl.length-10,
         .budget-input-xl.length-11,
         .budget-input-xl.length-12 {
             font-size: 2.6rem;
+            padding-left: 2.2rem;
         }
 
         /* Adjust dollar sign position and size for longer inputs */
@@ -1910,17 +1920,20 @@
         div[style="position: relative;"]:has(.budget-input-xl.length-6)::before,
         div[style="position: relative;"]:has(.budget-input-xl.length-7)::before {
             font-size: 3.6rem;
+            left: 0.3rem; /* Position closer to the first digit */
         }
 
         div[style="position: relative;"]:has(.budget-input-xl.length-8)::before,
         div[style="position: relative;"]:has(.budget-input-xl.length-9)::before {
             font-size: 3.2rem;
+            left: 0.3rem; /* Position closer to the first digit */
         }
 
         div[style="position: relative;"]:has(.budget-input-xl.length-10)::before,
         div[style="position: relative;"]:has(.budget-input-xl.length-11)::before,
         div[style="position: relative;"]:has(.budget-input-xl.length-12)::before {
             font-size: 2.8rem;
+            left: 0.3rem; /* Position closer to the first digit */
         }
 
         
