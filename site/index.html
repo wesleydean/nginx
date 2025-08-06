@@ -14466,6 +14466,18 @@ margin-right: 0.5rem;
                         const positiveData = chart.data.datasets[0].data;
                         const negativeData = chart.data.datasets[1].data;
                         
+                        // Combine data into single continuous array
+                        const allDataPoints = [];
+                        for (let i = 0; i < positiveData.length; i++) {
+                            if (positiveData[i] !== null) {
+                                allDataPoints[i] = positiveData[i];
+                            } else if (negativeData[i] !== null) {
+                                allDataPoints[i] = negativeData[i];
+                            } else {
+                                allDataPoints[i] = 0;
+                            }
+                        }
+                        
                         // Set up clipping region for animated width
                         ctx.save();
                         ctx.rect(chartArea.left, chartArea.top, visibleWidth, chartArea.bottom - chartArea.top);
@@ -14481,13 +14493,10 @@ margin-right: 0.5rem;
                         ctx.beginPath();
                         ctx.moveTo(chartArea.left, zeroLineY);
                         
-                        // Draw line following positive data points
-                        positiveData.forEach((point, index) => {
+                        // Draw line following all data points, but cap at zero line for positive fill
+                        allDataPoints.forEach((point, index) => {
                             const x = xAxis.getPixelForValue(index);
-                            let y = zeroLineY; // Default to zero line
-                            if (point !== null && point > 0) {
-                                y = yAxis.getPixelForValue(point);
-                            }
+                            const y = yAxis.getPixelForValue(Math.max(point, 0)); // Cap at zero for positive area
                             ctx.lineTo(x, y);
                         });
                         
@@ -14505,13 +14514,10 @@ margin-right: 0.5rem;
                         ctx.beginPath();
                         ctx.moveTo(chartArea.left, zeroLineY);
                         
-                        // Draw line following negative data points
-                        negativeData.forEach((point, index) => {
+                        // Draw line following all data points, but cap at zero line for negative fill
+                        allDataPoints.forEach((point, index) => {
                             const x = xAxis.getPixelForValue(index);
-                            let y = zeroLineY; // Default to zero line
-                            if (point !== null && point < 0) {
-                                y = yAxis.getPixelForValue(point);
-                            }
+                            const y = yAxis.getPixelForValue(Math.min(point, 0)); // Cap at zero for negative area
                             ctx.lineTo(x, y);
                         });
                         
