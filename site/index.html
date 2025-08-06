@@ -1567,14 +1567,15 @@
         .budget-input-xl {
             font-size: 4rem;
             font-weight: 700;
-            text-align: right;
-            padding: 1rem 1rem 1rem 4rem;
+            text-align: center;
+            padding: 1rem;
             border: none;
             background: transparent;
-            color: #2d7d32;
+            color: #c8c8c8;
             width: 100%;
             outline: none;
             min-height: 5rem;
+            text-indent: 50px;
         }
         
         .budget-input-large::placeholder {
@@ -1592,6 +1593,14 @@
         }
 
         .budget-input-xl:focus {
+            color: #c8c8c8;
+        }
+
+        .budget-input-xl:not(.default-value) {
+            color: #2d7d32;
+        }
+
+        .budget-input-xl:not(.default-value):focus {
             color: #2d7d32;
         }
         
@@ -1606,12 +1615,12 @@
 
         .budget-dollar-sign-xl {
             position: absolute;
-            right: calc(100% - 0.2rem);
-            top: 50%;
+            left: 1rem;
+            top: 49%;
             transform: translateY(-50%);
             font-size: 4rem;
             font-weight: 700;
-            color: #2d7d32;
+            color: #c8c8c8;
             pointer-events: none;
             z-index: 1;
         }
@@ -1641,9 +1650,167 @@
             padding: 0.5rem 1rem;
             border-radius: 1.5rem;
             text-align: center;
-            display: inline-block;
-            margin: 0 auto 1rem auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 0 auto;
             border: 1px solid #c8e6c9;
+        }
+
+        .budget-header-bubble-small {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #1b5e20;
+            background-color: #e8f5e8;
+            padding: 0.75rem 1rem;
+            border-radius: 1.5rem;
+            text-align: center;
+            display: inline-block;
+            margin: 0 auto 0.5rem auto;
+            border: 1px solid #c8e6c9;
+        }
+
+        .monthly-savings-label {
+           font-size: 0.875rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .monthly-savings-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .monthly-savings-amount {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #7c3aed;
+        }
+
+        .savings-rate-bubble {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+            padding: 0.35rem 0.6rem;
+            background-color: #f3f0ff;
+            color: #7c3aed;
+            border: 1px solid #ddd6fe;
+            border-radius: 1rem;
+        }
+
+        .bubble-info-icon {
+            color: #1b5e20 !important;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+
+        .bubble-info-icon:hover {
+            opacity: 1;
+        }
+
+        .budget-header-bubble .bubble-info-icon {
+            color: #1b5e20 !important;
+        }
+
+        .savings-rate-bubble .bubble-info-icon {
+            color: #7c3aed !important;
+        }
+
+        #savingsRateBubble .bubble-info-icon {
+            color: #7c3aed !important;
+        }
+
+        #essentialExpenseRateBubble .bubble-info-icon {
+            color: #7c3aed !important;
+        }
+
+        /* Make all icons in purple bubbles purple */
+        .savings-rate-bubble svg {
+            stroke: #7c3aed !important;
+            fill: none !important;
+        }
+
+        #savingsRateBubble svg {
+            stroke: #7c3aed !important;
+            fill: none !important;
+        }
+
+        #essentialExpenseRateBubble svg {
+            stroke: #7c3aed !important;
+            fill: none !important;
+        }
+
+        #fixedExpenseRateBubble svg {
+            stroke: #7c3aed !important;
+            fill: none !important;
+        }
+
+        #discretionaryExpenseRateBubble svg {
+            stroke: #7c3aed !important;
+            fill: none !important;
+        }
+
+        .info-popup {
+            position: absolute;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            color: #666;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            max-width: 250px;
+            display: none;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 0.5rem;
+        }
+
+        .info-popup::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 6px solid #ffffff;
+        }
+
+        .bubble-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .budget-dollar-sign-xl {
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+
+        .budget-dollar-sign-xl.fade-in {
+            opacity: 1;
+        }
+
+        .budget-input-xl {
+            caret-color: #2d7d32;
+        }
+
+        .budget-input-xl.flash-caret {
+            animation: caretFlash 1s ease-in-out;
+        }
+
+        @keyframes caretFlash {
+            0%, 100% { caret-color: #2d7d32; }
+            50% { caret-color: transparent; }
         }
 
         
@@ -7294,7 +7461,7 @@ margin-right: 0.5rem;
                                     <div class="budget-header-bubble">Gross Yearly Income</div>
                                     <div style="position: relative;">
                                         <span class="budget-dollar-sign-xl">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetGrossYearlyIncome" placeholder="140,000" min="0" step="1000" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                        <input type="text" class="budget-input-xl" id="budgetGrossYearlyIncome" value="0,00" min="0" step="1000" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                                     </div>
                                 </div>
                                 
@@ -7404,33 +7571,32 @@ margin-right: 0.5rem;
                         <div class="budget-screen-content">
                             <div class="budget-step-header-new">
                                 <h2>Savings Goals</h2>
-                                <p class="budget-step-description">Set your savings target to build your future</p>
+                                <p class="budget-step-description">How much do you want to save per year?</p>
                             </div>
                             
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
                                     <div class="budget-header-bubble">Annual Savings Goal</div>
-                                    <div class="budget-input-container">
-                                        <span class="budget-dollar-sign">$</span>
-                                        <input type="number" class="budget-input-large" id="budgetAnnualSavingsGoal" placeholder="0.00" min="0" step="100" oninput="updateSavingsVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    <div style="position: relative;">
+                                        <span class="budget-dollar-sign-xl">$</span>
+                                        <input type="text" class="budget-input-xl" id="budgetAnnualSavingsGoal" value="0,00" min="0" step="100" oninput="updateSavingsVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                                     </div>
-                                    <div class="form-help">How much do you want to save per year?</div>
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="budgetMonthlySavingsTarget">Monthly Savings Target</label>
-                                    <input type="text" class="budget-input-large" id="budgetMonthlySavingsTarget" placeholder="4,333" min="0" step="0.01" readonly>
-                                    <div class="form-help">Auto-calculated from annual savings goal.</div>
+                                <div class="form-group" id="monthlySavingsTargetSection" style="text-align: center; display: none;">
+                                    <div>
+                                        <div class="monthly-savings-label">Monthly Savings</div>
+                                        <div class="monthly-savings-display">
+                                            <div class="monthly-savings-amount">
+                                                $<span id="budgetMonthlySavingsTarget">0</span>
+                                            </div>
+                                            <div id="savingsRateBubble" class="budget-header-bubble-small savings-rate-bubble">
+                                                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                                                <span id="savingsRateDisplay">0%</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 
-                                <!-- Savings Rate Display -->
-                                <div class="interactive-chart-container" id="savingsVisualization" style="display: none;">
-                                    <div class="chart-title">
-                                        <i data-lucide="trending-up" class="w-4 h-4"></i>
-                                        Savings Rate
-                                    </div>
-                                    <div class="savings-rate-display" id="savingsRateDisplay">0%</div>
-                                        <div class="text-center text-sm text-muted-foreground" id="savingsRateDescription">of your net income</div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -7445,22 +7611,27 @@ margin-right: 0.5rem;
                             
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
-                                    <div class="budget-header-bubble">Monthly Fixed Expenses</div>
-                                    <div class="budget-input-container">
-                                        <span class="budget-dollar-sign">$</span>
-                                        <input type="number" class="budget-input-large" id="budgetFixedExpenses" placeholder="0.00" min="0" step="0.01" oninput="updateFixedExpenseVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    <div class="bubble-container">
+                                        <div class="budget-header-bubble">
+                                            <span>Monthly Fixed Expenses</span>
+                                            <i data-lucide="info" class="w-4 h-4 bubble-info-icon" onclick="toggleInfoPopup('fixedExpensesInfo')"></i>
+                                        </div>
+                                        <div id="fixedExpensesInfo" class="info-popup">Rent, insurance, loan payments, subscriptions</div>
                                     </div>
-                                    <div class="form-help">Rent, insurance, loan payments, subscriptions</div>
+                                    <div style="position: relative;">
+                                        <span class="budget-dollar-sign-xl">$</span>
+                                        <input type="text" class="budget-input-xl" id="budgetFixedExpenses" value="0,00" min="0" step="0.01" oninput="updateFixedExpenseVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    </div>
                                 </div>
                                 
-                                <!-- Fixed Expenses Percentage Display -->
-                                <div class="interactive-chart-container" id="fixedExpenseVisualization" style="display: none;">
-                                    <div class="chart-title">
-                                        <i data-lucide="home" class="w-4 h-4"></i>
-                                        Fixed Expenses Rate
+                                <div class="form-group" id="fixedExpenseTargetSection" style="text-align: center; display: none;">
+                                    <div>
+                                        <div class="monthly-savings-label">Fixed Expenses Rate</div>
+                                        <div id="fixedExpenseRateBubble" class="budget-header-bubble-small savings-rate-bubble">
+                                            <i data-lucide="home" class="w-4 h-4"></i>
+                                            <span id="fixedExpenseRateDisplay">0%</span>
+                                        </div>
                                     </div>
-                                    <div class="savings-rate-display" id="fixedExpenseRateDisplay">0%</div>
-                                    <div class="text-center text-sm text-muted-foreground" id="fixedExpenseRateDescription">of your net income</div>
                                 </div>
                             </div>
                         </div>
@@ -7476,22 +7647,27 @@ margin-right: 0.5rem;
                             
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
-                                    <div class="budget-header-bubble">Monthly Essential Expenses</div>
-                                    <div class="budget-input-container">
-                                        <span class="budget-dollar-sign">$</span>
-                                        <input type="number" class="budget-input-large" id="budgetEssentialExpenses" placeholder="0.00" min="0" step="0.01" oninput="updateEssentialExpenseVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    <div class="bubble-container">
+                                        <div class="budget-header-bubble">
+                                            <span>Monthly Essential Expenses</span>
+                                            <i data-lucide="info" class="w-4 h-4 bubble-info-icon" onclick="toggleInfoPopup('essentialExpensesInfo')"></i>
+                                        </div>
+                                        <div id="essentialExpensesInfo" class="info-popup">Groceries, utilities, gas, phone, internet</div>
                                     </div>
-                                    <div class="form-help">Groceries, utilities, gas, phone, internet</div>
+                                    <div style="position: relative;">
+                                        <span class="budget-dollar-sign-xl">$</span>
+                                        <input type="text" class="budget-input-xl" id="budgetEssentialExpenses" value="0,00" min="0" step="0.01" oninput="updateEssentialExpenseVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    </div>
                                 </div>
                                 
-                                <!-- Essential Expenses Percentage Display -->
-                                <div class="interactive-chart-container" id="essentialExpenseVisualization" style="display: none;">
-                                    <div class="chart-title">
-                                        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
-                                        Essential Expenses Rate
+                                <div class="form-group" id="essentialExpenseTargetSection" style="text-align: center; display: none;">
+                                    <div>
+                                        <div class="monthly-savings-label">Essential Expenses Rate</div>
+                                        <div id="essentialExpenseRateBubble" class="budget-header-bubble-small savings-rate-bubble">
+                                            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+                                            <span id="essentialExpenseRateDisplay">0%</span>
+                                        </div>
                                     </div>
-                                    <div class="savings-rate-display" id="essentialExpenseRateDisplay">0%</div>
-                                    <div class="text-center text-sm text-muted-foreground" id="essentialExpenseRateDescription">of your net income</div>
                                 </div>
                             </div>
                         </div>
@@ -7507,22 +7683,27 @@ margin-right: 0.5rem;
                             
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
-                                    <div class="budget-header-bubble">Monthly Discretionary Expenses</div>
-                                    <div class="budget-input-container">
-                                        <span class="budget-dollar-sign">$</span>
-                                        <input type="number" class="budget-input-large" id="budgetDiscretionaryExpenses" placeholder="0.00" min="0" step="0.01" oninput="updateDiscretionaryExpenseVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    <div class="bubble-container">
+                                        <div class="budget-header-bubble">
+                                            <span>Monthly Discretionary Expenses</span>
+                                            <i data-lucide="info" class="w-4 h-4 bubble-info-icon" onclick="toggleInfoPopup('discretionaryExpensesInfo')"></i>
+                                        </div>
+                                        <div id="discretionaryExpensesInfo" class="info-popup">Entertainment, dining out, hobbies, shopping</div>
                                     </div>
-                                    <div class="form-help">Entertainment, dining out, hobbies, shopping</div>
+                                    <div style="position: relative;">
+                                        <span class="budget-dollar-sign-xl">$</span>
+                                        <input type="text" class="budget-input-xl" id="budgetDiscretionaryExpenses" value="0,00" min="0" step="0.01" oninput="updateDiscretionaryExpenseVisualization(); formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                    </div>
                                 </div>
                                 
-                                <!-- Discretionary Expenses Percentage Display -->
-                                <div class="interactive-chart-container" id="discretionaryExpenseVisualization" style="display: none;">
-                                    <div class="chart-title">
-                                        <i data-lucide="coffee" class="w-4 h-4"></i>
-                                        Discretionary Expenses Rate
+                                <div class="form-group" id="discretionaryExpenseTargetSection" style="text-align: center; display: none;">
+                                    <div>
+                                        <div class="monthly-savings-label">Discretionary Expenses Rate</div>
+                                        <div id="discretionaryExpenseRateBubble" class="budget-header-bubble-small savings-rate-bubble">
+                                            <i data-lucide="coffee" class="w-4 h-4"></i>
+                                            <span id="discretionaryExpenseRateDisplay">0%</span>
+                                        </div>
                                     </div>
-                                    <div class="savings-rate-display" id="discretionaryExpenseRateDisplay">0%</div>
-                                    <div class="text-center text-sm text-muted-foreground" id="discretionaryExpenseRateDescription">of your net income</div>
                                 </div>
                             </div>
                         </div>
@@ -18488,6 +18669,24 @@ margin-right: 0.5rem;
             // Update progress indicators
             updateBudgetProgress(step);
             
+            // Initialize dollar sign positions after screen is shown
+            setTimeout(() => {
+                initializeDollarSignPositions();
+                
+                // Flash caret and focus the main XL input for the current screen
+                const currentScreen = document.getElementById(`budgetScreen${step}`);
+                const xlInput = currentScreen.querySelector('.budget-input-xl');
+                if (xlInput) {
+                    xlInput.focus();
+                    xlInput.classList.add('flash-caret');
+                    
+                    // Remove flash class after animation
+                    setTimeout(() => {
+                        xlInput.classList.remove('flash-caret');
+                    }, 1000);
+                }
+            }, 100);
+            
             // Update navigation buttons
             updateBudgetNavigation(step);
             
@@ -18741,6 +18940,32 @@ margin-right: 0.5rem;
             updateIncomeVisualization();
         }
 
+        function toggleInfoPopup(popupId) {
+            // Close all other popups
+            document.querySelectorAll('.info-popup').forEach(popup => {
+                if (popup.id !== popupId) {
+                    popup.style.display = 'none';
+                }
+            });
+            
+            // Toggle the clicked popup
+            const popup = document.getElementById(popupId);
+            if (popup.style.display === 'block') {
+                popup.style.display = 'none';
+            } else {
+                popup.style.display = 'block';
+            }
+        }
+
+        // Close popups when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.bubble-container')) {
+                document.querySelectorAll('.info-popup').forEach(popup => {
+                    popup.style.display = 'none';
+                });
+            }
+        });
+
         function updateBudgetSummary() {
             const grossIncome = parseFormattedNumber(document.getElementById('budgetGrossIncome').value);
             const federalTax = parseFormattedNumber(document.getElementById('budgetFederalTax').value);
@@ -18754,7 +18979,7 @@ margin-right: 0.5rem;
 
             // Calculate monthly savings target
             const monthlySavingsTarget = annualSavingsGoal / 12;
-            document.getElementById('budgetMonthlySavingsTarget').value = formatNumberForDisplay(monthlySavingsTarget);
+            document.getElementById('budgetMonthlySavingsTarget').textContent = formatNumberForDisplay(monthlySavingsTarget);
 
             // Calculate remaining budget
             const totalExpenses = fixedExpenses + essentialExpenses + discretionaryExpenses + monthlySavingsTarget;
@@ -18859,13 +19084,21 @@ margin-right: 0.5rem;
             const rawValue = input.value.replace(/,/g, '');
             const numericValue = parseFloat(rawValue);
             
-            if (!isNaN(numericValue) && numericValue !== 0) {
+            if (!isNaN(numericValue) && numericValue > 0) {
                 // Format with commas but no decimal places for whole numbers
                 const formattedValue = Math.floor(numericValue) === numericValue 
                     ? Math.floor(numericValue).toLocaleString('en-US')
                     : numericValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 
                 input.value = formattedValue;
+            } else if (!input.value || numericValue === 0) {
+                // Set default value for empty or zero inputs
+                input.value = "0,00";
+            }
+            
+            // Position dollar sign for XL inputs
+            if (input.classList.contains('budget-input-xl')) {
+                positionDollarSign(input);
             }
             
             // Move cursor to end after any input
@@ -18875,8 +19108,71 @@ margin-right: 0.5rem;
             }, 0);
         }
         
+        // Function to position dollar sign flush with text
+        function positionDollarSign(input) {
+            const dollarSign = input.parentNode.querySelector('.budget-dollar-sign-xl');
+            if (!dollarSign) return;
+            
+            // Clear any existing timeout to debounce
+            if (input.positionTimeout) {
+                clearTimeout(input.positionTimeout);
+            }
+            
+            input.positionTimeout = setTimeout(() => {
+            
+            // Use default "0,00" if input is empty
+            const displayValue = input.value || "0,00";
+            
+            // Check if this is a real value or default
+            const hasValue = input.value && parseFloat(input.value.replace(/,/g, '')) > 0;
+            
+            // Update colors and classes immediately without delay
+            if (hasValue) {
+                dollarSign.style.color = '#2d7d32';
+                input.classList.remove('default-value');
+            } else {
+                dollarSign.style.color = '#c8c8c8';
+                input.classList.add('default-value');
+            }
+            
+            // Use improved positioning with better approximations
+            const inputWidth = input.offsetWidth;
+            const estimatedTextWidth = displayValue.length * 38; // Better approximation for 4rem font
+            const dollarWidth = 45; // Better approximation for dollar sign width
+            const gap = 15; // Smaller gap for better alignment
+            const totalWidth = dollarWidth + gap + estimatedTextWidth;
+            const centeredStart = (inputWidth - totalWidth) / 2;
+            
+            // Position with minimum left margin to prevent cutting off
+            dollarSign.style.transition = 'none';
+            dollarSign.style.left = Math.max(20, centeredStart) + 'px';
+            dollarSign.style.right = 'auto';
+            
+            // Add fade-in effect
+            dollarSign.classList.add('fade-in');
+            }, 50); // Small delay to debounce
+        }
+
+        // Initialize dollar sign positions for all XL inputs on page load
+        function initializeDollarSignPositions() {
+            const xlInputs = document.querySelectorAll('.budget-input-xl');
+            xlInputs.forEach(input => {
+                // Set default value if empty
+                if (!input.value || input.value === "0,00") {
+                    input.value = "0,00";
+                    input.classList.add('default-value');
+                }
+                positionDollarSign(input);
+            });
+        }
+        
         // Add focus handler to move cursor to end
         function handleBudgetInputFocus(input) {
+            // Position dollar sign for XL inputs
+            if (input.classList.contains('budget-input-xl')) {
+                positionDollarSign(input);
+            }
+            
             setTimeout(() => {
                 const len = input.value.length;
                 input.setSelectionRange(len, len);
@@ -18889,15 +19185,24 @@ margin-right: 0.5rem;
             const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
             const monthlySavings = annualSavings / 12;
             
-            document.getElementById('budgetMonthlySavingsTarget').value = monthlySavings.toFixed(2);
+            // Show/hide monthly savings target section based on whether annual savings has a value
+            const monthlySavingsSection = document.getElementById('monthlySavingsTargetSection');
+            const savingsRateBubble = document.getElementById('savingsRateBubble');
             
-            if (netIncome > 0 && annualSavings > 0) {
-                const savingsRate = (monthlySavings / netIncome) * 100;
-                document.getElementById('savingsRateDisplay').textContent = savingsRate.toFixed(1) + '%';
-                document.getElementById('savingsRateDescription').textContent = `$${monthlySavings.toFixed(0)} per month of your $${netIncome.toFixed(0)} net income`;
-                document.getElementById('savingsVisualization').style.display = 'block';
+            if (annualSavings > 0) {
+                monthlySavingsSection.style.display = 'block';
+                document.getElementById('budgetMonthlySavingsTarget').textContent = formatNumberForDisplay(monthlySavings);
+                
+                // Show savings rate bubble if we have net income
+                if (netIncome > 0) {
+                    const savingsRate = (monthlySavings / (netIncome / 12)) * 100;
+                    document.getElementById('savingsRateDisplay').textContent = savingsRate.toFixed(1) + '%';
+                    savingsRateBubble.style.display = 'flex';
+                } else {
+                    savingsRateBubble.style.display = 'none';
+                }
             } else {
-                document.getElementById('savingsVisualization').style.display = 'none';
+                monthlySavingsSection.style.display = 'none';
             }
         }
 
@@ -18905,13 +19210,14 @@ margin-right: 0.5rem;
             const fixedExpenses = parseFormattedNumber(document.getElementById('budgetFixedExpenses').value);
             const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
             
+            const fixedExpenseSection = document.getElementById('fixedExpenseTargetSection');
+            
             if (netIncome > 0 && fixedExpenses > 0) {
-                const expenseRate = (fixedExpenses / netIncome) * 100;
+                const expenseRate = (fixedExpenses / (netIncome / 12)) * 100;
                 document.getElementById('fixedExpenseRateDisplay').textContent = expenseRate.toFixed(1) + '%';
-                document.getElementById('fixedExpenseRateDescription').textContent = `$${fixedExpenses.toFixed(0)} per month of your $${netIncome.toFixed(0)} net income`;
-                document.getElementById('fixedExpenseVisualization').style.display = 'block';
+                fixedExpenseSection.style.display = 'block';
             } else {
-                document.getElementById('fixedExpenseVisualization').style.display = 'none';
+                fixedExpenseSection.style.display = 'none';
             }
             updateBudgetSummary();
         }
@@ -18920,13 +19226,14 @@ margin-right: 0.5rem;
             const essentialExpenses = parseFormattedNumber(document.getElementById('budgetEssentialExpenses').value);
             const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
             
+            const essentialExpenseSection = document.getElementById('essentialExpenseTargetSection');
+            
             if (netIncome > 0 && essentialExpenses > 0) {
-                const expenseRate = (essentialExpenses / netIncome) * 100;
+                const expenseRate = (essentialExpenses / (netIncome / 12)) * 100;
                 document.getElementById('essentialExpenseRateDisplay').textContent = expenseRate.toFixed(1) + '%';
-                document.getElementById('essentialExpenseRateDescription').textContent = `$${essentialExpenses.toFixed(0)} per month of your $${netIncome.toFixed(0)} net income`;
-                document.getElementById('essentialExpenseVisualization').style.display = 'block';
+                essentialExpenseSection.style.display = 'block';
             } else {
-                document.getElementById('essentialExpenseVisualization').style.display = 'none';
+                essentialExpenseSection.style.display = 'none';
             }
             updateBudgetSummary();
         }
@@ -18935,13 +19242,14 @@ margin-right: 0.5rem;
             const discretionaryExpenses = parseFormattedNumber(document.getElementById('budgetDiscretionaryExpenses').value);
             const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
             
+            const discretionaryExpenseSection = document.getElementById('discretionaryExpenseTargetSection');
+            
             if (netIncome > 0 && discretionaryExpenses > 0) {
-                const expenseRate = (discretionaryExpenses / netIncome) * 100;
+                const expenseRate = (discretionaryExpenses / (netIncome / 12)) * 100;
                 document.getElementById('discretionaryExpenseRateDisplay').textContent = expenseRate.toFixed(1) + '%';
-                document.getElementById('discretionaryExpenseRateDescription').textContent = `$${discretionaryExpenses.toFixed(0)} per month of your $${netIncome.toFixed(0)} net income`;
-                document.getElementById('discretionaryExpenseVisualization').style.display = 'block';
+                discretionaryExpenseSection.style.display = 'block';
             } else {
-                document.getElementById('discretionaryExpenseVisualization').style.display = 'none';
+                discretionaryExpenseSection.style.display = 'none';
             }
             updateBudgetSummary();
         }
