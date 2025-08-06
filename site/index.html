@@ -14459,40 +14459,63 @@ margin-right: 0.5rem;
                         const chartWidth = chartArea.right - chartArea.left;
                         const visibleWidth = chartWidth * animationProgress;
                         
-                        // Simple gradient fill from bottom to top (temporary fix)
-                        const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                        gradient.addColorStop(0, 'rgba(95, 164, 46, 0)'); // Transparent at bottom
-                        gradient.addColorStop(0.2, 'rgba(95, 164, 46, 0.02)');
-                        gradient.addColorStop(0.4, 'rgba(95, 164, 46, 0.05)');
-                        gradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
+                        // Calculate zero line position
+                        const zeroLineY = yAxis.getPixelForValue(0);
                         
-                        // Get data points and chart bottom position
-                        const dataPoints = chart.data.datasets[0].data;
-                        const chartBottom = chartArea.bottom;
+                        // Get combined data from both datasets
+                        const positiveData = chart.data.datasets[0].data;
+                        const negativeData = chart.data.datasets[1].data;
                         
                         // Set up clipping region for animated width
                         ctx.save();
                         ctx.rect(chartArea.left, chartArea.top, visibleWidth, chartArea.bottom - chartArea.top);
                         ctx.clip();
                         
-                        // Draw filled area from data line to chart bottom (visual bottom)
-                        ctx.fillStyle = gradient;
+                        // Draw positive area fill (green gradient above zero)
+                        const positiveGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.top);
+                        positiveGradient.addColorStop(0, 'rgba(95, 164, 46, 0.02)');
+                        positiveGradient.addColorStop(0.4, 'rgba(95, 164, 46, 0.08)');
+                        positiveGradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)');
+                        
+                        ctx.fillStyle = positiveGradient;
                         ctx.beginPath();
+                        ctx.moveTo(chartArea.left, zeroLineY);
                         
-                        // Start at left edge of chart area, at bottom
-                        ctx.moveTo(xAxis.getPixelForValue(0), chartBottom);
-                        
-                        // Draw line following the data points
-                        dataPoints.forEach((point, index) => {
-                            if (point !== null) {
-                                const x = xAxis.getPixelForValue(index);
-                                const y = yAxis.getPixelForValue(point);
-                                ctx.lineTo(x, y);
+                        // Draw line following positive data points
+                        positiveData.forEach((point, index) => {
+                            const x = xAxis.getPixelForValue(index);
+                            let y = zeroLineY; // Default to zero line
+                            if (point !== null && point > 0) {
+                                y = yAxis.getPixelForValue(point);
                             }
+                            ctx.lineTo(x, y);
                         });
                         
-                        // Complete the fill back to chart bottom at right edge
-                        ctx.lineTo(xAxis.getPixelForValue(dataPoints.length - 1), chartBottom);
+                        ctx.lineTo(chartArea.right, zeroLineY);
+                        ctx.closePath();
+                        ctx.fill();
+                        
+                        // Draw negative area fill (gray gradient below zero)
+                        const negativeGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.bottom);
+                        negativeGradient.addColorStop(0, 'rgba(156, 163, 175, 0.02)');
+                        negativeGradient.addColorStop(0.4, 'rgba(156, 163, 175, 0.08)');
+                        negativeGradient.addColorStop(1, 'rgba(156, 163, 175, 0.25)');
+                        
+                        ctx.fillStyle = negativeGradient;
+                        ctx.beginPath();
+                        ctx.moveTo(chartArea.left, zeroLineY);
+                        
+                        // Draw line following negative data points
+                        negativeData.forEach((point, index) => {
+                            const x = xAxis.getPixelForValue(index);
+                            let y = zeroLineY; // Default to zero line
+                            if (point !== null && point < 0) {
+                                y = yAxis.getPixelForValue(point);
+                            }
+                            ctx.lineTo(x, y);
+                        });
+                        
+                        ctx.lineTo(chartArea.right, zeroLineY);
                         ctx.closePath();
                         ctx.fill();
                         
