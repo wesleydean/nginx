@@ -15482,8 +15482,8 @@ margin-right: 0.5rem;
                             subtitleElement.style.display = '';
                         }
                         
-                        // Hide change element
-                        if (changeElement) changeElement.style.display = 'none';
+                        // Hide change element (use visibility to maintain layout)
+                        if (changeElement) changeElement.style.visibility = 'hidden';
                     }
                 } else if (overlayId === 'accountsNetWorthOverlay') {
                     const titleElement = document.getElementById('accountsNetWorthTitle');
@@ -15518,8 +15518,8 @@ margin-right: 0.5rem;
                             subtitleElement.style.display = '';
                         }
                         
-                        // Hide change element
-                        if (changeElement) changeElement.style.display = 'none';
+                        // Hide change element (use visibility to maintain layout)
+                        if (changeElement) changeElement.style.visibility = 'hidden';
                     }
                 }
 
@@ -15566,7 +15566,7 @@ margin-right: 0.5rem;
                     }
                     
                     // Show hidden elements
-                    if (changeElement) changeElement.style.display = '';
+                    if (changeElement) changeElement.style.visibility = '';
                     if (subtitleElement) subtitleElement.style.display = '';
                 } else if (overlayId === 'accountsNetWorthOverlay') {
                     const titleElement = document.getElementById('accountsNetWorthTitle');
@@ -15584,7 +15584,7 @@ margin-right: 0.5rem;
                     }
                     
                     // Show hidden elements
-                    if (changeElement) changeElement.style.display = '';
+                    if (changeElement) changeElement.style.visibility = '';
                     if (subtitleElement) subtitleElement.style.display = '';
                 }
                 
