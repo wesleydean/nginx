@@ -15293,21 +15293,8 @@ margin-right: 0.5rem;
                         // Calculate zero line position
                         const zeroLineY = yAxis.getPixelForValue(0);
                         
-                        // Get both datasets for complete data
-                        const positiveDataset = chart.data.datasets[0];
-                        const negativeDataset = chart.data.datasets[1];
-                        
-                        // Safely combine data from both datasets
-                        const allData = [];
-                        for (let i = 0; i < positiveDataset.data.length; i++) {
-                            if (positiveDataset.data[i] !== null) {
-                                allData[i] = positiveDataset.data[i];
-                            } else if (negativeDataset && negativeDataset.data && negativeDataset.data[i] !== null) {
-                                allData[i] = negativeDataset.data[i];
-                            } else {
-                                allData[i] = 0; // fallback to zero
-                            }
-                        }
+                        // Get data from single dataset (accounts chart only has one dataset)
+                        const allDataPoints = chart.data.datasets[0].data;
                         
                         // Set up clipping for progressive reveal
                         ctx.save();
@@ -15315,48 +15302,41 @@ margin-right: 0.5rem;
                         ctx.rect(chartArea.left, chartArea.top, visibleWidth, chartArea.bottom - chartArea.top);
                         ctx.clip();
                         
-                        // Create and draw positive area fill (above zero line)
+                        // Draw positive area fill (green gradient above zero)
                         const positiveGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.top);
-                        positiveGradient.addColorStop(0, 'rgba(95, 164, 46, 0.02)'); // Slight opacity at zero line
-                        positiveGradient.addColorStop(0.3, 'rgba(95, 164, 46, 0.08)');
-                        positiveGradient.addColorStop(0.6, 'rgba(95, 164, 46, 0.18)');
-                        positiveGradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)'); // Opaque at top
+                        positiveGradient.addColorStop(0, 'rgba(95, 164, 46, 0.02)');
+                        positiveGradient.addColorStop(0.4, 'rgba(95, 164, 46, 0.08)');
+                        positiveGradient.addColorStop(1, 'rgba(95, 164, 46, 0.25)');
                         
                         ctx.fillStyle = positiveGradient;
                         ctx.beginPath();
-                        
-                        // Start at left edge at zero line
                         ctx.moveTo(chartArea.left, zeroLineY);
                         
-                        // Follow the actual data line (positive sections will show above zero, negative below)
-                        allData.forEach((value, index) => {
+                        // Draw line following all data points, but cap at zero line for positive fill
+                        allDataPoints.forEach((point, index) => {
                             const x = xAxis.getPixelForValue(index);
-                            const y = yAxis.getPixelForValue(Math.max(value, 0)); // Use zero as minimum for positive fill
+                            const y = yAxis.getPixelForValue(Math.max(point, 0)); // Cap at zero for positive area
                             ctx.lineTo(x, y);
                         });
                         
-                        // Complete the fill back to zero line at right edge
                         ctx.lineTo(chartArea.right, zeroLineY);
                         ctx.closePath();
                         ctx.fill();
                         
-                        // Create and draw negative area fill (below zero line)
+                        // Draw negative area fill (gray gradient below zero)
                         const negativeGradient = ctx.createLinearGradient(0, zeroLineY, 0, chartArea.bottom);
-                        negativeGradient.addColorStop(0, 'rgba(156, 163, 175, 0.02)'); // Slight opacity at zero line
-                        negativeGradient.addColorStop(0.3, 'rgba(156, 163, 175, 0.08)');
-                        negativeGradient.addColorStop(0.6, 'rgba(156, 163, 175, 0.18)');
-                        negativeGradient.addColorStop(1, 'rgba(156, 163, 175, 0.25)'); // Opaque at bottom
+                        negativeGradient.addColorStop(0, 'rgba(156, 163, 175, 0.02)');
+                        negativeGradient.addColorStop(0.4, 'rgba(156, 163, 175, 0.08)');
+                        negativeGradient.addColorStop(1, 'rgba(156, 163, 175, 0.25)');
                         
                         ctx.fillStyle = negativeGradient;
                         ctx.beginPath();
-                        
-                        // Start at left edge at zero line
                         ctx.moveTo(chartArea.left, zeroLineY);
                         
-                        // Follow the actual data line (negative sections will show below zero, positive above)
-                        allData.forEach((value, index) => {
+                        // Draw line following all data points, but cap at zero line for negative fill
+                        allDataPoints.forEach((point, index) => {
                             const x = xAxis.getPixelForValue(index);
-                            const y = yAxis.getPixelForValue(Math.min(value, 0)); // Use zero as maximum for negative fill
+                            const y = yAxis.getPixelForValue(Math.min(point, 0)); // Cap at zero for negative area
                             ctx.lineTo(x, y);
                         });
                         
