@@ -15511,7 +15511,10 @@ margin-right: 0.5rem;
                         }
                         
                         // Get the current value and date
-                        const currentValue = chart.data.datasets[0].data[activeIndex] || chart.data.datasets[1].data[activeIndex];
+                        let currentValue = chart.data.datasets[0].data[activeIndex];
+                        if (currentValue === null && chart.data.datasets[1]) {
+                            currentValue = chart.data.datasets[1].data[activeIndex];
+                        }
                         const dateLabel = chart.data.labels[activeIndex];
                         const date = new Date(dateLabel);
                         const friendlyDate = date.toLocaleDateString('en-US', { 
@@ -15547,7 +15550,10 @@ margin-right: 0.5rem;
                         }
                         
                         // Get the current value and date
-                        const currentValue = chart.data.datasets[0].data[activeIndex] || chart.data.datasets[1].data[activeIndex];
+                        let currentValue = chart.data.datasets[0].data[activeIndex];
+                        if (currentValue === null && chart.data.datasets[1]) {
+                            currentValue = chart.data.datasets[1].data[activeIndex];
+                        }
                         const dateLabel = chart.data.labels[activeIndex];
                         const date = new Date(dateLabel);
                         const friendlyDate = date.toLocaleDateString('en-US', { 
