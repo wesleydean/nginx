@@ -14384,11 +14384,9 @@ margin-right: 0.5rem;
                         pointBackgroundColor: 'transparent',
                         pointBorderColor: 'transparent',
                         pointBorderWidth: 0,
-                        borderDash: [5, 5], // Dashed line for negative
                         spanGaps: false,
                         segment: {
-                            borderColor: (ctx) => ctx.p0.parsed.y < 0 ? '#9ca3af' : 'transparent',
-                            borderDash: (ctx) => ctx.p0.parsed.y < 0 ? [5, 5] : []
+                            borderColor: (ctx) => ctx.p0.parsed.y < 0 ? '#9ca3af' : 'transparent'
                         }
                     }]
                 },
