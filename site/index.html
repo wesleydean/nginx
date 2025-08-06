@@ -8891,15 +8891,26 @@ margin-right: 0.5rem;
                 return `${year}-${month}-${day}`;
             });
 
-            // Calculate cumulative spending
-            const spendingData = [];
+            // Calculate cumulative spending and split into past/future
+            const spendingDataPast = [];
+            const spendingDataFuture = [];
             let cumulativeSpending = 0;
+            const today = new Date().toISOString().split('T')[0]; // Current date in YYYY-MM-DD format
 
-            dateKeys.forEach(dateKey => {
+            dateKeys.forEach((dateKey, index) => {
                 const dayExpenses = expenses[dateKey] || [];
                 const dayTotal = dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
                 cumulativeSpending += dayTotal;
-                spendingData.push(cumulativeSpending);
+                
+                if (dateKey <= today) {
+                    // Past and current days - solid line
+                    spendingDataPast.push(cumulativeSpending);
+                    spendingDataFuture.push(null);
+                } else {
+                    // Future days - dashed line
+                    spendingDataPast.push(null);
+                    spendingDataFuture.push(cumulativeSpending);
+                }
             });
 
             // Calculate account balances over time
@@ -9101,20 +9112,37 @@ margin-right: 0.5rem;
                             pointBorderWidth: 0
                         },
                         {
-                            label: 'Spent',
-                            data: spendingData,
+                            label: 'Spent (Past)',
+                            data: spendingDataPast,
                             borderColor: 'rgb(107, 114, 128)', // Gray
                             backgroundColor: 'transparent', // No fill
                             tension: 0.6,
                             fill: false, // No fill for spending
-                            borderDash: [4, 4], // Dotted line
                             pointRadius: 0,
                             borderWidth: 2.5,
                             z: 5,
                             pointHitRadius: 15,
                             pointBackgroundColor: 'transparent',
                             pointBorderColor: 'transparent',
-                            pointBorderWidth: 0
+                            pointBorderWidth: 0,
+                            spanGaps: false
+                        },
+                        {
+                            label: 'Spent (Future)',
+                            data: spendingDataFuture,
+                            borderColor: 'rgb(107, 114, 128)', // Gray
+                            backgroundColor: 'transparent', // No fill
+                            tension: 0.6,
+                            fill: false, // No fill for spending
+                            borderDash: [4, 4], // Dashed line for future days
+                            pointRadius: 0,
+                            borderWidth: 2.5,
+                            z: 5,
+                            pointHitRadius: 15,
+                            pointBackgroundColor: 'transparent',
+                            pointBorderColor: 'transparent',
+                            pointBorderWidth: 0,
+                            spanGaps: false
                         }
                     ]
                 },
