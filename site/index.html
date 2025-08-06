@@ -14507,6 +14507,9 @@ margin-right: 0.5rem;
                         
                         if (!chart.data.datasets[0].data.length) return;
                         
+                        // Hide horizontal line during drag interaction
+                        if (chart.isInteracting) return;
+                        
                         // Check if there's an active crosshair interaction
                         let currentValue, currentIndex, displayDate = '';
                         if (chart.activeIndex !== undefined && chart.activeIndex >= 0) {
@@ -15305,6 +15308,9 @@ margin-right: 0.5rem;
                         
                         if (!chart.data.datasets[0].data.length) return;
                         
+                        // Hide horizontal line during drag interaction
+                        if (chart.isInteracting) return;
+                        
                         // Check if there's an active crosshair interaction
                         let currentValue, currentIndex, displayDate = '';
                         if (chart.activeIndex !== undefined && chart.activeIndex >= 0) {
@@ -15442,6 +15448,65 @@ margin-right: 0.5rem;
                 chartCrosshair.style.opacity = '0'; // Hide vertical line during dragging
                 chartOverlay.classList.add('visible');
 
+                // Handle header elements during drag (for net worth charts)
+                if (overlayId === 'homeNetWorthOverlay') {
+                    const titleElement = document.getElementById('netWorthTitle');
+                    const changeElement = document.getElementById('netWorthChange');
+                    const subtitleElement = document.getElementById('netWorthSubtitle');
+                    
+                    if (titleElement && chart.data && chart.data.datasets[0] && chart.data.labels) {
+                        // Store original title if not already stored
+                        if (!chart.originalTitle) {
+                            chart.originalTitle = titleElement.textContent;
+                        }
+                        
+                        // Get the current value and date
+                        const currentValue = chart.data.datasets[0].data[activeIndex] || chart.data.datasets[1].data[activeIndex];
+                        const dateLabel = chart.data.labels[activeIndex];
+                        const date = new Date(dateLabel);
+                        const friendlyDate = date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric',
+                            year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+                        });
+                        
+                        // Update title with current dragged value and date
+                        titleElement.textContent = `${formatCurrency(currentValue)} net worth (${friendlyDate})`;
+                        
+                        // Hide change and subtitle elements
+                        if (changeElement) changeElement.style.display = 'none';
+                        if (subtitleElement) subtitleElement.style.display = 'none';
+                    }
+                } else if (overlayId === 'accountsNetWorthOverlay') {
+                    const titleElement = document.getElementById('accountsNetWorthTitle');
+                    const changeElement = document.getElementById('accountsNetWorthChange');
+                    const subtitleElement = document.getElementById('accountsNetWorthSubtitle');
+                    
+                    if (titleElement && chart.data && chart.data.datasets[0] && chart.data.labels) {
+                        // Store original title if not already stored
+                        if (!chart.originalTitle) {
+                            chart.originalTitle = titleElement.textContent;
+                        }
+                        
+                        // Get the current value and date
+                        const currentValue = chart.data.datasets[0].data[activeIndex] || chart.data.datasets[1].data[activeIndex];
+                        const dateLabel = chart.data.labels[activeIndex];
+                        const date = new Date(dateLabel);
+                        const friendlyDate = date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric',
+                            year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+                        });
+                        
+                        // Update title with current dragged value and date
+                        titleElement.textContent = `${formatCurrency(currentValue)} net worth (${friendlyDate})`;
+                        
+                        // Hide change and subtitle elements
+                        if (changeElement) changeElement.style.display = 'none';
+                        if (subtitleElement) subtitleElement.style.display = 'none';
+                    }
+                }
+
                 chart.update('none');
             }
 
@@ -15467,6 +15532,35 @@ margin-right: 0.5rem;
                 setTimeout(() => {
                     chartOverlay.classList.remove('visible');
                 }, 200);
+                
+                // Restore header elements (for net worth charts)
+                if (overlayId === 'homeNetWorthOverlay') {
+                    const titleElement = document.getElementById('netWorthTitle');
+                    const changeElement = document.getElementById('netWorthChange');
+                    const subtitleElement = document.getElementById('netWorthSubtitle');
+                    
+                    // Restore original title
+                    if (titleElement && chart.originalTitle) {
+                        titleElement.textContent = chart.originalTitle;
+                    }
+                    
+                    // Show hidden elements
+                    if (changeElement) changeElement.style.display = '';
+                    if (subtitleElement) subtitleElement.style.display = '';
+                } else if (overlayId === 'accountsNetWorthOverlay') {
+                    const titleElement = document.getElementById('accountsNetWorthTitle');
+                    const changeElement = document.getElementById('accountsNetWorthChange');
+                    const subtitleElement = document.getElementById('accountsNetWorthSubtitle');
+                    
+                    // Restore original title
+                    if (titleElement && chart.originalTitle) {
+                        titleElement.textContent = chart.originalTitle;
+                    }
+                    
+                    // Show hidden elements
+                    if (changeElement) changeElement.style.display = '';
+                    if (subtitleElement) subtitleElement.style.display = '';
+                }
                 
                 chart.update('none');
             }
