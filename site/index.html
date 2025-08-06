@@ -1631,31 +1631,32 @@
         .budget-input-xl {
             font-size: 4rem;
             font-weight: 700;
-            text-align: left; /* Changed to left alignment */
-            padding: 1rem;
+            text-align: center; /* Center alignment */
+            padding: 1rem 2.5rem; /* Increased horizontal padding for better spacing with dollar sign */
             border: none;
             background: transparent;
             color: #c8c8c8;
             width: 100%;
             outline: none;
             min-height: 5rem;
-            padding-left: 3.5rem; /* Reduced space for the dollar sign to position it closer to text */
-            padding-right: 1rem; /* Add some padding on the right side */
+            padding-left: 1.5rem; /* Maintain some padding for the dollar sign */
+            padding-right: 1.5rem; /* Equal padding on both sides */
         }
         
         /* Use pseudo-element for the dollar sign */
         div[style="position: relative;"]::before {
             content: "$";
             position: absolute;
-            left: 2.5rem;  /* Position it closer to where the text starts */
+            left: 50%; /* Center it horizontally */
             top: 49%;
-            transform: translateY(-50%);
+            transform: translateX(-150%) translateY(-50%); /* Move it to the left of the center for better spacing */
             font-size: 4rem;
             font-weight: 700;
             color: #c8c8c8;
             pointer-events: none;
             z-index: 1;
             transition: color 0s; /* Immediate color change */
+            margin-right: 0.5rem; /* Add some space between dollar sign and the number */
         }
         
         /* Style for when input has a valid value */
@@ -1708,6 +1709,7 @@
             width: 100%;
             max-width: 400px;
             margin: 0 auto;
+            position: relative;
         }
         
         .budget-form-label-large {
@@ -1882,58 +1884,85 @@
             50% { caret-color: transparent; }
         }
 
-        /* Responsive font sizing for longer inputs */
+        /* Responsive font sizing for inputs */
+        /* Special handling for short inputs */
+        .budget-input-xl.length-1,
+        .budget-input-xl.length-2,
+        .budget-input-xl.length-3,
+        .budget-input-xl.length-4 {
+            font-size: 4rem;
+            padding-left: 2rem; /* More space for better centering */
+            padding-right: 2rem;
+        }
+        
         .budget-input-xl.length-5 {
             font-size: 3.6rem;
-            padding-left: 2.5rem; /* Adjusted padding for better alignment with $ */
+            padding-left: 1.5rem; /* Adjusted padding for better alignment with $ */
         }
 
         .budget-input-xl.length-6 {
             font-size: 3.4rem;
-            padding-left: 2.5rem;
+            padding-left: 1.5rem;
         }
 
         .budget-input-xl.length-7 {
             font-size: 3.2rem;
-            padding-left: 2.5rem;
+            padding-left: 1.5rem;
         }
 
         .budget-input-xl.length-8 {
             font-size: 3.0rem;
-            padding-left: 2.2rem;
+            padding-left: 1.5rem;
         }
 
         .budget-input-xl.length-9 {
             font-size: 2.8rem;
-            padding-left: 2.2rem;
+            padding-left: 1.5rem;
         }
 
         .budget-input-xl.length-10,
         .budget-input-xl.length-11,
         .budget-input-xl.length-12 {
             font-size: 2.6rem;
-            padding-left: 2.2rem;
+            padding-left: 1.5rem;
         }
 
-        /* Adjust dollar sign position and size for longer inputs */
+        /* Adjust dollar sign position and size for all input lengths */
+        /* Specific positioning for different input lengths - adjusted for center alignment */
+        div[style="position: relative;"]:has(.budget-input-xl.length-1)::before {
+            font-size: 4rem;
+            transform: translateX(-50%) translateY(-50%); /* Single digit needs special handling */
+        }
+        
+        div[style="position: relative;"]:has(.budget-input-xl.length-2)::before {
+            font-size: 4rem;
+            transform: translateX(-80%) translateY(-50%);
+        }
+        
+        div[style="position: relative;"]:has(.budget-input-xl.length-3)::before,
+        div[style="position: relative;"]:has(.budget-input-xl.length-4)::before {
+            font-size: 4rem;
+            transform: translateX(-110%) translateY(-50%);
+        }
+        
         div[style="position: relative;"]:has(.budget-input-xl.length-5)::before,
         div[style="position: relative;"]:has(.budget-input-xl.length-6)::before,
         div[style="position: relative;"]:has(.budget-input-xl.length-7)::before {
             font-size: 3.6rem;
-            left: 0.3rem; /* Position closer to the first digit */
+            transform: translateX(-130%) translateY(-50%);
         }
 
         div[style="position: relative;"]:has(.budget-input-xl.length-8)::before,
         div[style="position: relative;"]:has(.budget-input-xl.length-9)::before {
             font-size: 3.2rem;
-            left: 0.3rem; /* Position closer to the first digit */
+            transform: translateX(-150%) translateY(-50%);
         }
 
         div[style="position: relative;"]:has(.budget-input-xl.length-10)::before,
         div[style="position: relative;"]:has(.budget-input-xl.length-11)::before,
         div[style="position: relative;"]:has(.budget-input-xl.length-12)::before {
             font-size: 2.8rem;
-            left: 0.3rem; /* Position closer to the first digit */
+            transform: translateX(-170%) translateY(-50%);
         }
 
         
@@ -19282,6 +19311,7 @@ margin-right: 0.5rem;
         function updateInputLengthClass(input) {
             // Remove any existing length classes
             input.classList.remove(
+                'length-1', 'length-2', 'length-3', 'length-4',
                 'length-5', 'length-6', 'length-7', 'length-8',
                 'length-9', 'length-10', 'length-11', 'length-12'
             );
@@ -19291,7 +19321,7 @@ margin-right: 0.5rem;
             const length = cleanValue.length;
             
             // Add appropriate class based on length
-            if (length >= 5 && length <= 12) {
+            if (length >= 1 && length <= 12) {
                 input.classList.add(`length-${length}`);
             }
         }
