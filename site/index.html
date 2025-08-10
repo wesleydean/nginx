@@ -1440,38 +1440,76 @@
             left: 0;
             right: 0;
             z-index: 50;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
-        .progress-dots {
+        .progress-bar-container {
             display: flex;
             justify-content: center;
-            gap: 14px;
             margin-bottom: 8px;
+            width: 100%;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        .progress-dot {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
+        .progress-bar-track {
+            width: 100%;
+            height: 8px;
             background: hsl(var(--muted));
-            transition: all 0.3s ease;
-            border: 2px solid hsl(var(--border));
-            box-sizing: border-box;
-            cursor: pointer;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
         }
         
-        .progress-dot.active {
-            background: #8b5cf6;
-            border-color: #8b5cf6;
-            transform: scale(1.2);
-            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+        .progress-bar-fill {
+            height: 100%;
+            background: #74c8cb;
+            border-radius: 4px;
+            width: 16.67%;
+            transition: width 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
         
-        .progress-dot.completed {
-            background: #5fa42e;
-            border-color: #5fa42e;
-            transform: scale(1.1);
+        .progress-bar-fill[data-step="1"] { width: 16.67%; }
+        .progress-bar-fill[data-step="2"] { width: 33.33%; }
+        .progress-bar-fill[data-step="3"] { width: 50%; }
+        .progress-bar-fill[data-step="4"] { width: 66.67%; }
+        .progress-bar-fill[data-step="5"] { width: 83.33%; }
+        .progress-bar-fill[data-step="6"] { width: 100%; }
+        
+        .progress-bar-fill[data-step="1"]:not([data-step="1"]):not([data-prev-step]),
+        .progress-bar-fill[data-step="2"]:not([data-prev-step="1"]),
+        .progress-bar-fill[data-step="3"]:not([data-prev-step="2"]),
+        .progress-bar-fill[data-step="4"]:not([data-prev-step="3"]),
+        .progress-bar-fill[data-step="5"]:not([data-prev-step="4"]),
+        .progress-bar-fill[data-step="6"]:not([data-prev-step="5"]) {
+            animation: progressBounce 0.8s ease-out;
+        }
+        
+        @keyframes progressBounce {
+            0% { transform: scaleY(1); }
+            25% { transform: scaleY(1.5); }
+            50% { transform: scaleY(1.2); }
+            75% { transform: scaleY(1.3); }
+            100% { transform: scaleY(1); }
+        }
+        
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: progressShimmer 2s infinite;
+        }
+        
+        @keyframes progressShimmer {
+            0% { left: -100%; }
+            50% { left: -100%; }
+            100% { left: 100%; }
         }
         
         .progress-label {
@@ -1618,11 +1656,13 @@
         }
         
         .dollar-sign {
-            font-size: 4rem;
+            font-size: 64px;
             font-weight: 700;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
             color: #c8c8c8;
             transition: color 0s;
             user-select: none;
+            letter-spacing: -0.02em;
         }
         
         .budget-input-container:has(input:not(.default-value)) .dollar-sign {
@@ -1633,18 +1673,18 @@
         .budget-input-container:has(.budget-input-xl.length-5) .dollar-sign,
         .budget-input-container:has(.budget-input-xl.length-6) .dollar-sign,
         .budget-input-container:has(.budget-input-xl.length-7) .dollar-sign {
-            font-size: 3.6rem;
+            font-size: 58px;
         }
         
         .budget-input-container:has(.budget-input-xl.length-8) .dollar-sign,
         .budget-input-container:has(.budget-input-xl.length-9) .dollar-sign {
-            font-size: 3.2rem;
+            font-size: 48px;
         }
         
         .budget-input-container:has(.budget-input-xl.length-10) .dollar-sign,
         .budget-input-container:has(.budget-input-xl.length-11) .dollar-sign,
         .budget-input-container:has(.budget-input-xl.length-12) .dollar-sign {
-            font-size: 2.8rem;
+            font-size: 42px;
         }
         
         /* Ensure no horizontal overflow */
@@ -1673,19 +1713,21 @@
         }
 
         .budget-input-xl {
-            font-size: 4rem;
+            font-size: 64px;
             font-weight: 700;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
             text-align: left;
-            padding: 1rem 0;
+            padding: 16px 0;
             border: none;
             background: transparent;
             color: #c8c8c8;
             width: 100%;
             max-width: 350px;
             outline: none;
-            min-height: 5rem;
+            min-height: 80px;
             flex-grow: 1;
             box-sizing: border-box;
+            letter-spacing: -0.02em;
         }
         
         
@@ -1919,33 +1961,33 @@
         .budget-input-xl.length-2,
         .budget-input-xl.length-3,
         .budget-input-xl.length-4 {
-            font-size: 4rem;
+            font-size: 64px;
         }
         
         .budget-input-xl.length-5 {
-            font-size: 3.6rem;
+            font-size: 58px;
         }
 
         .budget-input-xl.length-6 {
-            font-size: 3.4rem;
+            font-size: 54px;
         }
 
         .budget-input-xl.length-7 {
-            font-size: 3.2rem;
+            font-size: 51px;
         }
 
         .budget-input-xl.length-8 {
-            font-size: 3.0rem;
+            font-size: 48px;
         }
 
         .budget-input-xl.length-9 {
-            font-size: 2.8rem;
+            font-size: 45px;
         }
 
         .budget-input-xl.length-10,
         .budget-input-xl.length-11,
         .budget-input-xl.length-12 {
-            font-size: 2.6rem;
+            font-size: 42px;
         }
 
         /* Adjust dollar sign position and size for all input lengths */
@@ -7602,7 +7644,7 @@ margin-right: 0.5rem;
             <div class="budget-progress-indicator">
                 <div class="progress-bar-container">
                     <div class="progress-bar-track">
-                        <div class="progress-bar-fill" id="budgetProgressBar"></div>
+                        <div class="progress-bar-fill" id="budgetProgressBar" data-step="1"></div>
                     </div>
                 </div>
                 <div class="progress-label" id="budgetProgressLabel">Step 1 of 6: Income & Taxes</div>
@@ -18883,15 +18925,13 @@ margin-right: 0.5rem;
         }
         
         function updateBudgetProgress(step) {
-            // Update progress dots
-            document.querySelectorAll('.progress-dot').forEach((dot, index) => {
-                dot.classList.remove('active', 'completed');
-                if (index + 1 < step) {
-                    dot.classList.add('completed');
-                } else if (index + 1 === step) {
-                    dot.classList.add('active');
-                }
-            });
+            // Update progress bar using CSS data attributes
+            const progressBar = document.getElementById('budgetProgressBar');
+            if (progressBar) {
+                const currentStep = progressBar.getAttribute('data-step');
+                progressBar.setAttribute('data-prev-step', currentStep);
+                progressBar.setAttribute('data-step', step);
+            }
             
             // Update progress label
             const labels = [
