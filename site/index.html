@@ -1517,22 +1517,72 @@
         }
         
         .budget-flow-screens {
-            display: flex;
-            flex-direction: column;
+            position: relative;
             min-height: 60vh;
             padding: 0;
+            flex: 1;
+            overflow: hidden;
+            width: 100%;
+            max-width: 100vw;
         }
         
         .budget-flow-screen {
-            display: none;
-            animation: fadeIn 0.3s ease-in-out;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            max-width: 100%;
+            height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.25s ease, opacity 0.25s ease;
             padding: 1.5rem 1.5rem 120px 1.5rem;
-            flex: 1;
+            flex-direction: column;
+            display: flex;
+            transform: translateX(0);
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
         
         .budget-flow-screen.active {
-            display: flex;
-            flex-direction: column;
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+        
+        .budget-flow-screen.slide-out-left {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        
+        .budget-flow-screen.slide-out-right {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        
+        .budget-flow-screen.slide-in-left {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+        
+        .budget-flow-screen.slide-in-right {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+        
+        /* Prepare incoming screens offscreen */
+        .budget-flow-screen.prepare-left {
+            opacity: 0;
+            visibility: visible;
+            transform: translateX(-20px);
+        }
+        
+        .budget-flow-screen.prepare-right {
+            opacity: 0;
+            visibility: visible;
+            transform: translateX(20px);
         }
         
         @keyframes fadeIn {
@@ -1793,7 +1843,6 @@
             text-align: center;
             width: 100%;
             max-width: 380px;
-            margin: 32px auto;
             position: relative;
             box-sizing: border-box;
         }
@@ -1809,19 +1858,10 @@
         .budget-header-bubble {
             font-size: 0.875rem;
             font-weight: 500;
-            color: #2a6a6d;
-            background-color: #e8f7f8;
-            padding: 0.5rem 1rem;
-            border-radius: 1.5rem;
+            color: hsl(var(--foreground));
             text-align: center;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+            display: block;
             margin: 0 auto 1rem auto;
-            border: 1px solid #c8e6e7;
-            max-width: calc(100% - 2rem);
-            box-sizing: border-box;
         }
 
         .budget-header-bubble-small {
@@ -5812,11 +5852,389 @@
         }
 
         .calculate-btn {
-            background-color: hsl(var(--primary));
-            color: hsl(var(--primary-foreground));
+            background: #4a9ea1;
+            color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
+            padding: 1rem 1.5rem;
+            border-radius: 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 200ms ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            /* box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); */
+            letter-spacing: 0.02em;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .calculate-btn:active {
+            transform: translateY(0px);
+            box-shadow: 0 2px 8px #4a9ea1;
+        }
+        
+        /* Manual Override Trigger Button */
+        .manual-override-trigger {
+            background: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+            border: 1px solid hsl(var(--border));
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 150ms ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .manual-override-trigger:hover {
+            background: hsl(var(--accent));
+            color: hsl(var(--accent-foreground));
+            border-color: hsl(var(--ring));
+        }
+        
+        /* Manual Override Slide-up Styles */
+        .manual-override-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 300ms ease;
+        }
+        
+        .manual-override-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .manual-override-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: hsl(var(--background));
+            border-radius: 20px 20px 0 0;
+            max-height: 85vh;
+            transform: translateY(100%);
+            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .manual-override-overlay.active .manual-override-content {
+            transform: translateY(0);
+        }
+        
+        .manual-override-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid hsl(var(--border));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        
+        .manual-override-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            color: hsl(var(--foreground));
+        }
+        
+        .manual-override-close {
+            background: none;
+            border: none;
+            color: hsl(var(--muted-foreground));
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: all 150ms ease;
+        }
+        
+        .manual-override-close:hover {
+            background: hsl(var(--muted));
+            color: hsl(var(--foreground));
+        }
+        
+        .manual-override-body {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .manual-override-description {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.875rem;
+            margin: 0 0 1.5rem 0;
+            text-align: center;
+        }
+        
+        .manual-override-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .manual-override-footer {
+            padding: 1.5rem;
+            border-top: 1px solid hsl(var(--border));
+            flex-shrink: 0;
+        }
+        
+        .manual-override-update-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 200ms ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        
+        .manual-override-update-btn:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+        
+        .manual-override-update-btn:active {
+            transform: translateY(0px);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Tax Calculation Flow Styles */
+        .tax-calculation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 300ms ease;
+        }
+        
+        .tax-calculation-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .tax-calculation-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: hsl(var(--background));
+            border-radius: 20px 20px 0 0;
+            max-height: 90vh;
+            transform: translateY(100%);
+            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tax-calculation-overlay.active .tax-calculation-content {
+            transform: translateY(0);
+        }
+        
+        .tax-calculation-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid hsl(var(--border));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        
+        .tax-calculation-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            color: hsl(var(--foreground));
+        }
+        
+        .tax-calculation-close {
+            background: none;
+            border: none;
+            color: hsl(var(--muted-foreground));
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: all 150ms ease;
+        }
+        
+        .tax-calculation-close:hover {
+            background: hsl(var(--muted));
+            color: hsl(var(--foreground));
+        }
+        
+        .tax-calculation-body {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .tax-step {
+            display: none;
+            padding: 1.5rem;
+            min-height: 400px;
+        }
+        
+        .tax-step.active {
+            display: block;
+        }
+        
+        .tax-step-content h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+            color: hsl(var(--foreground));
+            text-align: center;
+        }
+        
+        .tax-step-description {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.875rem;
+            margin: 0 0 2rem 0;
+            text-align: center;
+        }
+        
+        /* Province Grid */
+        .province-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .province-btn {
+            background: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+            border: 1px solid hsl(var(--border));
+            padding: 0.75rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 150ms ease;
+            text-align: center;
+        }
+        
+        .province-btn:hover {
+            background: hsl(var(--accent));
+            color: hsl(var(--accent-foreground));
+            border-color: hsl(var(--ring));
+        }
+        
+        .province-btn.selected {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+            border-color: hsl(var(--primary));
+        }
+        
+        /* Take-Home Summary */
+        .take-home-summary {
+            text-align: center;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+            border-radius: 16px;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .take-home-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #059669;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .take-home-period {
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Tax Breakdown */
+        .tax-breakdown {
+            background: hsl(var(--muted));
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .tax-breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+        
+        .tax-breakdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .tax-breakdown-item.total {
+            border-top: 2px solid hsl(var(--border));
+            padding-top: 1rem;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .tax-breakdown-label {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+        
+        .tax-breakdown-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: hsl(var(--foreground));
+        }
+        
+        .tax-breakdown-item.total .tax-breakdown-label,
+        .tax-breakdown-item.total .tax-breakdown-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        /* Adjust Values Button */
+        .adjust-values-btn {
+            background: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+            border: 1px solid hsl(var(--border));
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
             font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
@@ -5825,11 +6243,84 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
+            gap: 0.5rem;
         }
-
-        .calculate-btn:hover {
-            background-color: hsl(var(--primary) / 0.9);
+        
+        .adjust-values-btn:hover {
+            background: hsl(var(--accent));
+            color: hsl(var(--accent-foreground));
+        }
+        
+        .back-to-results-btn {
+            background: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+            border: 1px solid hsl(var(--border));
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 150ms ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .back-to-results-btn:hover {
+            background: hsl(var(--accent));
+            color: hsl(var(--accent-foreground));
+        }
+        
+        /* Footer */
+        .tax-calculation-footer {
+            padding: 1.5rem;
+            border-top: 1px solid hsl(var(--border));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        
+        .step-indicator {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: hsl(var(--muted-foreground));
+            opacity: 0.4;
+            transition: all 150ms ease;
+        }
+        
+        .step-dot.active {
+            background: hsl(var(--primary));
+            opacity: 1;
+        }
+        
+        .tax-calculation-continue-btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 200ms ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 120px;
+            justify-content: center;
+        }
+        
+        .tax-calculation-continue-btn:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+            transform: translateY(-1px);
         }
 
         .tax-results {
@@ -5952,6 +6443,13 @@
             opacity: 1;
             visibility: visible;
         }
+        
+        /* Budget overlay with backdrop blur */
+        #budgetOverlay {
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
 
         .settings-panel {
             position: fixed;
@@ -5974,20 +6472,23 @@
         /* Budget panel transition */
         .budget-panel {
             position: fixed;
-            top: 0;
-            right: -100%;
+            bottom: -100%;
+            left: 0;
             width: 100%;
-            height: 100%;
+            max-width: 100vw;
+            height: 95vh;
             background-color: hsl(var(--background));
             z-index: 1002;
+            overflow-x: hidden;
             overflow-y: auto;
-            transition: right 0.3s ease;
+            transition: bottom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-sizing: border-box;
-            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+            border-radius: 20px 20px 0 0;
         }
 
         .budget-panel.active {
-            right: 0;
+            bottom: 0;
         }
 
         /* Settings panel slide transition when budget is open */
@@ -6798,7 +7299,6 @@ margin-right: 0.5rem;
                         <div class="card-header">
                             <div class="home-section-header">
                                 <h3 class="section-title">Budget</h3>
-                                <div class="section-subtitle" id="budgetSubtitle">Monthly overview</div>
                             </div>
                             <div class="budget-timerange-toggle">
                                 <button class="timerange-btn active" data-range="monthly" onclick="event.stopPropagation(); toggleBudgetTimeRange('monthly')">Month</button>
@@ -7643,17 +8143,17 @@ margin-right: 0.5rem;
                         <div class="progress-bar-fill" id="budgetProgressBar" data-step="1"></div>
                     </div>
                 </div>
-                <div class="progress-label" id="budgetProgressLabel">Step 1 of 6: Income & Taxes</div>
+                <div class="progress-label" id="budgetProgressLabel">Step 1 of 6: Gross Yearly Income</div>
             </div>
 
             <div class="settings-content">
                 <!-- Budget Flow Screens -->
                 <div class="budget-flow-screens">
-                    <!-- Screen 1: Income & Taxes -->
+                    <!-- Screen 1: Gross Yearly Income -->
                     <div class="budget-flow-screen active" id="budgetScreen1">
                         <div class="budget-screen-content">
                             <div class="budget-step-header-new">
-                                <h2>Income & Taxes</h2>
+                                <h2>Gross Yearly Income</h2>
                                 <p class="budget-step-description">Tell us about your income to calculate your take-home pay</p>
                             </div>
                         
@@ -7662,75 +8162,14 @@ margin-right: 0.5rem;
                                     <div class="budget-header-bubble">Gross Yearly Income</div>
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetGrossYearlyIncome" value="0,00" min="0" step="1000" oninput="formatBudgetInput(this); updateInputLengthClass(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this)" inputmode="numeric">
+                                        <input type="text" class="budget-input-xl" id="budgetGrossYearlyIncome" value="0,00" min="0" step="1000" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
                                     </div>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label class="form-label" for="budgetProvinceSelect">Province/Territory</label>
-                                    <div class="select-container">
-                                        <div class="select-trigger" onclick="toggleSlideOutSelect('budgetProvince')" id="budgetProvinceTrigger">
-                                            <span id="budgetProvinceValue">Ontario</span>
-                                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
-                                        </div>
-                                        <div class="select-content" id="budgetProvinceContent">
-                                            <div class="select-item selected" data-value="ON">Ontario</div>
-                                            <div class="select-item" data-value="BC">British Columbia</div>
-                                            <div class="select-item" data-value="AB">Alberta</div>
-                                            <div class="select-item" data-value="SK">Saskatchewan</div>
-                                            <div class="select-item" data-value="MB">Manitoba</div>
-                                            <div class="select-item" data-value="QC">Quebec</div>
-                                            <div class="select-item" data-value="NB">New Brunswick</div>
-                                            <div class="select-item" data-value="NS">Nova Scotia</div>
-                                            <div class="select-item" data-value="PE">Prince Edward Island</div>
-                                            <div class="select-item" data-value="NL">Newfoundland and Labrador</div>
-                                            <div class="select-item" data-value="NT">Northwest Territories</div>
-                                            <div class="select-item" data-value="NU">Nunavut</div>
-                                            <div class="select-item" data-value="YT">Yukon</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <button type="button" class="calculate-btn" onclick="calculateBudgetTaxes()" style="margin-top: 1rem;">Calculate Taxes</button>
+                                <button type="button" class="calculate-btn" onclick="openTaxCalculationFlow()">Calculate take-home</button>
                             </div>
-                            
-                            <!-- Manual Override Section -->
-                            <div class="budget-content-section">
-                                <div class="accordion-header" onclick="toggleAccordion('budgetManualOverride')">
-                                    <h4 class="text-md font-semibold">Manual Override (Optional)</h4>
-                                    <i data-lucide="chevron-down" class="accordion-icon" id="budgetManualOverrideIcon"></i>
-                                </div>
-                                <div class="accordion-content" id="budgetManualOverrideContent">
-                                    <p class="text-sm text-muted-foreground mb-4" style="text-align: center; margin: 1rem 0;">You can manually adjust the calculated values below if needed</p>
-                                    
-                                    <div class="form-group">
-                                        <label class="form-label" for="budgetGrossIncome">Gross Monthly Income</label>
-                                        <input type="text" class="budget-input-large" id="budgetGrossIncome" placeholder="11,667" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label" for="budgetFederalTax">Federal Tax</label>
-                                        <input type="text" class="budget-input-large" id="budgetFederalTax" placeholder="2,500" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label" for="budgetProvincialTax">Provincial Tax</label>
-                                        <input type="text" class="budget-input-large" id="budgetProvincialTax" placeholder="750" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label" for="budgetCppEi">CPP/EI</label>
-                                        <input type="text" class="budget-input-large" id="budgetCppEi" placeholder="333" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="form-label" for="budgetNetIncome">Net Monthly Income</label>
-                                        <input type="text" class="budget-input-large" id="budgetNetIncome" placeholder="8,084" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
-                                        <div class="form-help">Auto-calculated, but you can override if needed.</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="form-divider"></div>
                             
                             <div class="budget-content-section" id="budgetTaxResults" style="display: none;">
-                                <div class="budget-header-bubble">Tax Calculation Results</div>
                                 <div class="tax-summary">
                                     <div class="tax-item">
                                         <div class="tax-label">Monthly Gross Income</div>
@@ -7770,7 +8209,7 @@ margin-right: 0.5rem;
                     <div class="budget-flow-screen" id="budgetScreen2">
                         <div class="budget-screen-content">
                             <div class="budget-step-header-new">
-                                <h2>Savings Goals</h2>
+                                <h2>Annual Savings Goal</h2>
                                 <p class="budget-step-description">How much do you want to save per year?</p>
                             </div>
                             
@@ -7779,7 +8218,7 @@ margin-right: 0.5rem;
                                     <div class="budget-header-bubble">Annual Savings Goal</div>
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetAnnualSavingsGoal" value="0,00" min="0" step="100" oninput="updateSavingsVisualization(); formatBudgetInput(this); updateInputLengthClass(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this)" inputmode="numeric">
+                                        <input type="text" class="budget-input-xl" id="budgetAnnualSavingsGoal" value="0,00" min="0" step="100" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateSavingsVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
                                     </div>
                                 </div>
                                 <div class="form-group" id="monthlySavingsTargetSection" style="text-align: center; display: none;">
@@ -7805,22 +8244,17 @@ margin-right: 0.5rem;
                     <div class="budget-flow-screen" id="budgetScreen3">
                         <div class="budget-screen-content">
                             <div class="budget-step-header-new">
-                                <h2>Fixed Expenses</h2>
-                                <p class="budget-step-description">Regular expenses that stay the same each month</p>
+                                <h2>Monthly Fixed Expenses</h2>
+                                <p class="budget-step-description">Regular expenses that stay the same each month <i data-lucide="info" class="w-4 h-4 bubble-info-icon" onclick="toggleInfoPopup('fixedExpensesInfo')"></i></p>
+                                <div id="fixedExpensesInfo" class="info-popup">Rent, insurance, loan payments, subscriptions</div>
                             </div>
                             
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
-                                    <div class="bubble-container">
-                                        <div class="budget-header-bubble">
-                                            <span>Monthly Fixed Expenses</span>
-                                            <i data-lucide="info" class="w-4 h-4 bubble-info-icon" onclick="toggleInfoPopup('fixedExpensesInfo')"></i>
-                                        </div>
-                                        <div id="fixedExpensesInfo" class="info-popup">Rent, insurance, loan payments, subscriptions</div>
-                                    </div>
+                                    <div class="budget-header-bubble">Monthly Fixed Expenses</div>
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetFixedExpenses" value="0,00" min="0" step="0.01" oninput="updateFixedExpenseVisualization(); formatBudgetInput(this); updateInputLengthClass(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this)" inputmode="numeric">
+                                        <input type="text" class="budget-input-xl" id="budgetFixedExpenses" value="0,00" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateFixedExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
                                     </div>
                                 </div>
                                 
@@ -7841,22 +8275,17 @@ margin-right: 0.5rem;
                     <div class="budget-flow-screen" id="budgetScreen4">
                         <div class="budget-screen-content">
                             <div class="budget-step-header-new">
-                                <h2>Essential Expenses</h2>
-                                <p class="budget-step-description">Necessary expenses that can vary month to month</p>
+                                <h2>Monthly Essential Expenses</h2>
+                                <p class="budget-step-description">Necessary expenses that can vary month to month <i data-lucide="info" class="w-4 h-4 bubble-info-icon" onclick="toggleInfoPopup('essentialExpensesInfo')"></i></p>
+                                <div id="essentialExpensesInfo" class="info-popup">Groceries, utilities, gas, phone, internet</div>
                             </div>
                             
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
-                                    <div class="bubble-container">
-                                        <div class="budget-header-bubble">
-                                            <span>Monthly Essential Expenses</span>
-                                            <i data-lucide="info" class="w-4 h-4 bubble-info-icon" onclick="toggleInfoPopup('essentialExpensesInfo')"></i>
-                                        </div>
-                                        <div id="essentialExpensesInfo" class="info-popup">Groceries, utilities, gas, phone, internet</div>
-                                    </div>
+                                    <div class="budget-header-bubble">Monthly Essential Expenses</div>
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetEssentialExpenses" value="0,00" min="0" step="0.01" oninput="updateEssentialExpenseVisualization(); formatBudgetInput(this); updateInputLengthClass(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this)" inputmode="numeric">
+                                        <input type="text" class="budget-input-xl" id="budgetEssentialExpenses" value="0,00" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateEssentialExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
                                     </div>
                                 </div>
                                 
@@ -7877,22 +8306,17 @@ margin-right: 0.5rem;
                     <div class="budget-flow-screen" id="budgetScreen5">
                         <div class="budget-screen-content">
                             <div class="budget-step-header-new">
-                                <h2>Discretionary Expenses</h2>
-                                <p class="budget-step-description">Fun spending and lifestyle choices</p>
+                                <h2>Monthly Discretionary Expenses</h2>
+                                <p class="budget-step-description">Fun spending and lifestyle choices <i data-lucide="info" class="w-4 h-4 bubble-info-icon" onclick="toggleInfoPopup('discretionaryExpensesInfo')"></i></p>
+                                <div id="discretionaryExpensesInfo" class="info-popup">Entertainment, dining out, hobbies, shopping</div>
                             </div>
                             
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
-                                    <div class="bubble-container">
-                                        <div class="budget-header-bubble">
-                                            <span>Monthly Discretionary Expenses</span>
-                                            <i data-lucide="info" class="w-4 h-4 bubble-info-icon" onclick="toggleInfoPopup('discretionaryExpensesInfo')"></i>
-                                        </div>
-                                        <div id="discretionaryExpensesInfo" class="info-popup">Entertainment, dining out, hobbies, shopping</div>
-                                    </div>
+                                    <div class="budget-header-bubble">Monthly Discretionary Expenses</div>
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetDiscretionaryExpenses" value="0,00" min="0" step="0.01" oninput="updateDiscretionaryExpenseVisualization(); formatBudgetInput(this); updateInputLengthClass(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this)" inputmode="numeric">
+                                        <input type="text" class="budget-input-xl" id="budgetDiscretionaryExpenses" value="0,00" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateDiscretionaryExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
                                     </div>
                                 </div>
                                 
@@ -8027,6 +8451,131 @@ margin-right: 0.5rem;
                         <span>Save Budget</span>
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tax Calculation Flow Slide-up -->
+    <div class="tax-calculation-overlay" id="taxCalculationOverlay">
+        <div class="tax-calculation-content">
+            <div class="tax-calculation-header">
+                <h3>Calculate Take-Home Pay</h3>
+                <button type="button" class="tax-calculation-close" onclick="closeTaxCalculationFlow()">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="tax-calculation-body">
+                <!-- Step 1: Province Selection -->
+                <div class="tax-step active" id="taxStep1">
+                    <div class="tax-step-content">
+                        <h4>Select your province/territory</h4>
+                        <p class="tax-step-description">We need this to calculate your provincial tax rate</p>
+                        
+                        <div class="province-grid">
+                            <button type="button" class="province-btn selected" data-value="ON">Ontario</button>
+                            <button type="button" class="province-btn" data-value="BC">British Columbia</button>
+                            <button type="button" class="province-btn" data-value="AB">Alberta</button>
+                            <button type="button" class="province-btn" data-value="SK">Saskatchewan</button>
+                            <button type="button" class="province-btn" data-value="MB">Manitoba</button>
+                            <button type="button" class="province-btn" data-value="QC">Quebec</button>
+                            <button type="button" class="province-btn" data-value="NB">New Brunswick</button>
+                            <button type="button" class="province-btn" data-value="NS">Nova Scotia</button>
+                            <button type="button" class="province-btn" data-value="PE">PEI</button>
+                            <button type="button" class="province-btn" data-value="NL">Newfoundland</button>
+                            <button type="button" class="province-btn" data-value="YT">Yukon</button>
+                            <button type="button" class="province-btn" data-value="NT">NWT</button>
+                            <button type="button" class="province-btn" data-value="NU">Nunavut</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Tax Results -->
+                <div class="tax-step" id="taxStep2">
+                    <div class="tax-step-content">
+                        <h4>Your Take-Home Pay</h4>
+                        <p class="tax-step-description">Based on your $<span id="incomeDisplay">200,000</span> gross income in <span id="selectedProvinceDisplay">Ontario</span></p>
+                        
+                        <div class="take-home-summary">
+                            <div class="take-home-main">
+                                <div class="take-home-amount">$<span id="netIncomeDisplay">11,250</span></div>
+                                <div class="take-home-period">per month</div>
+                            </div>
+                        </div>
+                        
+                        <div class="tax-breakdown">
+                            <div class="tax-breakdown-item">
+                                <span class="tax-breakdown-label">Gross Monthly</span>
+                                <span class="tax-breakdown-value">$<span id="grossMonthlyDisplay">16,667</span></span>
+                            </div>
+                            <div class="tax-breakdown-item">
+                                <span class="tax-breakdown-label">Federal Tax</span>
+                                <span class="tax-breakdown-value">-$<span id="federalTaxDisplay">3,750</span></span>
+                            </div>
+                            <div class="tax-breakdown-item">
+                                <span class="tax-breakdown-label">Provincial Tax</span>
+                                <span class="tax-breakdown-value">-$<span id="provincialTaxDisplay">1,167</span></span>
+                            </div>
+                            <div class="tax-breakdown-item">
+                                <span class="tax-breakdown-label">CPP/EI</span>
+                                <span class="tax-breakdown-value">-$<span id="cppEiDisplay">500</span></span>
+                            </div>
+                            <div class="tax-breakdown-item total">
+                                <span class="tax-breakdown-label">Net Monthly</span>
+                                <span class="tax-breakdown-value">$<span id="netMonthlyDisplay">11,250</span></span>
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="adjust-values-btn" onclick="showManualAdjustment()">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            <span>Adjust values manually</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Manual Adjustment (Hidden by default) -->
+                <div class="tax-step" id="taxStep3">
+                    <div class="tax-step-content">
+                        <h4>Manual Adjustments</h4>
+                        <p class="tax-step-description">Fine-tune the calculated values if needed</p>
+                        
+                        <div class="manual-adjustment-form">
+                            <div class="form-group">
+                                <label class="form-label" for="manualGrossIncome">Gross Monthly Income</label>
+                                <input type="text" class="budget-input-large" id="manualGrossIncome" placeholder="16,667" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="manualFederalTax">Federal Tax</label>
+                                <input type="text" class="budget-input-large" id="manualFederalTax" placeholder="3,750" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="manualProvincialTax">Provincial Tax</label>
+                                <input type="text" class="budget-input-large" id="manualProvincialTax" placeholder="1,167" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="manualCppEi">CPP/EI</label>
+                                <input type="text" class="budget-input-large" id="manualCppEi" placeholder="500" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                            </div>
+                        </div>
+                        
+                        <button type="button" class="back-to-results-btn" onclick="backToTaxResults()">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span>Back to results</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tax-calculation-footer">
+                <div class="step-indicator">
+                    <div class="step-dot active" data-step="1"></div>
+                    <div class="step-dot" data-step="2"></div>
+                </div>
+                
+                <button type="button" class="tax-calculation-continue-btn" onclick="continueTaxFlow()">
+                    <span id="continueButtonText">Calculate</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -18810,9 +19359,30 @@ margin-right: 0.5rem;
                 });
             });
             
-            // Initialize all budget inputs with proper length classes
+            // Initialize all budget inputs with proper length classes and dollar sign positioning
             document.querySelectorAll('.budget-input-xl').forEach(input => {
                 updateInputLengthClass(input);
+                positionDollarSign(input);
+            });
+            
+            // Tax Calculation overlay click outside to close
+            const taxCalculationOverlay = document.getElementById('taxCalculationOverlay');
+            if (taxCalculationOverlay) {
+                taxCalculationOverlay.addEventListener('click', function (e) {
+                    if (e.target === taxCalculationOverlay) {
+                        closeTaxCalculationFlow();
+                    }
+                });
+            }
+            
+            // Province button event listeners
+            document.querySelectorAll('.province-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // Update selection
+                    document.querySelectorAll('.province-btn').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedProvince = this.getAttribute('data-value');
+                });
             });
 
             // Add event listeners for budget form inputs
@@ -18833,19 +19403,62 @@ margin-right: 0.5rem;
         function openBudgetFlow() {
             const budgetOverlay = document.getElementById('budgetOverlay');
             const budgetPanel = document.getElementById('budgetPanel');
-            const appContainer = document.querySelector('.app-container');
 
             // Show budget overlay and panel
             budgetOverlay.classList.add('active');
             budgetPanel.classList.add('active');
-            appContainer.classList.add('settings-open');
 
-            // Reset to first step
-            currentBudgetStep = 1;
-            showBudgetStep(1);
-            
-            // Load existing settings into budget form
-            loadBudgetSettings();
+            // Wait for slide-up animation to complete, then initialize
+            setTimeout(() => {
+                // Reset to first step - clear any existing states first
+                document.querySelectorAll('.budget-flow-screen').forEach(screen => {
+                    screen.classList.remove('active', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'prepare-left', 'prepare-right');
+                });
+                
+                // Show first screen directly
+                document.getElementById('budgetScreen1').classList.add('active');
+                currentBudgetStep = 1;
+                updateBudgetProgress(1);
+                updateBudgetNavigation(1);
+                
+                // Load existing settings into budget form, then initialize
+                loadBudgetSettings();
+                
+                // Initialize after settings are loaded with proper delay for modal animation
+                setTimeout(() => {
+                    // First general initialization for all inputs
+                    initializeDollarSignPositions();
+                    
+                    // Then specific and thorough initialization for the income input
+                    const firstScreenInput = document.getElementById('budgetGrossYearlyIncome');
+                    if (firstScreenInput) {
+                        // Check current value and set default state appropriately
+                        const currentValue = parseFloat(firstScreenInput.value.replace(/,/g, ''));
+                        
+                        if (!firstScreenInput.value || isNaN(currentValue) || currentValue <= 0) {
+                            firstScreenInput.value = "0,00";
+                            firstScreenInput.classList.add('default-value');
+                        } else {
+                            firstScreenInput.classList.remove('default-value');
+                            formatBudgetInput(firstScreenInput);
+                        }
+                        
+                        // Apply all necessary styling and positioning functions
+                        updateInputLengthClass(firstScreenInput);
+                        positionDollarSign(firstScreenInput);
+                        
+                        // Force a repaint and do a final check
+                        setTimeout(() => {
+                            updateInputLengthClass(firstScreenInput);
+                            positionDollarSign(firstScreenInput);
+                            firstScreenInput.focus();
+                            
+                            // Trigger any change events to ensure UI updates
+                            firstScreenInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        }, 150);
+                    }
+                }, 200);
+            }, 400);
         }
         
         // Make function globally accessible
@@ -18854,65 +19467,94 @@ margin-right: 0.5rem;
         function closeBudgetFlow() {
             const budgetOverlay = document.getElementById('budgetOverlay');
             const budgetPanel = document.getElementById('budgetPanel');
-            const appContainer = document.querySelector('.app-container');
 
             // Hide budget overlay and panel
             budgetOverlay.classList.remove('active');
             budgetPanel.classList.remove('active');
-            appContainer.classList.remove('settings-open');
         }
         
-        function showBudgetStep(step) {
-            // Hide all screens
+        function showBudgetStep(step, direction = 'next') {
+            const currentScreen = document.querySelector('.budget-flow-screen.active');
+            const targetScreen = document.getElementById(`budgetScreen${step}`);
+            
+            if (currentScreen === targetScreen) return;
+            
+            // Clean up any existing animation classes
             document.querySelectorAll('.budget-flow-screen').forEach(screen => {
-                screen.classList.remove('active');
+                screen.classList.remove('slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'prepare-left', 'prepare-right');
             });
             
-            // Show current screen
-            document.getElementById(`budgetScreen${step}`).classList.add('active');
+            const isNext = direction === 'next';
             
-            // Update progress indicators
-            updateBudgetProgress(step);
-            
-            // Initialize dollar sign positions after screen is shown
-            setTimeout(() => {
-                initializeDollarSignPositions();
+            if (currentScreen && targetScreen) {
+                // Position the target screen offscreen in the correct direction
+                targetScreen.classList.remove('active');
+                targetScreen.classList.add(isNext ? 'prepare-right' : 'prepare-left');
                 
-                // Flash caret and focus the main XL input for the current screen
-                const currentScreen = document.getElementById(`budgetScreen${step}`);
-                const xlInput = currentScreen.querySelector('.budget-input-xl');
-                if (xlInput) {
-                    xlInput.focus();
-                    xlInput.classList.add('flash-caret');
+                // Start the simultaneous animation
+                setTimeout(() => {
+                    // Slide current screen out
+                    currentScreen.classList.remove('active');
+                    currentScreen.classList.add(isNext ? 'slide-out-left' : 'slide-out-right');
                     
-                    // Remove flash class after animation
+                    // Slide target screen in
+                    targetScreen.classList.remove('prepare-left', 'prepare-right');
+                    targetScreen.classList.add('active');
+                    
+                    // Clean up after animation completes
                     setTimeout(() => {
-                        xlInput.classList.remove('flash-caret');
-                    }, 1000);
-                }
-            }, 100);
-            
-            // Update navigation buttons
-            updateBudgetNavigation(step);
-            
-            // Update interactive elements based on current step
-            setTimeout(() => {
-                if (step === 2) {
-                    updateSavingsVisualization();
-                } else if (step === 3) {
-                    updateFixedExpenseVisualization();
-                } else if (step === 4) {
-                    updateEssentialExpenseVisualization();
-                } else if (step === 5) {
-                    updateDiscretionaryExpenseVisualization();
-                } else if (step === 6) {
-                    updateSummaryCharts();
-                }
-                // Initialize icons for the new screen
-                safeInitLucideIcons();
-            }, 100);
-            
-            currentBudgetStep = step;
+                        currentScreen.classList.remove('slide-out-left', 'slide-out-right');
+                        
+                        // Update progress indicators
+                        updateBudgetProgress(step);
+                        
+                        // Initialize dollar sign positions after screen is shown
+                        setTimeout(() => {
+                            initializeDollarSignPositions();
+                            
+                            // Flash caret and focus the main XL input for the current screen
+                            const xlInput = targetScreen.querySelector('.budget-input-xl');
+                            if (xlInput) {
+                                xlInput.focus();
+                                xlInput.classList.add('flash-caret');
+                                
+                                // Remove flash class after animation
+                                setTimeout(() => {
+                                    xlInput.classList.remove('flash-caret');
+                                }, 1000);
+                            }
+                        }, 100);
+                        
+                        // Update navigation buttons
+                        updateBudgetNavigation(step);
+                        
+                        // Update interactive elements based on current step
+                        setTimeout(() => {
+                            if (step === 2) {
+                                updateSavingsVisualization();
+                            } else if (step === 3) {
+                                updateFixedExpenseVisualization();
+                            } else if (step === 4) {
+                                updateEssentialExpenseVisualization();
+                            } else if (step === 5) {
+                                updateDiscretionaryExpenseVisualization();
+                            } else if (step === 6) {
+                                updateSummaryCharts();
+                            }
+                            // Initialize icons for the new screen
+                            safeInitLucideIcons();
+                        }, 100);
+                        
+                        currentBudgetStep = step;
+                    }, 250); // Match the CSS transition duration
+                }, 16); // Single frame delay for smooth animation start
+            } else if (targetScreen) {
+                // Direct show (like initial load)
+                targetScreen.classList.add('active');
+                updateBudgetProgress(step);
+                updateBudgetNavigation(step);
+                currentBudgetStep = step;
+            }
         }
         
         function updateBudgetProgress(step) {
@@ -18926,7 +19568,7 @@ margin-right: 0.5rem;
             
             // Update progress label
             const labels = [
-                'Income & Taxes',
+                'Gross Yearly Income',
                 'Savings Goals', 
                 'Fixed Expenses',
                 'Essential Expenses',
@@ -18958,13 +19600,13 @@ margin-right: 0.5rem;
         
         function nextBudgetStep() {
             if (currentBudgetStep < totalBudgetSteps) {
-                showBudgetStep(currentBudgetStep + 1);
+                showBudgetStep(currentBudgetStep + 1, 'next');
             }
         }
         
         function previousBudgetStep() {
             if (currentBudgetStep > 1) {
-                showBudgetStep(currentBudgetStep - 1);
+                showBudgetStep(currentBudgetStep - 1, 'previous');
             }
         }
         
@@ -19453,6 +20095,215 @@ margin-right: 0.5rem;
             }
         }
 
+        // Tax Calculation Flow Variables
+        let currentTaxStep = 1;
+        let selectedProvince = 'ON';
+        let taxCalculationData = {};
+        
+        // Tax Calculation Flow Functions
+        function openTaxCalculationFlow() {
+            const overlay = document.getElementById('taxCalculationOverlay');
+            const grossIncome = parseFormattedNumber(document.getElementById('budgetGrossYearlyIncome').value);
+            
+            if (!grossIncome || grossIncome <= 0) {
+                alert('Please enter a valid yearly income first');
+                return;
+            }
+            
+            // Reset to step 1
+            currentTaxStep = 1;
+            showTaxStep(1);
+            
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeTaxCalculationFlow() {
+            const overlay = document.getElementById('taxCalculationOverlay');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        function showTaxStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.tax-step').forEach(s => s.classList.remove('active'));
+            // Show target step
+            document.getElementById(`taxStep${step}`).classList.add('active');
+            
+            // Update step indicators
+            document.querySelectorAll('.step-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index < step);
+            });
+            
+            // Update continue button text
+            const continueBtn = document.getElementById('continueButtonText');
+            if (step === 1) {
+                continueBtn.textContent = 'Calculate';
+            } else if (step === 2) {
+                continueBtn.textContent = 'Continue to Budget';
+            }
+        }
+        
+        function continueTaxFlow() {
+            if (currentTaxStep === 1) {
+                // Calculate taxes and move to results
+                calculateAndShowResults();
+                currentTaxStep = 2;
+                showTaxStep(2);
+            } else if (currentTaxStep === 2) {
+                // Move to next budget step and close overlay
+                updateBudgetFromTaxResults();
+                closeTaxCalculationFlow();
+                // Trigger next budget step
+                nextBudgetStep();
+            }
+        }
+        
+        function calculateAndShowResults() {
+            const grossYearly = parseFormattedNumber(document.getElementById('budgetGrossYearlyIncome').value);
+            const provinceCode = selectedProvince;
+            
+            // Calculate taxes using existing function logic
+            const federalTax = calculateTax(grossYearly, TAX_BRACKETS_2024.federal);
+            const provincialTax = calculateTax(grossYearly, TAX_BRACKETS_2024.provinces[provinceCode]);
+            const cppContribution = Math.min(grossYearly, 68500) * 0.0595;
+            const eiContribution = Math.min(grossYearly, 63100) * 0.0163;
+            const totalCppEi = cppContribution + eiContribution;
+            
+            // Calculate monthly amounts
+            const monthlyGross = grossYearly / 12;
+            const monthlyFederalTax = federalTax / 12;
+            const monthlyProvincialTax = provincialTax / 12;
+            const monthlyCppEi = totalCppEi / 12;
+            const monthlyNet = monthlyGross - monthlyFederalTax - monthlyProvincialTax - monthlyCppEi;
+            
+            // Store results
+            taxCalculationData = {
+                grossYearly,
+                monthlyGross,
+                monthlyFederalTax,
+                monthlyProvincialTax,
+                monthlyCppEi,
+                monthlyNet,
+                province: getProvinceFullName(provinceCode)
+            };
+            
+            // Update display
+            document.getElementById('incomeDisplay').textContent = formatNumberForDisplay(grossYearly);
+            document.getElementById('selectedProvinceDisplay').textContent = taxCalculationData.province;
+            document.getElementById('netIncomeDisplay').textContent = formatNumberForDisplay(monthlyNet);
+            document.getElementById('grossMonthlyDisplay').textContent = formatNumberForDisplay(monthlyGross);
+            document.getElementById('federalTaxDisplay').textContent = formatNumberForDisplay(monthlyFederalTax);
+            document.getElementById('provincialTaxDisplay').textContent = formatNumberForDisplay(monthlyProvincialTax);
+            document.getElementById('cppEiDisplay').textContent = formatNumberForDisplay(monthlyCppEi);
+            document.getElementById('netMonthlyDisplay').textContent = formatNumberForDisplay(monthlyNet);
+        }
+        
+        function updateBudgetFromTaxResults() {
+            // Update the budget settings with calculated tax values
+            if (taxCalculationData.monthlyGross) {
+                // Store the tax calculation results in the budget settings
+                const budgetSettings = {
+                    grossYearlyIncome: taxCalculationData.grossYearly,
+                    province: taxCalculationData.province,
+                    grossIncome: taxCalculationData.monthlyGross,
+                    federalTax: taxCalculationData.monthlyFederalTax,
+                    provincialTax: taxCalculationData.monthlyProvincialTax,
+                    cppEi: taxCalculationData.monthlyCppEi,
+                    netIncome: taxCalculationData.monthlyNet,
+                    // Keep existing values for these fields if they exist
+                    annualSavingsGoal: parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal').value) || 0,
+                    fixedExpenses: parseFormattedNumber(document.getElementById('budgetFixedExpenses').value) || 0,
+                    essentialExpenses: parseFormattedNumber(document.getElementById('budgetEssentialExpenses').value) || 0,
+                    discretionaryExpenses: parseFormattedNumber(document.getElementById('budgetDiscretionaryExpenses').value) || 0
+                };
+                
+                // Save to localStorage
+                localStorage.setItem('budgetSettings', JSON.stringify(budgetSettings));
+                
+                // Update any budget displays that exist
+                const netIncomeDisplay = document.getElementById('budgetNetIncomeSummary');
+                if (netIncomeDisplay) {
+                    netIncomeDisplay.textContent = '$' + formatNumberForDisplay(taxCalculationData.monthlyNet);
+                }
+                
+                // Update tax results display if it exists
+                const taxResultsSection = document.getElementById('budgetTaxResults');
+                if (taxResultsSection) {
+                    // Update the tax results display elements
+                    const monthlyGrossResult = document.getElementById('budgetMonthlyGrossResult');
+                    const federalTaxResult = document.getElementById('budgetFederalTaxResult');
+                    const provincialTaxResult = document.getElementById('budgetProvincialTaxResult');
+                    const cppEiResult = document.getElementById('budgetCppEiResult');
+                    const netIncomeResult = document.getElementById('budgetNetIncomeResult');
+                    
+                    if (monthlyGrossResult) monthlyGrossResult.textContent = '$' + formatNumberForDisplay(taxCalculationData.monthlyGross);
+                    if (federalTaxResult) federalTaxResult.textContent = '$' + formatNumberForDisplay(taxCalculationData.monthlyFederalTax);
+                    if (provincialTaxResult) provincialTaxResult.textContent = '$' + formatNumberForDisplay(taxCalculationData.monthlyProvincialTax);
+                    if (cppEiResult) cppEiResult.textContent = '$' + formatNumberForDisplay(taxCalculationData.monthlyCppEi);
+                    if (netIncomeResult) netIncomeResult.textContent = '$' + formatNumberForDisplay(taxCalculationData.monthlyNet);
+                    
+                    // Show the tax results section
+                    taxResultsSection.style.display = 'block';
+                }
+            }
+        }
+        
+        function showManualAdjustment() {
+            // Populate manual adjustment fields with current values
+            document.getElementById('manualGrossIncome').value = formatNumberForDisplay(taxCalculationData.monthlyGross);
+            document.getElementById('manualFederalTax').value = formatNumberForDisplay(taxCalculationData.monthlyFederalTax);
+            document.getElementById('manualProvincialTax').value = formatNumberForDisplay(taxCalculationData.monthlyProvincialTax);
+            document.getElementById('manualCppEi').value = formatNumberForDisplay(taxCalculationData.monthlyCppEi);
+            
+            currentTaxStep = 3;
+            showTaxStep(3);
+        }
+        
+        function backToTaxResults() {
+            // Update calculation data with manual values if changed
+            const manualGross = parseFormattedNumber(document.getElementById('manualGrossIncome').value);
+            const manualFederal = parseFormattedNumber(document.getElementById('manualFederalTax').value);
+            const manualProvincial = parseFormattedNumber(document.getElementById('manualProvincialTax').value);
+            const manualCppEi = parseFormattedNumber(document.getElementById('manualCppEi').value);
+            
+            if (manualGross) taxCalculationData.monthlyGross = manualGross;
+            if (manualFederal) taxCalculationData.monthlyFederalTax = manualFederal;
+            if (manualProvincial) taxCalculationData.monthlyProvincialTax = manualProvincial;
+            if (manualCppEi) taxCalculationData.monthlyCppEi = manualCppEi;
+            
+            // Recalculate net income
+            taxCalculationData.monthlyNet = taxCalculationData.monthlyGross - 
+                taxCalculationData.monthlyFederalTax - 
+                taxCalculationData.monthlyProvincialTax - 
+                taxCalculationData.monthlyCppEi;
+            
+            // Update results display
+            calculateAndShowResults();
+            
+            currentTaxStep = 2;
+            showTaxStep(2);
+        }
+        
+        function getProvinceFullName(code) {
+            const provinces = {
+                'ON': 'Ontario',
+                'BC': 'British Columbia',
+                'AB': 'Alberta',
+                'SK': 'Saskatchewan',
+                'MB': 'Manitoba',
+                'QC': 'Quebec',
+                'NB': 'New Brunswick',
+                'NS': 'Nova Scotia',
+                'PE': 'Prince Edward Island',
+                'NL': 'Newfoundland and Labrador',
+                'YT': 'Yukon',
+                'NT': 'Northwest Territories',
+                'NU': 'Nunavut'
+            };
+            return provinces[code] || code;
+        }
+        
         // Interactive chart functions
         function updateSavingsVisualization() {
 
