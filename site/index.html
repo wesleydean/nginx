@@ -1652,6 +1652,7 @@
             gap: 8px;
             padding: 0 16px;
             box-sizing: border-box;
+            position: relative;
         }
         
         .dollar-sign {
@@ -1659,9 +1660,14 @@
             font-weight: 700;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
             color: #c8c8c8;
-            transition: color 0s;
+            transition: color 0s, transform 0.15s ease;
             user-select: none;
             letter-spacing: -0.02em;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+            transform: translateY(-50%);
         }
         
         .budget-input-container:has(input:not(.default-value)) .dollar-sign {
@@ -2004,43 +2010,7 @@
             font-size: 28px;
         }
 
-        /* Adjust dollar sign position and size for all input lengths */
-        /* Specific positioning for different input lengths - adjusted for center alignment */
-        div[style="position: relative;"]:has(.budget-input-xl.length-1)::before {
-            font-size: 4rem;
-            transform: translateX(-50%) translateY(-50%); /* Single digit needs special handling */
-        }
-        
-        div[style="position: relative;"]:has(.budget-input-xl.length-2)::before {
-            font-size: 4rem;
-            transform: translateX(-80%) translateY(-50%);
-        }
-        
-        div[style="position: relative;"]:has(.budget-input-xl.length-3)::before,
-        div[style="position: relative;"]:has(.budget-input-xl.length-4)::before {
-            font-size: 4rem;
-            transform: translateX(-110%) translateY(-50%);
-        }
-        
-        div[style="position: relative;"]:has(.budget-input-xl.length-5)::before,
-        div[style="position: relative;"]:has(.budget-input-xl.length-6)::before,
-        div[style="position: relative;"]:has(.budget-input-xl.length-7)::before {
-            font-size: 3.6rem;
-            transform: translateX(-130%) translateY(-50%);
-        }
-
-        div[style="position: relative;"]:has(.budget-input-xl.length-8)::before,
-        div[style="position: relative;"]:has(.budget-input-xl.length-9)::before {
-            font-size: 3.2rem;
-            transform: translateX(-150%) translateY(-50%);
-        }
-
-        div[style="position: relative;"]:has(.budget-input-xl.length-10)::before,
-        div[style="position: relative;"]:has(.budget-input-xl.length-11)::before,
-        div[style="position: relative;"]:has(.budget-input-xl.length-12)::before {
-            font-size: 2.8rem;
-            transform: translateX(-170%) translateY(-50%);
-        }
+        /* Dynamic dollar sign positioning - now handled by JavaScript for better performance */
 
         
         .budget-step-icon {
@@ -19341,8 +19311,53 @@ margin-right: 0.5rem;
             }, 0);
         }
         
-        // Function to handle dollar sign styling through CSS class
+        // Performance optimizations for dollar sign positioning
+        const textMeasureCache = new Map();
+        let measureElement = null;
+        
+        // Efficient text measurement with caching and reused DOM element
+        function measureTextWidth(input) {
+            const displayValue = input.value || "0,00";
+            const fontSize = getComputedStyle(input).fontSize;
+            const cacheKey = `${displayValue}-${fontSize}`;
+            
+            // Return cached result if available
+            if (textMeasureCache.has(cacheKey)) {
+                return textMeasureCache.get(cacheKey);
+            }
+            
+            // Create reusable measure element only once
+            if (!measureElement) {
+                measureElement = document.createElement('span');
+                measureElement.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;white-space:nowrap;';
+                document.body.appendChild(measureElement);
+            }
+            
+            // Configure for measurement
+            measureElement.style.font = getComputedStyle(input).font;
+            measureElement.textContent = displayValue;
+            
+            const width = measureElement.offsetWidth;
+            
+            // Cache result with size limit
+            if (textMeasureCache.size > 50) {
+                textMeasureCache.clear();
+            }
+            textMeasureCache.set(cacheKey, width);
+            
+            return width;
+        }
+        
+        // Performance tracking for dollar sign positioning
+        const positioningCache = new WeakMap();
+        
+        // Optimized dollar sign positioning with requestAnimationFrame and change detection
         function positionDollarSign(input) {
+            const container = input.parentElement;
+            const dollarSign = container.querySelector('.dollar-sign');
+            
+            if (!dollarSign) return;
+            
             // Use default "0,00" if input is empty
             const displayValue = input.value || "0,00";
             
@@ -19356,8 +19371,37 @@ margin-right: 0.5rem;
                 input.classList.add('default-value');
             }
             
-            // Apply any needed length-based adjustments through the CSS classes
+            // Apply length-based adjustments
             updateInputLengthClass(input);
+            
+            // Check if positioning needs update (performance optimization)
+            const currentKey = `${displayValue}-${getComputedStyle(input).fontSize}-${container.offsetWidth}`;
+            const lastKey = positioningCache.get(input);
+            
+            if (lastKey === currentKey) {
+                return; // No change needed
+            }
+            
+            positioningCache.set(input, currentKey);
+            
+            // Use requestAnimationFrame for smooth positioning
+            requestAnimationFrame(() => {
+                const textWidth = measureTextWidth(input);
+                const containerWidth = container.offsetWidth;
+                const dollarWidth = dollarSign.offsetWidth;
+                
+                // Calculate position to place dollar sign just before the text starts
+                // Text is centered, so it starts at (containerWidth - textWidth) / 2
+                const textStartX = (containerWidth - textWidth) / 2;
+                // Position dollar sign just before text with small gap
+                const dollarTargetX = textStartX - dollarWidth - 8;
+                
+                // Since dollar sign starts at center (50%), calculate offset from center
+                const offsetFromCenter = dollarTargetX - (containerWidth / 2);
+                
+                // Apply transform: keep vertical centering, add horizontal offset
+                dollarSign.style.transform = `translate(${offsetFromCenter}px, -50%)`;
+            });
         }
 
         // Initialize dollar sign positions for all XL inputs on page load
@@ -19372,6 +19416,8 @@ margin-right: 0.5rem;
                     input.classList.remove('default-value');
                 }
                 updateInputLengthClass(input);
+                // Actually position the dollar sign!
+                positionDollarSign(input);
             });
         }
         
