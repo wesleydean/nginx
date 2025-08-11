@@ -1648,9 +1648,9 @@
             justify-content: center;
             margin: 24px auto;
             width: 100%;
-            max-width: 600px;
+            max-width: 450px;
             gap: 8px;
-            padding: 0 8px;
+            padding: 0 16px;
             box-sizing: border-box;
         }
         
@@ -1701,7 +1701,7 @@
         
         /* Ensure no horizontal overflow */
         .budget-content-section {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .bubble-container {
@@ -1728,16 +1728,16 @@
             font-size: 64px;
             font-weight: 700;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
-            text-align: left;
+            text-align: center;
             padding: 16px 0;
             border: none;
             background: transparent;
             color: #c8c8c8;
-            width: 100%;
-            max-width: 500px;
+            width: auto;
+            max-width: 350px;
             outline: none;
             min-height: 80px;
-            flex-grow: 1;
+            min-width: 200px;
             box-sizing: border-box;
             letter-spacing: -0.02em;
         }
@@ -1786,10 +1786,9 @@
             align-items: center;
             text-align: center;
             width: 100%;
-            max-width: 700px;
+            max-width: 380px;
             margin: 32px auto;
             position: relative;
-            padding: 0 8px;
             box-sizing: border-box;
         }
         
@@ -2591,7 +2590,11 @@
         .form-group {
             display: flex;
             flex-direction: column;
-            margin-bottom: 0.75rem; /* consistent spacing */
+            margin-bottom: 0.75rem;
+            max-width: 380px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
         }
         
         .form-label {
@@ -2696,6 +2699,8 @@
             transform: translateY(-10px);
             transition: all 150ms ease;
             pointer-events: none;
+            max-width: 100%;
+            box-sizing: border-box;
         }
         
         .select-content.open {
@@ -5825,6 +5830,11 @@
             display: grid;
             gap: 0.75rem;
             margin-bottom: 0.75rem;
+            max-width: 380px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 20px;
+            box-sizing: border-box;
         }
 
         .tax-calculator-inputs .form-group {
@@ -5842,6 +5852,10 @@
             cursor: pointer;
             transition: all 150ms ease;
             width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
         }
 
         .calculate-btn:hover {
@@ -6167,9 +6181,6 @@
             background-color: hsl(var(--muted));
         }
 
-        .settings-content {
-            padding: 1rem;
-        }
 
         @media (min-width: 768px) {
             .settings-panel {
@@ -7677,10 +7688,6 @@ margin-right: 0.5rem;
                             </div>
                         
                             <div class="budget-content-section">
-                                <!-- Income Input Section -->
-                                <div class="tax-calculator-section">
-                            
-                            <div class="tax-calculator-inputs">
                                 <div class="budget-form-group-large">
                                     <div class="budget-header-bubble">Gross Yearly Income</div>
                                     <div class="budget-input-container">
@@ -7714,17 +7721,17 @@ margin-right: 0.5rem;
                                     </div>
                                 </div>
                                 
-                                <button type="button" class="calculate-btn" onclick="calculateBudgetTaxes()">Calculate Taxes</button>
+                                <button type="button" class="calculate-btn" onclick="calculateBudgetTaxes()" style="margin-top: 1rem;">Calculate Taxes</button>
                             </div>
                             
                             <!-- Manual Override Section -->
-                            <div class="manual-override-section">
+                            <div class="budget-content-section">
                                 <div class="accordion-header" onclick="toggleAccordion('budgetManualOverride')">
                                     <h4 class="text-md font-semibold">Manual Override (Optional)</h4>
                                     <i data-lucide="chevron-down" class="accordion-icon" id="budgetManualOverrideIcon"></i>
                                 </div>
                                 <div class="accordion-content" id="budgetManualOverrideContent">
-                                    <p class="text-sm text-muted-foreground mb-4">You can manually adjust the calculated values below if needed</p>
+                                    <p class="text-sm text-muted-foreground mb-4" style="text-align: center; margin: 1rem 0;">You can manually adjust the calculated values below if needed</p>
                                     
                                     <div class="form-group">
                                         <label class="form-label" for="budgetGrossIncome">Gross Monthly Income</label>
@@ -7752,7 +7759,8 @@ margin-right: 0.5rem;
                             
                             <div class="form-divider"></div>
                             
-                            <div class="tax-results" id="budgetTaxResults" style="display: none;">
+                            <div class="budget-content-section" id="budgetTaxResults" style="display: none;">
+                                <div class="budget-header-bubble">Tax Calculation Results</div>
                                 <div class="tax-summary">
                                     <div class="tax-item">
                                         <div class="tax-label">Monthly Gross Income</div>
@@ -7774,8 +7782,6 @@ margin-right: 0.5rem;
                                         <div class="tax-label">Net Monthly Income</div>
                                         <div class="tax-value" id="budgetNetIncomeResult">$0.00</div>
                                     </div>
-                                </div>
-                                </div>
                                 </div>
                             </div>
                             
