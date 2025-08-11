@@ -8159,7 +8159,6 @@ margin-right: 0.5rem;
                         
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
-                                    <div class="budget-header-bubble">Gross Yearly Income</div>
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
                                         <input type="text" class="budget-input-xl" id="budgetGrossYearlyIncome" value="0,00" min="0" step="1000" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
@@ -8215,7 +8214,6 @@ margin-right: 0.5rem;
                             
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
-                                    <div class="budget-header-bubble">Annual Savings Goal</div>
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
                                         <input type="text" class="budget-input-xl" id="budgetAnnualSavingsGoal" value="0,00" min="0" step="100" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateSavingsVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
@@ -8251,7 +8249,6 @@ margin-right: 0.5rem;
                             
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
-                                    <div class="budget-header-bubble">Monthly Fixed Expenses</div>
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
                                         <input type="text" class="budget-input-xl" id="budgetFixedExpenses" value="0,00" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateFixedExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
@@ -8282,7 +8279,6 @@ margin-right: 0.5rem;
                             
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
-                                    <div class="budget-header-bubble">Monthly Essential Expenses</div>
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
                                         <input type="text" class="budget-input-xl" id="budgetEssentialExpenses" value="0,00" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateEssentialExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
@@ -8313,7 +8309,6 @@ margin-right: 0.5rem;
                             
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
-                                    <div class="budget-header-bubble">Monthly Discretionary Expenses</div>
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
                                         <input type="text" class="budget-input-xl" id="budgetDiscretionaryExpenses" value="0,00" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateDiscretionaryExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
@@ -8469,10 +8464,13 @@ margin-right: 0.5rem;
                 <!-- Step 1: Province Selection -->
                 <div class="tax-step active" id="taxStep1">
                     <div class="tax-step-content">
-                        <h4>Select your province/territory</h4>
-                        <p class="tax-step-description">We need this to calculate your provincial tax rate</p>
+                        <div class="budget-step-header-new">
+                            <h2>Select your province/territory</h2>
+                            <p class="budget-step-description">We need this to calculate your provincial tax rate</p>
+                        </div>
                         
-                        <div class="province-grid">
+                        <div class="budget-content-section">
+                            <div class="province-grid">
                             <button type="button" class="province-btn selected" data-value="ON">Ontario</button>
                             <button type="button" class="province-btn" data-value="BC">British Columbia</button>
                             <button type="button" class="province-btn" data-value="AB">Alberta</button>
@@ -8486,6 +8484,7 @@ margin-right: 0.5rem;
                             <button type="button" class="province-btn" data-value="YT">Yukon</button>
                             <button type="button" class="province-btn" data-value="NT">NWT</button>
                             <button type="button" class="province-btn" data-value="NU">Nunavut</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -8493,10 +8492,13 @@ margin-right: 0.5rem;
                 <!-- Step 2: Tax Results -->
                 <div class="tax-step" id="taxStep2">
                     <div class="tax-step-content">
-                        <h4>Your Take-Home Pay</h4>
-                        <p class="tax-step-description">Based on your $<span id="incomeDisplay">200,000</span> gross income in <span id="selectedProvinceDisplay">Ontario</span></p>
+                        <div class="budget-step-header-new">
+                            <h2>Your Take-Home Pay</h2>
+                            <p class="budget-step-description">Based on your $<span id="incomeDisplay">200,000</span> gross income in <span id="selectedProvinceDisplay">Ontario</span></p>
+                        </div>
                         
-                        <div class="take-home-summary">
+                        <div class="budget-content-section">
+                            <div class="take-home-summary">
                             <div class="take-home-main">
                                 <div class="take-home-amount">$<span id="netIncomeDisplay">11,250</span></div>
                                 <div class="take-home-period">per month</div>
@@ -8526,20 +8528,24 @@ margin-right: 0.5rem;
                             </div>
                         </div>
                         
-                        <button type="button" class="adjust-values-btn" onclick="showManualAdjustment()">
-                            <i data-lucide="edit-3" class="w-4 h-4"></i>
-                            <span>Adjust values manually</span>
-                        </button>
+                            <button type="button" class="adjust-values-btn" onclick="showManualAdjustment()">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                <span>Adjust values manually</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Step 3: Manual Adjustment (Hidden by default) -->
                 <div class="tax-step" id="taxStep3">
                     <div class="tax-step-content">
-                        <h4>Manual Adjustments</h4>
-                        <p class="tax-step-description">Fine-tune the calculated values if needed</p>
+                        <div class="budget-step-header-new">
+                            <h2>Manual Adjustments</h2>
+                            <p class="budget-step-description">Fine-tune the calculated values if needed</p>
+                        </div>
                         
-                        <div class="manual-adjustment-form">
+                        <div class="budget-content-section">
+                            <div class="manual-adjustment-form">
                             <div class="form-group">
                                 <label class="form-label" for="manualGrossIncome">Gross Monthly Income</label>
                                 <input type="text" class="budget-input-large" id="manualGrossIncome" placeholder="16,667" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
@@ -8556,12 +8562,13 @@ margin-right: 0.5rem;
                                 <label class="form-label" for="manualCppEi">CPP/EI</label>
                                 <input type="text" class="budget-input-large" id="manualCppEi" placeholder="500" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                             </div>
+                            </div>
+                            
+                            <button type="button" class="back-to-results-btn" onclick="backToTaxResults()">
+                                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                                <span>Back to results</span>
+                            </button>
                         </div>
-                        
-                        <button type="button" class="back-to-results-btn" onclick="backToTaxResults()">
-                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                            <span>Back to results</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -19361,6 +19368,10 @@ margin-right: 0.5rem;
             
             // Initialize all budget inputs with proper length classes and dollar sign positioning
             document.querySelectorAll('.budget-input-xl').forEach(input => {
+                // Skip the gross yearly income input as it has its own initialization
+                if (input.id === 'budgetGrossYearlyIncome') {
+                    return;
+                }
                 updateInputLengthClass(input);
                 positionDollarSign(input);
             });
@@ -19421,43 +19432,16 @@ margin-right: 0.5rem;
                 updateBudgetProgress(1);
                 updateBudgetNavigation(1);
                 
-                // Load existing settings into budget form, then initialize
-                loadBudgetSettings();
-                
-                // Initialize after settings are loaded with proper delay for modal animation
+                // Simple, robust initialization with proper error handling
                 setTimeout(() => {
-                    // First general initialization for all inputs
-                    initializeDollarSignPositions();
+                    // Load settings first
+                    loadBudgetSettings();
                     
-                    // Then specific and thorough initialization for the income input
-                    const firstScreenInput = document.getElementById('budgetGrossYearlyIncome');
-                    if (firstScreenInput) {
-                        // Check current value and set default state appropriately
-                        const currentValue = parseFloat(firstScreenInput.value.replace(/,/g, ''));
-                        
-                        if (!firstScreenInput.value || isNaN(currentValue) || currentValue <= 0) {
-                            firstScreenInput.value = "0,00";
-                            firstScreenInput.classList.add('default-value');
-                        } else {
-                            firstScreenInput.classList.remove('default-value');
-                            formatBudgetInput(firstScreenInput);
-                        }
-                        
-                        // Apply all necessary styling and positioning functions
-                        updateInputLengthClass(firstScreenInput);
-                        positionDollarSign(firstScreenInput);
-                        
-                        // Force a repaint and do a final check
-                        setTimeout(() => {
-                            updateInputLengthClass(firstScreenInput);
-                            positionDollarSign(firstScreenInput);
-                            firstScreenInput.focus();
-                            
-                            // Trigger any change events to ensure UI updates
-                            firstScreenInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        }, 150);
-                    }
-                }, 200);
+                    // Then initialize with a single comprehensive function
+                    setTimeout(() => {
+                        initializeBudgetIncomeInput();
+                    }, 100);
+                }, 400);
             }, 400);
         }
         
@@ -20050,6 +20034,11 @@ margin-right: 0.5rem;
         function initializeDollarSignPositions() {
             const xlInputs = document.querySelectorAll('.budget-input-xl');
             xlInputs.forEach(input => {
+                // Skip the gross yearly income input as it has its own initialization
+                if (input.id === 'budgetGrossYearlyIncome') {
+                    return;
+                }
+                
                 // Set default value if empty
                 if (!input.value || input.value === "0,00") {
                     input.value = "0,00";
@@ -20061,6 +20050,46 @@ margin-right: 0.5rem;
                 // Actually position the dollar sign!
                 positionDollarSign(input);
             });
+        }
+        
+        // Dedicated function for robust budget income input initialization
+        function initializeBudgetIncomeInput() {
+            const incomeInput = document.getElementById('budgetGrossYearlyIncome');
+            if (!incomeInput) return;
+            
+            // Get the current value and parse it
+            let currentValue = incomeInput.value || '';
+            const numericValue = parseFloat(currentValue.replace(/,/g, ''));
+            
+            // Determine if this is a valid value or should be default
+            const isValidValue = currentValue && !isNaN(numericValue) && numericValue > 0;
+            
+            if (isValidValue) {
+                // Has a real value - format it properly and remove default styling
+                incomeInput.classList.remove('default-value');
+                incomeInput.value = numericValue.toLocaleString('en-US');
+                formatBudgetInput(incomeInput);
+            } else {
+                // No value or zero - set to default
+                incomeInput.value = "0,00";
+                incomeInput.classList.add('default-value');
+            }
+            
+            // Apply all styling functions
+            updateInputLengthClass(incomeInput);
+            positionDollarSign(incomeInput);
+            
+            // Force focus and selection for user interaction
+            setTimeout(() => {
+                incomeInput.focus();
+                incomeInput.setSelectionRange(incomeInput.value.length, incomeInput.value.length);
+                
+                // One more verification after focus
+                setTimeout(() => {
+                    updateInputLengthClass(incomeInput);
+                    positionDollarSign(incomeInput);
+                }, 50);
+            }, 50);
         }
         
         // Add focus handler to move cursor to end
