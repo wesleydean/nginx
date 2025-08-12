@@ -1000,6 +1000,21 @@
             }
         }
         
+        @keyframes slideUpBounce {
+            0% {
+                transform: translateY(100%);
+            }
+            70% {
+                transform: translateY(-5%);
+            }
+            85% {
+                transform: translateY(2%);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+        
         .chart-slide {
             width: 50%;
             flex-shrink: 0;
@@ -1501,15 +1516,9 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: progressShimmer 2s infinite;
+            background: transparent;
         }
         
-        @keyframes progressShimmer {
-            0% { left: -100%; }
-            50% { left: -100%; }
-            100% { left: 100%; }
-        }
         
         .progress-label {
             font-size: 0.875rem;
@@ -1616,18 +1625,20 @@
             justify-content: center;
             gap: 0.5rem;
             padding: 12px 16px;
-            border-radius: 1rem;
+            border-radius: 2rem;
             font-weight: 500;
             transition: all 0.2s ease;
             white-space: nowrap;
             border: none;
             cursor: pointer;
             min-width: 0;
+            font-size: 1rem;
         }
             
         .budget-nav-btn.primary {
-            background-color: #8b5cf6;
+            background-color: #12849e;
             color: white;
+            font-weight: bold;
         }
 
         .budget-nav-btn.primary svg {
@@ -1635,8 +1646,7 @@
         }
             
         .budget-nav-btn.primary:hover:not(:disabled) {
-            background-color: #7c3aed;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+            background-color: #12849e;
         }
             
         .budget-nav-btn.secondary {
@@ -2074,8 +2084,7 @@
         
         .budget-step-description {
             font-size: 0.875rem;
-            color: hsl(var(--muted-foreground));
-            margin: 0.25rem 0 0 0;
+            margin: 0.25rem 2rem;
         }
         
         .interactive-chart-container {
@@ -4985,7 +4994,7 @@
             background: rgba(0,0,0,0.5);
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: visibility 0s linear 0s;
             z-index: 2000;
         }
         
@@ -5003,7 +5012,7 @@
             border-radius: 20px 20px 0 0;
             padding: 20px 20px 40px;
             transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: transform 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25);
             max-height: 80vh;
             overflow-y: auto;
         }
@@ -5062,7 +5071,7 @@
             background: rgba(0,0,0,0.5);
             opacity: 0;
             visibility: hidden;
-            transition: all 0.3s ease;
+            transition: visibility 0s linear 0s;
             z-index: 2000;
         }
         
@@ -5080,7 +5089,7 @@
             border-radius: 20px 20px 0 0;
             padding: 20px 20px 40px;
             transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: transform 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25);
             max-height: 80vh;
             overflow-y: auto;
         }
@@ -5622,7 +5631,7 @@
             /* right: auto; */
             bottom: 0;
             transform: translateY(0);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25);
         }
         
         .quick-actions.hidden {
@@ -5962,7 +5971,7 @@
             background: #4a9ea1;
             color: white;
             border: none;
-            padding: 1rem 1.5rem;
+            padding: 0.6rem 1.3rem;
             border-radius: 2rem;
             font-size: 1rem;
             font-weight: 600;
@@ -5973,6 +5982,8 @@
             letter-spacing: 0.02em;
             align-self: center;
             justify-self: center;
+            align-items: center;
+            min-height: 0;
         }
 
         .calculate-btn:hover {
@@ -6019,7 +6030,7 @@
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
-            transition: all 300ms ease;
+            transition: visibility 0s linear 0s;
         }
         
         .manual-override-overlay.active {
@@ -6036,7 +6047,7 @@
             border-radius: 20px 20px 0 0;
             max-height: 85vh;
             transform: translateY(100%);
-            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 300ms cubic-bezier(0.17, 0.89, 0.32, 1.25);
             display: flex;
             flex-direction: column;
         }
@@ -6141,7 +6152,7 @@
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
-            transition: all 300ms ease;
+            transition: visibility 0s linear 0s;
         }
         
         .tax-calculation-overlay.active {
@@ -6158,7 +6169,7 @@
             border-radius: 20px 20px 0 0;
             max-height: 90vh;
             transform: translateY(100%);
-            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 300ms cubic-bezier(0.17, 0.89, 0.32, 1.25);
             display: flex;
             flex-direction: column;
         }
@@ -6547,6 +6558,7 @@
         .settings-overlay.active {
             opacity: 1;
             visibility: visible;
+            background-color: rgba(200, 160, 61, 0.04);
         }
         
         /* Budget overlay with backdrop blur */
@@ -8478,12 +8490,10 @@ margin-right: 0.5rem;
                 <!-- Navigation Buttons -->
                 <div class="budget-flow-navigation">
                     <button type="button" class="budget-nav-btn secondary" id="budgetPrevBtn" onclick="previousBudgetStep()" disabled>
-                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
                         <span>Previous</span>
                     </button>
                     <button type="button" class="budget-nav-btn primary" id="budgetNextBtn" onclick="nextBudgetStep()">
                         <span>Next</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
                     <button type="button" class="budget-nav-btn primary hidden" id="budgetSaveBtn" onclick="saveBudgetSettings()">
                         <i data-lucide="check" class="w-4 h-4"></i>
@@ -19788,6 +19798,35 @@ margin-right: 0.5rem;
             remainingSegment.title = `Remaining: $${Math.round(remainingBudget).toLocaleString()}`;
         }
 
+        function animateBudgetBars() {
+            // Find all spending segments and reset them to 0 width, then animate
+            const segments = ['fixedSpending', 'essentialSpending', 'discretionarySpending', 'remainingBudget'];
+            
+            segments.forEach(segmentId => {
+                const segment = document.getElementById(segmentId);
+                if (segment) {
+                    const targetWidth = segment.style.width;
+                    segment.style.width = '0%';
+                    segment.style.transition = 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                    
+                    // Animate to target width with a slight delay for each segment
+                    setTimeout(() => {
+                        segment.style.width = targetWidth;
+                    }, segments.indexOf(segmentId) * 30);
+                }
+            });
+            
+            // Remove transition after animation completes
+            setTimeout(() => {
+                segments.forEach(segmentId => {
+                    const segment = document.getElementById(segmentId);
+                    if (segment) {
+                        segment.style.transition = '';
+                    }
+                });
+            }, 1200);
+        }
+
         function loadBudgetSettings() {
             const settings = getSimpleBudgetSettings();
 
@@ -20791,29 +20830,29 @@ make         }
             if (fixed > 0) {
                 data.push(fixed);
                 labels.push('Fixed Expenses');
-                colors.push('#dc2626'); // Red
-                summaryItems.push({ label: 'Fixed Expenses', amount: fixed, color: '#dc2626' });
+                colors.push('#cac14a'); // Yellow - matches budget card
+                summaryItems.push({ label: 'Fixed Expenses', amount: fixed, color: '#cac14a' });
             }
             
             if (essential > 0) {
                 data.push(essential);
                 labels.push('Essential Expenses');
-                colors.push('#ea580c'); // Orange
-                summaryItems.push({ label: 'Essential Expenses', amount: essential, color: '#ea580c' });
+                colors.push('#995cdb'); // Purple - matches budget card
+                summaryItems.push({ label: 'Essential Expenses', amount: essential, color: '#995cdb' });
             }
             
             if (discretionary > 0) {
                 data.push(discretionary);
                 labels.push('Discretionary');
-                colors.push('#0891b2'); // Cyan
-                summaryItems.push({ label: 'Discretionary', amount: discretionary, color: '#0891b2' });
+                colors.push('#74c8cb'); // Teal - matches budget card
+                summaryItems.push({ label: 'Discretionary', amount: discretionary, color: '#74c8cb' });
             }
             
             if (remaining > 0) {
                 data.push(remaining);
                 labels.push('Remaining');
-                colors.push('#9ca3af'); // Gray
-                summaryItems.push({ label: 'Remaining', amount: remaining, color: '#9ca3af' });
+                colors.push('#e5e7eb'); // Light gray - matches budget card
+                summaryItems.push({ label: 'Remaining', amount: remaining, color: '#e5e7eb' });
             }
             
             console.log('📊 Spending chart data:', { data, labels, colors });
@@ -20836,7 +20875,9 @@ make         }
                                 backgroundColor: colors,
                                 borderWidth: 2,
                                 borderColor: '#ffffff',
-                                cutout: '60%'
+                                cutout: '60%',
+                                borderRadius: 20,
+                                borderSkipped: false
                             }]
                         },
                         options: {
@@ -20960,7 +21001,9 @@ make         }
                             backgroundColor: colors,
                             borderWidth: 2,
                             borderColor: '#ffffff',
-                            cutout: '60%'
+                            cutout: '60%',
+                            borderRadius: 20,
+                            borderSkipped: false
                         }]
                     },
                     options: {
@@ -20995,23 +21038,30 @@ make         }
         }
 
         async function saveBudgetSettings() {
+            // Start slide down animation
+            const budgetModal = document.getElementById('budgetModal');
+            if (budgetModal) {
+                budgetModal.style.transform = 'translateY(100%)';
+                budgetModal.style.opacity = '0';
+            }
+            
             // Calculate monthly savings target first
-            const annualSavingsGoal = parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal').value);
+            const annualSavingsGoal = parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal')?.value || '0');
             const monthlySavingsTarget = annualSavingsGoal / 12;
 
             const settings = {
-                grossYearlyIncome: parseFormattedNumber(document.getElementById('budgetGrossYearlyIncome').value),
-                province: document.getElementById('budgetProvinceValue').textContent,
-                grossIncome: parseFormattedNumber(document.getElementById('budgetGrossIncome').value),
-                federalTax: parseFormattedNumber(document.getElementById('budgetFederalTax').value),
-                provincialTax: parseFormattedNumber(document.getElementById('budgetProvincialTax').value),
-                cppEi: parseFormattedNumber(document.getElementById('budgetCppEi').value),
-                netIncome: parseFormattedNumber(document.getElementById('budgetNetIncome').value),
+                grossYearlyIncome: parseFormattedNumber(document.getElementById('budgetGrossYearlyIncome')?.value || '0'),
+                province: document.getElementById('budgetProvinceValue')?.textContent || 'Ontario',
+                grossIncome: parseFormattedNumber(document.getElementById('budgetGrossIncome')?.value || '0'),
+                federalTax: parseFormattedNumber(document.getElementById('budgetFederalTax')?.value || '0'),
+                provincialTax: parseFormattedNumber(document.getElementById('budgetProvincialTax')?.value || '0'),
+                cppEi: parseFormattedNumber(document.getElementById('budgetCppEi')?.value || '0'),
+                netIncome: parseFormattedNumber(document.getElementById('budgetNetIncome')?.value || '0'),
                 annualSavingsGoal: annualSavingsGoal,
                 monthlySavingsTarget: monthlySavingsTarget, // Save monthly savings target
-                fixedExpenses: parseFormattedNumber(document.getElementById('budgetFixedExpenses').value),
-                essentialExpenses: parseFormattedNumber(document.getElementById('budgetEssentialExpenses').value),
-                discretionaryExpenses: parseFormattedNumber(document.getElementById('budgetDiscretionaryExpenses').value)
+                fixedExpenses: parseFormattedNumber(document.getElementById('budgetFixedExpenses')?.value || '0'),
+                essentialExpenses: parseFormattedNumber(document.getElementById('budgetEssentialExpenses')?.value || '0'),
+                discretionaryExpenses: parseFormattedNumber(document.getElementById('budgetDiscretionaryExpenses')?.value || '0')
             };
 
             localStorage.setItem('simpleBudgetSettings', JSON.stringify(settings));
@@ -21026,14 +21076,21 @@ make         }
             // Update the budget overview card
             updateBudgetOverview('monthly');
 
-            // Close the budget setup
-            closeBudgetFlow();
+            // Wait for slide animation to complete, then close and redirect
+            setTimeout(() => {
+                // Close the budget setup
+                closeBudgetFlow();
 
-            // Redirect to home page (screen 0)
-            goToScreen(0);
+                // Redirect to home page (screen 0)
+                goToScreen(0);
+                
+                // Reanimate budget bars and recalculate amounts
+                setTimeout(() => {
+                    updateBudgetSummary();
+                    animateBudgetBars();
+                }, 100);
 
-            // Show success message
-            alert('Budget settings saved successfully!');
+            }, 200);
         }
         async function loadSampleBudget() {
             const button = event?.currentTarget;
