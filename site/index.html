@@ -5795,6 +5795,101 @@
             gap: 0.75rem; /* consistent spacing */
         }
 
+        /* Budget Charts Styling */
+        .budget-charts-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+            padding: 0 1rem;
+        }
+
+        .budget-chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            margin-bottom: 1rem;
+        }
+
+        .chart-wrapper canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .chart-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+            max-width: 250px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.875rem;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .summary-amount {
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .budget-charts-section {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 0 0.5rem;
+            }
+            
+            .budget-chart-container {
+                padding: 1rem;
+            }
+            
+            .chart-wrapper {
+                width: 200px;
+                height: 200px;
+            }
+        }
+
         .budget-item {
             display: flex;
             justify-content: space-between;
@@ -8161,7 +8256,7 @@ margin-right: 0.5rem;
                                 <div class="budget-form-group-large">
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetGrossYearlyIncome" value="0,00" min="0" step="1000" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
+                                        <input type="text" class="budget-input-xl" id="budgetGrossYearlyIncome" value="" min="0" step="1000" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this)" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
                                     </div>
                                 </div>
                                 
@@ -8216,7 +8311,7 @@ margin-right: 0.5rem;
                                 <div class="budget-form-group-large">
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetAnnualSavingsGoal" value="0,00" min="0" step="100" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateSavingsVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
+                                        <input type="text" class="budget-input-xl" id="budgetAnnualSavingsGoal" value="" min="0" step="100" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateSavingsVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
                                     </div>
                                 </div>
                                 <div class="form-group" id="monthlySavingsTargetSection" style="text-align: center; display: none;">
@@ -8251,7 +8346,7 @@ margin-right: 0.5rem;
                                 <div class="budget-form-group-large">
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetFixedExpenses" value="0,00" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateFixedExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
+                                        <input type="text" class="budget-input-xl" id="budgetFixedExpenses" value="" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateFixedExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
                                     </div>
                                 </div>
                                 
@@ -8281,7 +8376,7 @@ margin-right: 0.5rem;
                                 <div class="budget-form-group-large">
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetEssentialExpenses" value="0,00" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateEssentialExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
+                                        <input type="text" class="budget-input-xl" id="budgetEssentialExpenses" value="" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateEssentialExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
                                     </div>
                                 </div>
                                 
@@ -8311,7 +8406,7 @@ margin-right: 0.5rem;
                                 <div class="budget-form-group-large">
                                     <div class="budget-input-container">
                                         <span class="dollar-sign">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetDiscretionaryExpenses" value="0,00" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateDiscretionaryExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
+                                        <input type="text" class="budget-input-xl" id="budgetDiscretionaryExpenses" value="" min="0" step="0.01" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateDiscretionaryExpenseVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
                                     </div>
                                 </div>
                                 
@@ -8391,41 +8486,34 @@ margin-right: 0.5rem;
                             </div>
                             </div>
                             
-                            <!-- Spending Breakdown Chart -->
-                            <div class="budget-content-section" style="margin-top: 1.5rem;">
-                                <div class="budget-bar-section">
-                                    <div class="budget-bar-header">
-                                        <span class="budget-bar-label">Spending Breakdown</span>
-                                        <span class="budget-bar-amount" id="budgetSpendingAmount">$0 / $0</span>
+                            <!-- Budget Charts -->
+                            <div class="budget-charts-section">
+                                <!-- Spending Categories Donut Chart -->
+                                <div class="budget-chart-container">
+                                    <h3 class="chart-title">Monthly Spending</h3>
+                                    <div class="chart-wrapper">
+                                        <canvas id="spendingDonutChart" width="250" height="250"></canvas>
                                     </div>
-                                    <div class="budget-spending-bar">
-                                        <div class="spending-segment fixed" id="budgetFixedSpending" style="width: 0%" title="Fixed: $0"></div>
-                                        <div class="spending-segment essential" id="budgetEssentialSpending" style="width: 0%" title="Essential: $0"></div>
-                                        <div class="spending-segment discretionary" id="budgetDiscretionarySpending" style="width: 0%" title="Discretionary: $0"></div>
-                                        <div class="spending-segment remaining" id="budgetRemainingBudget" style="width: 100%" title="Remaining: $0"></div>
+                                    <div class="chart-summary" id="spendingSummary">
+                                        <!-- Spending breakdown will be populated here -->
                                     </div>
-                                    <div class="budget-legend">
-                                        <div class="legend-item">
-                                            <div class="legend-dot fixed"></div>
-                                            <span>Fixed</span>
-                                        </div>
-                                        <div class="legend-item">
-                                            <div class="legend-dot essential"></div>
-                                            <span>Essential</span>
-                                        </div>
-                                        <div class="legend-item">
-                                            <div class="legend-dot discretionary"></div>
-                                            <span>Discretionary</span>
-                                        </div>
+                                </div>
+
+                                <!-- Savings Donut Chart -->
+                                <div class="budget-chart-container">
+                                    <h3 class="chart-title">Yearly Savings Goal</h3>
+                                    <div class="chart-wrapper">
+                                        <canvas id="savingsDonutChart" width="250" height="250"></canvas>
+                                    </div>
+                                    <div class="chart-summary" id="savingsGoalSummary">
+                                        <!-- Savings breakdown will be populated here -->
+                                    </div>
+                                    <div style="text-align: center; margin-top: 0.75rem;">
+                                        <div class="savings-rate-display" id="budgetSavingsRateSummary">0%</div>
+                                        <div class="text-sm text-muted-foreground">of monthly net income</div>
                                     </div>
                                 </div>
                             </div>
-                                
-                                <div style="text-align: center; margin-top: 0.75rem;">
-                                    <div class="savings-rate-display" id="budgetSavingsRateSummary">0%</div>
-                                    <div class="text-sm text-muted-foreground">Savings Rate</div>
-                                    <div class="text-sm font-medium" id="budgetValidationSummary" style="margin-top: 0.25rem;">-</div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -8548,19 +8636,19 @@ margin-right: 0.5rem;
                             <div class="manual-adjustment-form">
                             <div class="form-group">
                                 <label class="form-label" for="manualGrossIncome">Gross Monthly Income</label>
-                                <input type="text" class="budget-input-large" id="manualGrossIncome" placeholder="16,667" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                <input type="text" class="budget-input-large" id="manualGrossIncome" placeholder="" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="manualFederalTax">Federal Tax</label>
-                                <input type="text" class="budget-input-large" id="manualFederalTax" placeholder="3,750" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                <input type="text" class="budget-input-large" id="manualFederalTax" placeholder="" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="manualProvincialTax">Provincial Tax</label>
-                                <input type="text" class="budget-input-large" id="manualProvincialTax" placeholder="1,167" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                <input type="text" class="budget-input-large" id="manualProvincialTax" placeholder="" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="manualCppEi">CPP/EI</label>
-                                <input type="text" class="budget-input-large" id="manualCppEi" placeholder="500" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
+                                <input type="text" class="budget-input-large" id="manualCppEi" placeholder="" min="0" step="0.01" oninput="formatBudgetInput(this)" onfocus="handleBudgetInputFocus(this)" onclick="handleBudgetInputFocus(this)" inputmode="numeric">
                             </div>
                             </div>
                             
@@ -19128,6 +19216,7 @@ margin-right: 0.5rem;
             };
 
             localStorage.setItem('simpleBudgetSettings', JSON.stringify(settings));
+            console.log('💾 BUDGET SAVED (saveSimpleBudgetSettings):', settings);
 
             // Update all displays to reflect new settings
             await updatePeriodView();
@@ -19401,6 +19490,14 @@ margin-right: 0.5rem;
                 const el = document.getElementById(id);
                 if (el) {
                     el.addEventListener('input', function () {
+                        console.log(`📝 INPUT CHANGED: ${id} = "${this.value}"`);
+                        
+                        // Log current localStorage state
+                        const currentBudgetSettings = localStorage.getItem('simpleBudgetSettings');
+                        if (currentBudgetSettings) {
+                            console.log('📊 CURRENT BUDGET STATE:', JSON.parse(currentBudgetSettings));
+                        }
+                        
                         updateBudgetSummary();
                     });
                 }
@@ -19582,8 +19679,46 @@ margin-right: 0.5rem;
             }
         }
         
+        function saveBudgetState() {
+            // Gather all current budget values and save to localStorage
+            const grossYearlyIncomeEl = document.getElementById('budgetGrossYearlyIncome');
+            const provinceValueEl = document.getElementById('budgetProvinceValue');
+            const grossIncomeEl = document.getElementById('budgetGrossIncome');
+            const federalTaxEl = document.getElementById('budgetFederalTax');
+            const provincialTaxEl = document.getElementById('budgetProvincialTax');
+            const cppEiEl = document.getElementById('budgetCppEi');
+            const netIncomeEl = document.getElementById('budgetNetIncome');
+            const annualSavingsGoalEl = document.getElementById('budgetAnnualSavingsGoal');
+            const fixedExpensesEl = document.getElementById('budgetFixedExpenses');
+            const essentialExpensesEl = document.getElementById('budgetEssentialExpenses');
+            const discretionaryExpensesEl = document.getElementById('budgetDiscretionaryExpenses');
+
+            const annualSavingsGoal = annualSavingsGoalEl ? parseFormattedNumber(annualSavingsGoalEl.value) : 0;
+            const monthlySavingsTarget = annualSavingsGoal / 12;
+
+            const settings = {
+                grossYearlyIncome: grossYearlyIncomeEl ? parseFormattedNumber(grossYearlyIncomeEl.value) : 0,
+                province: provinceValueEl ? provinceValueEl.textContent : 'Ontario',
+                grossIncome: grossIncomeEl ? parseFormattedNumber(grossIncomeEl.value) : 0,
+                federalTax: federalTaxEl ? parseFormattedNumber(federalTaxEl.value) : 0,
+                provincialTax: provincialTaxEl ? parseFormattedNumber(provincialTaxEl.value) : 0,
+                cppEi: cppEiEl ? parseFormattedNumber(cppEiEl.value) : 0,
+                netIncome: netIncomeEl ? parseFormattedNumber(netIncomeEl.value) : 0,
+                annualSavingsGoal: annualSavingsGoal,
+                monthlySavingsTarget: monthlySavingsTarget,
+                fixedExpenses: fixedExpensesEl ? parseFormattedNumber(fixedExpensesEl.value) : 0,
+                essentialExpenses: essentialExpensesEl ? parseFormattedNumber(essentialExpensesEl.value) : 0,
+                discretionaryExpenses: discretionaryExpensesEl ? parseFormattedNumber(discretionaryExpensesEl.value) : 0
+            };
+
+            localStorage.setItem('simpleBudgetSettings', JSON.stringify(settings));
+            console.log('💾 BUDGET SAVED (on Next Step):', settings);
+        }
+
         function nextBudgetStep() {
             if (currentBudgetStep < totalBudgetSteps) {
+                // Save current budget state before moving to next step
+                saveBudgetState();
                 showBudgetStep(currentBudgetStep + 1, 'next');
             }
         }
@@ -19700,18 +19835,30 @@ margin-right: 0.5rem;
         function loadBudgetSettings() {
             const settings = getSimpleBudgetSettings();
 
-            // Populate form fields with existing settings
-            document.getElementById('budgetGrossYearlyIncome').value = formatNumberForDisplay(settings.grossYearlyIncome);
-            document.getElementById('budgetProvinceValue').textContent = settings.province || 'Ontario';
-            document.getElementById('budgetGrossIncome').value = formatNumberForDisplay(settings.grossIncome);
-            document.getElementById('budgetFederalTax').value = formatNumberForDisplay(settings.federalTax);
-            document.getElementById('budgetProvincialTax').value = formatNumberForDisplay(settings.provincialTax);
-            document.getElementById('budgetCppEi').value = formatNumberForDisplay(settings.cppEi);
-            document.getElementById('budgetNetIncome').value = formatNumberForDisplay(settings.netIncome);
-            document.getElementById('budgetAnnualSavingsGoal').value = formatNumberForDisplay(settings.annualSavingsGoal);
-            document.getElementById('budgetFixedExpenses').value = formatNumberForDisplay(settings.fixedExpenses);
-            document.getElementById('budgetEssentialExpenses').value = formatNumberForDisplay(settings.essentialExpenses);
-            document.getElementById('budgetDiscretionaryExpenses').value = formatNumberForDisplay(settings.discretionaryExpenses);
+            // Populate form fields with existing settings - with null checks
+            const grossYearlyIncomeEl = document.getElementById('budgetGrossYearlyIncome');
+            const provinceValueEl = document.getElementById('budgetProvinceValue');
+            const grossIncomeEl = document.getElementById('budgetGrossIncome');
+            const federalTaxEl = document.getElementById('budgetFederalTax');
+            const provincialTaxEl = document.getElementById('budgetProvincialTax');
+            const cppEiEl = document.getElementById('budgetCppEi');
+            const netIncomeEl = document.getElementById('budgetNetIncome');
+            const annualSavingsGoalEl = document.getElementById('budgetAnnualSavingsGoal');
+            const fixedExpensesEl = document.getElementById('budgetFixedExpenses');
+            const essentialExpensesEl = document.getElementById('budgetEssentialExpenses');
+            const discretionaryExpensesEl = document.getElementById('budgetDiscretionaryExpenses');
+
+            if (grossYearlyIncomeEl) grossYearlyIncomeEl.value = formatNumberForDisplay(settings.grossYearlyIncome);
+            if (provinceValueEl) provinceValueEl.textContent = settings.province || 'Ontario';
+            if (grossIncomeEl) grossIncomeEl.value = formatNumberForDisplay(settings.grossIncome);
+            if (federalTaxEl) federalTaxEl.value = formatNumberForDisplay(settings.federalTax);
+            if (provincialTaxEl) provincialTaxEl.value = formatNumberForDisplay(settings.provincialTax);
+            if (cppEiEl) cppEiEl.value = formatNumberForDisplay(settings.cppEi);
+            if (netIncomeEl) netIncomeEl.value = formatNumberForDisplay(settings.netIncome);
+            if (annualSavingsGoalEl) annualSavingsGoalEl.value = formatNumberForDisplay(settings.annualSavingsGoal);
+            if (fixedExpensesEl) fixedExpensesEl.value = formatNumberForDisplay(settings.fixedExpenses);
+            if (essentialExpensesEl) essentialExpensesEl.value = formatNumberForDisplay(settings.essentialExpenses);
+            if (discretionaryExpensesEl) discretionaryExpensesEl.value = formatNumberForDisplay(settings.discretionaryExpenses);
 
             // Update budget summary
             updateBudgetSummary();
@@ -19796,15 +19943,30 @@ margin-right: 0.5rem;
         });
 
         function updateBudgetSummary() {
-            const grossIncome = parseFormattedNumber(document.getElementById('budgetGrossIncome').value);
-            const federalTax = parseFormattedNumber(document.getElementById('budgetFederalTax').value);
-            const provincialTax = parseFormattedNumber(document.getElementById('budgetProvincialTax').value);
-            const cppEi = parseFormattedNumber(document.getElementById('budgetCppEi').value);
-            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
-            const annualSavingsGoal = parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal').value);
-            const fixedExpenses = parseFormattedNumber(document.getElementById('budgetFixedExpenses').value);
-            const essentialExpenses = parseFormattedNumber(document.getElementById('budgetEssentialExpenses').value);
-            const discretionaryExpenses = parseFormattedNumber(document.getElementById('budgetDiscretionaryExpenses').value);
+            const grossIncomeEl = document.getElementById('budgetGrossIncome');
+            const federalTaxEl = document.getElementById('budgetFederalTax');
+            const provincialTaxEl = document.getElementById('budgetProvincialTax');
+            const cppEiEl = document.getElementById('budgetCppEi');
+            const netIncomeEl = document.getElementById('budgetNetIncome');
+            const annualSavingsGoalEl = document.getElementById('budgetAnnualSavingsGoal');
+            const fixedExpensesEl = document.getElementById('budgetFixedExpenses');
+            const essentialExpensesEl = document.getElementById('budgetEssentialExpenses');
+            const discretionaryExpensesEl = document.getElementById('budgetDiscretionaryExpenses');
+
+            if (!grossIncomeEl || !federalTaxEl || !provincialTaxEl || !cppEiEl || !netIncomeEl || 
+                !annualSavingsGoalEl || !fixedExpensesEl || !essentialExpensesEl || !discretionaryExpensesEl) {
+                return; // Exit if any required elements are missing
+            }
+
+            const grossIncome = parseFormattedNumber(grossIncomeEl.value);
+            const federalTax = parseFormattedNumber(federalTaxEl.value);
+            const provincialTax = parseFormattedNumber(provincialTaxEl.value);
+            const cppEi = parseFormattedNumber(cppEiEl.value);
+            const netIncome = parseFormattedNumber(netIncomeEl.value);
+            const annualSavingsGoal = parseFormattedNumber(annualSavingsGoalEl.value);
+            const fixedExpenses = parseFormattedNumber(fixedExpensesEl.value);
+            const essentialExpenses = parseFormattedNumber(essentialExpensesEl.value);
+            const discretionaryExpenses = parseFormattedNumber(discretionaryExpensesEl.value);
 
             // Calculate monthly savings target
             const monthlySavingsTarget = annualSavingsGoal / 12;
@@ -20249,6 +20411,7 @@ margin-right: 0.5rem;
                 
                 // Save to localStorage
                 localStorage.setItem('budgetSettings', JSON.stringify(budgetSettings));
+                console.log('💾 BUDGET SAVED (updateBudgetFromTaxResults):', budgetSettings);
                 
                 // Update any budget displays that exist
                 const netIncomeDisplay = document.getElementById('budgetNetIncomeSummary');
@@ -20336,8 +20499,15 @@ margin-right: 0.5rem;
         // Interactive chart functions
         function updateSavingsVisualization() {
 
-            const annualSavings = parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal').value);
-            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
+            const annualSavingsEl = document.getElementById('budgetAnnualSavingsGoal');
+            const netIncomeEl = document.getElementById('budgetNetIncome');
+
+            if (!annualSavingsEl || !netIncomeEl) {
+                return; // Exit if required elements are missing
+            }
+
+            const annualSavings = parseFormattedNumber(annualSavingsEl.value);
+            const netIncome = parseFormattedNumber(netIncomeEl.value);
             const monthlySavings = annualSavings / 12;
             
             // Show/hide monthly savings target section based on whether annual savings has a value
@@ -20359,11 +20529,23 @@ margin-right: 0.5rem;
             } else {
                 monthlySavingsSection.style.display = 'none';
             }
+            
+            // Update charts if on summary screen
+            if (document.getElementById('budgetScreen6').classList.contains('active')) {
+                updateSummaryCharts();
+            }
         }
 
         function updateFixedExpenseVisualization() {
-            const fixedExpenses = parseFormattedNumber(document.getElementById('budgetFixedExpenses').value);
-            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
+            const fixedExpensesEl = document.getElementById('budgetFixedExpenses');
+            const netIncomeEl = document.getElementById('budgetNetIncome');
+
+            if (!fixedExpensesEl || !netIncomeEl) {
+                return; // Exit if required elements are missing
+            }
+
+            const fixedExpenses = parseFormattedNumber(fixedExpensesEl.value);
+            const netIncome = parseFormattedNumber(netIncomeEl.value);
             
             const fixedExpenseSection = document.getElementById('fixedExpenseTargetSection');
             
@@ -20378,8 +20560,15 @@ margin-right: 0.5rem;
         }
 
         function updateEssentialExpenseVisualization() {
-            const essentialExpenses = parseFormattedNumber(document.getElementById('budgetEssentialExpenses').value);
-            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
+            const essentialExpensesEl = document.getElementById('budgetEssentialExpenses');
+            const netIncomeEl = document.getElementById('budgetNetIncome');
+
+            if (!essentialExpensesEl || !netIncomeEl) {
+                return; // Exit if required elements are missing
+            }
+
+            const essentialExpenses = parseFormattedNumber(essentialExpensesEl.value);
+            const netIncome = parseFormattedNumber(netIncomeEl.value);
             
             const essentialExpenseSection = document.getElementById('essentialExpenseTargetSection');
             
@@ -20394,8 +20583,15 @@ margin-right: 0.5rem;
         }
 
         function updateDiscretionaryExpenseVisualization() {
-            const discretionaryExpenses = parseFormattedNumber(document.getElementById('budgetDiscretionaryExpenses').value);
-            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
+            const discretionaryExpensesEl = document.getElementById('budgetDiscretionaryExpenses');
+            const netIncomeEl = document.getElementById('budgetNetIncome');
+
+            if (!discretionaryExpensesEl || !netIncomeEl) {
+                return; // Exit if required elements are missing
+            }
+
+            const discretionaryExpenses = parseFormattedNumber(discretionaryExpensesEl.value);
+            const netIncome = parseFormattedNumber(netIncomeEl.value);
             
             const discretionaryExpenseSection = document.getElementById('discretionaryExpenseTargetSection');
             
@@ -20471,26 +20667,55 @@ margin-right: 0.5rem;
         }
 
         function updateSummaryCharts() {
-            const netIncome = parseFormattedNumber(document.getElementById('budgetNetIncome').value);
-            const fixedExpenses = parseFormattedNumber(document.getElementById('budgetFixedExpenses').value);
-            const essentialExpenses = parseFormattedNumber(document.getElementById('budgetEssentialExpenses').value);
-            const discretionaryExpenses = parseFormattedNumber(document.getElementById('budgetDiscretionaryExpenses').value);
-            const annualSavingsGoal = parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal').value);
+            const netIncomeEl = document.getElementById('budgetNetIncome');
+            const grossIncomeEl = document.getElementById('budgetGrossIncome');
+            const grossYearlyIncomeEl = document.getElementById('budgetGrossYearlyIncome');
+            const fixedExpensesEl = document.getElementById('budgetFixedExpenses');
+            const essentialExpensesEl = document.getElementById('budgetEssentialExpenses');
+            const discretionaryExpensesEl = document.getElementById('budgetDiscretionaryExpenses');
+            const annualSavingsGoalEl = document.getElementById('budgetAnnualSavingsGoal');
+
+            // Use net income if available, otherwise fall back to gross income, then yearly gross/12
+            let monthlyIncome = 0;
+            if (netIncomeEl && parseFormattedNumber(netIncomeEl.value) > 0) {
+                monthlyIncome = parseFormattedNumber(netIncomeEl.value);
+            } else if (grossIncomeEl && parseFormattedNumber(grossIncomeEl.value) > 0) {
+                monthlyIncome = parseFormattedNumber(grossIncomeEl.value);
+            } else if (grossYearlyIncomeEl && parseFormattedNumber(grossYearlyIncomeEl.value) > 0) {
+                monthlyIncome = parseFormattedNumber(grossYearlyIncomeEl.value) / 12;
+            }
+
+            const fixedExpenses = fixedExpensesEl ? parseFormattedNumber(fixedExpensesEl.value) : 0;
+            const essentialExpenses = essentialExpensesEl ? parseFormattedNumber(essentialExpensesEl.value) : 0;
+            const discretionaryExpenses = discretionaryExpensesEl ? parseFormattedNumber(discretionaryExpensesEl.value) : 0;
+            const annualSavingsGoal = annualSavingsGoalEl ? parseFormattedNumber(annualSavingsGoalEl.value) : 0;
             const monthlySavingsTarget = annualSavingsGoal / 12;
             const totalExpenses = fixedExpenses + essentialExpenses + discretionaryExpenses;
-            const remainingBudget = netIncome - totalExpenses - monthlySavingsTarget;
+            const remainingBudget = monthlyIncome - totalExpenses - monthlySavingsTarget;
 
-            // Update summary values
-            document.getElementById('budgetNetIncomeSummary').textContent = formatCurrency(netIncome);
-            document.getElementById('budgetTotalExpensesSummary').textContent = formatCurrency(totalExpenses);
-            document.getElementById('budgetMonthlySavingsSummary').textContent = formatCurrency(monthlySavingsTarget);
-            document.getElementById('budgetRemainingBudgetSummary').textContent = formatCurrency(remainingBudget);
+            // Update summary values (with null checks)
+            const netIncomeSummaryEl = document.getElementById('budgetNetIncomeSummary');
+            const totalExpensesSummaryEl = document.getElementById('budgetTotalExpensesSummary');
+            const monthlySavingsSummaryEl = document.getElementById('budgetMonthlySavingsSummary');
+            const remainingBudgetSummaryEl = document.getElementById('budgetRemainingBudgetSummary');
+            const savingsRateSummaryEl = document.getElementById('budgetSavingsRateSummary');
 
-            // Create main budget breakdown chart
-            createBudgetSummaryChart(netIncome, fixedExpenses, essentialExpenses, discretionaryExpenses, monthlySavingsTarget, remainingBudget);
+            if (netIncomeSummaryEl) netIncomeSummaryEl.textContent = formatCurrency(monthlyIncome);
+            if (totalExpensesSummaryEl) totalExpensesSummaryEl.textContent = formatCurrency(totalExpenses);
+            if (monthlySavingsSummaryEl) monthlySavingsSummaryEl.textContent = formatCurrency(monthlySavingsTarget);
+            if (remainingBudgetSummaryEl) remainingBudgetSummaryEl.textContent = formatCurrency(remainingBudget);
+
+            // Update savings rate
+            const savingsRate = monthlyIncome > 0 ? (monthlySavingsTarget / monthlyIncome) * 100 : 0;
+            if (savingsRateSummaryEl) savingsRateSummaryEl.textContent = savingsRate.toFixed(1) + '%';
+
+            // Create donut charts
+            console.log('📊 CREATING CHARTS with monthlyIncome:', monthlyIncome, 'expenses:', {fixedExpenses, essentialExpenses, discretionaryExpenses}, 'savings:', monthlySavingsTarget);
+            createSpendingDonutChart(fixedExpenses, essentialExpenses, discretionaryExpenses, Math.max(0, remainingBudget));
+            createSavingsDonutChart(monthlyIncome, annualSavingsGoal, monthlySavingsTarget);
             
-            // Create mini charts for each card
-            createMiniChart('incomeChart', [netIncome], ['#3b82f6']);
+            // Create mini charts for summary cards
+            createMiniChart('incomeChart', [monthlyIncome], ['#3b82f6']);
             createMiniChart('expensesChart', [fixedExpenses, essentialExpenses, discretionaryExpenses], ['#ef4444', '#f59e0b', '#8b5cf6']);
             createMiniChart('savingsChart', [monthlySavingsTarget], ['#10b981']);
             createMiniChart('remainingChart', [Math.max(0, remainingBudget)], remainingBudget >= 0 ? ['#10b981'] : ['#ef4444']);
@@ -20583,6 +20808,200 @@ make         }
             });
         }
 
+        function createSpendingDonutChart(fixed, essential, discretionary, remaining) {
+            const canvas = document.getElementById('spendingDonutChart');
+            const summaryContainer = document.getElementById('spendingSummary');
+            
+            if (!canvas || !summaryContainer) return;
+            
+            // Destroy existing chart
+            if (window.spendingDonutChart && typeof window.spendingDonutChart.destroy === 'function') {
+                window.spendingDonutChart.destroy();
+            }
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Debug canvas
+            console.log('📊 Spending chart canvas found:', !!canvas, 'Chart.js loaded:', typeof Chart !== 'undefined');
+            console.log('📊 Canvas dimensions:', canvas.offsetWidth, 'x', canvas.offsetHeight);
+            
+            // Check Chart.js availability
+            if (typeof Chart === 'undefined') {
+                console.error('❌ Chart.js not loaded for spending chart');
+                summaryContainer.innerHTML = '<div class="summary-item"><div class="summary-label">Chart.js not available</div></div>';
+                return;
+            }
+            
+            // Prepare data - only include non-zero amounts
+            const data = [];
+            const labels = [];
+            const colors = [];
+            const summaryItems = [];
+            
+            if (fixed > 0) {
+                data.push(fixed);
+                labels.push('Fixed Expenses');
+                colors.push('#dc2626'); // Red
+                summaryItems.push({ label: 'Fixed Expenses', amount: fixed, color: '#dc2626' });
+            }
+            
+            if (essential > 0) {
+                data.push(essential);
+                labels.push('Essential Expenses');
+                colors.push('#ea580c'); // Orange
+                summaryItems.push({ label: 'Essential Expenses', amount: essential, color: '#ea580c' });
+            }
+            
+            if (discretionary > 0) {
+                data.push(discretionary);
+                labels.push('Discretionary');
+                colors.push('#0891b2'); // Cyan
+                summaryItems.push({ label: 'Discretionary', amount: discretionary, color: '#0891b2' });
+            }
+            
+            if (remaining > 0) {
+                data.push(remaining);
+                labels.push('Remaining');
+                colors.push('#9ca3af'); // Gray
+                summaryItems.push({ label: 'Remaining', amount: remaining, color: '#9ca3af' });
+            }
+            
+            console.log('📊 Spending chart data:', { data, labels, colors });
+            
+            // Create chart only if we have data
+            if (data.length > 0) {
+                console.log('📊 Creating spending donut chart...');
+                window.spendingDonutChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                            cutout: '60%'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                        return `${context.label}: ${formatCurrency(context.parsed)} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            animateRotate: true,
+                            duration: 1000
+                        }
+                    }
+                });
+            }
+            
+            // Update summary
+            summaryContainer.innerHTML = summaryItems.map(item => `
+                <div class="summary-item">
+                    <div class="summary-label">
+                        <div class="color-dot" style="background-color: ${item.color}"></div>
+                        ${item.label}
+                    </div>
+                    <div class="summary-amount">${formatCurrency(item.amount)}</div>
+                </div>
+            `).join('');
+        }
+
+        function createSavingsDonutChart(monthlyNetIncome, annualSavingsGoal, monthlySavingsTarget) {
+            const canvas = document.getElementById('savingsDonutChart');
+            const summaryContainer = document.getElementById('savingsGoalSummary');
+            
+            if (!canvas || !summaryContainer) return;
+            
+            // Destroy existing chart
+            if (window.savingsDonutChart && typeof window.savingsDonutChart.destroy === 'function') {
+                window.savingsDonutChart.destroy();
+            }
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Calculate yearly savings capacity (net income * 12)
+            const yearlySavingsCapacity = monthlyNetIncome * 12;
+            const remainingCapacity = Math.max(0, yearlySavingsCapacity - annualSavingsGoal);
+            
+            const data = [];
+            const labels = [];
+            const colors = [];
+            const summaryItems = [];
+            
+            if (annualSavingsGoal > 0) {
+                data.push(annualSavingsGoal);
+                labels.push('Yearly Savings Goal');
+                colors.push('#16a34a'); // Green
+                summaryItems.push({ label: 'Yearly Savings Goal', amount: annualSavingsGoal, color: '#16a34a' });
+            }
+            
+            if (remainingCapacity > 0) {
+                data.push(remainingCapacity);
+                labels.push('Available Capacity');
+                colors.push('#e5e7eb'); // Light gray
+                summaryItems.push({ label: 'Available Capacity', amount: remainingCapacity, color: '#e5e7eb' });
+            }
+            
+            // Create chart only if we have meaningful data
+            if (data.length > 0 && yearlySavingsCapacity > 0) {
+                window.savingsDonutChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                            cutout: '60%'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const percentage = ((context.parsed / yearlySavingsCapacity) * 100).toFixed(1);
+                                        return `${context.label}: ${formatCurrency(context.parsed)} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        animation: {
+                            animateRotate: true,
+                            duration: 1000
+                        }
+                    }
+                });
+            }
+            
+            // Update summary
+            summaryContainer.innerHTML = summaryItems.map(item => `
+                <div class="summary-item">
+                    <div class="summary-label">
+                        <div class="color-dot" style="background-color: ${item.color}"></div>
+                        ${item.label}
+                    </div>
+                    <div class="summary-amount">${formatCurrency(item.amount)}</div>
+                </div>
+            `).join('');
+        }
+
         async function saveBudgetSettings() {
             // Calculate monthly savings target first
             const annualSavingsGoal = parseFormattedNumber(document.getElementById('budgetAnnualSavingsGoal').value);
@@ -20604,6 +21023,7 @@ make         }
             };
 
             localStorage.setItem('simpleBudgetSettings', JSON.stringify(settings));
+            console.log('💾 BUDGET SAVED (saveBudgetSettings):', settings);
 
             // Update the save target display after saving
             updateSaveTargetDisplay();
