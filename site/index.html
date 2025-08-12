@@ -1524,6 +1524,7 @@
             overflow: hidden;
             width: 100%;
             max-width: 100vw;
+            height: 67vh;
         }
         
         .budget-flow-screen {
@@ -5967,13 +5968,11 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 200ms ease;
-            width: 100%;
             display: flex;
-            align-items: center;
-            justify-content: center;
             text-align: center;
-            /* box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); */
             letter-spacing: 0.02em;
+            align-self: center;
+            justify-self: center;
         }
 
         .calculate-btn:hover {
@@ -20818,10 +20817,15 @@ make         }
             }
             
             console.log('📊 Spending chart data:', { data, labels, colors });
+            console.log('📊 Chart data validation:', { 
+                hasData: data.length > 0, 
+                dataValues: data,
+                totalValue: data.reduce((a, b) => a + b, 0) 
+            });
             
             // Create chart only if we have data
             if (data.length > 0) {
-                console.log('📊 Creating spending donut chart...');
+                console.log('📊 Creating spending donut chart with ctx:', !!ctx);
                 try {
                     window.spendingDonutChart = new Chart(ctx, {
                         type: 'doughnut',
@@ -20836,7 +20840,7 @@ make         }
                             }]
                         },
                         options: {
-                            responsive: true,
+                            responsive: false,
                             maintainAspectRatio: false,
                             plugins: {
                                 legend: { display: false },
@@ -20850,13 +20854,32 @@ make         }
                                     }
                                 }
                             },
-                            animation: {
-                                animateRotate: true,
-                                duration: 1000
-                            }
+                            animation: false
                         }
                     });
                     console.log('✅ Spending donut chart created successfully');
+                    
+                    // Force a render and check canvas content
+                    setTimeout(() => {
+                        if (window.spendingDonutChart) {
+                            try {
+                                window.spendingDonutChart.update('none');
+                                console.log('🔄 Chart updated, checking canvas content...');
+                                
+                                // Check if anything was drawn
+                                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                                const hasContent = imageData.data.some(pixel => pixel !== 0);
+                                console.log('🖼️ Canvas has visual content:', hasContent);
+                                
+                                if (!hasContent) {
+                                    console.log('⚠️ Chart created but nothing rendered - trying manual render...');
+                                    window.spendingDonutChart.render();
+                                }
+                            } catch (e) {
+                                console.error('❌ Chart update failed:', e);
+                            }
+                        }
+                    }, 50);
                 } catch (error) {
                     console.error('❌ Error creating spending chart:', error);
                 }
