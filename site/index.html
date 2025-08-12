@@ -5825,14 +5825,15 @@
 
         .chart-wrapper {
             position: relative;
-            width: 250px;
-            height: 250px;
+            width: 280px;
+            height: 280px;
             margin-bottom: 1rem;
         }
 
         .chart-wrapper canvas {
-            max-width: 100%;
-            max-height: 100%;
+            width: 280px !important;
+            height: 280px !important;
+            display: block;
         }
 
         .chart-summary {
@@ -8492,7 +8493,7 @@ margin-right: 0.5rem;
                                 <div class="budget-chart-container">
                                     <h3 class="chart-title">Monthly Spending</h3>
                                     <div class="chart-wrapper">
-                                        <canvas id="spendingDonutChart" width="250" height="250"></canvas>
+                                        <canvas id="spendingDonutChart" width="280" height="280"></canvas>
                                     </div>
                                     <div class="chart-summary" id="spendingSummary">
                                         <!-- Spending breakdown will be populated here -->
@@ -8503,7 +8504,7 @@ margin-right: 0.5rem;
                                 <div class="budget-chart-container">
                                     <h3 class="chart-title">Yearly Savings Goal</h3>
                                     <div class="chart-wrapper">
-                                        <canvas id="savingsDonutChart" width="250" height="250"></canvas>
+                                        <canvas id="savingsDonutChart" width="280" height="280"></canvas>
                                     </div>
                                     <div class="chart-summary" id="savingsGoalSummary">
                                         <!-- Savings breakdown will be populated here -->
@@ -20812,7 +20813,10 @@ make         }
             const canvas = document.getElementById('spendingDonutChart');
             const summaryContainer = document.getElementById('spendingSummary');
             
-            if (!canvas || !summaryContainer) return;
+            if (!canvas || !summaryContainer) {
+                console.log('❌ Spending chart elements not found - canvas:', !!canvas, 'summary:', !!summaryContainer);
+                return;
+            }
             
             // Destroy existing chart
             if (window.spendingDonutChart && typeof window.spendingDonutChart.destroy === 'function') {
@@ -20824,6 +20828,8 @@ make         }
             // Debug canvas
             console.log('📊 Spending chart canvas found:', !!canvas, 'Chart.js loaded:', typeof Chart !== 'undefined');
             console.log('📊 Canvas dimensions:', canvas.offsetWidth, 'x', canvas.offsetHeight);
+            console.log('📊 Canvas style display:', window.getComputedStyle(canvas).display);
+            console.log('📊 Canvas parent display:', window.getComputedStyle(canvas.parentElement).display);
             
             // Check Chart.js availability
             if (typeof Chart === 'undefined') {
@@ -20871,39 +20877,55 @@ make         }
             // Create chart only if we have data
             if (data.length > 0) {
                 console.log('📊 Creating spending donut chart...');
-                window.spendingDonutChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: data,
-                            backgroundColor: colors,
-                            borderWidth: 2,
-                            borderColor: '#ffffff',
-                            cutout: '60%'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                        return `${context.label}: ${formatCurrency(context.parsed)} (${percentage}%)`;
+                try {
+                    window.spendingDonutChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: data,
+                                backgroundColor: colors,
+                                borderWidth: 2,
+                                borderColor: '#ffffff',
+                                cutout: '60%'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                            return `${context.label}: ${formatCurrency(context.parsed)} (${percentage}%)`;
+                                        }
                                     }
                                 }
+                            },
+                            animation: {
+                                animateRotate: true,
+                                duration: 1000
                             }
-                        },
-                        animation: {
-                            animateRotate: true,
-                            duration: 1000
                         }
-                    }
-                });
+                    });
+                    console.log('✅ Spending donut chart created successfully:', !!window.spendingDonutChart);
+                    
+                    // Force chart update
+                    setTimeout(() => {
+                        if (window.spendingDonutChart) {
+                            window.spendingDonutChart.resize();
+                            window.spendingDonutChart.update('none');
+                            console.log('🔄 Spending chart forced update complete');
+                        }
+                    }, 100);
+                } catch (error) {
+                    console.error('❌ Error creating spending chart:', error);
+                }
+            } else {
+                console.log('⚠️ No spending data to display in chart');
             }
             
             // Update summary
@@ -20931,6 +20953,17 @@ make         }
             
             const ctx = canvas.getContext('2d');
             
+            // Debug canvas
+            console.log('💰 Savings chart canvas found:', !!canvas, 'Chart.js loaded:', typeof Chart !== 'undefined');
+            console.log('💰 Canvas dimensions:', canvas.offsetWidth, 'x', canvas.offsetHeight);
+            
+            // Check Chart.js availability  
+            if (typeof Chart === 'undefined') {
+                console.error('❌ Chart.js not loaded for savings chart');
+                summaryContainer.innerHTML = '<div class="summary-item"><div class="summary-label">Chart.js not available</div></div>';
+                return;
+            }
+            
             // Calculate yearly savings capacity (net income * 12)
             const yearlySavingsCapacity = monthlyNetIncome * 12;
             const remainingCapacity = Math.max(0, yearlySavingsCapacity - annualSavingsGoal);
@@ -20954,8 +20987,11 @@ make         }
                 summaryItems.push({ label: 'Available Capacity', amount: remainingCapacity, color: '#e5e7eb' });
             }
             
+            console.log('💰 Savings chart data:', { data, labels, colors, yearlySavingsCapacity, annualSavingsGoal });
+            
             // Create chart only if we have meaningful data
             if (data.length > 0 && yearlySavingsCapacity > 0) {
+                console.log('💰 Creating savings donut chart...');
                 window.savingsDonutChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
