@@ -6184,13 +6184,14 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 200ms ease;
-            display: flex;
+            display: inline-flex;
             text-align: center;
             letter-spacing: 0.02em;
-            align-self: center;
-            justify-self: center;
             align-items: center;
-            min-height: 0;
+            justify-content: center;
+            min-height: 2.5rem;
+            max-width: 80%;
+            margin: 0 auto;
         }
 
         .calculate-btn:hover {
@@ -6200,6 +6201,13 @@
         .calculate-btn:active {
             transform: translateY(0px);
             box-shadow: 0 2px 8px #4a9ea1;
+        }
+        
+        .button-center-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin: 0.5rem 0;
         }
         
         /* Manual Override Trigger Button */
@@ -8645,7 +8653,9 @@ margin-right: 0.5rem;
                                     </div>
                                 </div>
                                 
-                                <button type="button" class="calculate-btn" onclick="openTaxCalculationFlow()">Calculate take-home</button>
+                                <div class="button-center-container">
+                                    <button type="button" class="calculate-btn" onclick="openTaxCalculationFlow()">Calculate take-home</button>
+                                </div>
                             </div>
                             
                             <div class="budget-content-section" id="budgetTaxResults" style="display: none;">
@@ -19385,15 +19395,6 @@ margin-right: 0.5rem;
                 });
             });
         }
-
-        /**
-         * Header title removed - navigation labels now shown in bottom nav only.
-         */
-
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Header title removed - navigation now handled by bottom nav labels
-        });
 
         // Settings Slide-out Functions
         function openSettings() {
