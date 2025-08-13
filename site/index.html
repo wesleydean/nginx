@@ -21389,29 +21389,40 @@ margin-right: 0.5rem;
             const canvas = document.getElementById('savingsDonutChart');
             const summaryContainer = document.getElementById('savingsGoalSummary');
             
-            if (!canvas || !summaryContainer) return;
+            console.log('💰 createSavingsDonutChart called with:', {monthlyNetIncome, annualSavingsGoal, monthlySavingsTarget});
+            
+            if (!canvas) {
+                console.error('❌ Savings chart canvas not found!');
+                return;
+            }
+            
+            if (!summaryContainer) {
+                console.error('❌ Savings summary container not found!');
+                return;
+            }
             
             // Destroy existing chart
             if (window.savingsDonutChart && typeof window.savingsDonutChart.destroy === 'function') {
                 window.savingsDonutChart.destroy();
+                window.savingsDonutChart = null;
             }
             
-            // Reset canvas dimensions to defaults from HTML (don't set width/height directly)
+            // Reset canvas dimensions to defaults from HTML
             canvas.removeAttribute('style');
             canvas.style.display = 'block';
             canvas.style.width = '250px';
             canvas.style.height = '250px';
             
-            // No animation on chart load
-            canvas.style.opacity = '1';
-            canvas.style.transform = 'scale(1) rotate(0)';
-            
             const ctx = canvas.getContext('2d');
-            console.log('💰 Savings canvas dimensions set to:', canvas.width, 'x', canvas.height);
             
-            // Debug canvas
-            console.log('💰 Savings chart canvas found:', !!canvas, 'Chart.js loaded:', typeof Chart !== 'undefined');
-            console.log('💰 Canvas dimensions:', canvas.offsetWidth, 'x', canvas.offsetHeight);
+            // First, draw directly to canvas to verify it works
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgba(100, 200, 150, 0.3)";
+            ctx.fillRect(20, 20, canvas.width - 40, canvas.height - 40);
+            ctx.fillStyle = "black";
+            ctx.font = "14px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("Creating savings chart...", canvas.width / 2, canvas.height / 2);
             
             // Check Chart.js availability  
             if (typeof Chart === 'undefined') {
@@ -21421,7 +21432,7 @@ margin-right: 0.5rem;
             }
             
             // Calculate yearly savings capacity (net income * 12)
-            const yearlySavingsCapacity = monthlyNetIncome * 12;
+            const yearlySavingsCapacity = Math.max(1000, monthlyNetIncome * 12); // Ensure non-zero
             const remainingCapacity = Math.max(0, yearlySavingsCapacity - annualSavingsGoal);
             
             const data = [];
@@ -21429,13 +21440,13 @@ margin-right: 0.5rem;
             const colors = [];
             const summaryItems = [];
             
-            if (annualSavingsGoal > 0) {
-                data.push(annualSavingsGoal);
-                labels.push('Yearly Savings Goal');
-                colors.push('#16a34a'); // Green
-                summaryItems.push({ label: 'Yearly Savings Goal', amount: annualSavingsGoal, color: '#16a34a' });
-            }
+            // Always add savings goal data, even if it's zero
+            data.push(Math.max(1, annualSavingsGoal));
+            labels.push('Yearly Savings Goal');
+            colors.push('#16a34a'); // Green
+            summaryItems.push({ label: 'Yearly Savings Goal', amount: annualSavingsGoal, color: '#16a34a' });
             
+            // Add remaining capacity if positive
             if (remainingCapacity > 0) {
                 data.push(remainingCapacity);
                 labels.push('Available Capacity');
@@ -21443,11 +21454,9 @@ margin-right: 0.5rem;
                 summaryItems.push({ label: 'Available Capacity', amount: remainingCapacity, color: '#e5e7eb' });
             }
             
-            console.log('💰 Savings chart data:', { data, labels, colors, yearlySavingsCapacity, annualSavingsGoal });
+            console.log('💰 Creating savings donut chart with data:', data);
             
-            // Create chart only if we have meaningful data
-            if (data.length > 0 && yearlySavingsCapacity > 0) {
-                console.log('💰 Creating savings donut chart...');
+            try {
                 window.savingsDonutChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
@@ -21458,14 +21467,13 @@ margin-right: 0.5rem;
                             borderWidth: 6,
                             borderColor: '#ffffff',
                             cutout: '50%',
-                            borderRadius: 7, // More subtle border radius
-                            borderSkipped: false,
-                            animation: true
+                            borderRadius: 7,
+                            borderSkipped: false
                         }]
                     },
                     options: {
-                        responsive: false, // Set to false since we're using fixed dimensions
-                        maintainAspectRatio: false, // Not needed with responsive: false
+                        responsive: false,
+                        maintainAspectRatio: false,
                         plugins: {
                             legend: { display: false },
                             tooltip: {
@@ -21481,34 +21489,28 @@ margin-right: 0.5rem;
                     }
                 });
                 
-                // Force a render and check canvas content
-                setTimeout(() => {
-                    if (window.savingsDonutChart) {
-                        try {
-                            window.savingsDonutChart.update('none');
-                            console.log('🔄 Savings chart updated, checking canvas content...');
-                            
-                            // Check if anything was drawn
-                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                            const hasContent = imageData.data.some(pixel => pixel !== 0);
-                            console.log('🖼️ Savings canvas has visual content:', hasContent);
-                            
-                            if (!hasContent) {
-                                console.log('⚠️ Savings chart created but nothing rendered - trying manual render...');
-                                window.savingsDonutChart.render();
-                            }
-                        } catch (e) {
-                            console.error('❌ Savings chart update failed:', e);
-                        }
-                    }
-                }, 50);
+                console.log('✅ Savings chart created successfully');
+            } catch (error) {
+                console.error('❌ Error creating savings chart:', error);
             }
             
-            // Update summary without animation
+            // Force a render and check canvas content
+            setTimeout(() => {
+                if (window.savingsDonutChart) {
+                    try {
+                        window.savingsDonutChart.update('none');
+                        console.log('🔄 Savings chart updated');
+                    } catch (e) {
+                        console.error('❌ Savings chart update failed:', e);
+                    }
+                }
+            }, 100);
+            
+            // Update summary container
             summaryContainer.style.opacity = '1';
             summaryContainer.style.transform = 'translateY(0)';
             
-            summaryContainer.innerHTML = summaryItems.map((item, index) => `
+            summaryContainer.innerHTML = summaryItems.map((item) => `
                 <div class="summary-item">
                     <div class="summary-label">
                         <div class="color-dot" style="background-color: ${item.color}"></div>
