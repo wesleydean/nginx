@@ -1733,6 +1733,13 @@
             height: 16px;
         }
         
+        .budget-nav-btn.full-width {
+            width: 100%;
+            justify-content: center;
+            font-size: 1.1rem;
+            padding: 0.75rem;
+        }
+        
         .hidden {
             display: none;
         }
@@ -2318,13 +2325,35 @@
         /* Home Screen Styles */
         .home-section {
             margin-bottom: 1.5rem;
-            cursor: pointer;
             position: relative;
             background-color: hsl(var(--card)) !important;
             border: 2px solid hsl(var(--border) / 0.5) !important;
             border-radius: 12px;
             box-shadow: none !important;
             padding: 1rem;
+        }
+        
+        .card-footer {
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid hsl(var(--border) / 0.5);
+        }
+        
+        .full-width-cta {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .full-width-cta:hover {
+            background-color: #2563eb;
         }
         
         .home-section .card-header {
@@ -5955,6 +5984,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            animation: chartAppear 0.8s ease-out forwards;
+        }
+        
+        @keyframes chartAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .chart-wrapper canvas {
@@ -5976,8 +6017,7 @@
         
         /* Animation classes removed to fix chart display issues */
         
-        /* Removed opacity: 0 */
-
+        /* Summary items with staggered animation */
         .summary-item {
             display: flex;
             justify-content: space-between;
@@ -5986,7 +6026,28 @@
             background: #f9fafb;
             border-radius: 8px;
             font-size: 0.875rem;
-            transition: background-color 0.2s ease;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.5s ease-out forwards;
+            opacity: 0; /* Initial state for animation */
+            animation-fill-mode: forwards; /* Ensures it stays visible after animation */
+            will-change: opacity, transform; /* Performance optimization */
+        }
+        
+        [data-theme="dark"] .summary-item {
+            background: #1f2937;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .summary-item:hover {
@@ -6002,16 +6063,36 @@
         }
 
         .color-dot {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             flex-shrink: 0;
+            display: inline-block;
+            margin-right: 8px;
+            position: relative;
+            transition: transform 0.2s ease;
+        }
+        
+        .summary-item:hover .color-dot {
+            transform: scale(1.2);
         }
 
+        .summary-label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        
         .summary-amount {
             font-weight: 600;
             color: #111827;
+            letter-spacing: -0.01em;
+            text-align: right;
             font-size: 0.9rem;
+        }
+        
+        [data-theme="dark"] .summary-amount {
+            color: #f9fafb;
         }
 
         @media (max-width: 768px) {
@@ -7544,9 +7625,121 @@ margin-right: 0.5rem;
         }
 
     
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s ease-in-out;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .theme-toggle:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+        
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            color: hsl(var(--foreground));
+        }
     </style>
 </head>
 <body>
+   
+    
+    <script>
+        function testChart() {
+            console.log('🧪 Testing Chart.js...');
+            const ctx = document.getElementById('debugTestChart').getContext('2d');
+            
+            // Check Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('❌ Chart.js not loaded');
+                document.getElementById('debugTestChart').style.backgroundColor = '#ffcccc';
+                return;
+            }
+            
+            console.log('✅ Chart.js is available');
+            
+            // Create a simple chart
+            const testChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Red', 'Blue', 'Yellow', 'Green'],
+                    datasets: [{
+                        label: 'Test Dataset',
+                        data: [12, 19, 3, 5],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    animation: {
+                        duration: 1000
+                    }
+                }
+            });
+            
+            console.log('✅ Test chart created', testChartInstance);
+        }
+        
+        function testBudgetCharts() {
+            console.log('🧪 Testing budget charts directly...');
+            
+            // Find chart canvases
+            const spendingCanvas = document.getElementById('spendingDonutChart');
+            const savingsCanvas = document.getElementById('savingsDonutChart');
+            
+            console.log('📊 Spending canvas found:', !!spendingCanvas, spendingCanvas);
+            console.log('💰 Savings canvas found:', !!savingsCanvas, savingsCanvas);
+            
+            // Create test data
+            const fixed = 1000;
+            const essential = 800; 
+            const discretionary = 500;
+            const remaining = 300;
+            
+            // Call the chart creation functions directly
+            if (typeof createSpendingDonutChart === 'function') {
+                console.log('📊 Creating spending chart with test data...');
+                createSpendingDonutChart(fixed, essential, discretionary, remaining);
+            } else {
+                console.error('❌ createSpendingDonutChart function not found');
+            }
+            
+            if (typeof createSavingsDonutChart === 'function') {
+                console.log('💰 Creating savings chart with test data...');
+                createSavingsDonutChart(3000, 12000, 1000);
+            } else {
+                console.error('❌ createSavingsDonutChart function not found');
+            }
+        }
+    </script>
     <div id="app" class="app-container">
        
 
@@ -8651,6 +8844,9 @@ margin-right: 0.5rem;
                     <button type="button" class="budget-nav-btn primary hidden" id="budgetSaveBtn" onclick="saveBudgetSettings()">
                         <i data-lucide="check" class="w-4 h-4"></i>
                         <span>Save Budget</span>
+                    </button>
+                    <button type="button" class="budget-nav-btn primary full-width hidden" id="budgetReviewBtn" onclick="startBudgetReview()">
+                        <span>Review</span>
                     </button>
                 </div>
             </div>
@@ -19659,35 +19855,71 @@ margin-right: 0.5rem;
         function openBudgetFlow() {
             const budgetOverlay = document.getElementById('budgetOverlay');
             const budgetPanel = document.getElementById('budgetPanel');
-
-            // Show budget overlay and panel
+            
+            // First, prepare the summary page before showing anything
+            document.querySelectorAll('.budget-flow-screen').forEach(screen => {
+                screen.classList.remove('active', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'prepare-left', 'prepare-right');
+            });
+            
+            // Pre-activate summary screen before overlay is shown (to avoid flicker of screen 1)
+            document.getElementById('budgetScreen6').classList.add('active');
+            currentBudgetStep = 6;
+            updateBudgetProgress(6);
+            
+            // Now show budget overlay and panel after preparation
             budgetOverlay.classList.add('active');
             budgetPanel.classList.add('active');
-
+            
             // Wait for slide-up animation to complete, then initialize
             setTimeout(() => {
-                // Reset to first step - clear any existing states first
-                document.querySelectorAll('.budget-flow-screen').forEach(screen => {
-                    screen.classList.remove('active', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'prepare-left', 'prepare-right');
-                });
+                // Load settings
+                loadBudgetSettings();
                 
-                // Show first screen directly
-                document.getElementById('budgetScreen1').classList.add('active');
-                currentBudgetStep = 1;
-                updateBudgetProgress(1);
-                updateBudgetNavigation(1);
+                // Custom navigation for summary view
+                showSummaryViewNavigation();
                 
-                // Simple, robust initialization with proper error handling
+                // Update summary content and initialize charts
+                updateBudgetSummary();
+                
+                // Explicitly call updateSummaryCharts with delays to ensure charts are created
                 setTimeout(() => {
-                    // Load settings first
-                    loadBudgetSettings();
+                    console.log('🧪 Preparing to create budget summary charts...');
                     
-                    // Then initialize with a single comprehensive function
+                    // First clear any existing charts
+                    if (window.spendingDonutChart && typeof window.spendingDonutChart.destroy === 'function') {
+                        window.spendingDonutChart.destroy();
+                    }
+                    if (window.savingsDonutChart && typeof window.savingsDonutChart.destroy === 'function') {
+                        window.savingsDonutChart.destroy();
+                    }
+                    
+                    updateSummaryCharts();
+                    
+                    // Force a second chart update after a slight delay for better reliability
                     setTimeout(() => {
-                        initializeBudgetIncomeInput();
-                    }, 100);
-                }, 400);
-            }, 400);
+                        updateSummaryCharts();
+                    }, 250);
+                }, 200);
+                
+                // Initialize with a single comprehensive function
+                setTimeout(() => {
+                    initializeBudgetIncomeInput();
+                }, 100);
+            }, 300);
+        }
+        
+        // Start budget review from the first screen
+        function startBudgetReview() {
+            // Start from screen 1 to review all budget steps
+            document.querySelectorAll('.budget-flow-screen').forEach(screen => {
+                screen.classList.remove('active', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'prepare-left', 'prepare-right');
+            });
+            
+            // Show first screen
+            document.getElementById('budgetScreen1').classList.add('active');
+            currentBudgetStep = 1;
+            updateBudgetProgress(1);
+            updateBudgetNavigation(1);
         }
         
         // Make function globally accessible
@@ -19819,9 +20051,16 @@ margin-right: 0.5rem;
             const prevBtn = document.getElementById('budgetPrevBtn');
             const nextBtn = document.getElementById('budgetNextBtn');
             const saveBtn = document.getElementById('budgetSaveBtn');
+            const reviewBtn = document.getElementById('budgetReviewBtn');
+            
+            // Hide review button first (it's only for summary view)
+            if (reviewBtn) {
+                reviewBtn.classList.add('hidden');
+            }
             
             // Previous button
             prevBtn.disabled = step === 1;
+            prevBtn.classList.remove('hidden');
             
             // Next/Save buttons
             if (step === totalBudgetSteps) {
@@ -19831,6 +20070,21 @@ margin-right: 0.5rem;
                 nextBtn.classList.remove('hidden');
                 saveBtn.classList.add('hidden');
             }
+        }
+        
+        function showSummaryViewNavigation() {
+            const prevBtn = document.getElementById('budgetPrevBtn');
+            const nextBtn = document.getElementById('budgetNextBtn');
+            const saveBtn = document.getElementById('budgetSaveBtn');
+            const reviewBtn = document.getElementById('budgetReviewBtn');
+            
+            // Hide standard navigation buttons
+            prevBtn.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            saveBtn.classList.add('hidden');
+            
+            // Show review button
+            reviewBtn.classList.remove('hidden');
         }
         
         function saveBudgetState() {
@@ -20853,7 +21107,18 @@ margin-right: 0.5rem;
         // Simplified approach - no helper function needed
 
         function updateSummaryCharts() {
-            // No animation reset needed
+            console.log('📊 Updating summary charts...');
+            
+            // Check if charts exist in the DOM
+            const spendingCanvas = document.getElementById('spendingDonutChart');
+            const savingsCanvas = document.getElementById('savingsDonutChart');
+            
+            if (!spendingCanvas || !savingsCanvas) {
+                console.error('❌ Chart canvas elements not found in the DOM');
+                return;
+            } else {
+                console.log('✅ Chart canvas elements found in the DOM');
+            }
             
             const netIncomeEl = document.getElementById('budgetNetIncome');
             const grossIncomeEl = document.getElementById('budgetGrossIncome');
@@ -20970,46 +21235,39 @@ margin-right: 0.5rem;
         // Removed financial indicators functionality - focusing only on donut charts
 
         function createSpendingDonutChart(fixed, essential, discretionary, remaining) {
+            const statusEl = document.getElementById('chartStatus');
+            if (statusEl) statusEl.textContent = 'Creating spending chart...';
+            
+            console.log('📊 createSpendingDonutChart called with data:', {fixed, essential, discretionary, remaining});
+            
+            // Check if Chart.js is loaded
+            if (typeof Chart === 'undefined') {
+                console.error('❌ CRITICAL ERROR: Chart.js is not loaded!');
+                if (statusEl) statusEl.textContent = 'ERROR: Chart.js is not loaded!';
+                return;
+            } else {
+                console.log('✅ Chart.js is available - version:', Chart.version);
+            }
+            
             const canvas = document.getElementById('spendingDonutChart');
             const summaryContainer = document.getElementById('spendingSummary');
             
-            if (!canvas || !summaryContainer) {
-                console.log('❌ Spending chart elements not found - canvas:', !!canvas, 'summary:', !!summaryContainer);
+            if (!canvas) {
+                console.error('❌ Spending chart canvas not found!');
+                if (statusEl) statusEl.textContent = 'ERROR: Spending chart canvas not found!';
                 return;
             }
             
-            // Destroy existing chart completely
+            console.log('📊 Canvas found:', canvas.id);
+            
+            // Destroy existing chart if it exists
             if (window.spendingDonutChart) {
                 try {
                     window.spendingDonutChart.destroy();
+                    window.spendingDonutChart = null;
                 } catch (e) {
-                    console.log('Chart destroy error (expected):', e);
+                    console.log('Chart destroy error:', e);
                 }
-                window.spendingDonutChart = null;
-            }
-            
-            // Add subtle animation before creating the chart
-            canvas.style.opacity = '0';
-            canvas.style.transform = 'scale(0.95) rotate(-1deg)';
-            setTimeout(() => {
-                canvas.style.transition = 'all 0.6s ease-out';
-                canvas.style.opacity = '1';
-                canvas.style.transform = 'scale(1) rotate(0)';
-            }, 100);
-            
-            const ctx = canvas.getContext('2d');
-            
-            // Debug canvas
-            console.log('📊 Spending chart canvas found:', !!canvas, 'Chart.js loaded:', typeof Chart !== 'undefined');
-            console.log('📊 Canvas dimensions:', canvas.offsetWidth, 'x', canvas.offsetHeight);
-            console.log('📊 Canvas style display:', window.getComputedStyle(canvas).display);
-            console.log('📊 Canvas parent display:', window.getComputedStyle(canvas.parentElement).display);
-            
-            // Check Chart.js availability
-            if (typeof Chart === 'undefined') {
-                console.error('❌ Chart.js not loaded for spending chart');
-                summaryContainer.innerHTML = '<div class="summary-item"><div class="summary-label">Chart.js not available</div></div>';
-                return;
             }
             
             // Prepare data - only include non-zero amounts
@@ -21046,98 +21304,67 @@ margin-right: 0.5rem;
                 summaryItems.push({ label: 'Remaining', amount: remaining, color: '#e5e7eb' });
             }
             
-            console.log('📊 Spending chart data:', { data, labels, colors });
-            console.log('📊 Chart data validation:', { 
-                hasData: data.length > 0, 
-                dataValues: data,
-                totalValue: data.reduce((a, b) => a + b, 0) 
-            });
+            console.log('📊 Chart data:', { data, labels, colors });
             
-            // Create chart only if we have data
-            if (data.length > 0) {
-                console.log('📊 Creating spending donut chart with ctx:', !!ctx);
-                try {
-                    // Destroy existing chart if it exists
-                    if (window.spendingDonutChart) {
-                        window.spendingDonutChart.destroy();
-                    }
-                    
-                    window.spendingDonutChart = new Chart(ctx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                data: data,
-                                backgroundColor: colors,
-                                borderWidth: 2,
-                                borderColor: '#ffffff',
-                                cutout: '60%',
-                                borderRadius: 8, // More subtle border radius
-                                borderSkipped: false
-                            }]
+            // First, draw directly to canvas to verify it works
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgba(200, 100, 100, 0.3)";
+            ctx.fillRect(20, 20, canvas.width - 40, canvas.height - 40);
+            ctx.fillStyle = "black";
+            ctx.font = "14px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("Creating chart...", canvas.width / 2, canvas.height / 2);
+            
+            // Create a simple chart config - maximize compatibility
+            try {
+                window.spendingDonutChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            borderColor: '#ffffff',
+                            borderWidth: 6,
+                            cutout: '50%',
+                            borderRadius: 7,
+                            borderSkipped: false,
+                            animation: true
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
                         },
-                        options: {
-                            responsive: false,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                            const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                            return `${context.label}: ${formatCurrency(context.parsed)} (${percentage}%)`;
-                                        }
-                                    }
-                                }
-                            },
-                            animation: {
-                                animateRotate: true,
-                                animateScale: true,
-                                duration: 1000
-                            }
-                        }
-                    });
-                    console.log('✅ Spending donut chart created successfully');
-                    
-                    // Force a render and check canvas content
-                    setTimeout(() => {
-                        if (window.spendingDonutChart) {
-                            try {
-                                window.spendingDonutChart.update('none');
-                                console.log('🔄 Chart updated, checking canvas content...');
-                                
-                                // Check if anything was drawn
-                                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                                const hasContent = imageData.data.some(pixel => pixel !== 0);
-                                console.log('🖼️ Canvas has visual content:', hasContent);
-                                
-                                if (!hasContent) {
-                                    console.log('⚠️ Chart created but nothing rendered - trying manual render...');
-                                    window.spendingDonutChart.render();
-                                }
-                            } catch (e) {
-                                console.error('❌ Chart update failed:', e);
-                            }
-                        }
-                    }, 50);
-                } catch (error) {
-                    console.error('❌ Error creating spending chart:', error);
-                }
-            } else {
-                console.log('⚠️ No spending data to display in chart');
+                        animation: false
+                    }
+                });
+                
+                console.log('✅ Spending chart created successfully');
+                if (statusEl) statusEl.textContent = 'Chart created successfully!';
+                
+            } catch (error) {
+                console.error('❌ Error creating spending chart:', error);
+                if (statusEl) statusEl.textContent = 'ERROR: ' + error.message;
             }
             
             // Update summary
-            summaryContainer.innerHTML = summaryItems.map(item => `
-                <div class="summary-item">
-                    <div class="summary-label">
-                        <div class="color-dot" style="background-color: ${item.color}"></div>
-                        ${item.label}
+            if (summaryContainer) {
+                summaryContainer.innerHTML = summaryItems.map((item, index) => `
+                    <div class="summary-item">
+                        <div class="summary-label">
+                            <div class="color-dot" style="background-color: ${item.color}"></div>
+                            ${item.label}
+                        </div>
+                        <div class="summary-amount">${formatCurrency(item.amount)}</div>
                     </div>
-                    <div class="summary-amount">${formatCurrency(item.amount)}</div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         }
 
         function createSavingsDonutChart(monthlyNetIncome, annualSavingsGoal, monthlySavingsTarget) {
@@ -21151,16 +21378,18 @@ margin-right: 0.5rem;
                 window.savingsDonutChart.destroy();
             }
             
-            // Add subtle animation before creating the chart
-            canvas.style.opacity = '0';
-            canvas.style.transform = 'scale(0.95) rotate(1deg)';
-            setTimeout(() => {
-                canvas.style.transition = 'all 0.6s ease-out';
-                canvas.style.opacity = '1';
-                canvas.style.transform = 'scale(1) rotate(0)';
-            }, 300);
+            // Reset canvas dimensions to defaults from HTML (don't set width/height directly)
+            canvas.removeAttribute('style');
+            canvas.style.display = 'block';
+            canvas.style.width = '250px';
+            canvas.style.height = '250px';
+            
+            // No animation on chart load
+            canvas.style.opacity = '1';
+            canvas.style.transform = 'scale(1) rotate(0)';
             
             const ctx = canvas.getContext('2d');
+            console.log('💰 Savings canvas dimensions set to:', canvas.width, 'x', canvas.height);
             
             // Debug canvas
             console.log('💰 Savings chart canvas found:', !!canvas, 'Chart.js loaded:', typeof Chart !== 'undefined');
@@ -21208,16 +21437,17 @@ margin-right: 0.5rem;
                         datasets: [{
                             data: data,
                             backgroundColor: colors,
-                            borderWidth: 2,
+                            borderWidth: 6,
                             borderColor: '#ffffff',
-                            cutout: '60%',
-                            borderRadius: 8, // More subtle border radius
-                            borderSkipped: false
+                            cutout: '50%',
+                            borderRadius: 7, // More subtle border radius
+                            borderSkipped: false,
+                            animation: true
                         }]
                     },
                     options: {
-                        responsive: false,
-                        maintainAspectRatio: false,
+                        responsive: false, // Set to false since we're using fixed dimensions
+                        maintainAspectRatio: false, // Not needed with responsive: false
                         plugins: {
                             legend: { display: false },
                             tooltip: {
@@ -21229,17 +21459,38 @@ margin-right: 0.5rem;
                                 }
                             }
                         },
-                        animation: {
-                            animateRotate: true,
-                            animateScale: true,
-                            duration: 1000
-                        }
+                        animation: false
                     }
                 });
+                
+                // Force a render and check canvas content
+                setTimeout(() => {
+                    if (window.savingsDonutChart) {
+                        try {
+                            window.savingsDonutChart.update('none');
+                            console.log('🔄 Savings chart updated, checking canvas content...');
+                            
+                            // Check if anything was drawn
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            const hasContent = imageData.data.some(pixel => pixel !== 0);
+                            console.log('🖼️ Savings canvas has visual content:', hasContent);
+                            
+                            if (!hasContent) {
+                                console.log('⚠️ Savings chart created but nothing rendered - trying manual render...');
+                                window.savingsDonutChart.render();
+                            }
+                        } catch (e) {
+                            console.error('❌ Savings chart update failed:', e);
+                        }
+                    }
+                }, 50);
             }
             
-            // Update summary
-            summaryContainer.innerHTML = summaryItems.map(item => `
+            // Update summary without animation
+            summaryContainer.style.opacity = '1';
+            summaryContainer.style.transform = 'translateY(0)';
+            
+            summaryContainer.innerHTML = summaryItems.map((item, index) => `
                 <div class="summary-item">
                     <div class="summary-label">
                         <div class="color-dot" style="background-color: ${item.color}"></div>
@@ -21884,6 +22135,283 @@ margin-right: 0.5rem;
             }, 10); // Short timeout to ensure animation starts
         }
 
+        // Standalone Chart.js Test - Completely independent function
+        function testChartJS() {
+            console.log('🧪 Testing Chart.js...');
+            
+            // Update status
+            const statusEl = document.getElementById('chartStatus');
+            if (statusEl) statusEl.textContent = 'Testing Chart.js...';
+            
+            // Check if Chart.js is available
+            if (typeof Chart === 'undefined') {
+                console.error('❌ Chart.js not loaded');
+                if (statusEl) statusEl.textContent = 'ERROR: Chart.js not available!';
+                return false;
+            }
+            
+            console.log('✅ Chart.js is available');
+            if (statusEl) statusEl.textContent = 'Chart.js is available. Creating test chart...';
+            
+            // Get canvas and verify
+            const canvas = document.getElementById('testChart');
+            if (!canvas) {
+                console.error('❌ Test chart canvas not found');
+                if (statusEl) statusEl.textContent = 'ERROR: Canvas not found!';
+                return false;
+            }
+            
+            // Get context
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('❌ Could not get canvas context');
+                if (statusEl) statusEl.textContent = 'ERROR: Could not get canvas context!';
+                return false;
+            }
+            
+            // Draw rectangle first
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'red';
+            ctx.fillRect(10, 10, 50, 50);
+            console.log('✅ Drew a red rectangle on canvas');
+            
+            // Create a simple super-basic chart without destroying first
+            try {
+                // Create a completely standalone chart with basic data
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Red', 'Blue', 'Yellow', 'Green'],
+                        datasets: [{
+                            label: 'Test Data',
+                            data: [12, 19, 3, 5],
+                            backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0']
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false
+                    }
+                });
+                
+                console.log('✅ Test chart created successfully');
+                if (statusEl) statusEl.textContent = 'Chart created successfully!';
+                return true;
+            } catch (error) {
+                console.error('❌ Error creating chart:', error);
+                if (statusEl) statusEl.textContent = 'ERROR: ' + error.message;
+                return false;
+            }
+        }
+
+        // Create a simpler direct test for budget charts
+        function testBudgetChartsDirectly() {
+            console.log('🧪 Testing budget charts directly with dummy data...');
+            
+            const statusEl = document.getElementById('chartStatus');
+            if (statusEl) statusEl.textContent = 'Testing budget charts...';
+            
+            // Don't destroy charts first - create new ones directly
+            
+            // Check Chart.js availability
+            if (typeof Chart === 'undefined') {
+                console.error('❌ Chart.js not loaded');
+                if (statusEl) statusEl.textContent = 'ERROR: Chart.js not available!';
+                return;
+            }
+            
+            // Create spending chart with dummy data
+            try {
+                console.log('📊 Creating spending chart with dummy data');
+                createSpendingDonutChart(1000, 2000, 500, 1500);
+                console.log('✅ Spending chart creation attempted');
+            } catch (e) {
+                console.error('❌ Error creating spending chart:', e);
+            }
+            
+            // Create savings chart with dummy data
+            try {
+                console.log('� Creating savings chart with dummy data');
+                createSavingsDonutChart(5000, 12000, 1000);
+                console.log('✅ Savings chart creation attempted');
+            } catch (e) {
+                console.error('❌ Error creating savings chart:', e);
+            }
+            
+            if (statusEl) statusEl.textContent = 'Budget charts test completed. Check console for details.';
+        }
+        
+        // Set up test event handlers on DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 DOM loaded, setting up chart tests');
+            
+            // Test chart button
+            const testChartBtn = document.getElementById('testChartBtn');
+            if (testChartBtn) {
+                testChartBtn.addEventListener('click', function() {
+                    console.log('🧪 Test chart button clicked');
+                    testChartJS();
+                });
+            } else {
+                console.error('❌ Test chart button not found');
+            }
+            
+            // Fresh test chart button
+            const freshTestBtn = document.getElementById('freshTestBtn');
+            if (freshTestBtn) {
+                freshTestBtn.addEventListener('click', function() {
+                    console.log('🧪 Fresh test chart button clicked');
+                    createFreshTestChart();
+                });
+            } else {
+                console.error('❌ Fresh test button not found');
+            }
+
+            // Test budget charts button
+            const testBudgetChartsBtn = document.getElementById('testBudgetCharts');
+            if (testBudgetChartsBtn) {
+                testBudgetChartsBtn.addEventListener('click', function() {
+                    console.log('🧪 Test budget charts button clicked');
+                    testBudgetChartsDirectly();
+                });
+            } else {
+                console.error('❌ Test budget charts button not found');
+            }
+            
+            // Red square for reinitializing all charts
+            const testSquare = document.getElementById('testSquare');
+            if (testSquare) {
+                testSquare.addEventListener('click', function() {
+                    console.log('🔄 Red square clicked - reinitializing all charts');
+                    
+                    // Destroy all existing charts
+                    ['spendingDonutChart', 'savingsDonutChart', 'testChart'].forEach(chartId => {
+                        const chartVar = window[chartId];
+                        if (chartVar) {
+                            try {
+                                chartVar.destroy();
+                                window[chartId] = null;
+                            } catch (e) {
+                                console.log(`Chart destroy error (${chartId}):`, e);
+                            }
+                        }
+                    });
+                    
+                    // Recreate all charts
+                    setTimeout(() => {
+                        testChartJS();
+                        testBudgetChartsDirectly();
+                    }, 100);
+                });
+                
+                testSquare.style.cursor = 'pointer';
+                testSquare.title = 'Click to reinitialize all charts';
+            }
+            
+            // Run initial chart test with delay
+            setTimeout(createFreshTestChart, 500);
+        });
+        
+        // Create a completely fresh test chart without any dependencies on existing charts
+        function createFreshTestChart() {
+            console.log('🧪 Creating fresh test chart...');
+            
+            const statusEl = document.getElementById('chartStatus');
+            if (statusEl) statusEl.textContent = 'Creating fresh test chart...';
+            
+            // Check if Chart.js is available
+            if (typeof Chart === 'undefined') {
+                console.error('❌ Chart.js is not loaded');
+                if (statusEl) statusEl.textContent = 'ERROR: Chart.js is not available!';
+                return;
+            }
+            
+            console.log('✅ Chart.js is available - version:', Chart.version);
+            
+            // Get the container
+            const container = document.getElementById('freshChartContainer');
+            if (!container) {
+                console.error('❌ Fresh chart container not found');
+                return;
+            }
+            
+            // Make the container visible
+            container.style.display = 'block';
+            
+            // Clear any previous content
+            container.innerHTML = '';
+            
+            // Create a brand new canvas element
+            const canvas = document.createElement('canvas');
+            canvas.id = 'freshTestCanvas_' + Date.now(); // Unique ID to avoid conflicts
+            canvas.width = 250;
+            canvas.height = 200;
+            canvas.style.border = '1px solid #ddd';
+            canvas.style.display = 'block';
+            canvas.style.margin = '0 auto';
+            container.appendChild(canvas);
+            
+            // Get the canvas context
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('❌ Could not get canvas context');
+                return;
+            }
+            
+            // First draw a red rectangle to test the canvas works
+            ctx.fillStyle = 'red';
+            ctx.fillRect(10, 10, 50, 50);
+            console.log('✅ Drew a red rectangle on canvas');
+            
+            try {
+                // Create a simple chart
+                const chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['A', 'B', 'C', 'D'],
+                        datasets: [{
+                            label: 'Fresh Test',
+                            data: [12, 19, 3, 5],
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.5)',
+                                'rgba(54, 162, 235, 0.5)',
+                                'rgba(255, 206, 86, 0.5)',
+                                'rgba(75, 192, 192, 0.5)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false
+                    }
+                });
+                
+                console.log('✅ Fresh test chart created successfully');
+                if (statusEl) statusEl.textContent = 'Fresh chart created successfully!';
+                
+                // Add a success message to container
+                const message = document.createElement('div');
+                message.textContent = 'Chart.js working correctly';
+                message.style.textAlign = 'center';
+                message.style.marginTop = '10px';
+                message.style.color = 'green';
+                container.appendChild(message);
+                
+            } catch (error) {
+                console.error('❌ Error creating fresh test chart:', error);
+                if (statusEl) statusEl.textContent = 'ERROR: ' + error.message;
+                
+                // Add error message to container
+                const message = document.createElement('div');
+                message.textContent = 'Error: ' + error.message;
+                message.style.textAlign = 'center';
+                message.style.marginTop = '10px';
+                message.style.color = 'red';
+                container.appendChild(message);
+            }
+        }
+    </script>
+        });
 
     </script>
 
