@@ -170,7 +170,7 @@
         }
         /* shadcn/ui Design System */
         :root {
-            /* Colors */
+            /* Light mode colors */
             --background: 0 0% 100%;
             --foreground: 222.2 84% 4.9%;
             --card: 0 0% 100%;
@@ -188,6 +188,28 @@
             --destructive: 0 84.2% 60.2%;
             --destructive-foreground: 210 40% 98%;
             --border: 214.3 31.8% 91.4%;
+        }
+        
+        [data-theme="dark"] {
+            /* Dark mode colors */
+            --background: 222.2 84% 4.9%;
+            --foreground: 210 40% 98%;
+            --card: 222.2 84% 9.8%;
+            --card-foreground: 210 40% 98%;
+            --popover: 222.2 84% 4.9%;
+            --popover-foreground: 210 40% 98%;
+            --primary: 217.2 91.2% 59.8%;
+            --primary-foreground: 222.2 47.4% 11.2%;
+            --secondary: 217.2 32.6% 17.5%;
+            --secondary-foreground: 210 40% 98%;
+            --muted: 217.2 32.6% 17.5%;
+            --muted-foreground: 215 20.2% 65.1%;
+            --accent: 217.2 32.6% 17.5%;
+            --accent-foreground: 210 40% 98%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 217.2 32.6% 17.5%;
+            color-scheme: dark;
             --input: 214.3 31.8% 91.4%;
             --ring: 221.2 83.2% 53.3%;
             --radius: 0.5rem;
@@ -957,17 +979,21 @@
         }
         
         .chart-fade-slide-in {
-            animation: slideInFromLeft 0.3s ease-out forwards;
+            animation: slideInFromLeft 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25) forwards;
         }
         
         .chart-fade-slide-out {
-            animation: slideOutToRight 0.3s ease-out forwards;
+            animation: slideOutToRight 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25) forwards;
         }
         
         @keyframes slideInFromLeft {
             0% {
                 opacity: 0;
                 transform: translateX(-20px);
+            }
+            85% {
+                opacity: 1;
+                transform: translateX(2px);
             }
             100% {
                 opacity: 1;
@@ -980,11 +1006,17 @@
                 opacity: 1;
                 transform: translateX(0);
             }
+            20% {
+                opacity: 1;
+                transform: translateX(-2px);
+            }
             100% {
                 opacity: 0;
                 transform: translateX(20px);
             }
         }
+        
+        /* Animation keyframes removed to fix chart display issues */
         
         .chart-bar-stagger-in {
             opacity: 0;
@@ -1012,6 +1044,30 @@
             }
             100% {
                 transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideUpOpen {
+            0% {
+                transform: translateY(100%);
+            }
+            85% {
+                transform: translateY(-2%);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideDownClose {
+            0% {
+                transform: translateY(0);
+            }
+            20% {
+                transform: translateY(-3%);
+            }
+            100% {
+                transform: translateY(100%);
             }
         }
         
@@ -1521,7 +1577,7 @@
         
         
         .progress-label {
-            font-size: 0.875rem;
+            font-size: 0rem;
             color: hsl(var(--muted-foreground));
         }
         
@@ -1545,12 +1601,13 @@
             height: 100%;
             opacity: 0;
             visibility: hidden;
-            transition: transform 0.25s ease, opacity 0.25s ease;
+            transition: transform 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25), opacity 0.3s ease;
             flex-direction: column;
             display: flex;
             transform: translateX(0);
             box-sizing: border-box;
             overflow-x: hidden;
+            padding-bottom: 80px; /* Add extra padding at the bottom */
         }
         
         .budget-flow-screen.active {
@@ -1561,12 +1618,12 @@
         
         .budget-flow-screen.slide-out-left {
             opacity: 0;
-            transform: translateX(-20px);
+            transform: translateX(-30px);
         }
         
         .budget-flow-screen.slide-out-right {
             opacity: 0;
-            transform: translateX(20px);
+            transform: translateX(30px);
         }
         
         .budget-flow-screen.slide-in-left {
@@ -1585,13 +1642,13 @@
         .budget-flow-screen.prepare-left {
             opacity: 0;
             visibility: visible;
-            transform: translateX(-20px);
+            transform: translateX(-30px);
         }
         
         .budget-flow-screen.prepare-right {
             opacity: 0;
             visibility: visible;
-            transform: translateX(20px);
+            transform: translateX(30px);
         }
         
         @keyframes fadeIn {
@@ -2083,7 +2140,7 @@
         }
         
         .budget-step-description {
-            font-size: 0.875rem;
+            font-size: 0.975rem;
             margin: 0.25rem 2rem;
         }
         
@@ -4994,17 +5051,23 @@
             background: rgba(0,0,0,0.5);
             opacity: 0;
             visibility: hidden;
-            transition: visibility 0s linear 0s;
+            transition: visibility 0s;
             z-index: 2000;
         }
         
         .slide-out-overlay.active {
             opacity: 1;
             visibility: visible;
+            transition: visibility 0s;
+        }
+        
+        .slide-out-overlay.closing {
+            opacity: 1;
+            visibility: visible;
         }
         
         .slide-out-content {
-            position: absolute;
+            position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
@@ -5012,13 +5075,18 @@
             border-radius: 20px 20px 0 0;
             padding: 20px 20px 40px;
             transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25);
-            max-height: 80vh;
+            max-height: 95vh;
             overflow-y: auto;
+            padding-bottom: 120px; /* Add extra padding at the bottom to show content beyond the bottom edge */
+            transition: transform 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25);
         }
         
         .slide-out-overlay.active .slide-out-content {
             transform: translateY(0);
+        }
+        
+        .slide-out-overlay.closing .slide-out-content {
+            animation: slideDownClose 0.5s forwards;
         }
         
         .slide-out-header {
@@ -5071,17 +5139,23 @@
             background: rgba(0,0,0,0.5);
             opacity: 0;
             visibility: hidden;
-            transition: visibility 0s linear 0s;
+            transition: visibility 0s;
             z-index: 2000;
         }
         
         .account-management-slide-out.active {
             opacity: 1;
             visibility: visible;
+            transition: visibility 0s;
+        }
+        
+        .account-management-slide-out.closing {
+            opacity: 1;
+            visibility: visible;
         }
         
         .account-management-content {
-            position: absolute;
+            position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
@@ -5089,13 +5163,18 @@
             border-radius: 20px 20px 0 0;
             padding: 20px 20px 40px;
             transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25);
-            max-height: 80vh;
+            max-height: 95vh;
             overflow-y: auto;
+            padding-bottom: 120px; /* Add extra padding at the bottom to show content beyond the bottom edge */
+            transition: transform 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25);
         }
         
         .account-management-slide-out.active .account-management-content {
             transform: translateY(0);
+        }
+        
+        .account-management-slide-out.closing .account-management-content {
+            animation: slideDownClose 0.5s forwards;
         }
         
         .account-management-header {
@@ -5820,7 +5899,6 @@
             padding: 2rem 1.5rem;
             background: #fff;
             border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             border: 1px solid #e5e7eb;
             min-height: 500px;
         }
@@ -5832,6 +5910,42 @@
             margin-bottom: 1.5rem;
             text-align: center;
         }
+        
+        /* Budget chart styling */
+        
+        .indicator-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .indicator-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.75rem;
+        }
+        
+        .indicator-recommendation {
+            font-size: 0.8125rem;
+            color: #4b5563;
+            padding-top: 0.75rem;
+            border-top: 1px solid #f3f4f6;
+        }
+        
+        /* Removed status classes and mini-chart-container - focusing only on donut charts */
+        
+        @keyframes chart-zoom-in {
+            0% {
+                opacity: 0;
+                transform: scale(0.95) rotate(-1deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0);
+            }
+        }
+        
+        /* Removed mini-bar chart styles and animations - focusing only on donut charts */
 
         .chart-wrapper {
             position: relative;
@@ -5857,6 +5971,12 @@
             max-width: 280px;
             margin-top: 0.5rem;
         }
+        
+        /* Animation enhances but doesn't control visibility */
+        
+        /* Animation classes removed to fix chart display issues */
+        
+        /* Removed opacity: 0 */
 
         .summary-item {
             display: flex;
@@ -5898,6 +6018,12 @@
             .budget-charts-section {
                 grid-template-columns: 1fr;
                 gap: 1.5rem;
+                padding: 0 0.5rem;
+            }
+            
+            .financial-indicators {
+                grid-template-columns: 1fr;
+                gap: 1rem;
                 padding: 0 0.5rem;
             }
             
@@ -6030,30 +6156,41 @@
             z-index: 1000;
             opacity: 0;
             visibility: hidden;
-            transition: visibility 0s linear 0s;
+            transition: visibility 0s;
         }
         
         .manual-override-overlay.active {
             opacity: 1;
             visibility: visible;
+            transition: visibility 0s;
+        }
+        
+        .manual-override-overlay.closing {
+            opacity: 1;
+            visibility: visible;
         }
         
         .manual-override-content {
-            position: absolute;
+            position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             background: hsl(var(--background));
             border-radius: 20px 20px 0 0;
-            max-height: 85vh;
+            max-height: 95vh;
             transform: translateY(100%);
-            transition: transform 300ms cubic-bezier(0.17, 0.89, 0.32, 1.25);
             display: flex;
             flex-direction: column;
+            padding-bottom: 120px; /* Add extra padding at the bottom */
+            transition: transform 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25);
         }
         
         .manual-override-overlay.active .manual-override-content {
             transform: translateY(0);
+        }
+        
+        .manual-override-overlay.closing .manual-override-content {
+            animation: slideDownClose 0.5s forwards;
         }
         
         .manual-override-header {
@@ -6161,21 +6298,26 @@
         }
         
         .tax-calculation-content {
-            position: absolute;
+            position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
             background: hsl(var(--background));
             border-radius: 20px 20px 0 0;
-            max-height: 90vh;
+            max-height: 95vh;
             transform: translateY(100%);
-            transition: transform 300ms cubic-bezier(0.17, 0.89, 0.32, 1.25);
             display: flex;
             flex-direction: column;
+            padding-bottom: 120px; /* Add extra padding at the bottom */
+            transition: transform 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25);
         }
         
         .tax-calculation-overlay.active .tax-calculation-content {
             transform: translateY(0);
+        }
+        
+        .tax-calculation-overlay.closing .tax-calculation-content {
+            animation: slideDownClose 0.5s forwards;
         }
         
         .tax-calculation-header {
@@ -6598,14 +6740,19 @@
             z-index: 1002;
             overflow-x: hidden;
             overflow-y: auto;
-            transition: bottom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-sizing: border-box;
             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
             border-radius: 20px 20px 0 0;
+            padding-bottom: 120px; /* Add extra padding at the bottom */
+            transition: bottom 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25);
         }
 
         .budget-panel.active {
             bottom: 0;
+        }
+        
+        .budget-panel.closing {
+            animation: slideDownClose 0.5s forwards;
         }
 
         /* Settings panel slide transition when budget is open */
@@ -7287,7 +7434,7 @@ margin-right: 0.5rem;
         }
 
         .swipe-container.deleting {
-            animation: slide-out 0.3s ease-out forwards;
+            animation: slide-out 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.25) forwards;
             height: 0;
             margin: 0;
             padding: 0;
@@ -7306,6 +7453,12 @@ margin-right: 0.5rem;
             0% {
                 transform: translateX(0);
                 opacity: 1;
+                max-height: 100px;
+                margin-bottom: 8px;
+            }
+            15% {
+                transform: translateX(5px);
+                opacity: 0.9;
                 max-height: 100px;
                 margin-bottom: 8px;
             }
@@ -8460,7 +8613,7 @@ margin-right: 0.5rem;
                                 <div class="budget-chart-container">
                                     <h3 class="chart-title">Monthly Spending</h3>
                                     <div class="chart-wrapper">
-                                        <canvas id="spendingDonutChart" width="250" height="250"></canvas>
+                                        <canvas id="spendingDonutChart" width="250" height="250" style="display: block; width: 250px; height: 250px;"></canvas>
                                     </div>
                                     <div class="chart-summary" id="spendingSummary">
                                         <!-- Spending breakdown will be populated here -->
@@ -8471,7 +8624,7 @@ margin-right: 0.5rem;
                                 <div class="budget-chart-container">
                                     <h3 class="chart-title">Yearly Savings Goal</h3>
                                     <div class="chart-wrapper">
-                                        <canvas id="savingsDonutChart" width="250" height="250"></canvas>
+                                        <canvas id="savingsDonutChart" width="250" height="250" style="display: block; width: 250px; height: 250px;"></canvas>
                                     </div>
                                     <div class="chart-summary" id="savingsGoalSummary">
                                         <!-- Savings breakdown will be populated here -->
@@ -11991,7 +12144,8 @@ margin-right: 0.5rem;
         }
 
         function hideAccountManagementSlideOut() {
-            document.getElementById('accountManagementSlideOut').classList.remove('active');
+            const slideOut = document.getElementById('accountManagementSlideOut');
+            animateSlideOutClose(slideOut);
         }
 
         function hideAccountManagementModal() {
@@ -12251,12 +12405,12 @@ margin-right: 0.5rem;
 
         function hideExpenseSlideOut() {
             const overlay = document.getElementById('expenseSlideOut');
-            overlay.classList.remove('active');
+            animateSlideOutClose(overlay);
         }
 
         function hideBalanceSlideOut() {
             const overlay = document.getElementById('balanceSlideOut');
-            overlay.classList.remove('active');
+            animateSlideOutClose(overlay);
         }
 
         // Custom Datepicker Functions
@@ -13366,7 +13520,8 @@ margin-right: 0.5rem;
             document.getElementById('monthYearSlideOut').classList.add('active');
         }
         function hideMonthYearSlideOut() {
-            document.getElementById('monthYearSlideOut').classList.remove('active');
+            const slideOut = document.getElementById('monthYearSlideOut');
+            animateSlideOutClose(slideOut);
         }
         let tempSelectedMonth = selectedMonthDate.getMonth();
         let tempSelectedYear = selectedMonthDate.getFullYear();
@@ -19009,8 +19164,8 @@ margin-right: 0.5rem;
                                 hideAccountManagementSlideOut();
                                 break;
                             default:
-                                // Generic fallback - remove active class
-                                overlay.classList.remove('active');
+                                // Generic fallback - animate then remove active class
+                                animateSlideOutClose(overlay);
                                 break;
                         }
                     }
@@ -19049,21 +19204,48 @@ margin-right: 0.5rem;
         
         // Make function globally accessible
         window.openSettings = openSettings;
+        
+        /**
+         * Generic function to handle slide-out closing animations
+         * @param {HTMLElement} element - The slide-out element to animate
+         * @param {Function} callback - Optional callback to execute after animation completes
+         */
+        function animateSlideOutClose(element, callback) {
+            // Add closing class to trigger animation
+            element.classList.add('closing');
+            
+            // Wait for animation to complete
+            setTimeout(() => {
+                // Remove active and closing classes
+                element.classList.remove('active', 'closing');
+                
+                // Execute callback if provided
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            }, 500); // Match animation duration
+        }
 
         function closeSettings() {
             const overlay = document.getElementById('settingsOverlay');
             const panel = document.getElementById('settingsPanel');
             const appContainer = document.querySelector('.app-container');
 
-            // Hide overlay and panel
-            overlay.classList.remove('active');
-            panel.classList.remove('active');
-
-            // Remove slide transition from main content
-            appContainer.classList.remove('settings-open');
-
-            // Show bottom navigation
-            document.querySelector('.bottom-nav').style.display = 'flex';
+            // Add closing class to animate panel
+            panel.classList.add('closing');
+            
+            // Wait for animation to complete
+            setTimeout(() => {
+                // Hide overlay and panel
+                overlay.classList.remove('active');
+                panel.classList.remove('active', 'closing');
+                
+                // Remove slide transition from main content
+                appContainer.classList.remove('settings-open');
+                
+                // Show bottom navigation
+                document.querySelector('.bottom-nav').style.display = 'flex';
+            }, 500); // Match animation duration
         }
 
         // Close settings when clicking overlay
@@ -19515,9 +19697,15 @@ margin-right: 0.5rem;
             const budgetOverlay = document.getElementById('budgetOverlay');
             const budgetPanel = document.getElementById('budgetPanel');
 
-            // Hide budget overlay and panel
-            budgetOverlay.classList.remove('active');
-            budgetPanel.classList.remove('active');
+            // Add closing class to trigger animation
+            budgetPanel.classList.add('closing');
+            
+            // Wait for animation to complete
+            setTimeout(() => {
+                // Hide budget overlay and panel
+                budgetOverlay.classList.remove('active');
+                budgetPanel.classList.remove('active', 'closing');
+            }, 500); // Match animation duration
         }
         
         function showBudgetStep(step, direction = 'next') {
@@ -19593,7 +19781,7 @@ margin-right: 0.5rem;
                         }, 100);
                         
                         currentBudgetStep = step;
-                    }, 250); // Match the CSS transition duration
+                    }, 300); // Match the CSS transition duration
                 }, 16); // Single frame delay for smooth animation start
             } else if (targetScreen) {
                 // Direct show (like initial load)
@@ -20306,8 +20494,9 @@ margin-right: 0.5rem;
         
         function closeTaxCalculationFlow() {
             const overlay = document.getElementById('taxCalculationOverlay');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
+            animateSlideOutClose(overlay, () => {
+                document.body.style.overflow = '';
+            });
         }
         
         function showTaxStep(step) {
@@ -20660,8 +20849,12 @@ margin-right: 0.5rem;
                 }
             });
         }
+        
+        // Simplified approach - no helper function needed
 
         function updateSummaryCharts() {
+            // No animation reset needed
+            
             const netIncomeEl = document.getElementById('budgetNetIncome');
             const grossIncomeEl = document.getElementById('budgetGrossIncome');
             const grossYearlyIncomeEl = document.getElementById('budgetGrossYearlyIncome');
@@ -20698,6 +20891,7 @@ margin-right: 0.5rem;
             createSpendingDonutChart(fixedExpenses, essentialExpenses, discretionaryExpenses, Math.max(0, remainingBudget));
             createSavingsDonutChart(monthlyIncome, annualSavingsGoal, monthlySavingsTarget);
             
+            // Only create donut charts, no financial indicators
         }
 
         function createBudgetSummaryChart(netIncome, fixed, essential, discretionary, savings, remaining) {
@@ -20727,7 +20921,10 @@ margin-right: 0.5rem;
                     datasets: [{
                         data: data,
                         backgroundColor: colors,
-                        borderWidth: 0
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        cutout: '60%',
+                        borderRadius: 8 // More subtle border radius
                     }]
                 },
                 options: {
@@ -20743,49 +20940,34 @@ margin-right: 0.5rem;
                         }
                     },
                     animation: {
+                        animateRotate: true,
                         animateScale: true,
                         duration: 1000
                     }
                 }
             });
-make         }
-
-        function createMiniChart(canvasId, data, colors) {
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) return;
             
-            const ctx = canvas.getContext('2d');
-            
-            if (window[canvasId + 'Instance']) {
-                window[canvasId + 'Instance'].destroy();
+            // Create or update all charts
+            if (!window.spendingDonutChart) {
+                createSpendingDonutChart(fixed, essential, discretionary, remaining);
+            } else {
+                window.spendingDonutChart.update();
             }
-
-            window[canvasId + 'Instance'] = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: [''],
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors,
-                        borderWidth: 0,
-                        barThickness: 20
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { display: false },
-                        y: { display: false }
-                    },
-                    animation: {
-                        duration: 800,
-                        easing: 'easeOutQuart'
-                    }
-                }
-            });
+            
+            if (!window.savingsDonutChart && annualSavingsGoal > 0) {
+                createSavingsDonutChart(annualSavingsGoal, monthlySavingsTarget * 12, yearlySavingsCapacity);
+            } else if (window.savingsDonutChart) {
+                window.savingsDonutChart.update();
+            }
+            
+            if (window.budgetSummaryChart) {
+                window.budgetSummaryChart.update();
+            }
+            
+            // Only focusing on donut charts, financial indicators removed
         }
+
+        // Removed financial indicators functionality - focusing only on donut charts
 
         function createSpendingDonutChart(fixed, essential, discretionary, remaining) {
             const canvas = document.getElementById('spendingDonutChart');
@@ -20805,6 +20987,15 @@ make         }
                 }
                 window.spendingDonutChart = null;
             }
+            
+            // Add subtle animation before creating the chart
+            canvas.style.opacity = '0';
+            canvas.style.transform = 'scale(0.95) rotate(-1deg)';
+            setTimeout(() => {
+                canvas.style.transition = 'all 0.6s ease-out';
+                canvas.style.opacity = '1';
+                canvas.style.transform = 'scale(1) rotate(0)';
+            }, 100);
             
             const ctx = canvas.getContext('2d');
             
@@ -20866,6 +21057,11 @@ make         }
             if (data.length > 0) {
                 console.log('📊 Creating spending donut chart with ctx:', !!ctx);
                 try {
+                    // Destroy existing chart if it exists
+                    if (window.spendingDonutChart) {
+                        window.spendingDonutChart.destroy();
+                    }
+                    
                     window.spendingDonutChart = new Chart(ctx, {
                         type: 'doughnut',
                         data: {
@@ -20876,7 +21072,7 @@ make         }
                                 borderWidth: 2,
                                 borderColor: '#ffffff',
                                 cutout: '60%',
-                                borderRadius: 20,
+                                borderRadius: 8, // More subtle border radius
                                 borderSkipped: false
                             }]
                         },
@@ -20895,7 +21091,11 @@ make         }
                                     }
                                 }
                             },
-                            animation: false
+                            animation: {
+                                animateRotate: true,
+                                animateScale: true,
+                                duration: 1000
+                            }
                         }
                     });
                     console.log('✅ Spending donut chart created successfully');
@@ -20951,6 +21151,15 @@ make         }
                 window.savingsDonutChart.destroy();
             }
             
+            // Add subtle animation before creating the chart
+            canvas.style.opacity = '0';
+            canvas.style.transform = 'scale(0.95) rotate(1deg)';
+            setTimeout(() => {
+                canvas.style.transition = 'all 0.6s ease-out';
+                canvas.style.opacity = '1';
+                canvas.style.transform = 'scale(1) rotate(0)';
+            }, 300);
+            
             const ctx = canvas.getContext('2d');
             
             // Debug canvas
@@ -21002,7 +21211,7 @@ make         }
                             borderWidth: 2,
                             borderColor: '#ffffff',
                             cutout: '60%',
-                            borderRadius: 20,
+                            borderRadius: 8, // More subtle border radius
                             borderSkipped: false
                         }]
                     },
@@ -21020,7 +21229,11 @@ make         }
                                 }
                             }
                         },
-                        animation: false
+                        animation: {
+                            animateRotate: true,
+                            animateScale: true,
+                            duration: 1000
+                        }
                     }
                 });
             }
@@ -21035,6 +21248,228 @@ make         }
                     <div class="summary-amount">${formatCurrency(item.amount)}</div>
                 </div>
             `).join('');
+        }
+        
+        // Create custom HTML/CSS mini bar chart for financial indicators
+        function createMiniBarChart(containerId, data, options = {}) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            // Clear previous content
+            container.innerHTML = '';
+            
+            // Format value if formatter is provided
+            const formatValue = (value) => {
+                if (options.formatter) {
+                    return options.formatter(value);
+                }
+                return value.toFixed(options.decimals || 0) + (options.suffix || '');
+            };
+            
+            // Calculate max value for scaling
+            const maxValue = options.max || Math.max(...data.datasets[0].data) * 1.2;
+            
+            // Create the custom HTML bar chart
+            const chartHtml = document.createElement('div');
+            chartHtml.className = 'mini-bar-chart';
+            
+            // Add bars with staggered animation delays
+            data.labels.forEach((label, index) => {
+                const value = data.datasets[0].data[index];
+                const barColor = data.datasets[0].backgroundColor[index] || '#3b82f6';
+                const percentage = (value / maxValue) * 100;
+                
+                const barRow = document.createElement('div');
+                barRow.className = 'mini-bar-row';
+                barRow.style.animationDelay = `${index * 0.15}s`;
+                
+                barRow.innerHTML = `
+                    <div class="mini-bar-label">${label}</div>
+                    <div class="mini-bar-track">
+                        <div class="mini-bar" 
+                             style="width: 0%; background-color: ${barColor};"
+                             data-value="${percentage}%"></div>
+                    </div>
+                    <div class="mini-bar-value">${formatValue(value)}</div>
+                `;
+                
+                chartHtml.appendChild(barRow);
+            });
+            
+            // Add the chart to the container
+            container.appendChild(chartHtml);
+            
+            // Trigger animations after a short delay
+            setTimeout(() => {
+                const bars = container.querySelectorAll('.mini-bar');
+                bars.forEach(bar => {
+                    bar.style.width = bar.dataset.value;
+                });
+            }, 50);
+        }
+        
+        // Update all financial indicators with mini bar charts
+        function updateFinancialIndicators(fixed, essential, discretionary, remaining, monthlyIncome, monthlySavingsTarget, annualSavingsGoal) {
+            const totalExpenses = fixed + essential + discretionary;
+            
+            // Emergency Fund - Months of expenses saved
+            const emergencyFundEl = document.getElementById('emergencyFundStatus');
+            const monthsOfExpenses = totalExpenses > 0 ? Math.round((remaining * 12) / totalExpenses) : 0;
+            if (emergencyFundEl) {
+                let statusClass = 'status-poor';
+                if (monthsOfExpenses >= 6) {
+                    statusClass = 'status-excellent';
+                } else if (monthsOfExpenses >= 3) {
+                    statusClass = 'status-good';
+                } else if (monthsOfExpenses >= 1) {
+                    statusClass = 'status-fair';
+                }
+                
+                emergencyFundEl.innerHTML = `
+                    <div class="indicator-value ${statusClass}">${monthsOfExpenses} month${monthsOfExpenses !== 1 ? 's' : ''}</div>
+                    <div class="indicator-description">You have approximately ${monthsOfExpenses} month${monthsOfExpenses !== 1 ? 's' : ''} of expenses in savings.</div>
+                `;
+                
+                // Create mini bar chart for emergency fund
+                createMiniBarChart('emergencyFundChart', {
+                    labels: ['Current', 'Target'],
+                    datasets: [{
+                        label: 'Months',
+                        data: [monthsOfExpenses, 6],
+                        backgroundColor: [
+                            monthsOfExpenses >= 6 ? '#10b981' :
+                            monthsOfExpenses >= 3 ? '#0ea5e9' :
+                            monthsOfExpenses >= 1 ? '#f59e0b' : '#ef4444',
+                            '#d1d5db'
+                        ]
+                    }]
+                }, {
+                    max: 8,
+                    suffix: ' mo'
+                });
+            }
+            
+            // Monthly Surplus/Deficit
+            const surplusDeficitEl = document.getElementById('surplusDeficitStatus');
+            if (surplusDeficitEl) {
+                const surplus = monthlyIncome - totalExpenses - monthlySavingsTarget;
+                const surplusRate = monthlyIncome > 0 ? (surplus / monthlyIncome) * 100 : 0;
+                let statusClass = 'status-poor';
+                
+                if (surplusRate >= 10) {
+                    statusClass = 'status-excellent';
+                } else if (surplusRate >= 5) {
+                    statusClass = 'status-good';
+                } else if (surplusRate >= 0) {
+                    statusClass = 'status-fair';
+                }
+                
+                surplusDeficitEl.innerHTML = `
+                    <div class="indicator-value ${statusClass}">${formatCurrency(surplus)}</div>
+                    <div class="indicator-description">Your monthly ${surplus >= 0 ? 'surplus' : 'deficit'} after expenses and savings.</div>
+                `;
+                
+                // Create mini bar chart for surplus/deficit
+                createMiniBarChart('surplusDeficitChart', {
+                    labels: ['Current', 'Target'],
+                    datasets: [{
+                        label: 'Amount',
+                        data: [surplus, monthlyIncome * 0.1],
+                        backgroundColor: [
+                            surplus >= monthlyIncome * 0.1 ? '#10b981' :
+                            surplus >= monthlyIncome * 0.05 ? '#0ea5e9' :
+                            surplus >= 0 ? '#f59e0b' : '#ef4444',
+                            '#d1d5db'
+                        ]
+                    }]
+                }, {
+                    max: Math.max(surplus * 1.5, monthlyIncome * 0.15),
+                    formatter: formatCurrency
+                });
+            }
+            
+            // Savings Rate
+            const savingsRateEl = document.getElementById('savingsRateStatus');
+            if (savingsRateEl) {
+                const savingsRate = monthlyIncome > 0 ? (monthlySavingsTarget / monthlyIncome) * 100 : 0;
+                let statusClass = 'status-poor';
+                
+                if (savingsRate >= 20) {
+                    statusClass = 'status-excellent';
+                } else if (savingsRate >= 15) {
+                    statusClass = 'status-good';
+                } else if (savingsRate >= 10) {
+                    statusClass = 'status-fair';
+                }
+                
+                savingsRateEl.innerHTML = `
+                    <div class="indicator-value ${statusClass}">${savingsRate.toFixed(1)}%</div>
+                    <div class="indicator-description">Of your monthly income is being saved.</div>
+                `;
+                
+                // Create mini bar chart for savings rate
+                createMiniBarChart('savingsRateChart', {
+                    labels: ['Current', 'Target'],
+                    datasets: [{
+                        label: 'Rate',
+                        data: [savingsRate, 20],
+                        backgroundColor: [
+                            savingsRate >= 20 ? '#10b981' :
+                            savingsRate >= 15 ? '#0ea5e9' :
+                            savingsRate >= 10 ? '#f59e0b' : '#ef4444',
+                            '#d1d5db'
+                        ],
+                        borderRadius: 4,
+                        barThickness: 12
+                    }]
+                }, {
+                    max: 25,
+                    decimals: 1,
+                    suffix: '%'
+                });
+            }
+            
+            // Debt-to-Income
+            const debtToIncomeEl = document.getElementById('debtToIncomeStatus');
+            if (debtToIncomeEl) {
+                // For simplicity, we'll estimate debt-to-income as fixed expenses / income
+                const dti = monthlyIncome > 0 ? (fixed / monthlyIncome) * 100 : 0;
+                let statusClass = 'status-excellent';
+                
+                if (dti > 36) {
+                    statusClass = 'status-poor';
+                } else if (dti > 28) {
+                    statusClass = 'status-fair';
+                } else if (dti > 20) {
+                    statusClass = 'status-good';
+                }
+                
+                debtToIncomeEl.innerHTML = `
+                    <div class="indicator-value ${statusClass}">${dti.toFixed(1)}%</div>
+                    <div class="indicator-description">Your debt payments as a percentage of monthly income.</div>
+                `;
+                
+                // Create mini bar chart for debt-to-income ratio
+                createMiniBarChart('debtToIncomeChart', {
+                    labels: ['Current', 'Target'],
+                    datasets: [{
+                        label: 'DTI',
+                        data: [dti, 36],
+                        backgroundColor: [
+                            dti <= 20 ? '#10b981' :
+                            dti <= 28 ? '#0ea5e9' :
+                            dti <= 36 ? '#f59e0b' : '#ef4444',
+                            '#d1d5db'
+                        ],
+                        borderRadius: 4,
+                        barThickness: 12
+                    }]
+                }, {
+                    max: 50,
+                    decimals: 1,
+                    suffix: '%'
+                });
+            }
         }
 
         async function saveBudgetSettings() {
