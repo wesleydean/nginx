@@ -6996,6 +6996,23 @@
         .settings-back:hover {
             background-color: hsl(var(--muted));
         }
+        
+        .settings-close {
+            background: none;
+            border: none;
+            color: hsl(var(--muted-foreground));
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-close:hover {
+            background-color: hsl(var(--muted));
+        }
 
 
         @media (min-width: 768px) {
@@ -8592,11 +8609,11 @@ margin-right: 0.5rem;
     <div class="settings-overlay" id="budgetOverlay">
         <div class="budget-panel" id="budgetPanel">
             <div class="settings-header">
-                <button class="settings-back" onclick="closeBudgetFlow()" aria-label="Back">
-                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
-                </button>
-                <h2 class="settings-title" id="budgetFlowTitle">Budget Setup</h2>
                 <div style="width: 40px;"></div> <!-- Spacer for centering -->
+                <h2 class="settings-title" id="budgetFlowTitle">Budget Setup</h2>
+                <button class="settings-close" onclick="closeBudgetFlow()" aria-label="Close">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
             </div>
             
             <!-- Progress Indicator -->
