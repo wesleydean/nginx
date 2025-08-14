@@ -2176,10 +2176,13 @@
             font-size: 0.875rem;
             font-weight: 500;
             color: hsl(var(--muted-foreground));
-            margin-bottom: 1rem;
+            margin-bottom: 0.6rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            font-size: 1.2rem;
+            color: #111827;
+            text-align: center;
         }
         
         .savings-rate-display {
@@ -4324,6 +4327,19 @@
             font-weight: 500;
         }
         
+        .monthly-budget-total {
+            margin-top: -5px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            text-align: center;
+            color: hsl(var(--foreground));
+        }
+        
+        .monthly-budget-total span {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
         .chart-growth {
             font-size: 0.95rem;
             font-weight: 500;
@@ -5932,13 +5948,7 @@
             min-height: 500px;
         }
 
-        .chart-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
+        
         
         /* Budget chart styling */
         
@@ -6026,7 +6036,6 @@
             background: #f9fafb;
             border-radius: 8px;
             font-size: 0.875rem;
-            margin-bottom: 0.5rem;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
             animation: fadeInUp 0.5s ease-out forwards;
@@ -7751,8 +7760,9 @@ margin-right: 0.5rem;
             
             // Call the chart creation functions directly
             if (typeof createSpendingDonutChart === 'function') {
-                console.log('📊 Creating spending chart with test data...');
-                createSpendingDonutChart(fixed, essential, discretionary, remaining);
+                console.log('📊 Creating monthly budget chart with test data...');
+                const savings = 500; // Add test savings value
+                createSpendingDonutChart(fixed, essential, discretionary, remaining, savings); // No dummy total
             } else {
                 console.error('❌ createSpendingDonutChart function not found');
             }
@@ -8831,7 +8841,10 @@ margin-right: 0.5rem;
                             <div class="budget-charts-section">
                                 <!-- Spending Categories Donut Chart -->
                                 <div class="budget-chart-container">
-                                    <h3 class="chart-title">Monthly Spending</h3>
+                                    <h3 class="chart-title spending-chart-title">Monthly Budget</h3>
+                                    <div class="chart-subtitle monthly-budget-total">
+                                        Total: <span id="monthlyBudgetTotal">$0</span>
+                                    </div>
                                     <div class="chart-wrapper">
                                         <canvas id="spendingDonutChart" width="250" height="250" style="display: block; width: 250px; height: 250px;"></canvas>
                                     </div>
@@ -11302,7 +11315,7 @@ margin-right: 0.5rem;
             }
         }
 
-        // Monthly spending chart functions
+        // Monthly budget chart functions
         async function calculateMonthlySpending() {
             const expenses = await loadExpenses();
             const monthlyTotals = {};
@@ -21169,9 +21182,48 @@ margin-right: 0.5rem;
             const savingsRateSummaryEl = document.getElementById('budgetSavingsRateSummary');
             if (savingsRateSummaryEl) savingsRateSummaryEl.textContent = savingsRate.toFixed(1) + '%';
 
-            // Create donut charts
-            console.log('📊 CREATING CHARTS with monthlyIncome:', monthlyIncome, 'expenses:', {fixedExpenses, essentialExpenses, discretionaryExpenses}, 'savings:', monthlySavingsTarget);
-            createSpendingDonutChart(fixedExpenses, essentialExpenses, discretionaryExpenses, Math.max(0, remainingBudget));
+            // CRITICAL FIX: Check and adjust values for consistency
+            // The unallocated amount should be derived from monthlyIncome
+            
+            // First, ensure monthly income is correct (from net income display if available)
+            const netIncomeDisplay = document.getElementById('netIncomeDisplay');
+            if (netIncomeDisplay) {
+                const displayedValue = parseFormattedNumber(netIncomeDisplay.textContent);
+                if (displayedValue > 0 && Math.abs(displayedValue - monthlyIncome) > 0.1) {
+                    console.log('⚠️ Adjusting monthly income from', monthlyIncome, 'to displayed value', displayedValue);
+                    monthlyIncome = displayedValue;
+                }
+            }
+            
+            // Now calculate remaining based on the corrected monthly income
+            const totalAllocated = totalExpenses + monthlySavingsTarget;
+            const correctRemainingBudget = Math.max(0, monthlyIncome - totalAllocated);
+            
+            // Detailed budget logging
+            console.log('📊 BUDGET VERIFICATION:');
+            console.log('   Income:', monthlyIncome);
+            console.log('   Fixed Expenses:', fixedExpenses);
+            console.log('   Essential Expenses:', essentialExpenses);
+            console.log('   Discretionary Expenses:', discretionaryExpenses);
+            console.log('   Total Expenses:', totalExpenses);
+            console.log('   Monthly Savings Target:', monthlySavingsTarget);
+            console.log('   Total Allocated:', totalAllocated);
+            console.log('   Unallocated (Income - Allocated):', correctRemainingBudget);
+            console.log('   Math Check: Income =? Expenses + Savings + Unallocated');
+            console.log('              ', monthlyIncome, '=?', totalExpenses, '+', monthlySavingsTarget, '+', correctRemainingBudget);
+            console.log('              ', monthlyIncome, '=?', totalExpenses + monthlySavingsTarget + correctRemainingBudget);
+            
+            // The Monthly Budget chart shows all planned allocations (expenses + savings)
+            // Plus any unallocated money (remaining)
+            createSpendingDonutChart(
+                fixedExpenses, 
+                essentialExpenses, 
+                discretionaryExpenses, 
+                correctRemainingBudget, // This is what's left AFTER all expenses & savings
+                monthlySavingsTarget,
+                monthlyIncome // Pass the correct monthly income for verification
+            );
+            
             createSavingsDonutChart(monthlyIncome, annualSavingsGoal, monthlySavingsTarget);
             
             // Only create donut charts, no financial indicators
@@ -21232,7 +21284,11 @@ margin-right: 0.5rem;
             
             // Create or update all charts
             if (!window.spendingDonutChart) {
-                createSpendingDonutChart(fixed, essential, discretionary, remaining);
+                // Include savings in the monthly budget chart
+                const monthlySavings = getMonthlySavingsTarget();
+                // Note: We don't need to calculate a separate total - the function
+                // will use the components to calculate the total
+                createSpendingDonutChart(fixed, essential, discretionary, remaining, monthlySavings);
             } else {
                 window.spendingDonutChart.update();
             }
@@ -21252,11 +21308,13 @@ margin-right: 0.5rem;
 
         // Removed financial indicators functionality - focusing only on donut charts
 
-        function createSpendingDonutChart(fixed, essential, discretionary, remaining) {
+        function createSpendingDonutChart(fixed, essential, discretionary, unallocated, savings = 0, totalIncome = null) {
+            // Rename 'remaining' to 'unallocated' for clarity
+            const remaining = unallocated;
             const statusEl = document.getElementById('chartStatus');
-            if (statusEl) statusEl.textContent = 'Creating spending chart...';
+            if (statusEl) statusEl.textContent = 'Creating monthly budget chart...';
             
-            console.log('📊 createSpendingDonutChart called with data:', {fixed, essential, discretionary, remaining});
+            console.log('📊 createSpendingDonutChart called with data:', {fixed, essential, discretionary, remaining, savings});
             
             // Check if Chart.js is loaded
             if (typeof Chart === 'undefined') {
@@ -21270,9 +21328,70 @@ margin-right: 0.5rem;
             const canvas = document.getElementById('spendingDonutChart');
             const summaryContainer = document.getElementById('spendingSummary');
             
+            // Update title to "Monthly Budget"
+            const chartTitleEl = document.querySelector('.spending-chart-title');
+            if (chartTitleEl) {
+                chartTitleEl.textContent = 'Monthly Budget';
+            }
+            
+            // CRITICAL FIX: The total should be exactly equal to the monthly income if provided
+            // Otherwise, it's the sum of all planned allocations
+            let totalAllocation;
+            
+            if (totalIncome !== null && totalIncome > 0) {
+                // If we have income, the total should match that (and we've already fixed remaining)
+                totalAllocation = totalIncome;
+            } else {
+                // Otherwise, calculate from the components
+                totalAllocation = fixed + essential + discretionary + savings;
+            }
+            
+            // Detailed logging for verification
+            console.log('📊 CHART TOTAL VERIFICATION:');
+            console.log('   Fixed Expenses:', fixed);
+            console.log('   Essential Expenses:', essential);
+            console.log('   Discretionary:', discretionary);
+            console.log('   Savings:', savings);
+            console.log('   Unallocated:', remaining);
+            console.log('   Total without unallocated:', fixed + essential + discretionary + savings);
+            console.log('   Grand total (with unallocated):', fixed + essential + discretionary + savings + remaining);
+            console.log('   Income provided:', totalIncome);
+            console.log('   Final total to display:', totalAllocation);
+            
+            const budgetTotalEl = document.getElementById('monthlyBudgetTotal');
+            if (budgetTotalEl) {
+                budgetTotalEl.textContent = formatCurrency(totalAllocation);
+            }
+            
+            // FINAL DISPLAY DECISION:
+            // If we have income, we should always show the full income amount as the "Total"
+            // This makes it clear that all money is accounted for
+            if (totalIncome !== null && totalIncome > 0) {
+                const budgetTotalEl = document.getElementById('monthlyBudgetTotal');
+                if (budgetTotalEl) {
+                    // Show the full income amount as the total
+                    budgetTotalEl.textContent = formatCurrency(totalIncome);
+                    
+                    // Add a different title for clarity
+                    const chartTitleEl = document.querySelector('.spending-chart-title');
+                    if (chartTitleEl) {
+                        chartTitleEl.textContent = 'Monthly Income Allocation';
+                    }
+                }
+                
+                // Verify mathematical consistency
+                const sumOfParts = fixed + essential + discretionary + savings + remaining;
+                if (Math.abs(sumOfParts - totalIncome) > 0.1) {
+                    console.error('❌ MATH ERROR: Components don\'t add up to income');
+                    console.error('   Sum of parts:', sumOfParts.toFixed(2));
+                    console.error('   Income:', totalIncome.toFixed(2));
+                    console.error('   Difference:', (sumOfParts - totalIncome).toFixed(2));
+                }
+            }
+            
             if (!canvas) {
-                console.error('❌ Spending chart canvas not found!');
-                if (statusEl) statusEl.textContent = 'ERROR: Spending chart canvas not found!';
+                console.error('❌ Monthly budget chart canvas not found!');
+                if (statusEl) statusEl.textContent = 'ERROR: Monthly budget chart canvas not found!';
                 return;
             }
             
@@ -21315,11 +21434,41 @@ margin-right: 0.5rem;
                 summaryItems.push({ label: 'Discretionary', amount: discretionary, color: '#74c8cb' });
             }
             
+            // Add savings segment
+            if (savings > 0) {
+                data.push(savings);
+                labels.push('Savings');
+                colors.push('#16a34a'); // Green - match savings chart color
+                summaryItems.push({ label: 'Savings', amount: savings, color: '#16a34a' });
+            }
+            
+            // CRITICAL FIX: Ensure the unallocated amount is consistent
+            // It should be EXACTLY what's left over after planned expenses and savings
+            
+            // Force unallocated to be exactly what makes the total add up to income (if provided)
+            if (totalIncome !== null && totalIncome > 0) {
+                // Calculate exactly what's left from income after expenses and savings
+                const totalAllocated = fixed + essential + discretionary + savings;
+                const calculatedUnallocated = Math.max(0, totalIncome - totalAllocated);
+                
+                console.log('🔍 CHART UNALLOCATED CHECK:');
+                console.log('   Income:', totalIncome);
+                console.log('   Total allocated (expenses + savings):', totalAllocated);
+                console.log('   Calculated unallocated:', calculatedUnallocated);
+                console.log('   Provided unallocated:', remaining);
+                
+                if (Math.abs(calculatedUnallocated - remaining) > 0.1) {
+                    console.warn('⚠️ FIXING unallocated amount from', remaining, 'to', calculatedUnallocated);
+                    remaining = calculatedUnallocated;
+                }
+            }
+            
+            // Only show unallocated if there's actually something left
             if (remaining > 0) {
                 data.push(remaining);
-                labels.push('Remaining');
-                colors.push('#e5e7eb'); // Light gray - matches budget card
-                summaryItems.push({ label: 'Remaining', amount: remaining, color: '#e5e7eb' });
+                labels.push('Unallocated');
+                colors.push('#e5e7eb'); // Light gray
+                summaryItems.push({ label: 'Unallocated', amount: remaining, color: '#e5e7eb' });
             }
             
             console.log('📊 Chart data:', { data, labels, colors });
@@ -21363,11 +21512,11 @@ margin-right: 0.5rem;
                     }
                 });
                 
-                console.log('✅ Spending chart created successfully');
+                console.log('✅ Monthly budget chart created successfully');
                 if (statusEl) statusEl.textContent = 'Chart created successfully!';
                 
             } catch (error) {
-                console.error('❌ Error creating spending chart:', error);
+                console.error('❌ Error creating monthly budget chart:', error);
                 if (statusEl) statusEl.textContent = 'ERROR: ' + error.message;
             }
             
@@ -22242,8 +22391,8 @@ margin-right: 0.5rem;
             
             // Create spending chart with dummy data
             try {
-                console.log('📊 Creating spending chart with dummy data');
-                createSpendingDonutChart(1000, 2000, 500, 1500);
+                console.log('📊 Creating monthly budget chart with dummy data');
+                createSpendingDonutChart(1000, 2000, 500, 1500, 800); // Don't include total income
                 console.log('✅ Spending chart creation attempted');
             } catch (e) {
                 console.error('❌ Error creating spending chart:', e);
