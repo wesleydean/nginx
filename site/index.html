@@ -5948,6 +5948,101 @@
             min-height: 500px;
         }
 
+        .budget-chart-container:has(.emergency-fund-card) {
+            border: none;
+            padding: 0;
+            background: transparent;
+        }
+
+        .emergency-fund-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .emergency-fund-header {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #92400e;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .emergency-fund-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 1rem;
+        }
+
+        .emergency-fund-coverage {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            color: #92400e;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        .emergency-fund-amount {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 1rem;
+        }
+
+        .emergency-fund-goal {
+            font-size: 1rem;
+            color: #92400e;
+            margin-bottom: 1.5rem;
+            opacity: 0.8;
+        }
+
+        .emergency-fund-progress {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-month {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .progress-month.filled {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .progress-month.empty {
+            background: rgba(255, 255, 255, 0.6);
+            color: #92400e;
+        }
+
+        .emergency-fund-message {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 1rem;
+            padding: 1rem;
+            color: #92400e;
+            font-size: 1rem;
+            font-weight: 500;
+        }
         
         
         /* Budget chart styling */
@@ -7747,10 +7842,8 @@ margin-right: 0.5rem;
             
             // Find chart canvases
             const spendingCanvas = document.getElementById('spendingDonutChart');
-            const savingsCanvas = document.getElementById('savingsDonutChart');
             
             console.log('📊 Spending canvas found:', !!spendingCanvas, spendingCanvas);
-            console.log('💰 Savings canvas found:', !!savingsCanvas, savingsCanvas);
             
             // Create test data
             const fixed = 1000;
@@ -7767,11 +7860,11 @@ margin-right: 0.5rem;
                 console.error('❌ createSpendingDonutChart function not found');
             }
             
-            if (typeof createSavingsDonutChart === 'function') {
-                console.log('💰 Creating savings chart with test data...');
-                createSavingsDonutChart(3000, 12000, 1000);
+            if (typeof updateEmergencyFund === 'function') {
+                console.log('💰 Updating emergency fund display...');
+                updateEmergencyFund();
             } else {
-                console.error('❌ createSavingsDonutChart function not found');
+                console.error('❌ updateEmergencyFund function not found');
             }
         }
     </script>
@@ -8829,21 +8922,20 @@ margin-right: 0.5rem;
                                     </div>
                                 </div>
 
-                                <!-- Savings Donut Chart -->
+                                <!-- Emergency Fund Card -->
                                 <div class="budget-chart-container">
-                                    <h3 class="chart-title">Yearly Savings Goal</h3>
-                                    <div class="chart-subtitle">
-                                        <span id="budgetAnnualSavingsGoalDisplay">$0</span>
-                                    </div>
-                                    <div class="chart-wrapper">
-                                        <canvas id="savingsDonutChart" width="250" height="250" style="display: block; width: 250px; height: 250px;"></canvas>
-                                    </div>
-                                    <div class="chart-summary" id="savingsGoalSummary">
-                                        <!-- Savings breakdown will be populated here -->
-                                    </div>
-                                    <div style="text-align: center; margin-top: 0.75rem;">
-                                        <div class="savings-rate-display" id="budgetSavingsRateSummary">0%</div>
-                                        <div class="text-sm text-muted-foreground">of monthly net income</div>
+                                    <div class="emergency-fund-card">
+                                        <div class="emergency-fund-header">EMERGENCY FUND</div>
+                                        <div class="emergency-fund-title">Emergency Fund</div>
+                                        <div class="emergency-fund-coverage" id="emergencyFundCoverage">0 months covered</div>
+                                        <div class="emergency-fund-amount" id="emergencyFundAmount">$0</div>
+                                        <div class="emergency-fund-goal" id="emergencyFundGoal">Goal: $0 (6 months expenses)</div>
+                                        <div class="emergency-fund-progress" id="emergencyFundProgress">
+                                            <!-- Progress indicators will be populated here -->
+                                        </div>
+                                        <div class="emergency-fund-message" id="emergencyFundMessage">
+                                            Building your emergency fund...
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -19915,9 +20007,6 @@ margin-right: 0.5rem;
                     if (window.spendingDonutChart && typeof window.spendingDonutChart.destroy === 'function') {
                         window.spendingDonutChart.destroy();
                     }
-                    if (window.savingsDonutChart && typeof window.savingsDonutChart.destroy === 'function') {
-                        window.savingsDonutChart.destroy();
-                    }
                     
                     updateSummaryCharts();
                     
@@ -21195,9 +21284,8 @@ margin-right: 0.5rem;
             
             // Check if charts exist in the DOM
             const spendingCanvas = document.getElementById('spendingDonutChart');
-            const savingsCanvas = document.getElementById('savingsDonutChart');
             
-            if (!spendingCanvas || !savingsCanvas) {
+            if (!spendingCanvas) {
                 console.error('❌ Chart canvas elements not found in the DOM');
                 return;
             } else {
@@ -21293,13 +21381,13 @@ margin-right: 0.5rem;
             // Create the savings chart immediately to eliminate delay
             try {
                 // Create the chart synchronously
-                createSavingsDonutChart(monthlyIncome, annualSavingsGoal, monthlySavingsTarget);
+                updateEmergencyFund();
                 console.log('💰 Savings chart created synchronously');
             } catch (err) {
                 console.error('Error creating savings chart:', err);
                 // Fall back to async rendering if there's an error
                 requestAnimationFrame(() => {
-                    createSavingsDonutChart(monthlyIncome, annualSavingsGoal, monthlySavingsTarget);
+                    updateEmergencyFund();
                 });
             }
             
@@ -21370,11 +21458,8 @@ margin-right: 0.5rem;
                 window.spendingDonutChart.update();
             }
             
-            if (!window.savingsDonutChart && annualSavingsGoal > 0) {
-                createSavingsDonutChart(annualSavingsGoal, monthlySavingsTarget * 12, yearlySavingsCapacity);
-            } else if (window.savingsDonutChart) {
-                window.savingsDonutChart.update();
-            }
+            // Update emergency fund display
+            updateEmergencyFund();
             
             if (window.budgetSummaryChart) {
                 window.budgetSummaryChart.update();
@@ -21611,140 +21696,83 @@ margin-right: 0.5rem;
             }
         }
 
-        function createSavingsDonutChart(monthlyNetIncome, annualSavingsGoal, monthlySavingsTarget) {
-            const canvas = document.getElementById('savingsDonutChart');
-            const summaryContainer = document.getElementById('savingsGoalSummary');
+        function updateEmergencyFund() {
+            console.log('💰 updateEmergencyFund called');
             
-            console.log('💰 createSavingsDonutChart called with:', {monthlyNetIncome, annualSavingsGoal, monthlySavingsTarget});
+            // Get current budget settings
+            const budgetSettings = getBudgetSettings();
+            const annualSavingsGoal = budgetSettings.annualSavingsGoal || 0;
             
-            if (!canvas) {
-                console.error('❌ Savings chart canvas not found!');
-                return;
+            // Calculate total monthly expenses (excluding savings)
+            const fixedExpenses = budgetSettings.fixedExpenses || 0;
+            const essentialExpenses = budgetSettings.essentialExpenses || 0;
+            const discretionaryExpenses = budgetSettings.discretionaryExpenses || 0;
+            const totalMonthlyExpenses = fixedExpenses + essentialExpenses + discretionaryExpenses;
+            
+            // Calculate 6 months of expenses as goal
+            const emergencyFundGoal = totalMonthlyExpenses * 6;
+            
+            // Current emergency fund amount (use annual savings goal as current amount for now)
+            const currentAmount = annualSavingsGoal;
+            
+            // Calculate months covered
+            const monthsCovered = totalMonthlyExpenses > 0 ? Math.min(6, currentAmount / totalMonthlyExpenses) : 0;
+            
+            // Update the display elements
+            const coverageEl = document.getElementById('emergencyFundCoverage');
+            const amountEl = document.getElementById('emergencyFundAmount');
+            const goalEl = document.getElementById('emergencyFundGoal');
+            const progressEl = document.getElementById('emergencyFundProgress');
+            const messageEl = document.getElementById('emergencyFundMessage');
+            
+            if (coverageEl) {
+                coverageEl.textContent = `${monthsCovered.toFixed(1)} months covered`;
             }
             
-            if (!summaryContainer) {
-                console.error('❌ Savings summary container not found!');
-                return;
+            if (amountEl) {
+                amountEl.textContent = formatCurrency(currentAmount);
             }
             
-            // Destroy existing chart
-            if (window.savingsDonutChart && typeof window.savingsDonutChart.destroy === 'function') {
-                window.savingsDonutChart.destroy();
-                window.savingsDonutChart = null;
+            if (goalEl) {
+                goalEl.textContent = `Goal: ${formatCurrency(emergencyFundGoal)} (6 months expenses)`;
             }
             
-            // Reset canvas dimensions to defaults from HTML
-            canvas.removeAttribute('style');
-            canvas.style.display = 'block';
-            canvas.style.width = '250px';
-            canvas.style.height = '250px';
-            
-            const ctx = canvas.getContext('2d');
-            
-            // First, draw directly to canvas to verify it works
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "rgba(100, 200, 150, 0.3)";
-            ctx.fillRect(20, 20, canvas.width - 40, canvas.height - 40);
-            ctx.fillStyle = "black";
-            ctx.font = "14px Arial";
-            ctx.textAlign = "center";
-            ctx.fillText("Creating savings chart...", canvas.width / 2, canvas.height / 2);
-            
-            // Check Chart.js availability  
-            if (typeof Chart === 'undefined') {
-                console.error('❌ Chart.js not loaded for savings chart');
-                summaryContainer.innerHTML = '<div class="summary-item"><div class="summary-label">Chart.js not available</div></div>';
-                return;
-            }
-            
-            // Calculate yearly savings capacity (net income * 12)
-            const yearlySavingsCapacity = Math.max(1000, monthlyNetIncome * 12); // Ensure non-zero
-            const remainingCapacity = Math.max(0, yearlySavingsCapacity - annualSavingsGoal);
-            
-            const data = [];
-            const labels = [];
-            const colors = [];
-            const summaryItems = [];
-            
-            // Always add savings goal data, even if it's zero
-            data.push(Math.max(1, annualSavingsGoal));
-            labels.push('Yearly Savings Goal');
-            colors.push('#16a34a'); // Green
-            summaryItems.push({ label: 'Yearly Savings Goal', amount: annualSavingsGoal, color: '#16a34a' });
-            
-            // Add remaining capacity if positive
-            if (remainingCapacity > 0) {
-                data.push(remainingCapacity);
-                labels.push('Available Capacity');
-                colors.push('#e5e7eb'); // Light gray
-                summaryItems.push({ label: 'Available Capacity', amount: remainingCapacity, color: '#e5e7eb' });
-            }
-            
-            console.log('💰 Creating savings donut chart with data:', data);
-            
-            try {
-                window.savingsDonutChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: data,
-                            backgroundColor: colors,
-                            borderWidth: 6,
-                            borderColor: '#ffffff',
-                            cutout: '50%',
-                            borderRadius: 7,
-                            borderSkipped: false
-                        }]
-                    },
-                    options: {
-                        responsive: false,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const percentage = ((context.parsed / yearlySavingsCapacity) * 100).toFixed(1);
-                                        return `${context.label}: ${formatCurrency(context.parsed)} (${percentage}%)`;
-                                    }
-                                }
-                            }
-                        },
-                        animation: false
-                    }
-                });
-                
-                console.log('✅ Savings chart created successfully');
-            } catch (error) {
-                console.error('❌ Error creating savings chart:', error);
-            }
-            
-            // Force a render and check canvas content
-            setTimeout(() => {
-                if (window.savingsDonutChart) {
-                    try {
-                        window.savingsDonutChart.update('none');
-                        console.log('🔄 Savings chart updated');
-                    } catch (e) {
-                        console.error('❌ Savings chart update failed:', e);
-                    }
+            // Create progress indicators (6 rounded squares)
+            if (progressEl) {
+                let progressHTML = '';
+                for (let i = 1; i <= 6; i++) {
+                    const filled = i <= Math.floor(monthsCovered);
+                    progressHTML += `<div class="progress-month ${filled ? 'filled' : 'empty'}">${i}</div>`;
                 }
-            }, 100);
+                progressEl.innerHTML = progressHTML;
+            }
             
-            // Update summary container
-            summaryContainer.style.opacity = '1';
-            summaryContainer.style.transform = 'translateY(0)';
+            // Generate dynamic message
+            if (messageEl) {
+                const remainingAmount = Math.max(0, emergencyFundGoal - currentAmount);
+                let message;
+                
+                if (monthsCovered >= 6) {
+                    message = "Excellent! Your emergency fund is fully funded and you're financially protected.";
+                } else if (monthsCovered >= 4) {
+                    message = `You're in good shape! Add ${formatCurrency(remainingAmount)} more to be fully protected.`;
+                } else if (monthsCovered >= 2) {
+                    message = `Making progress! Add ${formatCurrency(remainingAmount)} more to reach your 6-month goal.`;
+                } else if (monthsCovered > 0) {
+                    message = `Good start! You need ${formatCurrency(remainingAmount)} more to reach 6 months of expenses.`;
+                } else {
+                    message = `Start building your emergency fund. Aim for ${formatCurrency(emergencyFundGoal)} (6 months of expenses).`;
+                }
+                
+                messageEl.textContent = message;
+            }
             
-            summaryContainer.innerHTML = summaryItems.map((item) => `
-                <div class="summary-item">
-                    <div class="summary-label">
-                        <div class="color-dot" style="background-color: ${item.color}"></div>
-                        ${item.label}
-                    </div>
-                    <div class="summary-amount">${formatCurrency(item.amount)}</div>
-                </div>
-            `).join('');
+            console.log('💰 Emergency fund updated:', {
+                currentAmount,
+                emergencyFundGoal,
+                monthsCovered: monthsCovered.toFixed(1),
+                totalMonthlyExpenses
+            });
         }
         
         // Create custom HTML/CSS mini bar chart for financial indicators
@@ -22531,7 +22559,7 @@ margin-right: 0.5rem;
                     console.log('🔄 Red square clicked - reinitializing all charts');
                     
                     // Destroy all existing charts
-                    ['spendingDonutChart', 'savingsDonutChart', 'testChart'].forEach(chartId => {
+                    ['spendingDonutChart', 'testChart'].forEach(chartId => {
                         const chartVar = window[chartId];
                         if (chartVar) {
                             try {
