@@ -20062,17 +20062,19 @@ margin-right: 0.5rem;
             }
             
             // Update progress label
-            const labels = [
-                'Gross Yearly Income',
-                'Savings Goals', 
-                'Fixed Expenses',
-                'Essential Expenses',
-                'Discretionary Expenses',
-                'Review & Summary'
-            ];
-            
-            document.getElementById('budgetProgressLabel').textContent = 
-                `Step ${step} of ${totalBudgetSteps}: ${labels[step - 1]}`;
+            const progressLabel = document.getElementById('budgetProgressLabel');
+            if (progressLabel) {
+                const labels = [
+                    'Gross Yearly Income',
+                    'Savings Goals', 
+                    'Fixed Expenses',
+                    'Essential Expenses',
+                    'Discretionary Expenses',
+                    'Review & Summary'
+                ];
+                
+                progressLabel.textContent = `Step ${step} of ${totalBudgetSteps}: ${labels[step - 1]}`;
+            }
         }
         
         function updateBudgetNavigation(step) {
