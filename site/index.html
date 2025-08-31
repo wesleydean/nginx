@@ -8925,8 +8925,8 @@ margin-right: 0.5rem;
                                 <!-- Emergency Fund Card -->
                                 <div class="budget-chart-container">
                                     <div class="emergency-fund-card">
-                                        <div class="emergency-fund-header">EMERGENCY FUND</div>
-                                        <div class="emergency-fund-title">Emergency Fund</div>
+                                        <div class="emergency-fund-header">YEARLY SAVINGS</div>
+                                        <div class="emergency-fund-title">Savings Goal Progress</div>
                                         <div class="emergency-fund-coverage" id="emergencyFundCoverage">0 months covered</div>
                                         <div class="emergency-fund-amount" id="emergencyFundAmount">$0</div>
                                         <div class="emergency-fund-goal" id="emergencyFundGoal">Goal: $0 (6 months expenses)</div>
@@ -20290,9 +20290,11 @@ margin-right: 0.5rem;
         }
         
         function updateBudgetOverview(timeRange = 'monthly') {
+            console.log('🔄 updateBudgetOverview called with timeRange:', timeRange);
             const settings = getSimpleBudgetSettings();
             
             if (!settings.netIncome) {
+                console.log('⚠️ No budget settings found, showing placeholder data');
                 // Show placeholder data if no budget is set
                 return;
             }
@@ -20305,9 +20307,16 @@ margin-right: 0.5rem;
             const currentSavings = savingsGoal * 0.6; // Placeholder - would come from actual savings data
             const savingsPercentage = Math.min((currentSavings / savingsGoal) * 100, 100);
             
+            console.log('💰 Savings data:', {
+                timeRange,
+                savingsGoal,
+                currentSavings,
+                savingsPercentage
+            });
+            
             // Update savings bar
             document.getElementById('savingsAmount').innerHTML = 
-                `$${Math.round(currentSavings).toLocaleString()} / <span class="upper-amount">$${Math.round(savingsGoal).toLocaleString()}</span>`;
+                `<strong>$${Math.round(currentSavings).toLocaleString()}</strong> / $${Math.round(savingsGoal).toLocaleString()}`;
             document.getElementById('savingsProgress').style.width = `${savingsPercentage}%`;
             
             // Spending data - budget limits
@@ -20334,7 +20343,7 @@ margin-right: 0.5rem;
             
             // Update spending bar header
             document.getElementById('spendingAmount').innerHTML = 
-                `$${Math.round(totalSpent).toLocaleString()} / <span class="upper-amount">$${Math.round(totalBudget).toLocaleString()}</span>`;
+                `<strong>$${Math.round(totalSpent).toLocaleString()}</strong> / $${Math.round(totalBudget).toLocaleString()}`;
             
             // Update spending segments - width based on percentage of total budget
             const fixedSegment = document.getElementById('fixedSpending');
@@ -21701,7 +21710,9 @@ margin-right: 0.5rem;
             
             // Get current budget settings
             const budgetSettings = getBudgetSettings();
+            console.log('📋 Budget settings:', budgetSettings);
             const annualSavingsGoal = budgetSettings.annualSavingsGoal || 0;
+            console.log('💰 Annual savings goal:', annualSavingsGoal);
             
             // Calculate total monthly expenses (excluding savings)
             const fixedExpenses = budgetSettings.fixedExpenses || 0;
@@ -22035,6 +22046,9 @@ margin-right: 0.5rem;
             
             // Update the budget overview card
             updateBudgetOverview('monthly');
+            
+            // Update the emergency fund display
+            updateEmergencyFund();
 
             // Wait for slide animation to complete, then close and redirect
             setTimeout(() => {
