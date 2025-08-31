@@ -8715,23 +8715,13 @@ margin-right: 0.5rem;
                             <div class="budget-content-section">
                                 <div class="budget-form-group-large">
                                     <div class="budget-input-container">
-                                        <span class="dollar-sign">$</span>
-                                        <input type="text" class="budget-input-xl" id="budgetAnnualSavingsGoal" value="" min="0" step="100" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); updateSavingsVisualization()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
+                                        <span class="dollar-sign" style="transition: none;">$</span>
+                                        <input type="text" class="budget-input-xl" id="budgetAnnualSavingsGoal" value="" min="0" step="100" oninput="formatBudgetInput(this); updateInputLengthClass(this); positionDollarSign(this); debouncedUpdateSavings()" onfocus="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" onclick="handleBudgetInputFocus(this); updateInputLengthClass(this); positionDollarSign(this)" inputmode="numeric">
                                     </div>
                                 </div>
-                                <div class="form-group" id="monthlySavingsTargetSection" style="text-align: center; display: none;">
-                                    <div>
-                                        <div class="monthly-savings-label">Monthly Savings</div>
-                                        <div class="monthly-savings-display">
-                                            <div class="monthly-savings-amount">
-                                                $<span id="budgetMonthlySavingsTarget">0</span>
-                                            </div>
-                                            <div id="savingsRateBubble" class="budget-header-bubble-small savings-rate-bubble">
-                                                <i data-lucide="trending-up" class="w-4 h-4"></i>
-                                                <span id="savingsRateDisplay">0%</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <!-- Monthly savings target is now calculated in the backend but not shown here -->
+                                <div style="display: none">
+                                    <span id="budgetMonthlySavingsTarget">0</span>
                                 </div>
                                 
                             </div>
@@ -8856,6 +8846,9 @@ margin-right: 0.5rem;
                                 <!-- Savings Donut Chart -->
                                 <div class="budget-chart-container">
                                     <h3 class="chart-title">Yearly Savings Goal</h3>
+                                    <div class="chart-subtitle">
+                                        <span id="budgetAnnualSavingsGoalDisplay">$0</span>
+                                    </div>
                                     <div class="chart-wrapper">
                                         <canvas id="savingsDonutChart" width="250" height="250" style="display: block; width: 250px; height: 250px;"></canvas>
                                     </div>
@@ -14804,6 +14797,22 @@ margin-right: 0.5rem;
                 maximumFractionDigits: 0
             });
         }
+        
+        // Debounce function to improve performance for expensive operations
+        const debounce = (func, delay) => {
+            let timeoutId;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(context, args), delay);
+            };
+        };
+        
+        // Create a debounced version of the savings visualization update
+        const debouncedUpdateSavings = debounce(function() {
+            updateSavingsVisualization();
+        }, 150); // 150ms delay for smoother experience
 
         function getCategoryEmoji(category) {
             const iconMap = {
@@ -19929,6 +19938,8 @@ margin-right: 0.5rem;
                     // Force a second chart update after a slight delay for better reliability
                     setTimeout(() => {
                         updateSummaryCharts();
+                        // Explicitly trigger savings visualization update to ensure annual savings goal display is updated
+                        updateSavingsVisualization();
                     }, 250);
                 }, 200);
                 
@@ -20316,18 +20327,63 @@ margin-right: 0.5rem;
             const essentialExpensesEl = document.getElementById('budgetEssentialExpenses');
             const discretionaryExpensesEl = document.getElementById('budgetDiscretionaryExpenses');
 
-            if (grossYearlyIncomeEl) grossYearlyIncomeEl.value = formatNumberForDisplay(settings.grossYearlyIncome);
+            // Helper function to set value and position dollar sign
+            const setFieldValue = (element, value) => {
+                if (element) {
+                    // Set value immediately
+                    element.value = formatNumberForDisplay(value);
+                    
+                    // Special handling for annual savings goal field
+                    if (element.id === 'budgetAnnualSavingsGoal') {
+                        // Force synchronous layout to ensure the value is displayed before positioning the dollar sign
+                        element.getBoundingClientRect();
+                        
+                        // Make positioning happen synchronously for this specific field
+                        const container = element.parentElement;
+                        const dollarSign = container.querySelector('.dollar-sign');
+                        if (dollarSign) {
+                            // Make sure dollar sign is visible immediately
+                            dollarSign.style.opacity = '1';
+                        }
+                    }
+                    
+                    // Position dollar sign immediately
+                    positionDollarSign(element);
+                    // Update input length class
+                    updateInputLengthClass(element);
+                }
+            };
+            
             if (provinceValueEl) provinceValueEl.textContent = settings.province || 'Ontario';
-            if (grossIncomeEl) grossIncomeEl.value = formatNumberForDisplay(settings.grossIncome);
-            if (federalTaxEl) federalTaxEl.value = formatNumberForDisplay(settings.federalTax);
-            if (provincialTaxEl) provincialTaxEl.value = formatNumberForDisplay(settings.provincialTax);
-            if (cppEiEl) cppEiEl.value = formatNumberForDisplay(settings.cppEi);
-            if (netIncomeEl) netIncomeEl.value = formatNumberForDisplay(settings.netIncome);
-            if (annualSavingsGoalEl) annualSavingsGoalEl.value = formatNumberForDisplay(settings.annualSavingsGoal);
-            if (fixedExpensesEl) fixedExpensesEl.value = formatNumberForDisplay(settings.fixedExpenses);
-            if (essentialExpensesEl) essentialExpensesEl.value = formatNumberForDisplay(settings.essentialExpenses);
-            if (discretionaryExpensesEl) discretionaryExpensesEl.value = formatNumberForDisplay(settings.discretionaryExpenses);
+            
+            // Set all input values and position their dollar signs
+            setFieldValue(grossYearlyIncomeEl, settings.grossYearlyIncome);
+            setFieldValue(grossIncomeEl, settings.grossIncome);
+            setFieldValue(federalTaxEl, settings.federalTax);
+            setFieldValue(provincialTaxEl, settings.provincialTax);
+            setFieldValue(cppEiEl, settings.cppEi);
+            setFieldValue(netIncomeEl, settings.netIncome);
+            setFieldValue(annualSavingsGoalEl, settings.annualSavingsGoal);
+            setFieldValue(fixedExpensesEl, settings.fixedExpenses);
+            setFieldValue(essentialExpensesEl, settings.essentialExpenses);
+            setFieldValue(discretionaryExpensesEl, settings.discretionaryExpenses);
 
+            // Update annual savings goal display immediately with forced synchronous layout
+            const annualSavingsGoalDisplay = document.getElementById('budgetAnnualSavingsGoalDisplay');
+            if (annualSavingsGoalDisplay) {
+                const savingsGoalNum = Number(settings.annualSavingsGoal) || 0;
+                annualSavingsGoalDisplay.textContent = formatCurrency(savingsGoalNum);
+                
+                // Force a layout calculation to ensure the text is rendered immediately
+                annualSavingsGoalDisplay.getBoundingClientRect();
+            }
+            
+            // Update all visualizations immediately to prevent delays
+            updateSavingsVisualization();
+            updateFixedExpenseVisualization();
+            updateEssentialExpenseVisualization();
+            updateDiscretionaryExpenseVisualization();
+            
             // Update budget summary
             updateBudgetSummary();
         }
@@ -20640,7 +20696,22 @@ margin-right: 0.5rem;
             
             positioningCache.set(input, currentKey);
             
-            // Use requestAnimationFrame for smooth positioning
+            // Special handling for annual savings goal to eliminate delay
+            if (input.id === 'budgetAnnualSavingsGoal') {
+                // Do positioning immediately without animation frame
+                const textWidth = measureTextWidth(input);
+                const containerWidth = container.offsetWidth;
+                const dollarWidth = dollarSign.offsetWidth;
+                
+                const textStartX = (containerWidth - textWidth) / 2;
+                const dollarTargetX = textStartX - dollarWidth - 8;
+                const offsetFromCenter = dollarTargetX - (containerWidth / 2);
+                
+                dollarSign.style.transform = `translate(${offsetFromCenter}px, -50%)`;
+                return;
+            }
+            
+            // Use requestAnimationFrame for smooth positioning for other fields
             requestAnimationFrame(() => {
                 const textWidth = measureTextWidth(input);
                 const containerWidth = container.offsetWidth;
@@ -20967,39 +21038,28 @@ margin-right: 0.5rem;
         
         // Interactive chart functions
         function updateSavingsVisualization() {
+            console.log('💰 Updating savings visualization...');
 
             const annualSavingsEl = document.getElementById('budgetAnnualSavingsGoal');
-            const netIncomeEl = document.getElementById('budgetNetIncome');
-
-            if (!annualSavingsEl || !netIncomeEl) {
-                return; // Exit if required elements are missing
+            
+            if (!annualSavingsEl) {
+                console.warn('⚠️ Missing annual savings goal element');
+                return; // Exit if required element is missing
             }
 
             const annualSavings = parseFormattedNumber(annualSavingsEl.value);
-            const netIncome = parseFormattedNumber(netIncomeEl.value);
+            
+            // Calculate monthly savings for budget summary
             const monthlySavings = annualSavings / 12;
             
-            // Show/hide monthly savings target section based on whether annual savings has a value
-            const monthlySavingsSection = document.getElementById('monthlySavingsTargetSection');
-            const savingsRateBubble = document.getElementById('savingsRateBubble');
-            
-            if (annualSavings > 0) {
-                monthlySavingsSection.style.display = 'block';
-                document.getElementById('budgetMonthlySavingsTarget').textContent = formatNumberForDisplay(monthlySavings);
-                
-                // Show savings rate bubble if we have net income
-                if (netIncome > 0) {
-                    const savingsRate = (monthlySavings / (netIncome / 12)) * 100;
-                    document.getElementById('savingsRateDisplay').textContent = savingsRate.toFixed(1) + '%';
-                    savingsRateBubble.style.display = 'flex';
-                } else {
-                    savingsRateBubble.style.display = 'none';
-                }
-            } else {
-                monthlySavingsSection.style.display = 'none';
+            // Update the budget monthly savings target if it exists - simple update for instant feedback
+            const budgetMonthlySavingsTarget = document.getElementById('budgetMonthlySavingsTarget');
+            if (budgetMonthlySavingsTarget) {
+                budgetMonthlySavingsTarget.textContent = formatNumberForDisplay(monthlySavings);
             }
             
-            // Update charts if on summary screen
+            // OPTIMIZED: Only update charts if on summary screen
+            // This is the key optimization - don't do heavy chart updates unless we need to
             if (document.getElementById('budgetScreen6').classList.contains('active')) {
                 updateSummaryCharts();
             }
@@ -21224,7 +21284,31 @@ margin-right: 0.5rem;
                 monthlyIncome // Pass the correct monthly income for verification
             );
             
-            createSavingsDonutChart(monthlyIncome, annualSavingsGoal, monthlySavingsTarget);
+            // Update annual savings goal element if it exists on summary screen
+            const annualSavingsGoalDisplay = document.getElementById('budgetAnnualSavingsGoalDisplay');
+            if (annualSavingsGoalDisplay) {
+                // Convert to number first to ensure consistent handling
+                const savingsGoalNum = Number(annualSavingsGoal) || 0;
+                
+                // Synchronously update the display without any delay
+                annualSavingsGoalDisplay.textContent = formatCurrency(savingsGoalNum);
+                
+                // Force a layout calculation to ensure the text is rendered immediately
+                annualSavingsGoalDisplay.getBoundingClientRect();
+            }
+            
+            // Create the savings chart immediately to eliminate delay
+            try {
+                // Create the chart synchronously
+                createSavingsDonutChart(monthlyIncome, annualSavingsGoal, monthlySavingsTarget);
+                console.log('💰 Savings chart created synchronously');
+            } catch (err) {
+                console.error('Error creating savings chart:', err);
+                // Fall back to async rendering if there's an error
+                requestAnimationFrame(() => {
+                    createSavingsDonutChart(monthlyIncome, annualSavingsGoal, monthlySavingsTarget);
+                });
+            }
             
             // Only create donut charts, no financial indicators
         }
