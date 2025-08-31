@@ -8628,7 +8628,7 @@ margin-right: 0.5rem;
         <div class="budget-panel" id="budgetPanel">
             <div class="settings-header">
                 <div style="width: 40px;"></div> <!-- Spacer for centering -->
-                <h2 class="settings-title" id="budgetFlowTitle">Budget Setup</h2>
+                <h2 class="settings-title" id="budgetFlowTitle">Budget Summary</h2>
                 <button class="settings-close" onclick="closeBudgetFlow()" aria-label="Close">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
@@ -19938,6 +19938,9 @@ margin-right: 0.5rem;
         
         // Start budget review from the first screen
         function startBudgetReview() {
+            // Change title to Budget Setup for review flow
+            document.getElementById('budgetFlowTitle').textContent = 'Budget Setup';
+            
             // Start from screen 1 to review all budget steps
             document.querySelectorAll('.budget-flow-screen').forEach(screen => {
                 screen.classList.remove('active', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right', 'prepare-left', 'prepare-right');
