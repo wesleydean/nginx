@@ -20192,7 +20192,9 @@ margin-right: 0.5rem;
             
             // Update subtitle
             const subtitle = document.getElementById('budgetSubtitle');
-            subtitle.textContent = range === 'monthly' ? 'Monthly overview' : 'Yearly overview';
+            if (subtitle) {
+                subtitle.textContent = range === 'monthly' ? 'Monthly overview' : 'Yearly overview';
+            }
             
             // Update budget bars
             updateBudgetOverview(range);
