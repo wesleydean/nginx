@@ -21709,7 +21709,7 @@ margin-right: 0.5rem;
             console.log('💰 updateEmergencyFund called');
             
             // Get current budget settings
-            const budgetSettings = getBudgetSettings();
+            const budgetSettings = getSimpleBudgetSettings();
             console.log('📋 Budget settings:', budgetSettings);
             const annualSavingsGoal = budgetSettings.annualSavingsGoal || 0;
             console.log('💰 Annual savings goal:', annualSavingsGoal);
@@ -21720,11 +21720,12 @@ margin-right: 0.5rem;
             const discretionaryExpenses = budgetSettings.discretionaryExpenses || 0;
             const totalMonthlyExpenses = fixedExpenses + essentialExpenses + discretionaryExpenses;
             
-            // Calculate 6 months of expenses as goal
-            const emergencyFundGoal = totalMonthlyExpenses * 6;
+            // Use annual savings goal as the target (what they want to save per year)
+            const emergencyFundGoal = annualSavingsGoal;
             
-            // Current emergency fund amount (use annual savings goal as current amount for now)
-            const currentAmount = annualSavingsGoal;
+            // Current amount should be from account balances (placeholder for now - will be configurable later)
+            // For now, we'll use a placeholder based on a percentage of the goal
+            const currentAmount = emergencyFundGoal * 0.65; // Placeholder - represents current account balances
             
             // Calculate months covered
             const monthsCovered = totalMonthlyExpenses > 0 ? Math.min(6, currentAmount / totalMonthlyExpenses) : 0;
@@ -21745,7 +21746,7 @@ margin-right: 0.5rem;
             }
             
             if (goalEl) {
-                goalEl.textContent = `Goal: ${formatCurrency(emergencyFundGoal)} (6 months expenses)`;
+                goalEl.textContent = `Goal: ${formatCurrency(emergencyFundGoal)} (yearly savings target)`;
             }
             
             // Create progress indicators (6 rounded squares)
