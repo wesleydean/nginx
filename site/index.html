@@ -6010,19 +6010,23 @@
         .emergency-fund-progress {
             display: flex;
             justify-content: center;
-            gap: 0.5rem;
+            gap: 0.25rem;
             margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .progress-month {
-            width: 2.5rem;
-            height: 2.5rem;
-            border-radius: 0.5rem;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.4rem;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            font-size: 0.875rem;
+            font-size: 0.75rem;
         }
 
         .progress-month.filled {
@@ -21705,6 +21709,42 @@ margin-right: 0.5rem;
             }
         }
 
+        function getCurrentSavingsAmount() {
+            // Get account data from localStorage or API
+            // For now, using placeholder data that matches your account structure
+            // TODO: Replace this with actual account data retrieval
+            const accountData = getAccountData();
+            
+            let totalAmount = 0;
+            
+            // Calculate total from all asset accounts (positive balances)
+            for (const account of accountData) {
+                if (account.type === 'asset' && account.includeInSavings !== false) {
+                    totalAmount += account.balance || 0;
+                }
+            }
+            
+            console.log('💰 Current savings amount calculated:', totalAmount);
+            return totalAmount;
+        }
+
+        function getAccountData() {
+            // Check if account data exists in localStorage
+            const savedAccounts = localStorage.getItem('accountData');
+            if (savedAccounts) {
+                return JSON.parse(savedAccounts);
+            }
+            
+            // Return placeholder data matching your account structure
+            // TODO: Replace with actual data source
+            return [
+                { name: 'Checking', type: 'asset', balance: 5000, includeInSavings: true },
+                { name: 'Savings', type: 'asset', balance: 15000, includeInSavings: true },
+                { name: 'Credit Card', type: 'liability', balance: -2500, includeInSavings: true },
+                { name: 'Brokerage Account', type: 'asset', balance: 25000, includeInSavings: true }
+            ];
+        }
+
         function updateEmergencyFund() {
             console.log('💰 updateEmergencyFund called');
             
@@ -21723,12 +21763,14 @@ margin-right: 0.5rem;
             // Use annual savings goal as the target (what they want to save per year)
             const emergencyFundGoal = annualSavingsGoal;
             
-            // Current amount should be from account balances (placeholder for now - will be configurable later)
-            // For now, we'll use a placeholder based on a percentage of the goal
-            const currentAmount = emergencyFundGoal * 0.65; // Placeholder - represents current account balances
+            // Calculate monthly savings target
+            const monthlySavingsTarget = emergencyFundGoal / 12;
             
-            // Calculate months covered
-            const monthsCovered = totalMonthlyExpenses > 0 ? Math.min(6, currentAmount / totalMonthlyExpenses) : 0;
+            // Get current amount from actual account balances
+            const currentAmount = getCurrentSavingsAmount();
+            
+            // Calculate months covered based on monthly savings target, not expenses
+            const monthsCovered = monthlySavingsTarget > 0 ? Math.min(12, currentAmount / monthlySavingsTarget) : 0;
             
             // Update the display elements
             const coverageEl = document.getElementById('emergencyFundCoverage');
@@ -21738,7 +21780,7 @@ margin-right: 0.5rem;
             const messageEl = document.getElementById('emergencyFundMessage');
             
             if (coverageEl) {
-                coverageEl.textContent = `${monthsCovered.toFixed(1)} months covered`;
+                coverageEl.textContent = `${monthsCovered.toFixed(1)} months of savings target`;
             }
             
             if (amountEl) {
@@ -21749,10 +21791,10 @@ margin-right: 0.5rem;
                 goalEl.textContent = `Goal: ${formatCurrency(emergencyFundGoal)} (yearly savings target)`;
             }
             
-            // Create progress indicators (6 rounded squares)
+            // Create progress indicators (12 rounded squares)
             if (progressEl) {
                 let progressHTML = '';
-                for (let i = 1; i <= 6; i++) {
+                for (let i = 1; i <= 12; i++) {
                     const filled = i <= Math.floor(monthsCovered);
                     progressHTML += `<div class="progress-month ${filled ? 'filled' : 'empty'}">${i}</div>`;
                 }
@@ -21764,16 +21806,16 @@ margin-right: 0.5rem;
                 const remainingAmount = Math.max(0, emergencyFundGoal - currentAmount);
                 let message;
                 
-                if (monthsCovered >= 6) {
-                    message = "Excellent! Your emergency fund is fully funded and you're financially protected.";
-                } else if (monthsCovered >= 4) {
-                    message = `You're in good shape! Add ${formatCurrency(remainingAmount)} more to be fully protected.`;
-                } else if (monthsCovered >= 2) {
-                    message = `Making progress! Add ${formatCurrency(remainingAmount)} more to reach your 6-month goal.`;
+                if (monthsCovered >= 12) {
+                    message = "Excellent! You've exceeded your yearly savings target and are financially protected.";
+                } else if (monthsCovered >= 10) {
+                    message = `You're in great shape! Add ${formatCurrency(remainingAmount)} more to reach your full yearly target.`;
+                } else if (monthsCovered >= 6) {
+                    message = `Good progress! Add ${formatCurrency(remainingAmount)} more to reach your yearly savings goal.`;
                 } else if (monthsCovered > 0) {
-                    message = `Good start! You need ${formatCurrency(remainingAmount)} more to reach 6 months of expenses.`;
+                    message = `Making progress! You need ${formatCurrency(remainingAmount)} more to reach your yearly target.`;
                 } else {
-                    message = `Start building your emergency fund. Aim for ${formatCurrency(emergencyFundGoal)} (6 months of expenses).`;
+                    message = `Start building your savings. Aim for ${formatCurrency(emergencyFundGoal)} this year.`;
                 }
                 
                 messageEl.textContent = message;
